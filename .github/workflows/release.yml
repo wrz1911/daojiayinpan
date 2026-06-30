@@ -31,36 +31,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-exe
-          path: src-tauri/target/release/app.exe
-
-  sign:
-    needs: windows
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    outputs:
-      artifact-id: ${{ steps.sign.outputs.artifact-id }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-exe
-      - name: Submit to SignPath
-        id: sign
-        uses: signpath/github-action-submit-signing-request@v1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
-          project-slug: daojiayinpan
-          signing-policy-slug: Release_Signing
-          artifact-configuration-slug: yinpanqimen
-          github-artifact-id: app-exe
-          wait-for-completion: true
-          output-artifact-directory: signed
-      - name: Upload signed
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-exe-signed
-          path: signed/
+          path: |
+            src-tauri/target/release/app.exe
+            src-tauri/target/release/WebView2Loader.dll
 
   android:
     runs-on: ubuntu-latest
@@ -73,12 +46,15 @@ jobs:
           java-version: '21'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install deps
         run: npm install
@@ -112,7 +88,7 @@ jobs:
       - name: Sync and build
         run: |
           npx cap sync
-          cd android && ./gradlew assembleRelease
+          cd android && echo "sdk.dir=$ANDROID_HOME" > local.properties && ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -121,14 +97,14 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
 
   release:
-    needs: [windows, sign, android]
+    needs: [windows, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: app-exe-signed
+          name: app-exe
 
       - uses: actions/download-artifact@v4
         with:
