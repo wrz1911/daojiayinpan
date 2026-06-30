@@ -152,6 +152,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pages: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -170,3 +171,16 @@ jobs:
             *.dll
             *.apk
           generate_release_notes: true
+
+      - name: Prepare Pages
+        run: |
+          mkdir -p pages/v1
+          cp *.exe *.dll pages/v1/
+          cp *.exe *.dll pages/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages
+          keep_files: true
