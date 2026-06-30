@@ -7,8 +7,6 @@ on:
 jobs:
   windows:
     runs-on: windows-latest
-    outputs:
-      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,38 +28,12 @@ jobs:
         run: cargo build --manifest-path src-tauri/Cargo.toml --release
 
       - name: Upload exe
-        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: app-exe
           path: |
             src-tauri/target/release/app.exe
             src-tauri/target/release/WebView2Loader.dll
-
-  sign:
-    needs: windows
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-exe
-      - name: Submit to SignPath
-        uses: signpath/github-action-submit-signing-request@v1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
-          project-slug: daojiayinpan
-          signing-policy-slug: Release_Signing
-          artifact-configuration-slug: yinpanqimen
-          github-artifact-id: ${{ needs.windows.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: signed
-      - name: Upload signed
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-exe-signed
-          path: signed/
 
   android:
     runs-on: ubuntu-latest
@@ -141,9 +113,6 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           ./gradlew assembleRelease --no-daemon
 
-      - name: Find APK
-        run: find android -name "*.apk" -type f 2>/dev/null || echo "NO APK FOUND"
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -151,14 +120,14 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
 
   release:
-    needs: [windows, sign, android]
+    needs: [windows, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: app-exe-signed
+          name: app-exe
 
       - uses: actions/download-artifact@v4
         with:
@@ -169,6 +138,7 @@ jobs:
         with:
           name: ${{ github.ref_name }}
           files: |
-            app.exe
-            app-release.apk
+            *.exe
+            *.dll
+            *.apk
           generate_release_notes: true
