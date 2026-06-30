@@ -7,6 +7,8 @@ on:
 jobs:
   windows:
     runs-on: windows-latest
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +30,7 @@ jobs:
         run: cargo build --manifest-path src-tauri/Cargo.toml --release
 
       - name: Upload exe
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: app-exe
@@ -51,7 +54,7 @@ jobs:
           project-slug: daojiayinpan
           signing-policy-slug: Release_Signing
           artifact-configuration-slug: yinpanqimen
-          github-artifact-id: app-exe
+          github-artifact-id: ${{ needs.windows.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: signed
       - name: Upload signed
@@ -72,9 +75,8 @@ jobs:
 
       - name: Setup Android SDK
         run: |
-          ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -110,13 +112,37 @@ jobs:
             -storepass qimen123 -keypass qimen123 \
             -dname "CN=qimen" -noprompt
 
+      - name: Inject signing config
+        run: |
+          cat >> android/app/build.gradle << 'GRADLEEOF'
+
+          android {
+            signingConfigs {
+              release {
+                storeFile rootProject.file('../qimen-release.keystore')
+                storePassword 'qimen123'
+                keyAlias 'qimen'
+                keyPassword 'qimen123'
+              }
+            }
+            buildTypes {
+              release {
+                signingConfig signingConfigs.release
+              }
+            }
+          }
+          GRADLEEOF
+
       - name: Sync and build
         timeout-minutes: 20
         run: |
           npx cap sync
           cd android
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Find APK
+        run: find android -name "*.apk" -type f 2>/dev/null || echo "NO APK FOUND"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
