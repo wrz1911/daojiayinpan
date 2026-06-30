@@ -14,6 +14,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p web/css/fonts web/css/yinpan web/js web/qimen_app/js
+          cat > web/index.html << 'EOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          EOF
           cp css/tool.css web/css/
           cp css/yinpan/yinpan.css web/css/yinpan/
           cp css/fonts/MiSans-VF.ttf web/css/fonts/

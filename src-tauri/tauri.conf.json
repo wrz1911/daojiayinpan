@@ -16,8 +16,7 @@
         "minWidth": 380,
         "minHeight": 600,
         "resizable": true,
-        "fullscreen": false,
-        "url": "qimen_app/yinpan_standalone.html"
+        "fullscreen": false
       }
     ],
     "security": {
