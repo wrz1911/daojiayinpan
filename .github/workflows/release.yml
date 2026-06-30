@@ -105,6 +105,21 @@ jobs:
           }
           GRADLEEOF
 
+      - name: Inject launcher icons
+        run: |
+          sudo apt-get install -y imagemagick
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/*.xml android/app/src/main/res/drawable*/ic_launcher*.xml
+          for dir in android/app/src/main/res/mipmap-*; do
+            size=$(basename "$dir" | sed 's/mipmap-//')
+            case $size in
+              mdpi) s=48;; hdpi) s=72;; xhdpi) s=96;; xxhdpi) s=144;; xxxhdpi) s=192;;
+              *) continue;;
+            esac
+            convert -background '#f5f5f5' -density 300 taiji.svg -resize ${s}x${s} -gravity center -extent ${s}x${s} "$dir/ic_launcher.png"
+            cp "$dir/ic_launcher.png" "$dir/ic_launcher_round.png"
+            echo "$size: ${s}x${s}"
+          done
+
       - name: Sync and build
         timeout-minutes: 20
         run: |
