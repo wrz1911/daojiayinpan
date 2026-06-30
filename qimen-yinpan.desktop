@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=阴盘奇门遁甲
-Comment=道家阴盘奇门排盘工具
-Exec=/home/wrz/文档/奇门排盘/run-desktop.sh
-Icon=/home/wrz/文档/奇门排盘/icon.png
-Terminal=false
-Type=Application
-Categories=Utility;
