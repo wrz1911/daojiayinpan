@@ -12,3 +12,4 @@ js/tyme4j/
 qimen-release.keystore
 qimen-yinpan.desktop
 src-tauri/target/
+code-sign-*.pem
