@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "identifier": "com.qimen.yinpan",
   "build": {
-    "frontendDist": "../web",
-    "devUrl": "http://localhost:1420/qimen_app/yinpan_standalone.html"
+    "frontendDist": "../web"
   },
   "app": {
     "withGlobalTauri": false,
