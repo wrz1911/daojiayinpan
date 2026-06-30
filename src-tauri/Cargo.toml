@@ -24,3 +24,6 @@ log = "0.4"
 tauri = { version = "2.11.1", features = [] }
 tauri-plugin-log = "2"
 time = "=0.3.36"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+webview2-com = { version = "0.38", features = ["static"] }
