@@ -51,7 +51,7 @@ jobs:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
           project-slug: daojiayinpan
-          signing-policy-slug: release-signing
+          signing-policy-slug: Release_Signing
           artifact-configuration-slug: yinpanqimen
           github-artifact-id: app-exe
           wait-for-completion: true
