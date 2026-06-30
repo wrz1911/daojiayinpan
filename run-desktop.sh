@@ -1,4 +1,3 @@
 #!/bin/bash
 DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$DIR"
-exec electron .
+exec "$DIR/src-tauri/target/release/app"

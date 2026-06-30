@@ -1,0 +1,38 @@
+{
+  "productName": "阴盘奇门遁甲",
+  "version": "1.0.0",
+  "identifier": "com.qimen.yinpan",
+  "build": {
+    "frontendDist": "../web",
+    "devUrl": "http://localhost:1420/qimen_app/yinpan_standalone.html"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "title": "阴盘奇门遁甲",
+        "width": 440,
+        "height": 820,
+        "minWidth": 380,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "url": "qimen_app/yinpan_standalone.html"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
