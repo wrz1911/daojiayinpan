@@ -1,0 +1,115 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup frontend
+        shell: bash
+        run: |
+          mkdir -p web/css/fonts web/css/yinpan web/js web/qimen_app/js
+          cp css/tool.css web/css/
+          cp css/yinpan/yinpan.css web/css/yinpan/
+          cp css/fonts/MiSans-VF.ttf web/css/fonts/
+          cp js/tyme4ts-browser.js web/js/
+          cp js/gong_detail_data.js web/js/
+          cp qimen_app/yinpan_standalone.html web/qimen_app/
+          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --manifest-path src-tauri/Cargo.toml --release
+
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-exe
+          path: src-tauri/target/release/app.exe
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm install
+
+      - name: Setup www dir
+        run: |
+          mkdir -p www/css/fonts www/css/yinpan www/js www/qimen_app/js
+          cat > www/index.html << 'EOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          EOF
+          cp css/tool.css www/css/
+          cp css/yinpan/yinpan.css www/css/yinpan/
+          cp css/fonts/MiSans-VF.ttf www/css/fonts/
+          cp js/tyme4ts-browser.js www/js/
+          cp js/gong_detail_data.js www/js/
+          cp qimen_app/yinpan_standalone.html www/qimen_app/
+          cp qimen_app/js/qimen_engine_min.js www/qimen_app/js/
+
+      - name: Init Capacitor
+        run: npx cap add android
+
+      - name: Generate keystore
+        run: |
+          keytool -genkey -v -keystore qimen-release.keystore -alias qimen \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass qimen123 -keypass qimen123 \
+            -dname "CN=qimen" -noprompt
+
+      - name: Sync and build
+        run: |
+          npx cap sync
+          cd android && ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+  release:
+    needs: [windows, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-exe
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-apk
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: |
+            app.exe
+            app-release.apk
+          generate_release_notes: true
