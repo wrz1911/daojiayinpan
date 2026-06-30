@@ -6,7 +6,6 @@
   开源项目:
   - tyme4ts (MIT) - 农历/节气/干支计算  https://github.com/6tail/tyme4ts
   - MiSans 字体 - Xiaomi MiSans  https://github.com/xiaomi/MiSans
-  - iconfont - Alibaba 图标字体  https://www.iconfont.cn
 -->
 <html lang="zh-CN">
 <head>
@@ -14,7 +13,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 <title>阴盘奇门 - 本地版</title>
 <link href="../css/tool.css?v=1" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="../css/iconfont.css">
+<!-- iconfont 已移除，改用 taiji.svg -->
 <link rel="stylesheet" href="../css/yinpan/yinpan.css?v=8">
 <style>
 @font-face{font-family:MiSans;src:url(../css/fonts/MiSans-VF.ttf) format('truetype');font-weight:100 900;font-display:swap}
@@ -656,7 +655,7 @@ function renderPan(raw, engineData) { if(engineData&&engineData.sizhu){var d=eng
     '<TABLE class="pan" id="headTable">' +
     '<TR><TD id="itemTitle" style="border:none">事项</TD><TD colspan="'+keCols+'" style="line-height:30px;border:none">' +
     '<span id="title" onclick="editTitle()" style="cursor:pointer;min-width:60px;display:inline-block"></span> ' +
-    '<i class="iconfont edit" onclick="editTitle()" style="cursor:pointer">&#xe63b;</i>' +
+    '<span onclick="editTitle()" style="cursor:pointer;font-size:16px">&#9998;</span>' +
     '<span onclick="savePan()" style="cursor:pointer;color:#0dc2b3;font-size:13px;float:right;margin-left:8px">保存</span>' +
     '<span onclick="showSavedList()" style="cursor:pointer;color:#999;font-size:12px;float:right">历史</span></TD></TR>' +
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongli+')</TD></TR>' +

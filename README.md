@@ -33,7 +33,6 @@ npm start
 |---|---|---|---|
 | tyme4ts | MIT | 农历/节气/干支计算 | https://github.com/6tail/tyme4ts |
 | MiSans | SIL OFL | 桌面/移动端字体 | https://github.com/xiaomi/MiSans |
-| iconfont | MIT | 图标字体 | https://www.iconfont.cn |
 
 ## 协议
 
