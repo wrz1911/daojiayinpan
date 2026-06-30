@@ -1,0 +1,116 @@
+@charset "utf-8";
+/*通用样式*/
+* { padding:0px; margin:0px;user-select: none;-moz-user-select:-ms-user-select: none;-webkit-user-select: none;font-family:Microsoft Yahei;-webkit-tap-highlight-color: transparent;}
+@media (min-width: 390px){
+	body{background-color:#ffffff;font-family:Microsoft Yahei;color:#000;padding:0px;margin:0px;word-break:break-all;font-size:13px}
+}
+@media (max-width:389px){
+	body{background-color:#ffffff;font-family:Microsoft Yahei;color:#000;padding:0px;margin:0px;word-break:break-all;font-size:11px}
+}
+
+TD{border-collapse:collapse; table-layout:fixed;word-break:break-all;text-align:left}
+img{border:0px}
+div{text-align:left}
+p{margin:0px;}
+i{vertical-align:middle}
+/*防止ios无法输入
+input{outline:none;-webkit-user-select:all}
+textarea{outline:none;-webkit-user-select:all}
+*/
+input,textarea{outline:none;-webkit-user-select:text;user-select: text}
+.text{LINE-HEIGHT:30px;height:30px;border:0px;width:100%;outline:none;-webkit-user-select:text;user-select: text}
+.grayBack{background-color:#f3f3f3;}
+
+/*主样式*/
+#ToolTitle{background:#0dc2b3;height:180px;line-height:80px;font-size:25px;color:#fff;text-align:center}
+.pane{background:#fff;border-radius:3px;margin:15px;padding:15px;margin-top:15px;box-shadow:0 0 3px #aaa}
+.pane_item{clear:both;height:45px;border-bottom:solid 1px #eee;line-height:45px;position:relative}
+.pane_item input{height:45px;line-height:45px;font-size:14px}
+.pane_item_title{float:left;color:#666;font-size:14px;font-weight:bold}
+.pane_item_value{float:right}
+
+.next{line-height:35px;width:100%;border-radius:3px;text-align:center;margin-top:10px;background:#0dc2b3;color:#fff;font-size:15px}
+.next:active{background:#03968a}
+/*H5分享*/
+.shareGuide{position:fixed;top:0px;width:100%;height:200px;z-index:999999;background:#000;opacity:0.8;color:#fff;font-size:16px;line-height:50px;display:none}
+.shareGuide img{width:250px;float:right;margin-right:60px}
+.shareGuide .close{font-size:30px;margin-left:10px}
+/*档案管理*/
+#mescroll{position: fixed;top:40px;bottom:0px;height: auto;}
+.mescroll_err{line-height:40px;font-size:12px;color:#888;text-align:center}
+
+.record{padding:10px;padding-left:5px;line-height:25px;font-size:13px;border-bottom:solid 1px #eee;background:#ffffff;color:#333;position:relative;text-align:justify}
+.record:active{background:#eee}
+.record .name{overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;white-space:nowrap;}
+.record .little_bnt{color:#666;font-size:10px;background:#f5f5f5;border-radius:10px;padding:3px;padding-left:5px;padding-right:5px;white-space:nowrap;margin-left:2px;}
+.record .checkBtn{float:left;margin-top:15px;display:none}
+
+#bottomBtn{height:40px;position:fixed;bottom:0px;left:0px;width:100%;background:#eee;border-top:solid 0.8px #ddd;display:none}
+#bottomBtn .left{width:50%;float:left;line-height:40px;text-align:center;background:#0dc2b3;color:#fff}
+#bottomBtn .right{width:50%;float:left;line-height:40px;text-align:center;background:#eee}
+
+#bottomBlock{height:250px;display:none}
+/*底部菜单*/
+#footbar{position:fixed;display:block;margin:0px;left:0px;right:0px;bottom:0px;padding-top:5px;height:48px;width:100%;text-align:center;background-color:#f8f8f8;z-index:999999;border-top:solid 0.6px #dddddd;clear:both}
+#footbar Table{width:100%;table-layout:fixed;}
+#footbar td{text-align:center;color:#444;font-weight:bold;;font-size:11px;letter-spacing:1px;line-height:22px}
+#footbar .iconfont{font-size:18px;color:#333}
+/*加载动画*/
+.loader{
+	border:1px solid #eee;
+	border-radius:50%;
+	border-top:1px solid #2e8e9a;
+	width:15px;
+	height:15px;
+	/* animation-name:load; */
+	animation:load 1s linear infinite;
+}
+@keyframes load{
+	0%{
+		transform: rotate(0deg);
+	}
+	100%{
+		transform:rotate(360deg);
+	}
+}
+/*断事笔记****************/
+.bootSpace{height:350px;display:none}
+#noteAmount{line-height:15px;font-size:10px;color:red;position:absolute;top:10px;left:58%;text-align:center;letter-spacing:0px}
+#noteTitle{padding:15px;padding-top:0px;padding-bottom:5px;position:relative;text-align:center;color:#000;border-bottom:solid 0.8px #ddd}
+.popClose{position:absolute;right:15px;top:-1px;font-size:28px;color:#555;font-weight:bold}
+.noteBox{margin-top:10px;border-bottom:solid 0.8px #eaeaea;padding-bottom:5px;}
+.noteMain{font-size:15px;line-height:25px;text-align:justify;clear:both;}
+.noteMain .img{width:25%;height:80px;border-radius:3px;box-shadow:0 0 3px #aaa;margin-right:3%;float:left;margin-left:2px;display:block;}
+.chatVoice{background:#9fee71;margin-top:5px;padding:6px;border-radius:5px;max-width:70%;float:left;font-family:Microsoft Yahei;text-align:justify;color:#000;font-size:16px; word-break:break-all;float:left}
+.chatVoice .voice{width:15px;float:left;margin-top:4px;margin-right:3px;}
+#noteInputBox1{height:120px;line-height:30px;color:#999;padding:10px;box-shadow:0 0 3px #ddd}
+#noteInputBox2{height:30px;line-height:30px;color:#999;padding:0px;padding-top:10px;padding-bottom:10px;padding-right:5px;box-shadow:0 0 3px #ddd}
+
+.little_bnt{color:#666;font-size:13px;background:#eee;border-radius:10px;padding:3px;padding-left:10px;padding-right:10px;white-space:nowrap;margin-left:5px;}
+#loading{height:30px;text-align:center;line-height:30px;font-size:12px;padding-left:50%;margin-top:15px;margin-bottom:15px;}
+
+.Btn_note_focus{font-size:14px;background:#2bc5c3;border:0px;width:60px;height:28px;color:#fff;float:right;border-radius:3px}
+.Btn_note{font-size:14px;background:#eee;border:0px;width:60px;height:28px;color:#aaa;float:right;border-radius:3px}
+
+#voice{font-size:26px;color:#333;margin-top:1px}
+#keyboard{font-size:26px;color:#333;margin-top:1px;display:none}
+#pictureBtn{font-size:26px;color:#333;margin-left:10px;float:left}
+#showRecording{position:fixed;bottom:200px;left: 50%;margin-left:-75px;width:150px;height:125px;background:#333;filter:alpha(Opacity=95);-moz-opacity:0.95;opacity: 0.95;color:#fff;border-radius:5px;padding-top:25px;z-index:9999999999999;display:none}
+/*2025.2笔记 */
+#noteTitle #closeDIV{width:60px;position:absolute;right:0px;top:0px;height:18px}
+#noteContainerBox{max-height:300px;min-height:200px;overflow:auto;padding-left:15px;padding-right:15px}
+#changeDIV{float:left;margin-left:-2px;width:98%;background:#eee;border-radius:5px;padding:5px;height:80px;}
+#noteContent{height:80px;line-height:25px;font-size:14px;width:100%;border:0px;background:#eee}
+#cancelBtn{float:right;color:#2bc5c3;font-size:14px;line-height:30px;margin-right:10px}
+#inputBtn{height:30px;background:#eee;border-radius:15px;padding-left:10px;font-size:13px;border:solid 0.8px #f0f0f0;}
+
+
+/*发贴弹窗样式 */
+#popTitle{padding:15px;padding-top:0px;padding-bottom:5px;position:relative;text-align:center;color:#555;border-bottom:solid 0.8px #eee;font-size:15px}
+.popClose{position:absolute;right:10px;top:-1px;font-size:22px;color:#888;}
+.zoneRecord{clear:both;padding:12px;height:50px;line-height:25px;font-size:13px;border-bottom:solid 0.8px #f3f3f3;background:#ffffff;color:#333;position:relative}
+.zoneTitle{color:#303030;height:50px;line-height:50x;font-size:16px;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;white-space:nowrap;width:75%}
+.zoneImg{float:left;width:50px;height:50px;border-radius:30px;border:solid 0.8px #f3f3f3;box-shadow:0 0 2px #ddd;}
+
+/*2025.2***********************/
+#goTop{font-size:18px;position:fixed;bottom:100px;right:10px;font-size:30px;color:#aaa;display:none}
