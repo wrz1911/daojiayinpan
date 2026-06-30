@@ -35,6 +35,31 @@ jobs:
             src-tauri/target/release/app.exe
             src-tauri/target/release/WebView2Loader.dll
 
+  sign:
+    needs: windows
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-exe
+      - name: Submit to SignPath
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
+          project-slug: daojiayinpan
+          signing-policy-slug: Release_Signing
+          artifact-configuration-slug: yinpanqimen
+          github-artifact-id: app-exe
+          wait-for-completion: true
+          output-artifact-directory: signed
+      - name: Upload signed
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-exe-signed
+          path: signed/
+
   android:
     runs-on: ubuntu-latest
     steps:
@@ -100,14 +125,14 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
 
   release:
-    needs: [windows, android]
+    needs: [windows, sign, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: app-exe
+          name: app-exe-signed
 
       - uses: actions/download-artifact@v4
         with:
