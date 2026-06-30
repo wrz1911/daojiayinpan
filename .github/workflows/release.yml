@@ -175,8 +175,11 @@ jobs:
       - name: Prepare Pages
         run: |
           mkdir -p pages/v1
-          cp *.exe *.dll pages/v1/
-          cp *.exe *.dll pages/
+          cp *.exe pages/v1/ 2>/dev/null || true
+          cp *.dll pages/v1/ 2>/dev/null || true
+          cp *.exe pages/ 2>/dev/null || true
+          cp *.dll pages/ 2>/dev/null || true
+          ls -la pages/v1/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
