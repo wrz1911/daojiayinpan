@@ -41,7 +41,6 @@ adb install android/app/build/outputs/apk/release/app-release.apk
 | 项目 | 协议 | 用途 | 地址 |
 |---|---|---|---|
 | tyme4ts | MIT | 农历/节气/干支计算 | https://github.com/6tail/tyme4ts |
-| MiSans | SIL OFL | 桌面/移动端字体 | https://github.com/xiaomi/MiSans |
 | Tauri | MIT | 跨平台桌面框架 | https://github.com/tauri-apps/tauri |
 
 ## 协议
