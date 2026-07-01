@@ -13,6 +13,11 @@ cp js/tyme4ts-browser.js web/js/
 cp js/gong_detail_data.js web/js/
 cp qimen_app/yinpan_standalone.html web/qimen_app/
 cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
+cat > web/index.html << 'HTMLEOF'
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+<script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+HTMLEOF
 
 echo "=== Tauri 编译 ==="
 /usr/bin/cargo-tauri build -b deb -b rpm -b appimage 2>&1 || true
