@@ -47,6 +47,47 @@ jobs:
             src-tauri/target/release/app.exe
             src-tauri/target/release/WebView2Loader.dll
 
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Setup frontend
+        run: |
+          mkdir -p web/css/yinpan web/js web/qimen_app/js
+          cp css/tool.css web/css/
+          cp css/yinpan/yinpan.css web/css/yinpan/
+          cp js/tyme4ts-browser.js web/js/
+          cp js/gong_detail_data.js web/js/
+          cp qimen_app/yinpan_standalone.html web/qimen_app/
+          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
+          cat > web/index.html << 'HTMLEOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          HTMLEOF
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Tauri build
+        run: |
+          cargo install tauri-cli --version "^2"
+          cargo tauri build --bundles deb,rpm,appimage
+
+      - name: Upload Linux packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-pkg
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/appimage/*.AppImage
+
   android:
     runs-on: ubuntu-latest
     steps:
@@ -146,7 +187,7 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
 
   release:
-    needs: [windows, android]
+    needs: [windows, linux, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -155,6 +196,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: app-exe
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-pkg
 
       - uses: actions/download-artifact@v4
         with:
@@ -167,6 +212,9 @@ jobs:
           files: |
             *.exe
             *.dll
+            *.deb
+            *.rpm
+            *.AppImage
             *.apk
           generate_release_notes: true
 
