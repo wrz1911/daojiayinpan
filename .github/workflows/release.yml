@@ -135,7 +135,7 @@ jobs:
       - name: Tauri build
         run: |
           cargo install tauri-cli --version "^2"
-          cargo tauri build --bundles deb,rpm,appimage
+          cargo tauri build --bundles deb,rpm
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
@@ -144,7 +144,6 @@ jobs:
           path: |
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/rpm/*.rpm
-            src-tauri/target/release/bundle/appimage/*.AppImage
 
   android:
     runs-on: ubuntu-latest
@@ -282,8 +281,8 @@ jobs:
       - name: Flatten artifacts to root
         shell: bash
         run: |
-          find . -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.dmg' -o -name '*.exe' -o -name '*.dll' -o -name '*.apk' \) -exec mv {} . \;
-          ls -la *.deb *.rpm *.AppImage *.dmg *.exe *.apk 2>/dev/null || true
+          find . -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.dmg' -o -name '*.exe' -o -name '*.dll' -o -name '*.apk' \) -exec mv {} . \;
+          ls -la *.deb *.rpm *.dmg *.exe *.apk 2>/dev/null || true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -295,7 +294,6 @@ jobs:
             *.deb
             *.rpm
             *.dmg
-            *.AppImage
             *.apk
           generate_release_notes: true
 
