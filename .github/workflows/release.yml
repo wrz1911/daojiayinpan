@@ -10,6 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          cat src-tauri/tauri.conf.json | sed "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" > /tmp/tmp.json && mv /tmp/tmp.json src-tauri/tauri.conf.json
+
       - name: Setup frontend
         shell: bash
         run: |
@@ -52,6 +59,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          cat src-tauri/tauri.conf.json | sed "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" > /tmp/tmp.json && mv /tmp/tmp.json src-tauri/tauri.conf.json
+
       - name: Setup frontend
         run: |
           mkdir -p web/css/yinpan web/js web/qimen_app/js
@@ -92,6 +107,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
+      
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          cat src-tauri/tauri.conf.json | sed "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" > /tmp/tmp.json && mv /tmp/tmp.json src-tauri/tauri.conf.json
+
       - name: Setup frontend
         run: |
           mkdir -p web/css/yinpan web/js web/qimen_app/js
@@ -127,6 +150,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          cat src-tauri/tauri.conf.json | sed "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" > /tmp/tmp.json && mv /tmp/tmp.json src-tauri/tauri.conf.json
+          # Also update Android versionName
+          ANDROID_VER=$(echo "$VER" | grep -o '^[0-9]*\.[0-9]*')
+          if [ -f android/app/build.gradle ]; then
+            sed -i "s/versionName \"[^\"]*\"/versionName \"$ANDROID_VER\"/" android/app/build.gradle
+          fi
 
       - uses: actions/setup-java@v4
         with:
