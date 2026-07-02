@@ -37,12 +37,7 @@ HTMLEOF
 
 # 复制所有必需文件
 cp css/tool.css www/css/
-cp css/iconfont.css www/css/
-cp css/iconfont.woff2 www/css/
-cp css/iconfont.woff www/css/
-cp css/iconfont.ttf www/css/
 cp css/yinpan/yinpan.css www/css/yinpan/
-cp css/fonts/MiSans-VF.ttf www/css/fonts/
 cp js/tyme4ts-browser.js www/js/
 cp js/gong_detail_data.js www/js/
 cp qimen_app/yinpan_standalone.html www/qimen_app/

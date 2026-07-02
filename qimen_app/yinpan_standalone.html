@@ -136,7 +136,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:#1a1a
   </div>
   <div id="xinpanPanel" style="display:none"></div>
 
-  <div class="tip" id="tip" style="text-align:center;color:#999;font-size:12px;padding:0;line-height:18px"></div>
+  <div id="tip" style="text-align:center;color:#0dc2b3;font-size:14px;padding:4px;line-height:20px"></div>
 
   <!-- 排盘结果 -->
   <div id="result"></div>
@@ -212,7 +212,11 @@ var _xpBgMaXing = '';     // 背景马星
 var _xpBgJu = '';         // 背景局数
 var _xpBgXunShou = '';    // 背景旬首
 var _xpBgPalaces = {};    // 背景完整宫位数据
+var _xpErrors = [];       // 错误/调试信息收集
+var _xpOpLog = [];        // 完整操作日志
+var _xpOpSeq = 0;         // 操作序号
 var _xpCalcJu = '';       // 用户推算的局数
+var _xpIsZhongGong = false; // 坤2地盘干是否来自中5寄宫
 var _xpBgIsYin = true;    // 背景阴阳遁
 (function initXpData() {
   [1,2,3,4,6,7,8,9].forEach(function(g) {
@@ -221,11 +225,13 @@ var _xpBgIsYin = true;    // 背景阴阳遁
   });
 })();
 function clearXinpan() {
+  _xpOpLog = []; _xpOpSeq = 0;
+  _xpOpLog.push('[1] 心盘重置');
   [1,2,3,4,6,7,8,9].forEach(function(g) {
     _xpData[g] = {shen:'', tian:'', di:'', xing:'', men:'', ma:false, kong:false};
     _xpManual[g] = false;
   });
-  renderXinpan();
+  renderXinpan(true);
 }
 function setPanType(t) {
   panType = t;
@@ -239,7 +245,7 @@ function setPanType(t) {
     _xpBgSizhu = ''; _xpBgNongli = ''; _xpBgPalaces = {}; _xpBgKongWang = ''; _xpBgMaXing = ''; _xpBgJu = ''; _xpBgXunShou = ''; _xpCalcJu = '';
     // 自动应用当下时间
     setNow();
-    // 触发排盘拿参考数据
+    // 计算背景参考(四柱/马星/空亡/局数), 但网格留空等用户编辑
     doPan();
   }
 }
@@ -283,6 +289,7 @@ var ZHI_LIST = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌
 // ============ 主排盘函数 ============
 function doNewPan(zxjus) { var o={year:Y,month:M,day:D,hour:hr,minute:mn,panType:panType}; if(zxjus){var i=parseInt(selZxj.value)||0;if(i>0){var t=i-1;o.customJu=t<9?{yinYang:"阴",number:9-t}:{yinYang:"阳",number:t-8};}} return window.qimenChart(o); }
 function doPan() {
+  var t = document.getElementById('tip'); if (t) t.innerHTML = '<span style=color:green>doPan called</span>';
   // 先读取时间选择器
   Y = parseInt(selY.value) || now.getFullYear();
   M = parseInt(selM.value) || 6;
@@ -290,16 +297,13 @@ function doPan() {
   hr = parseInt(selH.value) || 0;
   mn = parseInt(selI.value) || 0;
 
-	        // 心盘模式: 先用时盘算完整参考排盘, 用户编辑覆盖在上面
+	        // 心盘模式: 仅提取四柱/马星/空亡/局数, 网格等待用户编辑
 	        if (panType === 3) {
 	          document.getElementById('result').style.display = 'none';
+	          if (Object.keys(_xpBgPalaces).length > 0) { clearXinpan(); return; }
 	          try {
 	            var bgResult = doNewPan(false);
-	            document.getElementById('tianmendihu').checked = true;
-	            _tmdhRaw = paipan(false);
-	            document.getElementById('tianmendihu').checked = false;
 	            if (bgResult) {
-	              window._rawBg = bgResult.raw;
 	              var sz = bgResult.sizhu;
 	              _xpBgSizhu = sz.y.ganZhi+' '+sz.m.ganZhi+' '+sz.d.ganZhi+' '+sz.h.ganZhi;
 	              _xpBgNongli = bgResult.nongli;
@@ -308,18 +312,17 @@ function doPan() {
 	              _xpBgJu = bgResult.juLabel;
 	              _xpBgXunShou = bgResult.xs.gz;
 	              _xpBgIsYin = bgResult.yinYang === '阴';
-	              var bgPalaces = {};
-	              var pals = bgResult.pals;
-	              for (var g = 1; g < 10; g++) {
-	                if (g === 5) continue;
-	                var p = pals[g];
-	                bgPalaces[g] = { shen:p.shen, tian:p.tian, di:p.di, xing:p.xing, men:p.men, anGan:p.anGan||'' };
-	              }
-	              _xpBgPalaces = bgPalaces;
+              var bgPalaces = {};
+              var pals = bgResult.pals;
+              for (var g = 1; g < 10; g++) {
+                if (g === 5) continue;
+                var p = pals[g];
+                bgPalaces[g] = { shen:p.shen, tian:p.tian, di:p.di, xing:p.xing, men:p.men, anGan:'' };
+              }
+              _xpBgPalaces = bgPalaces;
 	            }
-	          } catch(e) { /* ignore */ }
-	          [1,2,3,4,6,7,8,9].forEach(function(g) { if (_xpBgPalaces[g]) _xpBgPalaces[g].anGan = ''; });
-	          renderXinpan(true);
+	          } catch(e) {}
+	          clearXinpan();
 	          return;
 	        }
 	      
@@ -885,6 +888,12 @@ function autoVerify() {
 // === 调试信息复制 ===
 function copyXinpanDebug() {
   var info = [];
+  // 错误日志
+  if (_xpErrors.length > 0) {
+    info.push('=== 错误日志 ===');
+    for (var ei = 0; ei < _xpErrors.length; ei++) info.push('['+ei+'] '+_xpErrors[ei]);
+    info.push('');
+  }
   info.push('局数:'+(_xpCalcJu||_xpBgJu||'?'));
   info.push('四柱:'+(_xpBgSizhu||''));
   info.push('旬首:'+(_xpBgXunShou||''));
@@ -900,11 +909,47 @@ function copyXinpanDebug() {
     info.push('  渲染: 天='+(p.tian||'')+' 地='+(p.di||'')+' 神='+(p.shen||'')+' 星='+(p.xing||'')+' 门='+(p.men||''));
   });
   info.push('伏吟:'+(window._dbgFu?'是':'否')+' 暗干Map:'+(window._dbgAnGan||'无'));
+  info.push('手动编辑:'+JSON.stringify(Object.keys(_xpManual).filter(function(k){return _xpManual[k];}).map(Number)));
+  // 操作日志
+  info.push('');
+  info.push('=== 操作日志('+_xpOpLog.length+'条) ===');
+  for (var oi = 0; oi < _xpOpLog.length; oi++) info.push(_xpOpLog[oi]);
+  // 局推算诊断
+  (function(){
+    var GAN = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
+    var isYin = xpGetYinYang();
+    var diag = [];
+    diag.push('');
+    diag.push('=== 局推算诊断 ===');
+    // Find possible局 from each宫's di
+    for (var dg = 1; dg <= 9; dg++) {
+      if (dg === 5) continue;
+      var dd = _xpData[dg];
+      if (!dd || !dd.di) continue;
+      var dgDi = dd.di;
+      var dgIdx = GAN.indexOf(dgDi);
+      if (dgIdx < 0) continue;
+      var juFrom = isYin ? (dgIdx + dg) % 9 : (dg - dgIdx + 9) % 9;
+      if (juFrom === 0) juFrom = 9;
+      diag.push('宫'+dg+' di='+dgDi+' → 局'+juFrom);
+    }
+    // Also check坤2寄干
+    if (_xpData[2] && _xpData[2].di2) {
+      var jiGan = _xpData[2].di2;
+      var jiIdx = GAN.indexOf(jiGan);
+      if (jiIdx >= 0) {
+        var juFromJi = isYin ? (jiIdx + 2) % 9 : (2 - jiIdx + 9) % 9;
+        if (juFromJi === 0) juFromJi = 9;
+        diag.push('坤2寄干'+jiGan+' → 局'+juFromJi+' (中5局)');
+      }
+    }
+    info.push.apply(info, diag);
+  })();
   var text = info.join('\n');
   var ta = document.createElement('textarea');
   ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='0';
   document.body.appendChild(ta); ta.focus(); ta.select();
-  try { document.execCommand('copy'); tip.innerHTML = '<span style="color:#0dc2b3">调试信息已复制</span>'; } catch(e) {}
+  try { document.execCommand('copy'); } catch(e) {}
   document.body.removeChild(ta);
 }
 
@@ -1129,44 +1174,7 @@ function renderXinpan(useBg) {
     var d = _xpData[g] || {};
     var tianRaw = (d.tian||'') + (d.tian2||'');
     var diRaw = (d.di||'') + (d.di2||'');
-    // 渲染层寄干补全: 用户只选了单字干, 尝试补全双字
-    if (tianRaw.length === 1 || diRaw.length === 1) {
-      var GAN = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
-      var B = [1,8,3,4,9,2,7,6];
-      var isYin = (typeof _xpBgIsYin !== 'undefined') ? _xpBgIsYin : true;
-      var FW = isYin ? [9,8,7,6,5,4,3,2,1] : [1,2,3,4,5,6,7,8,9];
-      // 从已填地盘推算局
-      var ju = 0;
-      for (var gi = 1; gi <= 9; gi++) {
-        if (gi === 5) continue; var dd2 = _xpData[gi]; if (!dd2 || !dd2.di) continue;
-        var dg0 = (dd2.di||'')[0]; var idx = GAN.indexOf(dg0); if (idx < 0) continue;
-        ju = FW[((FW.indexOf(gi) - idx) % 9 + 9) % 9]; break;
-      }
-      if (ju) {
-        var ji = FW.indexOf(ju), zi = FW.indexOf(5);
-        var zg = GAN[(zi - ji + 9) % 9];
-        var dm = {};
-        for (var fi = 0; fi < 9; fi++) { var dg2 = FW[(ji + fi) % 9]; if (dg2 !== 5) dm[dg2] = GAN[fi]; }
-        if (zg && dm[2]) dm[2] = dm[2] + zg;
-        // 天盘补全: 从dm通过BAGUA旋转
-        if (tianRaw.length === 1) {
-          for (var si = 0; si < 8; si++) {
-            var sg = B[si]; if (!dm[sg]) continue;
-            if (dm[sg].indexOf(tianRaw[0]) >= 0) {
-              for (var bi = 0; bi < 8; bi++) {
-                if (B[bi] !== g) continue;
-                var bw = ((B.indexOf(sg) + bi - B.indexOf(g)) % 8 + 8) % 8;
-                var tv = dm[B[bw]] || '';
-                if (tv.indexOf(tianRaw[0]) >= 0) { tianRaw = tv; break; }
-              }
-              break;
-            }
-          }
-        }
-        // 地盘补全: 直接从dm
-        if (diRaw.length === 1 && dm[g] && dm[g].length >= 2 && dm[g].indexOf(diRaw[0]) >= 0) diRaw = dm[g];
-      }
-    }
+    // diMap/tianMap现已从局推算, 不再从背景补全寄干
     palaces['gong'+g] = {
       shen: SHEN_LOOKUP[d.shen] || d.shen || '',
       tian: tianRaw,
@@ -1281,7 +1289,7 @@ function renderXinpan(useBg) {
   addColorStyles();
   setTimeout(fixYinGanAlign, 100);
   setTimeout(fixYinGanAlign, 500);
-  } catch(e) { tip.innerHTML = '<span style=color:red>心盘渲染错误:'+e.message+'</span>'; console.error(e); }
+  } catch(e) { _xpErrors.push('心盘渲染错误:'+e.message); console.error(e); }
 }
 
 function showYixing() {
@@ -1845,70 +1853,38 @@ function showPalace(g) {
 var _xpBgPalaces = {};
 
 function autoFillXinpan(anchorGong) {
+  try {
   var d = _xpData[anchorGong];
+  _xpOpLog.push('['+(++_xpOpSeq)+'] 推算全盘 锚点=宫'+anchorGong+' 神='+(d.shen||'')+' 天='+(d.tian||'')+' 地='+(d.di||'')+' 星='+(d.xing||'')+' 门='+(d.men||''));
   if (!d || !d.di || !d.tian || !d.shen) {
-    tip.innerHTML = '<span style="color:#e74c3c">请先选择神、天盘干、地盘干、星、门</span>';
+    _xpErrors.push('推算失败: 请先选择神、天盘干、地盘干、星、门');
     return;
   }
-  // 深拷贝锚点数据, 防止后续 _xpData 重建时丢失
   var anchorSaved = {shen:d.shen||'',tian:d.tian||'',tian2:d.tian2||'',di:d.di||'',di2:d.di2||'',xing:d.xing||'',men:d.men||''};
-
-  // 从背景paipan输出判断阴阳遁
-  var isYin = true;
-  if (window._rawBg) {
-    isYin = window._rawBg.indexOf('阴遁') >= 0;
-  } else if (_xpBgJu && _xpBgJu.length > 0) {
-    isYin = _xpBgJu.charAt(0) === '阴';
-  }
-
-  // 天干序列
   var GAN = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
 
-  // 从锚点反推局数
-  var diG2 = (anchorSaved.di||'')[0]; var diI2 = GAN.indexOf(diG2); if (diI2 < 0) diI2 = 0;
-  var juG = isYin ? ((anchorGong + diI2 - 1) % 9 + 1) : ((anchorGong - diI2 + 8) % 9 + 1);
-  _xpCalcJu = isYin ? ('阴'+juG+'局') : ('阳'+juG+'局');
+  // 从锚点地盘干反推局数, 再重算完整地盘(含寄干)
+  var diGan = (anchorSaved.di||'')[0];
+  var diIdx = GAN.indexOf(diGan);
+  var calcJuGong = 0;
+  if (diIdx >= 0) {
+    calcJuGong = _xpBgIsYin ? (diIdx + anchorGong) % 9 : (anchorGong - diIdx + 9) % 9;
+    if (calcJuGong === 0) calcJuGong = 9;
+  }
+  if (calcJuGong < 1 || calcJuGong > 9) calcJuGong = anchorGong;
+  _xpCalcJu = (_xpBgIsYin ? '阴遁' : '阳遁') + calcJuGong + '局';
 
-  // 重建全部地盘
-  var fw = []; var gp = juG;
-  for (var f = 0; f < 9; f++) { fw.push(gp); gp = isYin ? (gp===1?9:gp-1) : (gp===9?1:gp+1); }
-  var zhongGan = '';
+  var fwDi = xpBuildFw(calcJuGong, _xpBgIsYin);
   var diMap = {};
-  for (var gi = 0; gi < 9; gi++) {
-    var gong = fw[gi];
-    if (gong === 5) { zhongGan = GAN[gi]; }
-    else { diMap[gong] = GAN[gi]; }
+  var zhongGan = '';
+  for (var fi = 0; fi < 9; fi++) {
+    var fg = fwDi[fi];
+    if (fg === 5) { zhongGan = GAN[fi]; }
+    else { diMap[fg] = GAN[fi]; }
   }
-  if (zhongGan && diMap[2]) diMap[2] = diMap[2][0] + zhongGan;
+  // 寄干: 中5干附加到坤2宫地盘干尾部
+  if (zhongGan && diMap[2]) diMap[2] = diMap[2] + zhongGan;
 
-  // 坤宫戊二选一弹窗
-  var isZhongJu = false;
-  if (anchorGong === 2 && (anchorSaved.di||'')[0] === '戊' && !window._xpJuChoice) {
-    var ov2 = document.createElement('div');
-    ov2.id = 'xpJuPick';
-    ov2.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center';
-    ov2.innerHTML = '<div style="background:#fff;border-radius:12px;padding:20px;text-align:center;max-width:320px"><div style="font-size:16px;margin-bottom:16px">坤宫地盘戊：</div><div id="xpJu2" style="display:block;padding:12px;margin:6px 0;background:#0dc2b3;color:#fff;border-radius:8px;font-size:15px;cursor:pointer">戊为坤宫本宫主干（'+juG+'局）</div><div id="xpJu5" style="display:block;padding:12px;margin:6px 0;background:#e0e0e0;color:#333;border-radius:8px;font-size:15px;cursor:pointer">戊为中宫寄干（中5局）</div></div>';
-    document.body.appendChild(ov2);
-    document.getElementById('xpOverlay').style.display = 'none';
-    ov2.querySelector('#xpJu2').onclick = function() { ov2.remove(); window._xpJuChoice = juG; autoFillXinpan(anchorGong); };
-    ov2.querySelector('#xpJu5').onclick = function() { ov2.remove(); window._xpJuChoice = 5; autoFillXinpan(anchorGong); };
-    return;
-  }
-  if (window._xpJuChoice) {
-    if (window._xpJuChoice === 5) { juG = 5; isZhongJu = true; _xpCalcJu = (isYin?'阴':'阳')+'5局'; }
-    else { juG = window._xpJuChoice; _xpCalcJu = (isYin?'阴':'阳')+juG+'局'; }
-    window._xpJuChoice = null;
-    // 用选择的局重建地盘
-    fw = []; gp = juG;
-    for (var f2 = 0; f2 < 9; f2++) { fw.push(gp); gp = isYin ? (gp===1?9:gp-1) : (gp===9?1:gp+1); }
-    zhongGan = ''; diMap = {};
-    for (var gi2 = 0; gi2 < 9; gi2++) {
-      var gong2 = fw[gi2];
-      if (gong2 === 5) { zhongGan = GAN[gi2]; }
-      else { diMap[gong2] = GAN[gi2]; }
-    }
-    if (zhongGan && diMap[2]) diMap[2] = diMap[2][0] + zhongGan;
-  }
 
   var BAGUA = [1,8,3,4,9,2,7,6]; // 八卦顺时针
 
@@ -1916,7 +1892,7 @@ function autoFillXinpan(anchorGong) {
   var GODS = ['符','蛇','阴','六','白','玄','地','天'];
   var SHUN_GOD = [1,8,3,4,9,2,7,6];
   var NI_GOD   = [1,6,7,2,9,4,3,8];
-  var godOrder = isYin ? NI_GOD : SHUN_GOD;
+  var godOrder = _xpBgIsYin ? NI_GOD : SHUN_GOD;
   var godIdx = GODS.indexOf(anchorSaved.shen || '');
   if (godIdx < 0) godIdx = 0;
   var godAnchorIdx = godOrder.indexOf(anchorGong);
@@ -1931,12 +1907,7 @@ function autoFillXinpan(anchorGong) {
   // === 值符宫(八神=符) ===
   var fuGong3 = 0;
   [1,2,3,4,6,7,8,9].forEach(function(g) { if (godMap[g] === '符') fuGong3 = g; });
-  if (!fuGong3) fuGong3 = juG;
-
-  // === 天盘 ===
-  var tianMap = {};
-  var isFuAll = ((anchorSaved.tian||'')[0] === (anchorSaved.di||'')[0] ||
-                 ((diMap[anchorGong]||'').length >= 2 && (diMap[anchorGong]||'')[1] === (anchorSaved.tian||'')[0]));
+  if (!fuGong3) fuGong3 = anchorGong;
 
   // === 星/门 ===
   var SM_ORDER = [1,8,3,4,9,2,7,6];
@@ -1964,100 +1935,52 @@ function autoFillXinpan(anchorGong) {
 
   var diMapBg = {};
 
-  // 寄干=已算好的中宫干(仅坤2宫)
-  anchorSaved.di2 = (anchorGong === 2 ? zhongGan : '');
-  anchorSaved.tian2 = (anchorGong === 2 ? zhongGan : '');
-  // 中5局:用户输入的是寄干,保持diMap计算的主天干
-  if (!isZhongJu) {
-    diMap[anchorGong] = (anchorSaved.di||'') + (anchorGong === 2 ? (anchorSaved.di2||'') : '');
-  }  tianMap = {};
+
+  // === 天盘: 顺时针复制地盘(含寄干), 不做任何额外计算 ===
+  var tianMap = {};
   var BAGUA = [1,8,3,4,9,2,7,6];
   var tianG = (anchorSaved.tian||'')[0];
   var srcGong = 0;
   [1,2,3,4,6,7,8,9].forEach(function(gKey) {
     if (!srcGong && diMap[gKey] && diMap[gKey].indexOf(tianG) >= 0) srcGong = gKey;
   });
-  // 跳过锚点同宫寄干
-  if (!srcGong || (srcGong === anchorGong && diMap[anchorGong] && diMap[anchorGong].length >= 2 && diMap[anchorGong][1] === tianG)) {
-    [1,2,3,4,6,7,8,9].forEach(function(gKey) {
-      if (!srcGong && gKey !== anchorGong && diMap[gKey] && diMap[gKey].length >= 2 && diMap[gKey][1] === tianG) srcGong = gKey;
-    });
-  }
-  // 最后尝试背景坤2原寄干(锚点可能覆盖了寄干)
-  if (!srcGong && _xpBgPalaces[2] && _xpBgPalaces[2].di && _xpBgPalaces[2].di.length >= 2 && _xpBgPalaces[2].di[1] === tianG) srcGong = 2;
-  var isFuAll = ((anchorSaved.tian||'')[0] === (anchorSaved.di||'')[0] ||
-                 ((diMap[anchorGong]||'').length >= 2 && (diMap[anchorGong]||'')[1] === (anchorSaved.tian||'')[0]));
-  if (!srcGong || srcGong === 5) srcGong = juG;
-  // 锚点天地盘相同(伏吟):天盘=地盘,不fallback
-  if (isFuAll && srcGong === anchorGong) { /*保持伏吟*/ }
-  else if (srcGong === anchorGong) srcGong = juG;
+  if (!srcGong || srcGong === 5) srcGong = anchorGong;
 
-  var srcBw = BAGUA.indexOf(srcGong); if (srcBw < 0) srcBw = 0;
-  var dstBw = BAGUA.indexOf(anchorGong); if (dstBw < 0) dstBw = 0;
-  for (var ti = 0; ti < 8; ti++) {
-    var tg = BAGUA[ti];
-    var bw = (srcBw + ti - dstBw + 8) % 8;
-    tianMap[tg] = diMap[BAGUA[bw]] || '';
-  }
+  // 伏吟检测: 锚点天盘首字 = 锚点地盘首字
+  var isFuYinLocal = !!(anchorSaved.tian && anchorSaved.di && anchorSaved.tian[0] === anchorSaved.di[0]);
 
-  // 从锚点反推正确的寄干(背景局固定,锚点可能改变局)
-  var ganDi = (anchorSaved.di||'')[0];
-  var ganIdx = ['戊','己','庚','辛','壬','癸','丁','丙','乙'].indexOf(ganDi);
-  if (ganIdx >= 0 && anchorGong === 2) {
-    var fwTmp = []; var gTmp = anchorGong;
-    for (var fi = 0; fi < 9; fi++) {
-      fwTmp.push(gTmp);
-      gTmp = isYin ? (gTmp===9?1:gTmp+1) : (gTmp===1?9:gTmp-1);
-    }
-    // fwTmp[ganIdx] = anchor(坤2)地盘干, fwTmp[0] is局宫
-    // 中宫在fwTmp中的位置: index where value=5
-    var zhongIdx = fwTmp.indexOf(5);
-    if (zhongIdx >= 0) {
-      // 中宫干的飞步位置 = (局宫->中宫的步数)
-      //局宫在fwTmp[0],中宫在fwTmp[zhongIdx]
-      //原始GAN from局宫: GAN[0] at fwTmp[0], GAN[zhongIdx] at fwTmp[zhongIdx]=5
-      var zhongGan2 = ['戊','己','庚','辛','壬','癸','丁','丙','乙'][zhongIdx];
-      // 更新锚点坤2的寄干
-      // 寄干自动计算: 从坤2锚点飞步6到中宫,取对应干
-var diG = (anchorSaved.di||'')[0]; var diI = ['戊','己','庚','辛','壬','癸','丁','丙','乙'].indexOf(diG);
-if (diI >= 0 && anchorGong === 2) anchorSaved.di2 = (function(){var ju=0;for(var g in diMap){if(diMap[g]&&diMap[g][0]==='戊')ju=parseInt(g);}if(!ju)return'';var fw=[];var gp=ju;for(var f=0;f<9;f++){fw.push(gp);gp=isYin?(gp===1?9:gp-1):(gp===9?1:gp+1);}var zIdx=fw.indexOf(5);return zIdx>=0?['戊','己','庚','辛','壬','癸','丁','丙','乙'][zIdx]:'';})()
+  if (isFuYinLocal) {
+    // 伏吟: 天盘=地盘(含寄干完全复制)
+    for (var ti = 0; ti < 8; ti++) { var tg2 = BAGUA[ti]; tianMap[tg2] = diMap[tg2] || ''; }
+  } else {
+    // 正常BAGUA旋转
+    var srcBw = BAGUA.indexOf(srcGong), dstBw = BAGUA.indexOf(anchorGong);
+    if (srcBw < 0) srcBw = 0; if (dstBw < 0) dstBw = 0;
+    for (var ti = 0; ti < 8; ti++) {
+      var tg3 = BAGUA[ti];
+      var bw = (srcBw + ti - dstBw + 8) % 8;
+      tianMap[tg3] = diMap[BAGUA[bw]] || '';
     }
   }
 
   // 全部8宫重新计算，锚点宫保留用户手动选的神/天干/地盘干/星/门
   [1,2,3,4,6,7,8,9].forEach(function(g) {
     _xpData[g] = {shen:'',tian:'',di:'',tian2:'',di2:'',xing:'',men:'',ma:false,kong:false};
-    _xpManual[g] = false;
     if (g === anchorGong) {
       _xpData[g].shen = anchorSaved.shen;
       _xpData[g].xing = anchorSaved.xing;
       _xpData[g].men  = anchorSaved.men;
-      var isFu = (anchorSaved.tian||'')[0] === (anchorSaved.di||'')[0] ||
-                 ((diMap[anchorGong]||'').length >= 2 && (diMap[anchorGong]||'')[1] === (anchorSaved.tian||'')[0]);
-      if (isFu) {
-        // 伏吟:天盘=地盘完整值
-        _xpData[g].tian = (diMap[g]||'')[0] || '';
-        _xpData[g].tian2 = (diMap[g]||'').length >= 2 ? diMap[g][1] : '';
-        _xpData[g].di   = isZhongJu ? ((diMap[g]||'')[0]||'') : ((diMapBg[g]||diMap[g]||'')[0]||'');
-        _xpData[g].di2 = (anchorGong===2?anchorSaved.di2:'') || ((diMapBg[g]||diMap[g]||'').length >= 2 ? diMap[g][1] : '');
-      } else {
-        _xpData[g].tian = anchorSaved.tian;
-        _xpData[g].tian2 = anchorSaved.tian2 || '';
-        // 中5局时用户选的戊就是寄干，主天干用计算值
-        if (isZhongJu) {
-          _xpData[g].di  = (diMap[g]||'')[0] || '';
-        } else {
-          _xpData[g].di  = anchorSaved.di;
-        }
-        _xpData[g].di2 = (anchorGong===2?anchorSaved.di2:'') || ((diMapBg[g]||diMap[g]||'').length >= 2 ? diMap[g][1] : '');
-      }
+      // 锚点天盘/地盘: 取自局推算的diMap/tianMap, 含完整寄干
+      _xpData[g].tian = (tianMap[g]||'')[0] || anchorSaved.tian;
+      _xpData[g].tian2 = anchorSaved.tian2 || (tianMap[g]||'')[1] || '';
+      _xpData[g].di   = (diMap[g]||'')[0] || anchorSaved.di;
+      _xpData[g].di2  = anchorSaved.di2 || (diMap[g]||'')[1] || '';
       return;
     }
     _xpData[g].shen = godMap[g] || '';
     _xpData[g].tian = (tianMap[g]||'')[0] || '';
     _xpData[g].tian2 = (tianMap[g]||'')[1] || '';
     _xpData[g].di   = (diMapBg[g]||diMap[g]||'')[0] || '';
-    if (g === 8) { var dbg = '艮8 tianMap['+JSON.stringify(tianMap[8])+'] diMap[2]='+JSON.stringify(diMap[2])+' srcG='+srcGong+' dstBw='+dstBw+' srcBw='+srcBw; tip.innerHTML = '<span style=color:#0dc2b3>'+dbg+'</span>'; }
     _xpData[g].di2  = (diMapBg[g]||diMap[g]||'')[1] || '';
     _xpData[g].xing = starMap[g] || '';
     _xpData[g].men  = menMap[g] || '';
@@ -2074,7 +1997,7 @@ if (diI >= 0 && anchorGong === 2) anchorSaved.di2 = (function(){var ju=0;for(var
   else { anGanStart = shiG; }
 
   var anGanMap = {};
-  var isFuYin = isFuAll;
+  var isFuYin = false; // 暗干不强制伏吟,统一走BAGUA旋转
 
   // 值符宫
   var fuGong2 = 0;
@@ -2132,29 +2055,24 @@ if (diI >= 0 && anchorGong === 2) anchorSaved.di2 = (function(){var ju=0;for(var
     if (_xpBgPalaces[ag]) _xpBgPalaces[ag].anGan = anGanMap[ag];
   }
 
-  document.getElementById('xpOverlay').style.display = 'none';
+  // 诊断日志
+  _xpErrors.push('--- 推算诊断 ---');
+  _xpErrors.push('锚点:宫'+anchorGong+' 天='+anchorSaved.tian+' 地='+anchorSaved.di+' 伏吟='+isFuYinLocal);
+  _xpErrors.push('局:'+_xpCalcJu+' fwDi='+JSON.stringify(fwDi));
+  _xpErrors.push('diMap:'+JSON.stringify(diMap));
+  _xpErrors.push('tianMap:'+JSON.stringify(tianMap));
+  _xpErrors.push('_xpData[2]:天='+(_xpData[2].tian||'')+(_xpData[2].tian2||'')+' 地='+(_xpData[2].di||'')+(_xpData[2].di2||''));
+
+  var ov = window._xpOverlay || document.getElementById('xpOverlay');
+  if (ov) ov.style.display = 'none';
   window._xpEditGong = 0;
   renderXinpan(true);
+  } catch(e) { _xpErrors.push('推算错误:'+e.message); console.error(e); }
 }
 
 // 地盘/天盘干变更时自动计算寄干
 function xpAutoJiGan(g, cat) {
-  tip.innerHTML = '<span style=color:#0dc2b3>JiRun g='+g+' c='+cat+'</span>';
-  try {
-    var d = _xpData[g]; if (!d) return;
-    var gan = d[cat]; if (!gan) return;
-    tip.innerHTML = '<span style=color:#0dc2b3>JiRun g='+g+' c='+cat+' v='+gan+'</span>';
-    if (cat !== 'tian' && cat !== 'di') return;
-    // 简化: 用 background 数据直接补全
-    if (typeof _xpBgPalaces !== 'undefined' && _xpBgPalaces[g] && _xpBgPalaces[g][cat]) {
-      var bgFull = _xpBgPalaces[g][cat] || '';
-      if (bgFull.length >= 2 && bgFull.indexOf(gan[0]) >= 0) {
-        d[cat] = bgFull;
-        tip.innerHTML = '<span style=color:#0dc2b3>补全:'+gan+'\u2192'+bgFull+'</span>';
-        return;
-      }
-    }
-  } catch(e) { tip.innerHTML = '<span style=color:red>JiErr:'+e.message+'</span>'; }
+  // 寄干补全已由 renderXinpan 的渲染层处理, 此函数保留为空
 }
 
 // 获取当前阴遁/阳遁
@@ -2176,15 +2094,15 @@ function calcZhongGan() {
     var diG = d.di[0];
     var diIdx = GAN.indexOf(diG);
     if (diIdx < 0) continue;
-    var anchorIdx = fw.indexOf(gi);
+    var anchorIdx = FW.indexOf(gi);
     var juGong = FW[((anchorIdx - diIdx) % 9 + 9) % 9];
     if (juGong === 5) juGong = 2;
-    // 中宫干 = GAN[fw.indexOf(5)的偏移]
+    // 中宫干 = GAN[FW.indexOf(5)的偏移]
     var zhongIdx = (5 - juGong + 9) % 9; // 中宫在飞序中的位置
-    var zhongPos = (fw.indexOf(juGong) + zhongIdx) % 9;
+    var zhongPos = (FW.indexOf(juGong) + zhongIdx) % 9;
     // 实际上中宫在FW中的index
     for (var zi = 0; zi < 9; zi++) {
-      var g = FW[(fw.indexOf(juGong) + zi) % 9];
+      var g = FW[(FW.indexOf(juGong) + zi) % 9];
       if (g === 5) return GAN[zi];
     }
     return '';
@@ -2192,79 +2110,175 @@ function calcZhongGan() {
   return '';
 }
 
-// === 心盘宫殿编辑器 ===
-function showXinpanEditor(g) {
-  window._xpEditGong = g;
-  var d = _xpData[g] || {};
-  var overlay = document.getElementById('xpOverlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'xpOverlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:999;display:flex;align-items:center;justify-content:center';
-    overlay.onclick = function(e) { if (e.target === overlay) { overlay.style.display = 'none'; window._xpEditGong = 0; renderXinpan(); } };
-    document.body.appendChild(overlay);
+// 飞步序列: 从局宫起,阴阳顺逆
+function xpBuildFw(juGong, isYin) {
+  var fw = []; var gp = juGong;
+  for (var f = 0; f < 9; f++) {
+    fw.push(gp);
+    gp = isYin ? (gp === 1 ? 9 : gp - 1) : (gp === 9 ? 1 : gp + 1);
   }
-  var GONG_NAMES = {1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兑',8:'艮',9:'离'};
-  var cats = [
-    {key:'shen',label:'八神',opts:['符','蛇','阴','六','白','玄','地','天']},
-    {key:'tian',label:'天盘干',opts:['戊','己','庚','辛','壬','癸','丁','丙','乙']},
-    {key:'di',label:'地盘干',opts:['戊','己','庚','辛','壬','癸','丁','丙','乙']},
-    {key:'xing',label:'九星',opts:['蓬','任','冲','辅','英','芮','柱','心']},
-    {key:'men',label:'八门',opts:['休','生','伤','杜','景','死','惊','开']}
-  ];
-
-  function btn(catKey, val, label) {
-    var cur = d[catKey] || '';
-    var sel = (cur === val) ? 'background:#0dc2b3;color:#fff;border-color:#0dc2b3' : 'background:#fafafa;border-color:#e0e0e0';
-    var cls = 'xpbtng'+g+catKey;
-    var data_g = g, data_cat = catKey, data_val = val;
-    return '<span class="'+cls+'" data-g="'+g+'" data-cat="'+catKey+'" data-val="'+val+'" style="display:inline-block;padding:6px 12px;margin:2px;border:1px solid;border-radius:16px;font-size:14px;cursor:pointer;'+sel+'">'+label+'</span>';
-  }
-
-  var h = '<div style="background:#fff;border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:85vh;overflow-y:auto" onclick="event.stopPropagation()">';
-  h += '<div style="font-weight:bold;font-size:17px;text-align:center;margin-bottom:10px">'+GONG_NAMES[g]+'宫 编辑</div>';
-  for (var ci = 0; ci < cats.length; ci++) {
-    var cat = cats[ci];
-    h += '<div style="font-size:12px;color:#888;margin-bottom:2px">'+cat.label+'</div>';
-    h += '<div style="margin-bottom:8px">';
-    for (var oi = 0; oi < cat.opts.length; oi++) {
-      h += btn(cat.key, cat.opts[oi], cat.opts[oi]);
-    }
-    h += '</div>';
-  }
-  // 寄干扩展：天干和地干支持双字符
-  // 自动推算按钮
-  h += '<div style="text-align:center;margin:8px 0">';
-  h += '<span onclick="event.stopPropagation();autoFillXinpan('+g+')" style="display:inline-block;padding:8px 20px;background:#0dc2b3;color:#fff;border-radius:20px;font-size:14px;cursor:pointer">🔮 以此宫推算全盘</span>';
-  h += '</div>';
-  // 关闭按钮
-  h += '<div style="text-align:center"><span onclick="document.getElementById(\'xpOverlay\').style.display=\'none\';window._xpEditGong=0;renderXinpan();" style="font-size:13px;color:#888;cursor:pointer">关闭</span></div>';
-  h += '</div>';
-  overlay.innerHTML = h;
-  // 委托点击：天干/地盘干按钮
-  var btns = overlay.querySelectorAll('span[data-g]');
-  for (var bi = 0; bi < btns.length; bi++) {
-    btns[bi].addEventListener('click', function(e) {
-      var g = parseInt(this.getAttribute('data-g'));
-      var cat = this.getAttribute('data-cat');
-      var val = this.getAttribute('data-val');
-      _xpManual[g] = true;
-      _xpData[g][cat] = val;
-      // 更新按钮样式
-      var cls = 'xpbtng'+g+cat;
-      var all = overlay.querySelectorAll('.'+cls);
-      for (var ai = 0; ai < all.length; ai++) {
-        all[ai].style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid #e0e0e0;border-radius:16px;font-size:14px;cursor:pointer;background:#fafafa';
-      }
-      this.style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid #0dc2b3;border-radius:16px;font-size:14px;cursor:pointer;background:#0dc2b3;color:#fff';
-      // 寄干补全
-      if (cat === 'tian' || cat === 'di') {
-        setTimeout(function() { xpAutoJiGan(g, cat); }, 10);
-      }
-    });
-  }
-  overlay.style.display = 'flex';
+  return fw;
 }
+
+// 坤2宫地盘干戊选择后弹出局数选择(仅戊)
+function showJuSelectForKun2(gan) {
+  var isYin = xpGetYinYang();
+  var yinYangLabel = isYin ? '阴遁' : '阳遁';
+  var GAN = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
+
+  // 局2: 坤2主宫, 寄干=中5在飞步中对应的干
+  var fw2 = xpBuildFw(2, isYin);
+  var jiGan2 = GAN[fw2.indexOf(5)]; // 中5的干
+  var diLabel2 = gan + jiGan2;
+
+  // 局5: 中5寄宫, 坤2主宫=飞步中坤2位置的干, 寄干=戊(中5局宫干)
+  var fw5 = xpBuildFw(5, isYin);
+  var kunGan5 = GAN[fw5.indexOf(2)]; // 坤2主宫干
+  var diLabel5 = kunGan5 + gan; // 坤2主宫干+寄干(戊)
+
+  var ju2Label = yinYangLabel + '2局  → ' + diLabel2;
+  var ju5Label = yinYangLabel + '5局  → ' + diLabel5;
+
+  var old = document.getElementById('xpJuSelect');
+  if (old) old.parentNode.removeChild(old);
+
+  var dlg = document.createElement('div');
+  dlg.id = 'xpJuSelect';
+  dlg.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:center;justify-content:center';
+  dlg.innerHTML = '<div style="background:#fff;border-radius:12px;padding:16px;max-width:320px;width:90%;text-align:center">' +
+    '<div style="font-size:15px;margin-bottom:4px">坤2宫地盘干 戊</div>' +
+    '<div style="font-size:13px;color:#888;margin-bottom:12px">请选择局数（中5寄坤2宫）</div>' +
+    '<button id="xpJuBtn2" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid #0dc2b3;border-radius:8px;background:#f0fdfa;color:#0dc2b3;font-size:15px;cursor:pointer">'+ju2Label+'</button>' +
+    '<button id="xpJuBtn5" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;color:#333;font-size:15px;cursor:pointer">'+ju5Label+'</button>' +
+    '</div>';
+  document.body.appendChild(dlg);
+
+  document.getElementById('xpJuBtn2').addEventListener('click', function() {
+    _xpCalcJu = yinYangLabel + '2局';
+    _xpIsZhongGong = false;
+    _xpData[2].di2 = jiGan2;
+    _xpOpLog.push('['+(++_xpOpSeq)+'] 坤2局选择:'+ju2Label);
+    dlg.parentNode.removeChild(dlg);
+  });
+  document.getElementById('xpJuBtn5').addEventListener('click', function() {
+    _xpCalcJu = yinYangLabel + '5局';
+    _xpIsZhongGong = true;
+    _xpData[2].di = kunGan5;
+    _xpData[2].di2 = gan;
+    _xpOpLog.push('['+(++_xpOpSeq)+'] 坤2局选择:'+ju5Label);
+    dlg.parentNode.removeChild(dlg);
+  });
+  dlg.addEventListener('click', function(e) { if (e.target === dlg) dlg.parentNode.removeChild(dlg); });
+}
+
+// === 心盘宫殿编辑器 ===
+	function showXinpanEditor(g) {
+	  window._xpEditGong = g;
+	  var d = _xpData[g] || {};
+	  _xpOpLog.push('['+(++_xpOpSeq)+'] 打开宫'+g+'编辑器 当前:神='+(d.shen||'空')+' 天='+(d.tian||'空')+(d.tian2||'')+' 地='+(d.di||'空')+(d.di2||'')+' 星='+(d.xing||'空')+' 门='+(d.men||'空'));
+	  var overlay = document.getElementById('xpOverlay');
+	  if (!overlay) {
+	    overlay = document.createElement('div');
+	    overlay.id = 'xpOverlay';
+	    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:999;display:flex;align-items:center;justify-content:center';
+	    overlay.addEventListener('click', function(e) { if (e.target === overlay) { _xpOpLog.push('['+(++_xpOpSeq)+'] 点击背景关闭编辑器'); overlay.style.display = 'none'; window._xpEditGong = 0; renderXinpan(true); } });
+	    document.body.appendChild(overlay);
+	    window._xpOverlay = overlay;
+	  }
+	  var GONG_NAMES = {1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兑',8:'艮',9:'离'};
+	  var cats = [
+	    {key:'shen',label:'八神',opts:['符','蛇','阴','六','白','玄','地','天']},
+	    {key:'tian',label:'天盘干',opts:['戊','己','庚','辛','壬','癸','丁','丙','乙']},
+	    {key:'di',label:'地盘干',opts:['戊','己','庚','辛','壬','癸','丁','丙','乙']},
+	    {key:'xing',label:'九星',opts:['蓬','任','冲','辅','英','芮','柱','心']},
+	    {key:'men',label:'八门',opts:['休','生','伤','杜','景','死','惊','开']}
+	  ];
+
+	  // 构建HTML，所有按钮用data属性替代onclick
+	  var h = '<div id="xpEditorCard" style="background:#fff;border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:85vh;overflow-y:auto">';
+	  h += '<div style="font-weight:bold;font-size:17px;text-align:center;margin-bottom:10px">'+GONG_NAMES[g]+'宫 编辑</div>';
+	  for (var ci = 0; ci < cats.length; ci++) {
+	    var cat = cats[ci];
+	    var curVal = d[cat.key] || '';
+	    h += '<div style="font-size:12px;color:#888;margin-bottom:2px">'+cat.label+'</div>';
+	    h += '<div class="xp-btn-group" data-cat="'+cat.key+'" style="margin-bottom:8px">';
+	    for (var oi = 0; oi < cat.opts.length; oi++) {
+	      var val = cat.opts[oi];
+	      var sel = (curVal === val) ? 'background:#0dc2b3;color:#fff;border-color:#0dc2b3' : 'background:#fafafa;border-color:#e0e0e0';
+	      h += '<span class="xp-btn" data-cat="'+cat.key+'" data-val="'+val+'" style="display:inline-block;padding:6px 12px;margin:2px;border:1px solid;border-radius:16px;font-size:14px;cursor:pointer;'+sel+'">'+val+'</span>';
+	    }
+	    h += '</div>';
+	  }
+	  h += '<div style="text-align:center;margin:8px 0">';
+	  h += '<span id="xpAutoFillBtn" style="display:inline-block;padding:8px 20px;background:#0dc2b3;color:#fff;border-radius:20px;font-size:14px;cursor:pointer">以此宫推算全盘</span>';
+	  h += '</div>';
+	  h += '<div style="text-align:center"><span id="xpCloseBtn" style="font-size:13px;color:#888;cursor:pointer">关闭</span></div>';
+	  h += '</div>';
+
+	  overlay.innerHTML = h;
+	  overlay.style.display = 'flex';
+
+	  // === 事件委托: 所有符号按钮点击由卡片统一处理 ===
+	  var card = document.getElementById('xpEditorCard');
+	  card.addEventListener('click', function(e) {
+	    // 从点击目标向上查找 .xp-btn（兼容无closest的旧WebView）
+	    var btn = e.target;
+	    while (btn && btn !== card) {
+	      if (btn.classList && btn.classList.contains('xp-btn')) break;
+	      btn = btn.parentElement;
+	    }
+	    if (!btn || btn === card) return;
+	    var catKey = btn.getAttribute('data-cat');
+	    var val = btn.getAttribute('data-val');
+	    if (!catKey || val === null) return;
+
+	    // 设置数据
+	    _xpManual[g] = true;
+	    _xpData[g][catKey] = val;
+	    d[catKey] = val;
+	    // 干变更时清除旧寄干（局可能已变，旧寄干无效）
+	    if (catKey === 'di') { _xpData[g].di2 = ''; d.di2 = ''; }
+	    if (catKey === 'tian') { _xpData[g].tian2 = ''; d.tian2 = ''; }
+	    _xpOpLog.push('['+(++_xpOpSeq)+'] 宫'+g+' '+({'shen':'神','tian':'天','di':'地','xing':'星','men':'门'})[catKey]+'→'+val);
+
+	    // 重置同组所有按钮样式
+	    var group = btn.parentElement;
+	    var siblings = group.querySelectorAll('.xp-btn');
+	    for (var si = 0; si < siblings.length; si++) {
+	      siblings[si].style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid #e0e0e0;border-radius:16px;font-size:14px;cursor:pointer;background:#fafafa';
+	    }
+	    // 高亮选中按钮
+	    btn.style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid #0dc2b3;border-radius:16px;font-size:14px;cursor:pointer;background:#0dc2b3;color:#fff';
+
+	    // 坤2宫地盘干戊选择后弹出局数选择
+	    if (g === 2 && catKey === 'di' && val === '戊') {
+	      showJuSelectForKun2(val);
+	    }
+	  });
+
+	  // 关闭按钮
+	  var closeBtn = document.getElementById('xpCloseBtn');
+	  if (closeBtn) {
+	    closeBtn.addEventListener('click', function() {
+	      _xpOpLog.push('['+(++_xpOpSeq)+'] 关闭编辑器(宫'+g+')');
+	      overlay.style.display = 'none';
+	      window._xpEditGong = 0;
+	      renderXinpan(true);
+	    });
+	  }
+
+	  // 推算全盘按钮
+	  var fillBtn = document.getElementById('xpAutoFillBtn');
+	  if (fillBtn) {
+	    fillBtn.addEventListener('click', function(e) {
+	      e.stopPropagation();
+	      _xpOpLog.push('['+(++_xpOpSeq)+'] 点击推算全盘(宫'+g+') 锚点符号:神='+(_xpData[g].shen||'')+' 天='+(_xpData[g].tian||'')+' 地='+(_xpData[g].di||'')+' 星='+(_xpData[g].xing||'')+' 门='+(_xpData[g].men||''));
+	      window._xpAutoFillAnchor = g;
+	      setTimeout(function() { autoFillXinpan(window._xpAutoFillAnchor); }, 50);
+	    });
+	  }
+	}
+
 </script>
 </body>
 </html>
