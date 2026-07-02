@@ -17,7 +17,7 @@
 
 | 平台 | 文件 |
 |------|------|
-| Linux | `.deb` / `.rpm` / `.AppImage` |
+| Linux | `.deb` / `.rpm` |
 | macOS | `.dmg` |
 | Windows | `.exe` |
 | Android | `.apk` |
