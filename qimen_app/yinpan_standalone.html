@@ -87,12 +87,11 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:#1a1a
 }
 /* 桌面大屏等比放大 */
 @media (min-width:1025px) {
+  #pan .panItem{font-size:24px!important;line-height:36px!important}
+  .yinGan{font-size:20px!important;line-height:30px!important}
+  .yiXingPan td{font-size:24px!important;line-height:36px!important}
   #panHead #headTable td{font-size:19px!important;line-height:36px!important}
   #pan td{padding-left:20px!important;padding-right:20px!important;padding-top:12px!important}
-  #pan .panItem{line-height:54px!important;font-size:36px!important}
-  .yiXingPan td{padding-left:20px!important;padding-right:20px!important;padding-top:12px!important;line-height:54px!important;font-size:36px!important}
-  .yinGan{font-size:30px!important;line-height:42px!important}
-  span[id^="kong"]{font-size:38px!important}
   #panHead .sizhu{font-size:30px!important;line-height:36px!important}
   body.mode-shi #panHead .sizhu,body.mode-xin #panHead .sizhu{font-size:34px!important;line-height:40px!important}
   #panHead .sizhuTitle{font-size:16px!important}
@@ -714,7 +713,7 @@ function renderPan(raw, engineData) { if(engineData&&engineData.sizhu){var d=eng
     if (el) { el.innerHTML = ''; el.style.fontSize = ''; el.style.lineHeight = ''; }
   }
   addColorStyles();
-  setTimeout(fixYinGanAlign, 100);
+  setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 500);
 }
 
@@ -727,57 +726,56 @@ function addColorStyles() {
 }
 
 function fixYinGanAlign() {
-  // 0. 宫格正方形: 高度=宽度
-  [4,9,2,3,7,8,1,6].forEach(function(g) {
-    var el = document.getElementById('gong'+g);
-    if (el) {
-      var w = el.getBoundingClientRect().width;
-      if (w > 0) el.style.height = w + 'px';
-    }
-  });
-
-  // 1. 先让leftTable/rightTable的每行高度和pan对应行一致
-  var panRows = document.querySelectorAll('#pan tr');
-  var leftRows = document.querySelectorAll('#leftTable tr');
-  var rightRows = document.querySelectorAll('#rightTable tr');
-
-  if (panRows.length === 3) {
-    for (var i = 0; i < 3; i++) {
-      var rowH = panRows[i].getBoundingClientRect().height;
-      if (leftRows[i]) leftRows[i].style.height = rowH + 'px';
-      if (rightRows[i]) rightRows[i].style.height = rowH + 'px';
-    }
+  // 主盘 + 移星换斗统一处理
+  var containers = [document];
+  var yxDIV = document.getElementById('yixinghuandouDIV');
+  if (yxDIV && yxDIV.style.display === 'block') {
+    yxDIV.querySelectorAll('#content').forEach(function(c){ containers.push(c); });
   }
 
-  // 2. 阴干对齐天盘干/九星
-  var pairs = [
-    {gong:4, yin:'yinGan4', side:'left'},
-    {gong:3, yin:'yinGan3', side:'left'},
-    {gong:8, yin:'yinGan8', side:'left'},
-    {gong:2, yin:'yinGan2', side:'right'},
-    {gong:7, yin:'yinGan7', side:'right'},
-    {gong:6, yin:'yinGan6', side:'right'}
-  ];
-  pairs.forEach(function(pair) {
-    var gongEl = document.getElementById('gong'+pair.gong);
-    var yinEl = document.getElementById(pair.yin);
-    var tianEl = document.getElementById('tian'+pair.gong);
-    if (!gongEl || !yinEl || !tianEl) return;
-    var gongRect = gongEl.getBoundingClientRect();
-    var tianRect = tianEl.getBoundingClientRect();
-    var offset = tianRect.top - gongRect.top;
-    yinEl.style.paddingTop = Math.max(0, offset) + 'px';
-    yinEl.style.textAlign = pair.side === 'left' ? 'right' : 'left';
-    yinEl.style.verticalAlign = 'top';
-    yinEl.style.fontSize = '15px';
-    yinEl.style.lineHeight = '25px';
-    yinEl.style.color = '#333';
+  containers.forEach(function(scope) {
+    var isMain = (scope === document);
+    // 宫格正方形: 每个容器内独立处理
+    [4,9,2,3,7,8,1,6].forEach(function(g) {
+      var el = scope.querySelector('#gong'+g);
+      if (el) { var w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
+    });
+    // 行高同步
+    var pRows = scope.querySelectorAll('#pan tr');
+    var lRows = scope.querySelectorAll('#leftTable tr');
+    var rRows = scope.querySelectorAll('#rightTable tr');
+    for (var i = 0; i < 3 && i < pRows.length; i++) {
+      var rh = pRows[i].getBoundingClientRect().height;
+      if (rh > 0) {
+        if (lRows[i]) lRows[i].style.height = rh + 'px';
+        if (rRows[i]) rRows[i].style.height = rh + 'px';
+      }
+    }
+    // 侧边阴干top对齐: 左=天盘, 右=九星
+    [4,3,8].forEach(function(g) {
+      var yin = scope.querySelector('#yinGan'+g);
+      var tian = scope.querySelector('#tian'+g);
+      var gong = scope.querySelector('#gong'+g);
+      if (!yin || !tian || !gong) return;
+      var go = gong.getBoundingClientRect().top;
+      yin.style.paddingTop = Math.max(0, tian.getBoundingClientRect().top - go) + 'px';
+      if (isMain) { yin.style.textAlign = 'right'; yin.style.verticalAlign = 'top'; yin.style.fontSize = '15px'; yin.style.lineHeight = '25px'; yin.style.color = '#333'; }
+    });
+    [2,7,6].forEach(function(g) {
+      var yin = scope.querySelector('#yinGan'+g);
+      var xing = scope.querySelector('#xing'+g);
+      var gong = scope.querySelector('#gong'+g);
+      if (!yin || !xing || !gong) return;
+      var go = gong.getBoundingClientRect().top;
+      yin.style.paddingTop = Math.max(0, xing.getBoundingClientRect().top - go) + 'px';
+      if (isMain) { yin.style.textAlign = 'left'; yin.style.verticalAlign = 'top'; yin.style.fontSize = '15px'; yin.style.lineHeight = '25px'; yin.style.color = '#333'; }
+    });
+    if (isMain) {
+      var y9 = scope.querySelector('#yinGan9'), y1 = scope.querySelector('#yinGan1');
+      if (y9) { y9.style.verticalAlign = 'bottom'; y9.style.fontSize = '15px'; y9.style.color = '#333'; }
+      if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = '15px'; y1.style.color = '#333'; }
+    }
   });
-  // 离宫/坎宫
-  var yin9 = document.getElementById('yinGan9');
-  var yin1 = document.getElementById('yinGan1');
-  if (yin9) { yin9.style.verticalAlign = 'bottom'; yin9.style.fontSize = '15px'; yin9.style.color = '#333'; }
-  if (yin1) { yin1.style.verticalAlign = 'top'; yin1.style.fontSize = '15px'; yin1.style.color = '#333'; }
 }
 
 
@@ -1287,7 +1285,7 @@ function renderXinpan(useBg) {
   document.getElementById('result').style.display = 'block';
   tip.innerHTML = '';
   addColorStyles();
-  setTimeout(fixYinGanAlign, 100);
+  setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 500);
   } catch(e) { _xpErrors.push('心盘渲染错误:'+e.message); console.error(e); }
 }
@@ -1371,23 +1369,29 @@ function showYixing() {
    if(firstShow) setTimeout(function(){ var top=0,el=div; while(el){top+=el.offsetTop;el=el.offsetParent;} window.scrollTo({top:top-60,behavior:'smooth'}); }, 20);
    // 延迟对齐暗干，多次尝试确保渲染完成
   function alignYX() {
-    var contents = div.querySelectorAll('#content');
-    for (var ti = 0; ti < contents.length; ti++) {
-      var yxTR = contents[ti].querySelectorAll('#pan tr');
-      var yL = contents[ti].querySelectorAll('#rightTable tr');
-      var yR = contents[ti].querySelectorAll('#leftTable tr');
-      for (var ri = 0; ri < 3; ri++) {
-        if (!yxTR[ri]) continue;
-        var rH = yxTR[ri].getBoundingClientRect().height;
-        if (rH > 0) {
-          if (yL[ri]) yL[ri].style.height = rH + 'px';
-          if (yR[ri]) yR[ri].style.height = rH + 'px';
-        }
-      }
-    }
-  }
-  setTimeout(alignYX, 150);
-  setTimeout(alignYX, 500);
+	    var contents = div.querySelectorAll('#content');
+	    for (var ti = 0; ti < contents.length; ti++) {
+	      var ct = contents[ti];
+	      // 宫格正方形
+	      [4,9,2,3,7,8,1,6].forEach(function(g) {
+	        var el = ct.querySelector('#gong'+g);
+	        if (el) { var w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
+	      });
+	      // 行高同步
+	      var yxTR = ct.querySelectorAll('#pan tr');
+	      var yL = ct.querySelectorAll('#rightTable tr');
+	      var yR = ct.querySelectorAll('#leftTable tr');
+	      for (var ri = 0; ri < 3; ri++) {
+	        if (!yxTR[ri]) continue;
+	        var rH = yxTR[ri].getBoundingClientRect().height;
+	        if (rH > 0) {
+	          if (yL[ri]) yL[ri].style.height = rH + 'px';
+	          if (yR[ri]) yR[ri].style.height = rH + 'px';
+	        }
+	      }
+	    }
+	  }
+	  setTimeout(alignYX, 10);
 }
 
 // === 天门地户 ===
@@ -2279,6 +2283,10 @@ function showJuSelectForKun2(gan) {
 	  }
 	}
 
+	window.addEventListener('resize', function(){
+	  clearTimeout(window._yinRT);
+	  window._yinRT = setTimeout(fixYinGanAlign, 10);
+	});
 </script>
 </body>
 </html>
