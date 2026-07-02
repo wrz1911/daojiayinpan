@@ -11,6 +11,19 @@
 - **天门地户** — 月将加时支环绕
 - **神将十二** — 年月日时四柱神将
 - **81格局** — 宫位天地盘干组合解读
+## 安装
+
+从 [最新 Release](https://github.com/wrz1911/daojiayinpan/releases/latest) 下载对应平台安装包：
+
+| 平台 | 文件 |
+|------|------|
+| Linux | `.deb` / `.rpm` / `.AppImage` |
+| macOS | `.dmg` |
+| Windows | `.exe` |
+| Android | `.apk` |
+
+推送 tag 后 GitHub Actions 自动构建全平台包并发布。
+
 ## 构建
 
 ### 桌面 (Tauri)
