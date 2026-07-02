@@ -244,6 +244,12 @@ jobs:
         with:
           name: app-apk
 
+      - name: Flatten artifacts to root
+        shell: bash
+        run: |
+          find . -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.dmg' -o -name '*.exe' -o -name '*.dll' -o -name '*.apk' \) -exec mv {} . \;
+          ls -la *.deb *.rpm *.AppImage *.dmg *.exe *.apk 2>/dev/null || true
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
