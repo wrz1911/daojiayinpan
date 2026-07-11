@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!--
+  奇门遁甲排盘引擎  作者: 地天泰  微信/手机: 18626256203
+  项目地址: https://github.com/wrz1911/daojiayinpan
+  开源依赖: tyme4ts (MIT) https://github.com/6tail/tyme4ts
+  开源依赖: Tauri (MIT) https://github.com/tauri-apps/tauri
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+<title>阴盘奇门 - 本地版</title>
+<link rel="stylesheet" href="css/yinpan_app.css?v=9">
+</head>
+
+<body>
+
+<script>if(navigator.userAgent.indexOf('Android')>-1||window.Capacitor)document.body.classList.add('is-mobile')</script>
+<div id="topBar"></div>
+
+<input type="checkbox" id="tianmendihu" style="display:none">
+<div id="mainDIV">
+  <!-- 表单 -->
+  <div class="form-card">
+    <div class="form-row">
+      <div style="display:flex;align-items:center;gap:8px;flex:1">
+        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="1" checked onchange="setPanType(1);doPan()"> 时盘</label>
+        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="2" onchange="setPanType(2);doPan()"> 刻盘</label>
+        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="3" onchange="setPanType(3);doPan()"> 心盘</label>
+        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="4" onchange="setPanType(4);doPan()"> 山向</label>
+        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="5" onchange="setPanType(5);doPan()"> 穿壬</label>
+      </div>
+    </div>
+    <div class="form-row" id="timeRow">
+      <span class="form-label">排盘时间</span>
+      <div id="selGroup" style="display:flex;align-items:center;gap:2px;font-size:15px">
+        <select id="selYear" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">年</span>
+        <select id="selMonth" class="sel-date" onchange="adjDays();doPan()"></select><span style="color:#999;font-size:12px">月</span>
+        <select id="selDay" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">日</span>
+        <select id="selHour" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">时</span>
+        <select id="selMin" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">分</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <span id="zxjSpan" style="display:flex;align-items:center;gap:4px">
+        <span style="font-size:14px;color:#666">自选局</span>
+        <select id="selZxj" class="sel-zxj" onchange="onZxjChange()"></select>
+      </span>
+    </div>
+    <div id="shanxiangInputs" class="form-row" style="padding:6px 10px;display:none;align-items:center;gap:6px">
+      <span style="font-size:13px;color:#666">年</span>
+      <select id="selShanXiangYear" class="sel-date" style="width:72px" onchange="doPan()"></select>
+      <span style="font-size:13px;color:#666">度数</span>
+      <input id="selShanXiangDeg" class="sel-date" style="width:55px" type="number" min="0" max="359" value="0" onchange="var v=parseInt(this.value);if(isNaN(v)||v<0){this.value=0;}else if(v>359){this.value=359;}doPan();" onkeydown="if(event.key==='Enter'){this.blur();event.preventDefault();}">
+      <span id="shanXiangLabel" style="font-size:13px;color:#0dc2b3;font-weight:bold"></span>
+    </div>
+  </div>
+  </div></div>
+<div id="xinpanPanel" style="display:none"></div>
+
+  <div id="tip" style="display:none;text-align:center;color:#0dc2b3;font-size:14px;padding:4px;line-height:20px"></div>
+
+  <div id="result"><div id="panWrap"></div></div>
+  <div id="savePanel" style="display:none;position:fixed;right:max(12px,calc((100vw - 600px)/2 - 248px));top:50%;transform:translateY(-50%);width:230px;max-height:60vh;overflow-y:auto;background:#fff;border-radius:10px;padding:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:99"></div>
+</div>
+
+	<script src="js/tyme4j-browser.js"></script>
+	<script>window.tyme4j = window.tyme || {};</script>
+	<script src="./js/qimen_engine_min.js?v=3"></script>
+	<script src="js/qimen_chuanren.js?v=3"></script>
+	<script>
+	function paipan(zxjus) {
+	  const copts={year:window.Y,month:window.M,day:window.D,hour:window.hr,minute:window.mn,panType:window.panType};
+	  if(zxjus){const i=parseInt(document.getElementById("selZxj").value)||0;if(i>0){const t=i-1;copts.customJu=t<9?{yinYang:"阴",number:9-t}:{yinYang:"阳",number:t-8};}}
+	  const tmdhEl=document.getElementById("tianmendihu");
+	  if(tmdhEl&&tmdhEl.checked)copts.tmdh=true;
+	  const r=window.qimenChart(copts);
+	  return r&&r.raw?r.raw:"";
+	}
+	</script>
+<script src="js/gong_detail_data.js"></script>
+	<script src="js/yinpan_app.js?v=3"></script>
+</body>
+</html>

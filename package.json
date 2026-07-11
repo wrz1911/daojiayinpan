@@ -1,0 +1,18 @@
+{
+  "name": "qimen-yinpan",
+  "version": "1.2.6",
+  "scripts": {
+    "start": "./run-desktop.sh",
+    "build:linux": "bash build-tauri.sh",
+    "cap:sync": "npx cap sync",
+    "cap:open": "npx cap open android"
+  },
+  "dependencies": {
+    "jsdom": "^29.1.1"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.2.1",
+    "@capacitor/cli": "^7.2.1",
+    "@capacitor/core": "^7.2.1"
+  }
+}

@@ -1,0 +1,334 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          perl -i -pe "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" src-tauri/tauri.conf.json
+
+      - name: Setup frontend
+        shell: bash
+        run: |
+          mkdir -p web/qimen_app/css web/qimen_app/js
+          cat > web/index.html << 'EOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          EOF
+          cp qimen_app/css/yinpan_app.css web/qimen_app/css/
+          cp qimen_app/js/yinpan_app.js web/qimen_app/js/
+          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
+          cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
+          cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
+          cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
+          cp qimen_app/yinpan_standalone.html web/qimen_app/
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Tauri CLI
+        run: npm install -g @tauri-apps/cli
+
+      - name: Tauri build
+        run: tauri build --no-bundle
+
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-exe
+          path: |
+            src-tauri/target/release/app.exe
+            src-tauri/target/release/WebView2Loader.dll
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          perl -i -pe "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" src-tauri/tauri.conf.json
+
+      - name: Setup frontend
+        run: |
+          mkdir -p web/qimen_app/css web/qimen_app/js
+          cp qimen_app/css/yinpan_app.css web/qimen_app/css/
+          cp qimen_app/js/yinpan_app.js web/qimen_app/js/
+          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
+          cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
+          cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
+          cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
+          cp qimen_app/yinpan_standalone.html web/qimen_app/
+          cat > web/index.html << 'HTMLEOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          HTMLEOF
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Tauri build
+        run: |
+          cargo install tauri-cli --version "^2"
+          cargo tauri build --bundles dmg
+
+      - name: Upload macOS
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-pkg
+          path: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/macos/*.app
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+      
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          perl -i -pe "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" src-tauri/tauri.conf.json
+
+      - name: Setup frontend
+        run: |
+          mkdir -p web/qimen_app/css web/qimen_app/js
+          cp qimen_app/css/yinpan_app.css web/qimen_app/css/
+          cp qimen_app/js/yinpan_app.js web/qimen_app/js/
+          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
+          cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
+          cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
+          cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
+          cp qimen_app/yinpan_standalone.html web/qimen_app/
+          cat > web/index.html << 'HTMLEOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          HTMLEOF
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Tauri build
+        run: |
+          cargo install tauri-cli --version "^2"
+          cargo tauri build --bundles deb,rpm
+
+      - name: Upload Linux packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-pkg
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/rpm/*.rpm
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          echo "Setting version to $VER"
+          perl -i -pe "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" src-tauri/tauri.conf.json
+          # Also update Android versionName
+          ANDROID_VER=$(echo "$VER" | grep -o '^[0-9]*\.[0-9]*')
+          if [ -f android/app/build.gradle ]; then
+            sed -i "s/versionName \"[^\"]*\"/versionName \"$ANDROID_VER\"/" android/app/build.gradle
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        run: |
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install deps
+        run: npm install
+
+      - name: Setup www dir
+        run: |
+          mkdir -p www/qimen_app/css www/qimen_app/js
+          cat > www/index.html << 'EOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          EOF
+          cp qimen_app/css/yinpan_app.css www/qimen_app/css/
+          cp qimen_app/js/yinpan_app.js www/qimen_app/js/
+          cp qimen_app/js/qimen_engine_min.js www/qimen_app/js/
+          cp qimen_app/js/qimen_chuanren.js www/qimen_app/js/
+          cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
+          cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
+          cp qimen_app/yinpan_standalone.html www/qimen_app/
+
+      - name: Init Capacitor
+        run: |
+          rm -rf android
+          npx cap add android
+          # 覆盖variables.gradle: 保留Capacitor默认的AndroidX版本号, 仅修改minSdk
+          sed -i 's/minSdkVersion = 23/minSdkVersion = 31/' android/variables.gradle
+          # 移除SMS权限
+          sed -i 's|<manifest |<manifest xmlns:tools="http://schemas.android.com/tools" |' android/app/src/main/AndroidManifest.xml
+          sed -i 's|<application|<uses-permission android:name="android.permission.SMS" tools:node="remove"/>\n    <application|' android/app/src/main/AndroidManifest.xml
+
+      - name: Generate keystore
+        run: |
+          keytool -genkey -v -keystore qimen-release.keystore -alias qimen \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass qimen123 -keypass qimen123 \
+            -dname "CN=qimen" -noprompt
+
+      - name: Inject signing config
+        run: |
+          cat >> android/app/build.gradle << 'GRADLEEOF'
+
+          android {
+            signingConfigs {
+              release {
+                storeFile rootProject.file('../qimen-release.keystore')
+                storePassword 'qimen123'
+                keyAlias 'qimen'
+                keyPassword 'qimen123'
+              }
+            }
+            buildTypes {
+              release {
+                signingConfig signingConfigs.release
+              }
+            }
+          }
+          GRADLEEOF
+
+      - name: Inject launcher icons
+        run: |
+          sudo apt-get install -y imagemagick
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/*.xml android/app/src/main/res/drawable*/ic_launcher*.xml
+          for dir in android/app/src/main/res/mipmap-*; do
+            size=$(basename "$dir" | sed 's/mipmap-//')
+            case $size in
+              mdpi) s=48;; hdpi) s=72;; xhdpi) s=96;; xxhdpi) s=144;; xxxhdpi) s=192;;
+              *) continue;;
+            esac
+            convert -background '#f5f5f5' -density 300 taiji.svg -resize ${s}x${s} -gravity center -extent ${s}x${s} "$dir/ic_launcher.png"
+            cp "$dir/ic_launcher.png" "$dir/ic_launcher_round.png"
+            echo "$size: ${s}x${s}"
+          done
+
+      - name: Sync and build
+        timeout-minutes: 20
+        run: |
+          npx cap sync
+          cd android
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+  release:
+    needs: [windows, macos, linux, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-exe
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: macos-pkg
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-pkg
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-apk
+
+      - name: Flatten and rename artifacts
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          # 从子目录移出所有文件到根目录
+          find . -mindepth 2 -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.dmg' -o -name '*.exe' -o -name '*.dll' -o -name '*.apk' \) -exec mv {} . \; || true
+          # 重命名
+          for f in *.deb;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_linux_amd64.deb"; done
+          for f in *.rpm;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_linux_x86_64.rpm"; done
+          for f in *.dmg;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_macos.dmg"; done
+          for f in *.exe;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_windows.exe"; done
+          for f in *.dll;  do [ -f "$f" ] && mv "$f" "WebView2Loader.dll" 2>/dev/null; done
+          for f in *.apk;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_android.apk"; done
+          ls -la yinpan_* 2>/dev/null || true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: |
+            yinpan_*.deb
+            yinpan_*.rpm
+            yinpan_*.dmg
+            yinpan_*.exe
+            yinpan_*.apk
+            WebView2Loader.dll
+          generate_release_notes: true
+
+      - name: Prepare Pages
+        run: |
+          mkdir -p pages/v1
+          cp *.exe pages/v1/ 2>/dev/null || true
+          cp *.dll pages/v1/ 2>/dev/null || true
+          cp *.exe pages/ 2>/dev/null || true
+          cp *.dll pages/ 2>/dev/null || true
+          ls -la pages/v1/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages
+          keep_files: true

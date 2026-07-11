@@ -1,0 +1,37 @@
+{
+  "productName": "阴盘奇门遁甲",
+  "version": "1.2.6",
+  "identifier": "com.qimen.yinpan",
+  "build": {
+    "frontendDist": "../web"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "title": "阴盘奇门遁甲",
+        "width": 440,
+        "height": 820,
+        "minWidth": 440,
+        "minHeight": 600,
+        "maximizable": false,
+        "resizable": false,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "rpm"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
