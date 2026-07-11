@@ -1619,7 +1619,12 @@ function _doSave() {
   let panHTML = panWrap.innerHTML;
   let timeStr = document.getElementById('dateTime') ? document.getElementById('dateTime').innerText : '';
   let params = {year:Y, month:M, day:D, hour:hr, minute:mn, panType:panType};
-  if (panType === 4) { params._xjuDegSaved = _xjuDegSaved; params._xjuYearSaved = _xjuYearSaved; }
+  if (panType === 4) {
+    let sdEl=document.getElementById('selShanXiangDeg'), syEl=document.getElementById('selShanXiangYear');
+    params._xjuDegSaved = _xjuDegSaved || (sdEl?sdEl.value:'');
+    params._xjuYearSaved = _xjuYearSaved || (syEl?syEl.value:'');
+    params._sxYear = syEl ? syEl.value : Y;
+  }
   let record = {
     title: newTitle.trim(), time: timeStr, mode: _saveMode,
     params: params, html: panHTML,
@@ -1762,7 +1767,7 @@ function loadSaved(i) {
       _xjuDegSaved = p._xjuDegSaved || '';
       _xjuYearSaved = p._xjuYearSaved || '0';
       let syEl=document.getElementById('selShanXiangYear'), sdEl=document.getElementById('selShanXiangDeg');
-      if (syEl && p.year) syEl.value = p.year;
+      if (syEl) syEl.value = p._sxYear || p.year || Y;
       if (sdEl && _xjuDegSaved) sdEl.value = _xjuDegSaved;
     }
     document.getElementById('panWrap').innerHTML = r.html;
