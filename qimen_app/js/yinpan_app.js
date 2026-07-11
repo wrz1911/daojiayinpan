@@ -1617,6 +1617,7 @@ function _doSave() {
   let panWrap = document.getElementById('panWrap');
   if (!panWrap) { _closeSheet(); return; }
   let panHTML = panWrap.innerHTML;
+  let timeStr = document.getElementById('dateTime') ? document.getElementById('dateTime').innerText : '';
   let params = {year:Y, month:M, day:D, hour:hr, minute:mn, panType:panType};
   if (panType === 4) { params._xjuDegSaved = _xjuDegSaved; params._xjuYearSaved = _xjuYearSaved; }
   let record = {
