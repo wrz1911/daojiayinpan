@@ -6,7 +6,7 @@
     "frontendDist": "../web"
   },
   "app": {
-    "withGlobalTauri": false,
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "阴盘奇门遁甲",

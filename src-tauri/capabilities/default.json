@@ -6,6 +6,22 @@
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "$DOCUMENT/qimen/**" },
+        { "path": "$DOCUMENT/qimen/*" },
+        { "path": "$DOWNLOAD/qimen/**" },
+        { "path": "$DOWNLOAD/qimen/*" },
+        { "path": "$DESKTOP/**" }
+      ]
+    },
+    "fs:allow-exists",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    "fs:allow-mkdir",
+    "fs:allow-rename",
+    "fs:allow-remove"
   ]
 }

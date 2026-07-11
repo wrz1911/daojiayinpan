@@ -31,8 +31,25 @@ selY.value = Y; selM.value = M; selD.value = D; selH.value = hr; selI.value = mn
 
 // 排盘类型: 1=时盘 2=刻盘 3=心盘 4=山向 5=穿壬
 let panType = 1;
+let _saveMode = 'shi';
+let _xjuDegSaved='',_xjuYearSaved='0';
+let _expectedPals=[];
+const STORAGE_KEY = 'qimen_saved';
+const STORAGE_FILE = 'backups.json';
+const STORAGE_DIR = 'qimen';
 
 setPanType(1);
+// 绑定模式切换和日期选择器: 用程序化事件确保Tauri兼容
+document.querySelectorAll('input[name="panType"]').forEach(r => {
+  r.onclick = function() { let t = parseInt(this.value); setPanType(t); doPan(); };
+});
+[selY, selM, selH, selI].forEach(s => { if (s) s.onchange = doPan; });
+if (selM) selM.onchange = function() { adjDays(); doPan(); };
+if (selD) selD.onchange = doPan;
+// 山向输入绑定
+let sxYear=document.getElementById('selShanXiangYear'), sxDeg=document.getElementById('selShanXiangDeg');
+if (sxYear) sxYear.onchange = doPan;
+if (sxDeg) { sxDeg.onchange = function() { let v=parseInt(this.value); if(isNaN(v)||v<0) this.value=0; else if(v>359) this.value=359; doPan(); }; }
 // 自动排盘
 requestAnimationFrame(() =>{ requestAnimationFrame(() =>{ doPan(); }); });
 
@@ -117,23 +134,22 @@ function clearXinpan() {
 }
 function setPanType(t) {
   panType = t;
+  _saveMode = t===1?'shi':t===2?'ke':t===3?'xin':t===4?'shanxiang':'chuanren';
+  _renderBottomBar();
   let sxIn=document.getElementById('shanxiangInputs');
   if(sxIn)sxIn.style.display=(t===4)?'flex':'none';
   let crIn=document.getElementById('crInputs');
   if(crIn)crIn.style.display=(t===5)?'block':'none';
   let zxj=document.getElementById('zxjSpan');
-  if(zxj)zxj.style.display=(t===4||t===3)?'none':'flex';
+  if(zxj){let zxjRow=zxj.closest('.form-row');if(zxjRow)zxjRow.style.display=(t===3||t===4||t===5)?'none':'';}
   let tr=document.getElementById('timeRow');
   if(tr)tr.style.display=(t===4)?'none':'flex';
   document.body.className = document.body.className.replace(/mode-\w+/g,'');
   document.body.classList.add(t===2?'mode-ke':t===3?'mode-xin':'mode-shi');
   let isXin = (t === 3);
-  document.getElementById('xinpanPanel').style.display = isXin ? '' : 'none';
   document.getElementById('selGroup').style.display = '';
   if (isXin) {
     _xpBgSizhu = ''; _xpBgNongli = ''; _xpBgPalaces = {}; _xpBgKongWang = ''; _xpBgMaXing = ''; _xpBgJu = ''; _xpBgXunShou = ''; _xpCalcJu = '';
-    // 点击"现在"按钮: 读取系统当前时间并设置到选择器
-    setNow();
     // 计算背景参考(四柱/马星/空亡/局数), 但网格留空等用户编辑
     doPan();
   }
@@ -249,9 +265,7 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   }
   // 将重算后的暗干应用到各宫palaces对象
   for(let g=1;g<=9;g++){if(g===5)continue;palaces['gong'+g].anGan=angan[g]||palaces['gong'+g].di||'';}
-  let _dbg='hCyl='+_hCyl2+' ju='+_ju2+' yy='+_yy2+' sg='+_sgg2+' dg='+_dgg2+' mg='+_mg2+' v='+_v2+' |';
-  for(let g=1;g<=9;g++){if(g===5)continue;_dbg+=' G'+g+':'+palaces['gong'+g].anGan;}
-  window._yinDebug=_dbg;
+
   if(!window._anGanColor){window._anGanColor=(gs,gong)=>{if(!gs)return'';let muR={2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};let xingR={3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};let r='';for(let ai=0;ai<gs.length;ai++){let ch=gs[ai];let isX=xingR[gong]&&xingR[gong].indexOf(ch)>=0;let isM=muR[gong]&&muR[gong].indexOf(ch)>=0;if(isX&&isM)r+='<font color="#009cef">'+ch+'</font>';else if(isX)r+='<font color="#b745ce">'+ch+'</font>';else if(isM)r+='<font color="#ca610e">'+ch+'</font>';else r+=ch;}return r;};}
   let agColor= g => {let ag=palaces['gong'+g]?palaces['gong'+g].anGan:'';return ag?window._anGanColor(ag,g):'';};
   let colorSpan=window._colorSpan|| (v => {return v||'';});
@@ -274,17 +288,14 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   document.getElementById('panWrap').innerHTML=html;
   // 重新绑定宫格点击事件(WebView中比inline onclick更可靠)
   let xjBtn=document.getElementById('btnXiangJu');
-  if(xjBtn){xjBtn.onclick = () =>{toggleXiangJu();};}
+  if(xjBtn){xjBtn.onclick = () =>{try{toggleXiangJu();}catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>选局错误:'+e.message+'</span>';}};}
   let xjDeg=document.getElementById('xjuDeg');if(xjDeg)xjDeg.blur();
   document.getElementById('result').style.display='block';
   window._palaces=palaces;
-  if(window._yinDebug){tip.innerHTML='<span style=\"user-select:text;-webkit-user-select:text;font-size:11px\">'+window._yinDebug+'</span>';}
-  else{tip.innerHTML='';}
-  addColorStyles();setTimeout(fixYinGanAlign,50);setTimeout(fixYinGanAlign,50);
-  setTimeout(() => {let gs=document.querySelectorAll('[id^="gong"]');for(let i=0;i<gs.length;i++){gs[i].onclick=null;gs[i].style.cursor='default';}},50);
-  }catch(e){tip.innerHTML='<span style=color:red>山向错误:'+e.message+'</span>';}
+  _renderBottomBar();
+  addColorStyles();setTimeout(_bindActionButtons,50);setTimeout(fixYinGanAlign,50);setTimeout(fixYinGanAlign,50);
+  }catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>山向错误:'+e.message+'</span>';}
 }
-
 
 function doNewPan(zxjus) { let o={year:Y,month:M,day:D,hour:hr,minute:mn,panType:panType}; if(zxjus){let i=parseInt(selZxj.value)||0;if(i>0){let t=i-1;o.customJu=t<9?{yinYang:"阴",number:9-t}:{yinYang:"阳",number:t-8};}} return window.qimenChart(o); }
 function doPan() {
@@ -371,7 +382,7 @@ function doPan() {
           if(!zhiShiFG)zhiShiFG=szsgs;
           let sxInfo={palaces:pals,zfStar:zfStar,zsMen:zsMenH,zhiFuGong:zhiShiFG,kongWang:kongWang,maXing:maXing,xunShou:xunShou,zfzsF:zfzsF,szsgs:szsgs,sgg:gs,dgg:dgg,hCyl:hCyl,sgy:sgy};
           renderShanXiangPan2(sxDeg,sxName,sxJu,sxIsYin,sxHq,sxShiZhu,sxInfo);
-          }catch(e){let em=e.message||e;console.error(e);let tipEl=document.getElementById('tip');if(tipEl)tipEl.innerHTML='<span style=color:red>山向错误:'+em+'</span>';}
+          }catch(e){let em=e.message||e;console.error(e);let tipEl=document.getElementById('tip');if(tipEl){tipEl.style.display='block';tipEl.innerHTML='<span style=color:red>山向错误:'+em+'</span>';}}
           return;
         }
 
@@ -404,9 +415,9 @@ function doPan() {
 	          } catch(e) {}
           if (bgResult) window._raw = bgResult.raw || '';
           try {
-            document.getElementById("tianmendihu").checked = true;
+            let _tmdhEl=document.getElementById("tianmendihu");if(_tmdhEl)_tmdhEl.checked=true;
             _tmdhRaw = paipan(false);
-            document.getElementById("tianmendihu").checked = false;
+            let _tmdhEl2=document.getElementById("tianmendihu");if(_tmdhEl2)_tmdhEl2.checked=false;
           } catch(e) { _tmdhRaw = null; }
 	          clearXinpan();
 	          return;
@@ -444,14 +455,15 @@ function doPan() {
     }
     // 预生成天门地户数据(tmdh=true), 供tianmenDihu按钮即时显示
     try {
-      document.getElementById("tianmendihu").checked = true;
+      let _tmdhEl=document.getElementById("tianmendihu");if(_tmdhEl)_tmdhEl.checked=true;
 	      _tmdhRaw = paipan(zxjus);
-	      document.getElementById("tianmendihu").checked = false;
+	      let _tmdhEl2=document.getElementById("tianmendihu");if(_tmdhEl2)_tmdhEl2.checked=false;
     } catch(e) { _tmdhRaw = null; }
 
     let result=doNewPan(zxjus);renderPan(raw,result);
     tip.innerHTML = '';
     document.getElementById('result').style.display = 'block';
+    _renderBottomBar();
   } catch(e) {
     tip.style.display='block'; tip.innerHTML = '<span style="color:red">错误: ' + e.message + '</span>';
     console.error(e);
@@ -748,8 +760,8 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
       '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span><span id="men'+g+'">'+colorSpan(menAbbr, false, false, p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:30%;left:4px;font-size:10px;color:#888"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:4px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:#888"></div>' +
       '</div></TD>';
   }
 
@@ -774,9 +786,7 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
     '<TABLE class="pan" id="headTable">' +
     '<TR><TD id="itemTitle" style="border:none">事项</TD><TD colspan="'+keCols+'" style="line-height:30px;border:none">' +
     '<span id="title" onclick="editTitle()" style="cursor:pointer;min-width:60px;display:inline-block"></span> ' +
-    '<span onclick="editTitle()" style="cursor:pointer;font-size:16px">&#9998;</span>' +
-    '<span onclick="savePan()" style="cursor:pointer;color:#0dc2b3;font-size:13px;float:right;margin-left:8px">保存</span>' +
-    '<span onclick="showSavedList()" style="cursor:pointer;color:#999;font-size:12px;float:right">历史</span></TD></TR>' +
+    '<span onclick="editTitle()" style="cursor:pointer;font-size:16px">&#9998;</span></TD></TR>' +
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongli+')</TD></TR>' +
     '<TR><TD style="color:#dead68">节气</TD><TD colspan="'+keCols+'" id="jieqi">'+(jieqi||'节气')+'</TD></TR>' +
     '<TR><TD style="color:#dead68">类型</TD><TD colspan="'+keCols+'">' +
@@ -819,6 +829,7 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
     if (el) { el.innerHTML = ''; el.style.fontSize = ''; el.style.lineHeight = ''; }
   }
   addColorStyles();
+  setTimeout(_bindActionButtons, 10);
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
 }
@@ -890,72 +901,6 @@ function fixYinGanAlign() {
 // === 自动化验证 ===
 
 // === 调试信息复制 ===
-function copyXinpanDebug() {
-  let info = [];
-  // 错误日志
-  if (_xpErrors.length > 0) {
-    info.push('=== 错误日志 ===');
-    for(let ei = 0; ei < _xpErrors.length; ei++) info.push('['+ei+'] '+_xpErrors[ei]);
-    info.push('');
-  }
-  info.push('局数:'+(_xpCalcJu||_xpBgJu||'?'));
-  info.push('四柱:'+(_xpBgSizhu||''));
-  info.push('旬首:'+(_xpBgXunShou||''));
-  info.push('阴阳:'+(xpGetYinYang()?'阴遁':'阳遁'));
-  info.push('');
-  let gNames = {4:'巽4',9:'离9',2:'坤2',3:'震3',7:'兑7',8:'艮8',1:'坎1',6:'乾6'};
-  [4,9,2,3,7,8,1,6].forEach(g => {
-    let d = _xpData[g] || {};
-    let bg = _xpBgPalaces[g] || {};
-    p = window._palaces ? window._palaces['gong'+g] : {};
-    info.push(gNames[g]+': 神='+(d.shen||'-')+' 天='+(d.tian||'')+(d.tian2||'')+' 地='+(d.di||'')+(d.di2||'')+' 星='+(d.xing||'-')+' 门='+(d.men||'-'));
-    info.push('  背景: 天='+(bg.tian||'')+' 地='+(bg.di||'')+' 暗='+(bg.anGan||''));
-    info.push('  渲染: 天='+(p.tian||'')+' 地='+(p.di||'')+' 神='+(p.shen||'')+' 星='+(p.xing||'')+' 门='+(p.men||''));
-  });
-  info.push('伏吟:'+(window._dbgFu?'是':'否')+' 暗干Map:'+(window._dbgAnGan||'无'));
-  info.push('手动编辑:'+JSON.stringify(Object.keys(_xpManual).filter(k => {return _xpManual[k];}).map(Number)));
-  // 操作日志
-  info.push('');
-  info.push('=== 操作日志('+_xpOpLog.length+'条) ===');
-  for(let oi = 0; oi < _xpOpLog.length; oi++) info.push(_xpOpLog[oi]);
-  // 局推算诊断
-  (function(){
-    let GAN = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
-    let isYin = xpGetYinYang();
-    let diag = [];
-    diag.push('');
-    diag.push('=== 局推算诊断 ===');
-    // Find possible局 from each宫's di
-    for(let dg = 1; dg <= 9; dg++) {
-      if (dg === 5) continue;
-      let dd = _xpData[dg];
-      if (!dd || !dd.di) continue;
-      let dgDi = dd.di;
-      let dgIdx = GAN.indexOf(dgDi);
-      if (dgIdx < 0) continue;
-      let juFrom = isYin ? (dgIdx + dg) % 9 : (dg - dgIdx + 9) % 9;
-      if (juFrom === 0) juFrom = 9;
-      diag.push('宫'+dg+' di='+dgDi+' → 局'+juFrom);
-    }
-    // Also check坤2寄干
-    if (_xpData[2] && _xpData[2].di2) {
-      let jiGan = _xpData[2].di2;
-      let jiIdx = GAN.indexOf(jiGan);
-      if (jiIdx >= 0) {
-        let juFromJi = isYin ? (jiIdx + 2) % 9 : (2 - jiIdx + 9) % 9;
-        if (juFromJi === 0) juFromJi = 9;
-        diag.push('坤2寄干'+jiGan+' → 局'+juFromJi+' (中5局)');
-      }
-    }
-    info.push.apply(info, diag);
-  })();
-  let text = info.join('\n');
-  let ta = document.createElement('textarea');
-  ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='0';
-  document.body.appendChild(ta); ta.focus(); ta.select();
-  try { document.execCommand('copy'); } catch(e) {}
-  document.body.removeChild(ta);
-}
 
 // === 移星换斗 ===
 let ZHUAN_ORDER = [1,8,3,4,9,2,7,6];
@@ -1073,8 +1018,8 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
       '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span><span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:30%;left:4px;font-size:10px;color:#888"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:4px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:#888"></div>' +
       '</div></TD>';
   }
 
@@ -1179,8 +1124,8 @@ function renderXinpan(useBg) {
       '<div class="panItem top" style="align-self:start"><span>'+shenAbbr+'</span><span>'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span>'+charColor(p.tian)+'</span><span>'+xingAbbr+'</span></div>' +
       '<div class="panItem" style="align-self:end"><span>'+charColor(p.di)+'</span><span>'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:30%;left:4px;font-size:10px;color:#888"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:4px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:#888"></div>' +
       '</div></TD>';
   }
 
@@ -1226,17 +1171,19 @@ function renderXinpan(useBg) {
     gridHTML +
     '<div id="Tip">颜色说明：<span style="color:#ca610e">入墓</span>、<span style="color:#b745ce">击刑</span>、<span style="color:red">门迫</span>、<span style="color:#009cef">刑+墓</span></div>' +
     '<TABLE id="btnTable1"><TR>' +
-    '<TD><div class="btn" onclick="showYixing()">移星换斗</div></TD>' +
-    '<TD><div class="btn" onclick="tianmenDihu()">天门地户</div></TD>' +
-    '<TD><div class="btn" onclick="showState()">长生状态</div></TD>' +
+    '<TD><div class="btn" id="btn1" onclick="showYixing()">移星换斗</div></TD>' +
+    '<TD><div class="btn" id="btn3" onclick="tianmenDihu()">天门地户</div></TD>' +
+    '<TD><div class="btn" id="btn2" onclick="showState()">长生状态</div></TD>' +
     '</TR></TABLE>' +
-    '<div style="display:none;text-align:center;padding:4px"><span onclick="copyXinpanDebug()" style="font-size:12px;color:#999;cursor:pointer">📋 复制调试</span></div>' +
     '<div id="yixinghuandouDIV"></div>';
 
   document.getElementById('panWrap').innerHTML = html;
   document.getElementById('result').style.display = 'block';
   tip.innerHTML = '';
+  _renderBottomBar();
+  _bindActionButtons();
   addColorStyles();
+  setTimeout(_bindActionButtons, 50);
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
   } catch(e) { _xpErrors.push('心盘渲染错误:'+e.message); console.error(e); }
@@ -1351,6 +1298,7 @@ let _tmdhShow = false;
 let _tmdhRaw = null; // 缓存在doPan中预生成的tmdh版paipan输出
 
 function tianmenDihu() {
+  try{
   if (_shenShow) { _shenShow = 0; clearWaipan(); }
   _tmdhShow = !_tmdhShow;
   if (!window._palaces) return;
@@ -1415,6 +1363,7 @@ function tianmenDihu() {
     while(el3) { top += el3.offsetTop; el3 = el3.offsetParent; }
     window.scrollTo({top: top - 60, behavior: 'smooth'});
   }, 600);
+  }catch(e){tip.innerHTML='<span style=color:red>天门地户错误:'+e.message+'</span>';}
 }
 
 // === 长生状态 ===
@@ -1543,80 +1492,422 @@ function editTitle() {
   }
 }
 
-function savePan() {
-  let panHTML = document.getElementById('panWrap').innerHTML;
-  let title = (document.getElementById('title').innerText || '').trim() || '未命名';
-  let time = document.getElementById('dateTime').innerText || '';
-  let record = {title:title, time:time, html:panHTML, date:new Date().toISOString()};
+// === 持久存储: localStorage + Tauri文件(PC) + 导出/导入(Android通用) ===
+function _storagePath() {
+  if (window.__TAURI__) return STORAGE_DIR+'/'+STORAGE_FILE;
+  return STORAGE_FILE;
+}
+
+async function _fsWrite(data) {
+  if (!window.__TAURI__) return;
   try {
-    let saved = JSON.parse(localStorage.getItem('qimen_saved') || '[]');
+    const {writeTextFile, mkdir, exists} = window.__TAURI__.fs;
+    const {documentDir} = window.__TAURI__.path;
+    const dir = await documentDir() + STORAGE_DIR;
+    if (!(await exists(dir))) await mkdir(dir, {recursive:true});
+    await writeTextFile(dir+'/'+STORAGE_FILE, data);
+  } catch(e) { console.error('fs write:', e); }
+}
+
+async function _fsRead() {
+  if (!window.__TAURI__) return null;
+  try {
+    const {readTextFile, exists} = window.__TAURI__.fs;
+    const {documentDir} = window.__TAURI__.path;
+    const fp = await documentDir() + STORAGE_DIR + '/' + STORAGE_FILE;
+    if (!(await exists(fp))) return null;
+    return await readTextFile(fp);
+  } catch(e) { console.error('fs read:', e); return null; }
+}
+
+async function _syncToFile() {
+  let data = localStorage.getItem(STORAGE_KEY) || '[]';
+  await _fsWrite(data);
+}
+
+async function _syncFromFile() {
+  let txt = await _fsRead();
+  if (txt) {
+    try {
+      let d = JSON.parse(txt);
+      if (Array.isArray(d)) { localStorage.setItem(STORAGE_KEY, txt); return d; }
+    } catch(e) {}
+  }
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+}
+
+// === 底部滑出面板 ===
+function _ensureSheet() {
+  let overlay = document.getElementById('sheetOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'sheetOverlay';
+    overlay.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:200;transition:opacity 0.25s';
+    overlay.onclick = _closeSheet;
+    document.body.appendChild(overlay);
+  }
+  let sheet = document.getElementById('bottomSheet');
+  if (!sheet) {
+    sheet = document.createElement('div');
+    sheet.id = 'bottomSheet';
+    sheet.style.cssText = 'position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:600px;max-height:70vh;background:#fff;border-radius:14px 14px 0 0;z-index:201;overflow-y:auto;transition:transform 0.3s ease;padding-bottom:env(safe-area-inset-bottom,0)';
+    document.body.appendChild(sheet);
+  }
+  return {overlay, sheet};
+}
+
+function _openSheet(html) {
+  let {overlay, sheet} = _ensureSheet();
+  sheet.innerHTML = html;
+  overlay.style.display = 'block';
+  overlay.style.opacity = '0';
+  sheet.style.display = 'block';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
+      sheet.style.transform = 'translateX(-50%) translateY(0)';
+    });
+  });
+}
+
+function _closeSheet() {
+  let overlay = document.getElementById('sheetOverlay');
+  let sheet = document.getElementById('bottomSheet');
+  if (overlay) { overlay.style.opacity = '0'; setTimeout(() => {overlay.style.display='none';}, 250); }
+  if (sheet) { sheet.style.transform = 'translateX(-50%) translateY(100%)'; setTimeout(() => {sheet.style.display='none';}, 300); }
+}
+
+function savePan() {
+  let panWrap = document.getElementById('panWrap');
+  if (!panWrap) return;
+  let titleEl = document.getElementById('title');
+  let defaultName = (titleEl ? titleEl.innerText : '') || '';
+  let timeStr = document.getElementById('dateTime') ? document.getElementById('dateTime').innerText : '';
+  if (!defaultName) defaultName = timeStr || '';
+  let h = '<div style="padding:16px 16px 8px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+    '<span style="font-weight:bold;font-size:16px">保存排盘</span>' +
+    '<span id="sheetCloseX" style="cursor:pointer;font-size:20px;color:#999">&times;</span>' +
+    '</div>' +
+    '<div style="margin-bottom:8px"><span style="font-size:12px;color:#999">名称</span></div>' +
+    '<input id="sheetSaveName" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:15px;outline:none;box-sizing:border-box" value="'+defaultName.replace(/"/g,'&quot;')+'" autofocus>' +
+    '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">' +
+    '<span id="sheetCancelBtn" style="cursor:pointer;padding:8px 16px;border-radius:8px;color:#666;font-size:14px">取消</span>' +
+    '<span id="sheetSaveBtn" style="cursor:pointer;padding:8px 24px;border-radius:8px;background:#0dc2b3;color:#fff;font-size:14px">保存</span>' +
+    '</div></div>';
+  _openSheet(h);
+  // 绑定事件
+  let closeX = document.getElementById('sheetCloseX');
+  let cancelBtn = document.getElementById('sheetCancelBtn');
+  let saveBtn = document.getElementById('sheetSaveBtn');
+  if (closeX) closeX.onclick = _closeSheet;
+  if (cancelBtn) cancelBtn.onclick = _closeSheet;
+  if (saveBtn) saveBtn.onclick = _doSave;
+  setTimeout(() => {
+    let inp = document.getElementById('sheetSaveName');
+    if (inp) { inp.focus(); inp.select(); }
+  }, 350);
+}
+
+function _doSave() {
+  let inp = document.getElementById('sheetSaveName');
+  let newTitle = (inp ? inp.value : '') || '';
+  let timeStr = document.getElementById('dateTime') ? document.getElementById('dateTime').innerText : '';
+  if (!newTitle.trim()) newTitle = timeStr || '未命名';
+  let panWrap = document.getElementById('panWrap');
+  if (!panWrap) { _closeSheet(); return; }
+  let panHTML = panWrap.innerHTML;
+  let params = {year:Y, month:M, day:D, hour:hr, minute:mn, panType:panType};
+  let record = {
+    title: newTitle.trim(), time: timeStr, mode: _saveMode,
+    params: params, html: panHTML,
+    date: new Date().toISOString(),
+    zhiFu: window._palaces ? (() => {for(let g in window._palaces){let p=window._palaces['gong'+g];if(p&&p.shen&&window.SHEN_ABBR&&window.SHEN_ABBR[p.shen]==='符')return{shen:p.shen,star:p.xing,men:p.men,gong:parseInt(g)};}return null;})() : null
+  };
+  if (panType === 3) {
+    record._xpData = JSON.parse(JSON.stringify(window._xpData || {}));
+    record._xpBgSizhu = window._xpBgSizhu || '';
+    record._xpBgPalaces = window._xpBgPalaces || {};
+    record._xpCalcJu = window._xpCalcJu || '';
+    record._xpBgKongWang = window._xpBgKongWang || '';
+    record._xpBgMaXing = window._xpBgMaXing || '';
+    record._xpBgXunShou = window._xpBgXunShou || '';
+  }
+  try {
+    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     saved.unshift(record);
-    if (saved.length > 50) saved = saved.slice(0, 50);
-    localStorage.setItem('qimen_saved', JSON.stringify(saved));
-    showSavedList();
-  } catch(e) { alert('保存失败'); }
+    if (saved.length > 100) saved = saved.slice(0, 100);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    _syncToFile();
+    _renderBottomBar();
+    _closeSheet();
+  } catch(e) { alert('保存失败: '+e.message); }
 }
 
 function showSavedList() {
-  div = document.getElementById('savePanel');
-  // 切换开关
-  if (div.style.display === 'block') { div.style.display = 'none'; return; }
+  let sheet = document.getElementById('bottomSheet');
+  if (sheet && sheet.style.display === 'block') { _closeSheet(); return; }
+  _renderHistorySheet();
+}
+
+function _renderHistorySheet() {
   try {
-    saved = JSON.parse(localStorage.getItem('qimen_saved') || '[]');
-    if (!saved.length) { div.innerHTML = '<div style="padding:10px;color:#999;text-align:center">暂无记录</div>'; div.style.display='block';let xjuD=document.getElementById('xjuDeg');if(xjuD&&xjuD.value==='0'){let md=document.getElementById('selShanXiangDeg');if(md)xjuD.value=md.value||'0';} return; }
-    let h = '<div style="font-weight:bold;padding-bottom:8px;border-bottom:1px solid #eee;display:flex;justify-content:space-between"><span>已保存('+saved.length+')</span><span onclick="document.getElementById(\'savePanel\').style.display=\'none\'" style="cursor:pointer;color:#999">&times;</span></div>';
-    saved.forEach((r, i) => {
-      h += '<div style="padding:5px 0;display:flex;align-items:center;gap:4px;border-bottom:1px solid #f5f5f5;font-size:13px">' +
-        '<input type="checkbox" class="saveCb" value="'+i+'" style="flex:0">' +
-        '<span style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="loadSaved('+i+')">'+r.title+'</span>' +
-        '<span class="delOne" data-idx="'+i+'" style="color:#ccc;cursor:pointer;font-size:14px" title="删除">&times;</span></div>';
+    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let modeLabels = {shi:'时盘', ke:'刻盘', xin:'心盘', shanxiang:'山向', chuanren:'穿壬'};
+    let filtered = _saveMode ? saved.filter(r => r.mode === _saveMode) : saved;
+    let h = '<div style="padding:16px 16px 0">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+      '<span style="font-weight:bold;font-size:16px">排盘历史 <span style="font-size:11px;color:#999">('+filtered.length+'条'+(filtered.length!==saved.length?'/共'+saved.length+'条':'')+')</span></span>' +
+      '<span style="display:flex;gap:10px;align-items:center">' +
+      '<span id="sheetExport" style="cursor:pointer;color:#0dc2b3;font-size:12px">导出</span>' +
+      '<span id="sheetImport" style="cursor:pointer;color:#0dc2b3;font-size:12px">导入</span>' +
+      '<span id="sheetCloseX2" style="cursor:pointer;font-size:20px;color:#999">&times;</span>' +
+      '</span></div>';
+    h += '<div id="sheetFilters" style="padding:6px 0;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #f0f0f0;margin-bottom:4px">';
+    let allModes = [{k:'',v:'全部'},{k:'shi',v:'时盘'},{k:'ke',v:'刻盘'},{k:'xin',v:'心盘'},{k:'shanxiang',v:'山向'},{k:'chuanren',v:'穿壬'}];
+    allModes.forEach(m => {
+      let isActive = _saveMode === m.k || (!m.k && !_saveMode);
+      h += '<span class="sheetFilterBtn" data-mode="'+m.k+'" style="cursor:pointer;padding:2px 8px;border-radius:10px;font-size:12px;'+(isActive?'background:#0dc2b3;color:#fff':'background:#f0f0f0;color:#666')+'">'+m.v+'</span>';
     });
-    h += '<div style="padding-top:8px"><span id="delBtn" onclick="delChecked()" style="cursor:pointer;color:#e74c3c;font-size:12px">删除选中</span></div>';
-    div.innerHTML = h;
-    div.style.display = 'block';
-    let dels = div.querySelectorAll('.delOne');
-    dels.forEach(d => {
-      d.onclick = () => {
-        let idx = parseInt(this.getAttribute('data-idx'));
-        let saved = JSON.parse(localStorage.getItem('qimen_saved')||'[]');
-        saved.splice(idx, 1);
-        localStorage.setItem('qimen_saved', JSON.stringify(saved));
-        showSavedList();
+    h += '</div></div>';
+    if (!filtered.length) {
+      h += '<div style="padding:30px;color:#999;text-align:center">暂无记录</div>';
+    } else {
+      h += '<div style="padding:2px 16px 0;font-size:11px;color:#aaa;text-align:center">点击记录加载排盘</div>';
+      h += '<div id="sheetHistoryList" style="padding:0 16px">';
+      filtered.forEach((r, i) => {
+        let origIdx = saved.indexOf(r);
+        let modeLabel = modeLabels[r.mode] || r.mode || '时盘';
+        let d = r.date ? new Date(r.date) : null;
+        let dStr = d ? (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')) : '';
+        h += '<div style="padding:10px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f5f5f5;font-size:14px">' +
+          '<span style="font-size:10px;color:#fff;background:#0dc2b3;padding:1px 5px;border-radius:3px;flex-shrink:0">'+modeLabel+'</span>' +
+          '<span class="sheetLoadBtn" data-idx="'+origIdx+'" style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.title+'</span>' +
+          '<span style="font-size:10px;color:#aaa;flex-shrink:0">'+dStr+'</span>' +
+          '<span class="sheetDelBtn" data-idx="'+origIdx+'" style="color:#ccc;cursor:pointer;font-size:18px;flex-shrink:0;padding:0 4px" title="删除">&times;</span></div>';
+      });
+      h += '<div style="padding:12px 0;text-align:center"><span id="sheetDelAllBtn" style="cursor:pointer;color:#e74c3c;font-size:12px">删除 '+(_saveMode?(modeLabels[_saveMode]||_saveMode):'全部')+' 记录</span></div>';
+      h += '</div>';
+    }
+    _openSheet(h);
+    // 绑定事件
+    let cx = document.getElementById('sheetCloseX2');
+    let ex = document.getElementById('sheetExport');
+    let im = document.getElementById('sheetImport');
+    let da = document.getElementById('sheetDelAllBtn');
+    if (cx) cx.onclick = _closeSheet;
+    if (ex) ex.onclick = _exportJSON;
+    if (im) im.onclick = _importJSON;
+    if (da) da.onclick = delChecked;
+    // 过滤标签
+    let fbs = document.querySelectorAll('#sheetFilters .sheetFilterBtn');
+    fbs.forEach(fb => {
+      fb.onclick = function() { _filterHistory(this.getAttribute('data-mode')||''); };
+    });
+    // 加载按钮
+    let lbs = document.querySelectorAll('#sheetHistoryList .sheetLoadBtn');
+    lbs.forEach(lb => {
+      lb.onclick = function() { loadSaved(parseInt(this.getAttribute('data-idx')||'0')); };
+    });
+    // 删除按钮: 二次确认
+    let dbs = document.querySelectorAll('#sheetHistoryList .sheetDelBtn');
+    dbs.forEach(db => {
+      db.onclick = function() {
+        let el = this;
+        if (el.getAttribute('data-confirm') === '1') {
+          _delRecord(parseInt(el.getAttribute('data-idx')||'0'));
+        } else {
+          el.setAttribute('data-confirm', '1');
+          el.style.color = '#e74c3c';
+          el.style.fontWeight = 'bold';
+          el.title = '再次点击确认删除';
+          setTimeout(() => { el.setAttribute('data-confirm', ''); el.style.color = '#ccc'; el.style.fontWeight = ''; el.title = '删除'; }, 3000);
+        }
       };
     });
-  } catch(e) {}
+  } catch(e) { _openSheet('<div style="padding:20px;color:#999">加载失败</div>'); }
+}
+
+function _delRecord(idx) {
+  let sl = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  sl.splice(idx, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(sl));
+  _syncToFile();
+  _renderBottomBar();
+  _renderHistorySheet();
+}
+
+function _filterHistory(mode) {
+  _saveMode = mode || '';
+  _renderHistorySheet();
 }
 
 function loadSaved(i) {
   try {
-    saved = JSON.parse(localStorage.getItem('qimen_saved') || '[]');
-    if (saved[i]) {
-      document.getElementById('panWrap').innerHTML = saved[i].html;
-      document.getElementById('result').style.display = 'block';
-      document.getElementById('title').innerText = saved[i].title;
-      document.getElementById('yixinghuandouDIV').style.display = 'none';
-      setTimeout(fixYinGanAlign, 50);
+    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let r = saved[i];
+    if (!r) return;
+    document.getElementById('panWrap').innerHTML = r.html;
+    document.getElementById('result').style.display = 'block';
+    let titleEl = document.getElementById('title');
+    if (titleEl) titleEl.innerText = r.title;
+    _closeSheet();
+    let yhd = document.getElementById('yixinghuandouDIV');
+    if (yhd) yhd.style.display = 'none';
+    if (r.mode === 'xin' && r._xpData) {
+      window._xpData = JSON.parse(JSON.stringify(r._xpData));
+      window._xpBgSizhu = r._xpBgSizhu || '';
+      window._xpBgPalaces = r._xpBgPalaces || {};
+      window._xpCalcJu = r._xpCalcJu || '';
+      window._xpBgKongWang = r._xpBgKongWang || '';
+      window._xpBgMaXing = r._xpBgMaXing || '';
+      window._xpBgXunShou = r._xpBgXunShou || '';
+      window._xpOpLog = [];
+      window._xpOpSeq = 0;
+      document.getElementById('xinpanPanel').style.display = '';
     }
-  } catch(e) {}
+    if (r.mode) _saveMode = r.mode;
+    _renderBottomBar();
+    setTimeout(fixYinGanAlign, 50);
+  } catch(e) { console.error(e); }
 }
 
 function delChecked() {
-  let cbs = document.querySelectorAll('.saveCb:checked');
-  if (!cbs.length) return;
-  let btn = document.getElementById('delBtn');
-  if (btn.innerText === '删除选中') {
-    btn.innerText = '确认删除'+cbs.length+'条?';
+  let btn = document.getElementById('sheetDelAllBtn');
+  if (btn && btn.getAttribute('data-confirm') !== '1') {
+    btn.setAttribute('data-confirm', '1');
+    btn.innerText = '确认删除？';
     btn.style.fontWeight = 'bold';
+    setTimeout(() => { btn.setAttribute('data-confirm', ''); btn.innerText = '删除 '+(_saveMode?JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]').filter(r=>r.mode===_saveMode).length:'全部')+' 记录'; btn.style.fontWeight = ''; }, 3000);
+    return;
+  }
+  let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  saved = saved.filter(r => r.mode !== _saveMode);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  _syncToFile();
+  _renderBottomBar();
+  _renderHistorySheet();
+}
+
+async function _exportJSON() {
+  let data = localStorage.getItem(STORAGE_KEY) || '[]';
+  if (window.__TAURI__) {
+    try {
+      const {writeTextFile, mkdir, exists} = window.__TAURI__.fs;
+      const {downloadDir} = window.__TAURI__.path;
+      const dir = await downloadDir() + STORAGE_DIR;
+      if (!(await exists(dir))) await mkdir(dir, {recursive:true});
+      let ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+      await writeTextFile(dir+'/qimen_'+ts+'.json', data);
+      alert('已导出到下载目录');
+    } catch(e) { _downloadBlob(data); }
   } else {
-    let idxs = [];
-    cbs.forEach(cb => { idxs.push(parseInt(cb.value)); });
-    idxs.sort((a,b) => {return b-a;});
-    saved = JSON.parse(localStorage.getItem('qimen_saved') || '[]');
-    idxs.forEach(i => { saved.splice(i, 1); });
-    localStorage.setItem('qimen_saved', JSON.stringify(saved));
-    showSavedList();
+    _downloadBlob(data);
   }
 }
+
+function _downloadBlob(data) {
+  let blob = new Blob([data], {type:'application/json'});
+  let a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'qimen_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+function _importJSON() {
+  let inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = function() {
+    let file = this.files[0];
+    if (!file) return;
+    let reader = new FileReader();
+    reader.onload = function() {
+      try {
+        let d = JSON.parse(reader.result);
+        if (!Array.isArray(d)) throw new Error('格式错误');
+        let existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        let merged = d.concat(existing);
+        if (merged.length > 200) merged = merged.slice(0, 200);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        _syncToFile();
+        _renderBottomBar();
+        showSavedList();
+      } catch(e) { alert('导入失败: '+e.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+// 修复动态innerHTML中的onclick: 用事件委托绑定
+function _bindActionButtons() {
+  // 底部操作按钮
+  let btns = {
+    '#btn1': showYixing, '#btn2': showState, '#btn3': tianmenDihu,
+    '#btn4': ()=>shen12(1), '#btn5': ()=>shen12(2), '#btn6': ()=>shen12(3), '#btn7': ()=>shen12(4),
+    '#btnXiangJu': ()=>{try{toggleXiangJu();}catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>选局错误:'+e.message+'</span>';}},
+    '#preBtn': ()=>panChange(-1), '#nextBtn': ()=>panChange(1)
+  };
+  for (let id in btns) {
+    let el = document.querySelector(id);
+    if (el && !el._bound) { el.onclick = btns[id]; el._bound = true; }
+  }
+  // 宫位点击 (穿壬不绑定)
+  if (panType !== 5) {
+    let gongs = document.querySelectorAll('[id^="gong"]');
+    gongs.forEach(g => {
+      if (!g._bound) { let gn = parseInt(g.id.replace('gong','')); if (gn) g.onclick = ()=>showPalace(gn); g._bound = true; }
+    });
+  }
+  // 标题编辑
+  let titleSpans = document.querySelectorAll('#title,[onclick*="editTitle"]');
+  titleSpans.forEach(s => { if (!s._bound) { s.onclick = editTitle; s._bound = true; } });
+  // 山向相关
+  let xjBtn = document.querySelector('[onclick*="refreshXiangJu"]');
+  if (xjBtn && !xjBtn._bound) { xjBtn.onclick = refreshXiangJu; xjBtn._bound = true; }
+  let xjChg = document.querySelector('[onclick*="toggleXiangJu"]');
+  if (xjChg && !xjChg._bound) { xjChg.onclick = toggleXiangJu; xjChg._bound = true; }
+}
+
+// === 底部固定 Bar ===
+function _renderBottomBar() {
+  try {
+    let bar = document.getElementById('bottomBar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'bottomBar';
+      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:44px;background:#fff;border-top:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-around;z-index:100;padding-bottom:env(safe-area-inset-bottom,0);max-width:600px;margin:0 auto;';
+      let md = document.getElementById('mainDIV') || document.body;
+      if (md) md.appendChild(bar);
+    }
+    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let cnt = _saveMode ? saved.filter(r => r.mode === _saveMode).length : saved.length;
+    bar.innerHTML =
+      '<span id="barHistoryBtn" style="cursor:pointer;color:#666;font-size:14px;display:flex;align-items:center;gap:4px">' +
+      '<span style="font-size:16px">&#128196;</span>排盘历史'+(cnt>0?' ('+cnt+')':'')+'</span>' +
+      '<span id="barSaveBtn" style="cursor:pointer;color:#0dc2b3;font-size:14px;display:flex;align-items:center;gap:4px">' +
+      '<span style="font-size:16px">&#128190;</span>保存</span>';
+    let hb = document.getElementById('barHistoryBtn');
+    let sb = document.getElementById('barSaveBtn');
+    if (hb) hb.onclick = showSavedList;
+    if (sb) sb.onclick = savePan;
+  } catch(e) { console.error('bottomBar:', e); }
+}
+
+// Tauri启动时从文件同步记录
+(async function _initStorage() {
+  await _syncFromFile();
+})();
+
+window.savePan = savePan;
+window.showSavedList = showSavedList;
+window.loadSaved = loadSaved;
+window.delChecked = delChecked;
+window._exportJSON = _exportJSON;
+window._importJSON = _importJSON;
+window._filterHistory = _filterHistory;
+window._renderHistoryPanel = _renderHistoryPanel;
+
+// === 宫位详解数据 ===
 
 // === 宫位详解数据 ===
 let GONG_INFO = {
@@ -2028,8 +2319,7 @@ function autoFillXinpan(anchorGong) {
     }
   }
 
-  window._dbgAnGan = JSON.stringify(anGanMap);
-  window._dbgFu = isFuYin;
+
   for(let ag in anGanMap) {
     if (_xpBgPalaces[ag]) _xpBgPalaces[ag].anGan = anGanMap[ag];
   }
@@ -2449,48 +2739,9 @@ div.innerHTML=ui+parts.join('');
     });
   },50);
   // Self-verification: compare rendered DOM against expected paipanrest data
-  setTimeout(() => {verifyXiangJuRender(div, _expectedPals);}, 200);
 }
 
-// 向角度选局渲染自验证
-let _expectedPals=[];
-function verifyXiangJuRender(div, expected){
-  if(!expected||!expected.length) return;
-  let pans=div.querySelectorAll('.xj-pan');
-  if(pans.length!==expected.length){ console.log('[验证] 副盘数量不匹配: DOM='+pans.length+' 预期='+expected.length); return; }
-  let totalCells=0, mismatches=0;
-  for(let pi=0;pi<pans.length;pi++){
-    let pan=pans[pi], exp=expected[pi];
-    if(!exp) continue;
-    for(let g=1;g<=9;g++){if(g===5)continue;
-      let shenEl=pan.querySelector('#shen'+g), tianEl=pan.querySelector('#tian'+g),
-          diEl=pan.querySelector('#di'+g), xingEl=pan.querySelector('#xing'+g),
-          menEl=pan.querySelector('#men'+g);
-      // 读取渲染文本 (去HTML标签)
-      let rs=shenEl?shenEl.textContent.replace(/\s/g,''):'';
-      let rt=tianEl?tianEl.textContent.replace(/\s/g,''):'';
-      let rd=diEl?diEl.textContent.replace(/\s/g,''):'';
-      let rx=xingEl?xingEl.textContent.replace(/\s/g,''):'';
-      let rm=menEl?menEl.textContent.replace(/\s/g,''):'';
-      // 预期值 (全称→简称转换)
-      let SHEN_FULL={'符':'值符','天':'九天','地':'九地','玄':'玄武','白':'白虎','六':'六合','阴':'太阴','蛇':'螣蛇'};
-      let XING_FULL={'蓬':'天蓬','任':'天任','冲':'天冲','辅':'天辅','英':'天英','芮':'天芮','柱':'天柱','心':'天心'};
-      let MEN_FULL={'休':'休门','生':'生门','伤':'伤门','杜':'杜门','景':'景门','死':'死门','惊':'惊门','开':'开门'};
-      // 检测: 渲染值应该包含简称或全称
-      let es=exp.shen||'', et=exp.tian||'', ed=exp.di||'', ex=exp.xing||'', em=exp.men||'';
-      totalCells+=5;
-      if(rs&&rs!==es&&SHEN_FULL[es]&&rs!==SHEN_FULL[es]&&rs!==es){mismatches++;console.log('[验证] 副盘'+(pi+1)+'宫'+g+'神: DOM='+rs+' 预期='+es);}
-      if(rt&&rt!==et){mismatches++;console.log('[验证] 副盘'+(pi+1)+'宫'+g+'天: DOM='+rt+' 预期='+et);}
-      if(rd&&rd!==ed){mismatches++;console.log('[验证] 副盘'+(pi+1)+'宫'+g+'地: DOM='+rd+' 预期='+ed);}
-      if(rx&&rx!==ex&&XING_FULL[ex]&&rx!==XING_FULL[ex]&&rx!==ex){mismatches++;console.log('[验证] 副盘'+(pi+1)+'宫'+g+'星: DOM='+rx+' 预期='+ex);}
-      if(rm&&rm!==em&&MEN_FULL[em]&&rm!==MEN_FULL[em]&&rm!==em){mismatches++;console.log('[验证] 副盘'+(pi+1)+'宫'+g+'门: DOM='+rm+' 预期='+em);}
-    }
-  }
-  if(mismatches===0){console.log('[验证] 向角度选局渲染一致: '+expected.length+'盘×8宫×5项='+totalCells+'项 全部匹配');}
-  else{console.log('[验证] 向角度选局渲染差异: '+mismatches+'/'+totalCells+'项不匹配');}
-}
 
-let _xjuDegSaved='',_xjuYearSaved='0';
 function refreshXiangJu(){
   div=document.getElementById('xiangjuDIV');if(!div)return;
   // Save current values
@@ -2542,6 +2793,8 @@ function doChuanRen(){
     let data=window.chuanRenChart({year:Y,month:M,day:D,hour:hr,minute:mn,nianMing:nianMing,guiRen:guiRen,yongShen:yongShen,gender:gender,ziJu:ziJu,shiKe:shiKe});
     // Only update display, keep inputs persistent
     document.getElementById("panWrap").innerHTML=window.renderChuanRen(data,null);
+    _renderBottomBar();
+    setTimeout(_bindActionButtons, 50);
     requestAnimationFrame(() =>{requestAnimationFrame(() =>{
       let crW=document.querySelector('.cr-grid-wrap');if(!crW)return;
       let pans=crW.querySelectorAll('#pan');if(!pans.length)return;
@@ -2589,8 +2842,6 @@ function doChuanRen(){
       });
 
       // 移除宫位点击(穿壬不需要)
-      pan.querySelectorAll('[id^=gong]').forEach(g => {g.onclick=null;g.style.cursor='default';});
-      // 移除阴干点击
       document.querySelectorAll('[id^=yinGan]').forEach(y => {y.onclick=null;y.style.cursor='default';});    });});
   }catch(e){
     document.getElementById("panWrap").innerHTML="<span style=\"color:red;user-select:text;-webkit-user-select:text\">穿壬错误:"+e.message+"</span>";
@@ -2598,181 +2849,10 @@ function doChuanRen(){
 }
 
 
-// ============ 山向奇门全量自验证 ============
-function runShanXiangFullVerify(){
-  console.log('╔══════════════════════════════════════╗');
-  console.log('║  山向奇门 浏览器端全量自验证        ║');
-  console.log('╚══════════════════════════════════════╝');
-  let startTime=Date.now();
-
-  // === 算法层 ===
-  SHAN_JU=[-7,-2,-1,-9,-7,-6,-5,-6,-5,4,1,2,3,8,9,1,3,4,5,4,5,-6,-9,-8];
-  let XiangZhi=[1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,0,0];
-  let LIUYI=['','戊','己','庚','辛','壬','癸','丁','丙','乙'];
-  let FZ=[0,1,6,3,4,6,8,7,2,5],ZZ=[0,1,8,3,4,9,2,7,6];
-  let PP_XING=['','蓬','任','冲','辅','英','芮','柱','心'];
-  let PP_MEN=['','休','生','伤','杜','景','死','惊','开'];
-  let PP_SYIN=['','符','天','地','玄','白','六','阴','蛇'];
-  let PP_SYANG=['','符','蛇','阴','六','白','玄','地','天'];
-  let YIMA=[2,8,11,5];
-  ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-  ZHI2G={'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
-
-  function paipanRef(year,deg){
-    let duu=Math.floor(((deg%360+360)%360)/5),du=Math.floor(duu/3);
-    let t=SHAN_JU[du],tJ=t<0?t+9:t+8;
-    ju=tJ<9?9-tJ:tJ-8,yy=tJ<9?'阴':'阳',vv=duu%3;
-    if(yy==='阴')ju+=vv*3;else ju+=9-vv*3;if(ju>9)ju-=9;
-    let cY=(year-1864)%60,hG=cY%10;if(hG>4)hG-=5;
-    let hC=hG*12+XiangZhi[du],xs=Math.floor(hC/10)*10;
-    dg=Math.floor(xs/10)+1;
-    let di={},dgg=0,sgg=0;
-    for(let i=0;i<9;i++){let g=yy==='阴'?ju-i:ju+i;if(g>9)g-=9;if(g<1)g+=9;di[g]=LIUYI[i+1];if(i+1===dg)dgg=g;if(i+1===(hC%10))sgg=g;}
-    if(!sgg)sgg=dgg;if(di[5]&&di[2])di[2]=di[2]+di[5];
-    let zf=PP_XING[FZ[dgg]],zs=PP_MEN[FZ[dgg]];
-    let mg=yy==='阳'?(hC%10)+dgg:dgg-(hC%10);if(mg<1)mg+=9;if(mg>9)mg-=9;
-    let f1=FZ[sgg]-FZ[dgg];
-    let ti={},xp={};
-    for(let j=1;j<=8;j++){let k=j-f1;if(k<1)k+=8;if(k>8)k-=8;xp[ZZ[j]]=PP_XING[k];ti[ZZ[j]]=di[ZZ[k]]||'';}
-    let f2=FZ[mg]-FZ[dgg];
-    let mp={};
-    for(let j=1;j<=8;j++){let k=j-f2;if(k<1)k+=8;if(k>8)k-=8;mp[ZZ[j]]=PP_MEN[k];}
-    let f3=FZ[sgg]-1;
-    let sp={};
-    for(let j=1;j<=8;j++){let k=j-f3;if(k<1)k+=8;if(k>8)k-=8;sp[ZZ[j]]=yy==='阳'?PP_SYANG[k]:PP_SYIN[k];}
-    let f4=FZ[sgg]-FZ[mg];
-    ag={};
-    for(let j=1;j<=8;j++){let k=j+f4;if(k<1)k+=8;if(k>8)k-=8;ag[ZZ[j]]=di[ZZ[k]]||'';}
-    let xk1=(xs+10)%12,xk2=(xs+11)%12,ma=YIMA[hC%4];
-    pals={};
-    for(let g=1;g<=9;g++){if(g===5)continue;pals[g]={shen:sp[g]||'',tian:ti[g]||'',di:di[g]||'',xing:xp[g]||'',men:mp[g]||'',anGan:ag[g]?ag[g][0]:''};}
-    return {ju:ju,yy:yy,dgg:dgg,mg:mg,sgg:sgg,zf:zf,zs:zs,xk1:xk1,xk2:xk2,ma:ma,pals:pals,xs:xs};
-  }
-
-  // === 渲染+DOM提取 ===
-  function renderAndExtract(pals,kongG,maPosId){
-    let tmp=document.createElement('div');
-    tmp.style.cssText='position:absolute;left:-9999px;top:0;width:500px;visibility:hidden';
-    document.body.appendChild(tmp);
-    agFn= g => {let a=pals['gong'+g];return a&&a.anGan?a.anGan:'';};
-    csFn=window._colorSpan|| (v => {return v||'';});
-    tmp.innerHTML=buildPaipanGrid(pals,kongG,maPosId,agFn,{colorSpan:csFn});
-    // 提取文本
-    result={};
-    for(let g=1;g<=9;g++){if(g===5)continue;
-      let se=tmp.querySelector('#shen'+g),te=tmp.querySelector('#tian'+g),
-          de=tmp.querySelector('#di'+g),xe=tmp.querySelector('#xing'+g),
-          me=tmp.querySelector('#men'+g),ye=tmp.querySelector('#yinGan'+g);
-      result[g]={shen:se?se.textContent.replace(/\s/g,''):'',tian:te?te.textContent.replace(/\s/g,''):'',di:de?de.textContent.replace(/\s/g,''):'',xing:xe?xe.textContent.replace(/\s/g,''):'',men:me?me.textContent.replace(/\s/g,''):'',anGan:ye?ye.textContent.replace(/\s/g,''):''};
-    }
-    document.body.removeChild(tmp);
-    return result;
-  }
-
-  // === 主盘验证: 10年×72度(每5度) ===
-  console.log('\n[1/3] 主盘验证 (ju/阴阳) ...');
-  let mainOk=0,mainFail=0;
-  for(let yi=2020;yi<=2029;yi++){
-    for(let deg=0;deg<360;deg+=5){
-      let ref=paipanRef(yi,deg);
-      let ourJu=getJu(deg);
-      let ourYin=(deg>=0&&deg<=134)||(deg>=315&&deg<=359);
-      if(ref.ju===ourJu&&(ref.yy==='阴')===ourYin)mainOk++;else mainFail++;
-    }
-  }
-  console.log('  主盘ju/阴阳: '+(mainOk+mainFail)+'案例, '+mainOk+'通过, '+mainFail+'差异');
-
-  // === 副盘渲染验证: 5年×72中心度×13副盘 ===
-  console.log('\n[2/3] 副盘渲染验证 (DOM对比算法预期) ...');
-  let totalPan=0,totalPal=0,totalDiffs=0,errList=[];
-  let testYears=[2020,2022,2024,2026,2028];
-  for(let yi=0;yi<testYears.length;yi++){
-    let year=testYears[yi];
-    for(let cd=0;cd<360;cd+=5){
-      for(let off=-30;off<=30;off+=5){
-        let deg=((cd+off)%360+360)%360;
-        let ref=paipanRef(year,deg);
-        // 空亡: 旬首→空亡地支→对应宫位标记◎/马星
-        let kg={};kg[ZHI2G[ZHI[ref.xk1]]]=true;kg[ZHI2G[ZHI[ref.xk2]]]=true;
-        let maG=ZHI2G[ZHI[ref.ma]]||0;
-        let mp2={4:'ma1',9:'ma2',2:'ma2',3:'ma3',7:'ma4',8:'ma3',1:'ma4',6:'ma4'};
-        let maP=mp2[maG]||'';
-        // 组装pals
-        let palsT={};
-        for(let g=1;g<=9;g++){if(g===5)continue;
-          palsT['gong'+g]={shen:ref.pals[g].shen,tian:ref.pals[g].tian,di:ref.pals[g].di,xing:ref.pals[g].xing,men:ref.pals[g].men,anGan:ref.pals[g].anGan,isMenPo:false};
-        }
-        recalcColors(palsT);
-        let dom=renderAndExtract(palsT,kg,maP);
-        totalPan++;
-        // 逐宫对比
-        for(let g=1;g<=9;g++){if(g===5)continue;totalPal++;
-          let rp=ref.pals[g],dp=dom[g];
-          if(rp.shen!==dp.shen){totalDiffs++;if(errList.length<20)errList.push('副盘'+year+'/'+cd+'→'+deg+'°宫'+g+'神:'+dp.shen+'≠'+rp.shen);}
-          if(rp.tian!==dp.tian){totalDiffs++;if(errList.length<20)errList.push('副盘'+year+'/'+cd+'→'+deg+'°宫'+g+'天:'+dp.tian+'≠'+rp.tian);}
-          if(rp.di!==dp.di){totalDiffs++;if(errList.length<20)errList.push('副盘'+year+'/'+cd+'→'+deg+'°宫'+g+'地:'+dp.di+'≠'+rp.di);}
-          if(rp.xing!==dp.xing){totalDiffs++;if(errList.length<20)errList.push('副盘'+year+'/'+cd+'→'+deg+'°宫'+g+'星:'+dp.xing+'≠'+rp.xing);}
-          if(rp.men!==dp.men){totalDiffs++;if(errList.length<20)errList.push('副盘'+year+'/'+cd+'→'+deg+'°宫'+g+'门:'+dp.men+'≠'+rp.men);}
-        }
-      }
-    }
-    console.log('  年份'+year+'完成 ('+Math.round((yi+1)/testYears.length*100)+'%)');
-  }
-  console.log('  副盘:'+totalPan+'个, 宫位:'+totalPal+'个, 差异:'+totalDiffs);
-  if(errList.length>0){console.log('  差异样例:');errList.forEach(e => {console.log('    '+e);});}
-
-  // === 不变量验证: 20年×360度 ===
-  console.log('\n[3/3] 不变量验证 ...');
-  let invTotal=0,invOk=0;
-  let ry=[],rb=[];for(let y=1900;y<=2100;y++)rb.push(y);
-  for(let i=0;i<20;i++)ry.push(rb.splice(Math.floor(Math.random()*rb.length),1)[0]);
-  for(let yi=0;yi<ry.length;yi++){
-    year=ry[yi];
-    for(let deg=0;deg<360;deg++){
-      invTotal++;
-      ref=paipanRef(year,deg);let ok=true;
-      // 地盘干唯一性
-      let dc={};LIUYI.slice(1).forEach(g => {dc[g]=0;});
-      for(let g=1;g<=9;g++){if(g===5)continue;dc[ref.pals[g].di[0]]=(dc[ref.pals[g].di[0]]||0)+1;}
-      LIUYI.slice(1).forEach(g => {if(dc[g]!==1)ok=false;});
-      if(ref.pals[2]&&ref.pals[2].di.length<2)ok=false;
-      // 八神唯一
-      let sc={},allS=['符','天','地','玄','白','六','阴','蛇'];allS.forEach(s => {sc[s]=0;});
-      for(let g=1;g<=9;g++){if(g===5)continue;sc[ref.pals[g].shen]++;}
-      allS.forEach(s => {if(sc[s]!==1)ok=false;});
-      // 九星唯一
-      let xc={},allX=['蓬','任','冲','辅','英','芮','柱','心'];allX.forEach(x => {xc[x]=0;});
-      for(let g=1;g<=9;g++){if(g===5)continue;xc[ref.pals[g].xing]++;}
-      allX.forEach(x => {if(xc[x]!==1)ok=false;});
-      // 八门唯一
-      let mc={},allM=['休','生','伤','杜','景','死','惊','开'];allM.forEach(m => {mc[m]=0;});
-      for(let g=1;g<=9;g++){if(g===5)continue;mc[ref.pals[g].men]++;}
-      allM.forEach(m => {if(mc[m]!==1)ok=false;});
-      if(ok)invOk++;
-    }
-  }
-  console.log('  不变量: '+invTotal+'案例, '+invOk+'通过, '+(invTotal-invOk)+'差异');
-
-  // === 最终报告 ===
-  let elapsed=((Date.now()-startTime)/1000).toFixed(1);
-  console.log('\n═══════════════════════════════════════');
-  console.log('  验证完成 (耗时'+elapsed+'s)');
-  console.log('  主盘ju/阴阳: '+(mainFail===0?'✓':'✗')+' ('+mainOk+'/'+(mainOk+mainFail)+')');
-  console.log('  副盘渲染: '+(totalDiffs===0?'✓':'✗')+' ('+(totalPal*5-totalDiffs)+'/'+(totalPal*5)+'项)');
-  console.log('  不变量: '+(invOk===invTotal?'✓':'✗')+' ('+invOk+'/'+invTotal+')');
-  if(mainFail===0&&totalDiffs===0&&invOk===invTotal){
-    console.log('  ✓ 全部通过!');
-  } else {
-    console.log('  ✗ 存在差异, 请检查上方详情');
-  }
-  console.log('═══════════════════════════════════════');
-  return {mainOk:mainOk,mainFail:mainFail,totalDiffs:totalDiffs,invOk:invOk,invTotal:invTotal};
-}
-
 // 暴露到全局
-window.runShanXiangFullVerify=runShanXiangFullVerify;
 
-// 手动运行: 在console输入 runShanXiangFullVerify()
+
+
 
 window.Y=Y;
 window.M=M;
@@ -2795,7 +2875,7 @@ window.shen12=shen12;
 window.clearWaipan=clearWaipan;
 window.renderShanXiangPan2=renderShanXiangPan2;
 window.clearXinpan=clearXinpan;
-window.copyXinpanDebug=copyXinpanDebug;
+
 window.applyZhuan=applyZhuan;
 window.fixYinGanAlign=fixYinGanAlign;
 window.getJu=getJu;
@@ -2810,8 +2890,11 @@ window.loadSaved=loadSaved;
 window.showSavedList=showSavedList;
 window.showState=showState;
 window.delChecked=delChecked;
+window._closeSheet=_closeSheet;
+window._doSave=_doSave;
+window._delRecord=_delRecord;
 window.editTitle=editTitle;
-window.runShanXiangFullVerify=runShanXiangFullVerify;
+
 window.XING=XING;
 window.MEN=MEN;
 window.SHEN_ABBR=SHEN_ABBR;

@@ -19,7 +19,7 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 	.panItem{text-align:left;line-height:24px;font-size:14px;clear:both}
 	#headTable .sizhu{font-size:17px;line-height:20px;padding:5px;width:21%;font-weight:bold;}
 	#dateTime{font-family:Arial;font-size:14px}
-	.state{height:10px;line-height:10px;font-size:10px;text-align:left;width:100%;margin-top:0px;color:#888;clear:both}
+	.state{height:10px;line-height:10px;font-size:10px;text-align:left;width:100%;margin-top:2px;color:#888;clear:both;padding-top:1px}
 	#jieqi{font-size:14px;font-family:Arial}
 }
 @media (max-width:389px){
@@ -27,7 +27,7 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 	.panItem{text-align:left;line-height:24px;font-size:12px;clear:both}
 	#headTable .sizhu{font-size:15px;line-height:20px;padding:5px;width:21%;font-weight:bold;}
 	#dateTime{font-family:Arial;font-size:13px}
-	.state{height:10px;line-height:10px;font-size:8px;text-align:left;width:100%;margin-top:0px;color:#888;clear:both}
+	.state{height:10px;line-height:10px;font-size:8px;text-align:left;width:100%;margin-top:2px;color:#888;clear:both;padding-top:1px}
 	#jieqi{font-size:12px;font-family:Arial}
 }
 #panHead{padding-bottom:0px}
@@ -87,7 +87,7 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 #attention{height:10px;line-height:25px;color:red;text-align:center}
 
 /* ===== 3. 应用覆盖样式 (yinpan_app.css) ===== */
-body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;background:#f5f5f5;margin:0;padding-bottom:env(safe-area-inset-bottom, 24px)}
+body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;background:#f5f5f5;margin:0;padding-bottom:calc(44px + env(safe-area-inset-bottom, 24px))}
 body.is-mobile{padding-top:36px}
 #topBar{display:none;position:fixed;top:0;left:0;right:0;height:36px;background:linear-gradient(180deg,#0aa89a,#0dc2b3);z-index:1000}
 body.is-mobile #topBar{display:block}
