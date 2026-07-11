@@ -1579,6 +1579,7 @@ function _closeSheet() {
 }
 
 function savePan() {
+  try {
   let panWrap = document.getElementById('panWrap');
   if (!panWrap) return;
   let titleEl = document.getElementById('title');
@@ -1606,6 +1607,7 @@ function savePan() {
     let inp = document.getElementById('sheetSaveName');
     if (inp) { inp.focus(); inp.select(); }
   }, 350);
+  }catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>保存错误:'+e.message+'</span>';}
 }
 
 function _doSave() {
