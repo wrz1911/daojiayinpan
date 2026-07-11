@@ -205,9 +205,7 @@ jobs:
           npx cap add android
           # 覆盖variables.gradle: 保留Capacitor默认的AndroidX版本号, 仅修改minSdk
           sed -i 's/minSdkVersion = 23/minSdkVersion = 31/' android/variables.gradle
-          # 移除SMS权限
-          sed -i 's|<manifest |<manifest xmlns:tools="http://schemas.android.com/tools" |' android/app/src/main/AndroidManifest.xml
-          sed -i 's|<application|<uses-permission android:name="android.permission.SMS" tools:node="remove"/>\n    <application|' android/app/src/main/AndroidManifest.xml
+
 
       - name: Generate keystore
         run: |
