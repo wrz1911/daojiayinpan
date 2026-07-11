@@ -1710,19 +1710,12 @@ function _renderHistorySheet() {
     lbs.forEach(lb => {
       lb.onclick = function() { loadSaved(parseInt(this.getAttribute('data-idx')||'0')); };
     });
-    // 删除按钮: 二次确认
+    // 删除按钮: confirm确认
     let dbs = document.querySelectorAll('#sheetHistoryList .sheetDelBtn');
     dbs.forEach(db => {
       db.onclick = function() {
-        let el = this;
-        if (el.getAttribute('data-confirm') === '1') {
-          _delRecord(parseInt(el.getAttribute('data-idx')||'0'));
-        } else {
-          el.setAttribute('data-confirm', '1');
-          el.style.color = '#e74c3c';
-          el.style.fontWeight = 'bold';
-          el.title = '再次点击确认删除';
-          setTimeout(() => { el.setAttribute('data-confirm', ''); el.style.color = '#ccc'; el.style.fontWeight = ''; el.title = '删除'; }, 3000);
+        if (confirm('确认删除这条记录？')) {
+          _delRecord(parseInt(this.getAttribute('data-idx')||'0'));
         }
       };
     });
@@ -1774,14 +1767,7 @@ function loadSaved(i) {
 }
 
 function delChecked() {
-  let btn = document.getElementById('sheetDelAllBtn');
-  if (btn && btn.getAttribute('data-confirm') !== '1') {
-    btn.setAttribute('data-confirm', '1');
-    btn.innerText = '确认删除？';
-    btn.style.fontWeight = 'bold';
-    setTimeout(() => { btn.setAttribute('data-confirm', ''); btn.innerText = '删除 '+(_saveMode?JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]').filter(r=>r.mode===_saveMode).length:'全部')+' 记录'; btn.style.fontWeight = ''; }, 3000);
-    return;
-  }
+  if (!confirm('确认删除当前模块的全部记录？此操作不可撤销。')) return;
   let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   saved = saved.filter(r => r.mode !== _saveMode);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
