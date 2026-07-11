@@ -1611,6 +1611,7 @@ function savePan() {
 }
 
 function _doSave() {
+  try {
   let inp = document.getElementById('sheetSaveName');
   let newTitle = (inp ? inp.value : '') || '未命名';
   let panWrap = document.getElementById('panWrap');
@@ -1642,6 +1643,7 @@ function _doSave() {
     _renderBottomBar();
     _closeSheet();
   } catch(e) { alert('保存失败: '+e.message); }
+  } catch(e) { alert('_doSave错误: '+e.message); }
 }
 
 function showSavedList() {
