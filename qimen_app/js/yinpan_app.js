@@ -2788,6 +2788,8 @@ function doChuanRen(){
     _crVals.shiKe=document.getElementById("crShiKe")?document.getElementById("crShiKe").value:"时家";
   }
   document.getElementById("crInputs").innerHTML=window.renderChuanRenInputs?window.renderChuanRenInputs(_crVals):"";
+  // 程序化绑定穿壬输入事件(Tauri兼容)
+  ['crYongShen','crGuiRen','crNianMing','crGender','crZiJu','crShiKe'].forEach(id=>{let el=document.getElementById(id);if(el)el.onchange=doChuanRen;});
   try{
     let nm=document.getElementById("crNianMing");let nianMing=nm?nm.value:_crVals.nianMing||"子";
     let gr=document.getElementById("crGuiRen");let guiRen=gr?gr.value:_crVals.guiRen||"阳贵";
