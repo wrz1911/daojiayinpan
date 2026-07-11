@@ -50,8 +50,11 @@ if (selD) selD.onchange = doPan;
 let sxYear=document.getElementById('selShanXiangYear'), sxDeg=document.getElementById('selShanXiangDeg');
 if (sxYear) sxYear.onchange = doPan;
 if (sxDeg) { sxDeg.onchange = function() { let v=parseInt(this.value); if(isNaN(v)||v<0) this.value=0; else if(v>359) this.value=359; doPan(); }; }
-// 自动排盘
-requestAnimationFrame(() =>{ requestAnimationFrame(() =>{ doPan(); }); });
+// 自选局绑定
+(function(){ let zxj=document.getElementById('selZxj'); if(zxj) zxj.onchange = onZxjChange; })();
+// 自动排盘: 用setTimeout包裹rAF避免Tauri webview在IIFE完成前触发rAF导致TDZ
+let _iifeReady = false;
+requestAnimationFrame(() =>{ requestAnimationFrame(() =>{ if(_iifeReady) doPan(); else setTimeout(()=>doPan(),50); }); });
 
 // === 山向奇门: 局数用24山角度查表公式 ===
 function getJu(deg){
@@ -2909,4 +2912,5 @@ window.ZHI12=ZHI12;
 window.SHENJIANG_NAMES=SHENJIANG_NAMES;
 window.SHENJUE=SHENJUE;
 window.ZXJ_NAMES=ZXJ_NAMES;
+_iifeReady = true;
 })();
