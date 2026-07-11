@@ -157,13 +157,10 @@ jobs:
         shell: bash
         run: |
           VER="${GITHUB_REF_NAME#v}"
+          echo "VER=$VER" >> $GITHUB_ENV
           echo "Setting version to $VER"
           perl -i -pe "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" src-tauri/tauri.conf.json
-          # Also update Android versionName
-          ANDROID_VER=$(echo "$VER" | grep -o '^[0-9]*\.[0-9]*')
-          if [ -f android/app/build.gradle ]; then
-            sed -i "s/versionName \"[^\"]*\"/versionName \"$ANDROID_VER\"/" android/app/build.gradle
-          fi
+          perl -i -pe "s/\"version\": \"[^\"]*\"/\"version\": \"$VER\"/" package.json
 
       - uses: actions/setup-java@v4
         with:
@@ -205,6 +202,12 @@ jobs:
           npx cap add android
           # 覆盖variables.gradle: 保留Capacitor默认的AndroidX版本号, 仅修改minSdk
           sed -i 's/minSdkVersion = 23/minSdkVersion = 31/' android/variables.gradle
+          # 移除SMS权限
+          sed -i 's|<manifest |<manifest xmlns:tools="http://schemas.android.com/tools" |' android/app/src/main/AndroidManifest.xml
+          sed -i 's|<application|    <uses-permission android:name="android.permission.SMS" tools:node="remove" />\n    <application|' android/app/src/main/AndroidManifest.xml
+          # 同步Android版本号
+          ANDROID_VER="${VER%.*}"
+          sed -i "s/versionName \"[^\"]*\"/versionName \"$ANDROID_VER\"/" android/app/build.gradle
 
 
       - name: Generate keystore
