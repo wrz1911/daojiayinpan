@@ -1741,10 +1741,28 @@ function loadSaved(i) {
     let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let r = saved[i];
     if (!r) return;
+    // 恢复时间选择器
+    let p = r.params || {};
+    if (p.year) { Y=p.year; selY.value=p.year; }
+    if (p.month!=null) { M=p.month; selM.value=p.month; adjDays(); }
+    if (p.day) { D=p.day; selD.value=p.day; }
+    if (p.hour!=null) { hr=p.hour; selH.value=p.hour; }
+    if (p.minute!=null) { mn=p.minute; selI.value=p.minute; }
+    // 自动切换到对应模块
+    let modeMap = {shi:1, ke:2, xin:3, shanxiang:4, chuanren:5};
+    let targetType = modeMap[r.mode] || 1;
+    if (targetType !== panType) {
+      let radio = document.querySelector('input[name="panType"][value="'+targetType+'"]');
+      if (radio) { radio.checked = true; setPanType(targetType); }
+    }
+    // 恢复山向年/度
+    if (r.mode === 'shanxiang' && p.panType === 4) {
+      let syEl=document.getElementById('selShanXiangYear'), sdEl=document.getElementById('selShanXiangDeg');
+      if (syEl && p.year) syEl.value = p.year;
+      if (sdEl) { let sdVal = _xjuDegSaved || '0'; sdEl.value = sdVal; }
+    }
     document.getElementById('panWrap').innerHTML = r.html;
     document.getElementById('result').style.display = 'block';
-    let titleEl = document.getElementById('title');
-    if (titleEl) titleEl.innerText = r.title;
     _closeSheet();
     let yhd = document.getElementById('yixinghuandouDIV');
     if (yhd) yhd.style.display = 'none';
@@ -1762,6 +1780,7 @@ function loadSaved(i) {
     }
     if (r.mode) _saveMode = r.mode;
     _renderBottomBar();
+    _bindActionButtons();
     setTimeout(fixYinGanAlign, 50);
   } catch(e) { console.error(e); }
 }
