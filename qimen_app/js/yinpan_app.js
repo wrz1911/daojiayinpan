@@ -1590,8 +1590,8 @@ function savePan() {
     '<span style="font-weight:bold;font-size:16px">保存排盘</span>' +
     '<span id="sheetCloseX" style="cursor:pointer;font-size:20px;color:#999">&times;</span>' +
     '</div>' +
-    '<div style="margin-bottom:8px"><span style="font-size:12px;color:#999">名称</span></div>' +
-    '<input id="sheetSaveName" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:15px;outline:none;box-sizing:border-box" value="'+defaultName.replace(/"/g,'&quot;')+'" autofocus>' +
+    '<div style="margin-bottom:8px"><span style="font-size:12px;color:#999">输入事项</span></div>' +
+    '<input id="sheetSaveName" placeholder="请输入事项名称" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:15px;outline:none;box-sizing:border-box" value="'+defaultName.replace(/"/g,'&quot;')+'" autofocus>' +
     '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">' +
     '<span id="sheetCancelBtn" style="cursor:pointer;padding:8px 16px;border-radius:8px;color:#666;font-size:14px">取消</span>' +
     '<span id="sheetSaveBtn" style="cursor:pointer;padding:8px 24px;border-radius:8px;background:#0dc2b3;color:#fff;font-size:14px">保存</span>' +
@@ -1619,6 +1619,7 @@ function _doSave() {
   if (!panWrap) { _closeSheet(); return; }
   let panHTML = panWrap.innerHTML;
   let params = {year:Y, month:M, day:D, hour:hr, minute:mn, panType:panType};
+  if (panType === 4) { params._xjuDegSaved = _xjuDegSaved; params._xjuYearSaved = _xjuYearSaved; }
   let record = {
     title: newTitle.trim(), time: timeStr, mode: _saveMode,
     params: params, html: panHTML,
@@ -1756,10 +1757,12 @@ function loadSaved(i) {
       if (radio) { radio.checked = true; setPanType(targetType); }
     }
     // 恢复山向年/度
-    if (r.mode === 'shanxiang' && p.panType === 4) {
+    if (r.mode === 'shanxiang') {
+      _xjuDegSaved = p._xjuDegSaved || '';
+      _xjuYearSaved = p._xjuYearSaved || '0';
       let syEl=document.getElementById('selShanXiangYear'), sdEl=document.getElementById('selShanXiangDeg');
       if (syEl && p.year) syEl.value = p.year;
-      if (sdEl) { let sdVal = _xjuDegSaved || '0'; sdEl.value = sdVal; }
+      if (sdEl && _xjuDegSaved) sdEl.value = _xjuDegSaved;
     }
     document.getElementById('panWrap').innerHTML = r.html;
     document.getElementById('result').style.display = 'block';
