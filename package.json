@@ -1,6 +1,6 @@
 {
   "name": "qimen-yinpan",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "scripts": {
     "start": "./run-desktop.sh",
     "build:linux": "bash build-tauri.sh",
