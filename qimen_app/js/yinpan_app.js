@@ -1893,12 +1893,12 @@ function _renderBottomBar() {
     hb.id = 'barHistoryBtn';
     hb.style.cssText = 'cursor:pointer;color:#666;font-size:14px;display:flex;align-items:center;gap:4px';
     hb.innerHTML = '<span style="font-size:16px">&#128196;</span>排盘历史'+(cnt>0?' ('+cnt+')':'');
-    hb.onclick = showSavedList;
+    hb.addEventListener('click', showSavedList);
     let sb = document.createElement('span');
     sb.id = 'barSaveBtn';
     sb.style.cssText = 'cursor:pointer;color:#0dc2b3;font-size:14px;display:flex;align-items:center;gap:4px';
     sb.innerHTML = '<span style="font-size:16px">&#128190;</span>保存';
-    sb.onclick = savePan;
+    sb.addEventListener('click', savePan);
     bar.appendChild(hb);
     bar.appendChild(sb);
   } catch(e) { console.error('bottomBar:', e); }
