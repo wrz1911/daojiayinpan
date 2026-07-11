@@ -1583,8 +1583,6 @@ function savePan() {
   if (!panWrap) return;
   let titleEl = document.getElementById('title');
   let defaultName = (titleEl ? titleEl.innerText : '') || '';
-  let timeStr = document.getElementById('dateTime') ? document.getElementById('dateTime').innerText : '';
-  if (!defaultName) defaultName = timeStr || '';
   let h = '<div style="padding:16px 16px 8px">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
     '<span style="font-weight:bold;font-size:16px">保存排盘</span>' +
@@ -1612,9 +1610,7 @@ function savePan() {
 
 function _doSave() {
   let inp = document.getElementById('sheetSaveName');
-  let newTitle = (inp ? inp.value : '') || '';
-  let timeStr = document.getElementById('dateTime') ? document.getElementById('dateTime').innerText : '';
-  if (!newTitle.trim()) newTitle = timeStr || '未命名';
+  let newTitle = (inp ? inp.value : '') || '未命名';
   let panWrap = document.getElementById('panWrap');
   if (!panWrap) { _closeSheet(); return; }
   let panHTML = panWrap.innerHTML;
