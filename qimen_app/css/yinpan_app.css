@@ -94,12 +94,12 @@ body.is-mobile #topBar{display:block}
 #mainDIV{max-width:600px;margin:0 auto;padding:0}
 #mainDIV,#mainDIV *{user-select:text!important;-webkit-user-select:text!important}
 .form-card{background:#fff;border-radius:0;padding:4px 0;margin:0;box-shadow:none}
-.form-row{display:flex;align-items:center;border-bottom:1px solid #f0f0f0;padding:12px 10px}
+.form-row{display:flex;align-items:center;border-bottom:1px solid #f0f0f0;padding:6px 10px}
 .form-row:last-child{border-bottom:none}
-.form-label{color:#666;font-size:14px;min-width:65px}
-.sel-date{border:1px solid #e0e0e0;border-radius:8px;padding:5px 8px;font-size:15px;color:#333;background:#fafafa;outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:52px}
+.form-label{color:#666;font-size:13px;min-width:55px}
+.sel-date{border:1px solid #e0e0e0;border-radius:6px;padding:3px 6px;font-size:14px;color:#333;background:#fafafa;outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:48px}
 .sel-date:focus{border-color:#0dc2b3;background:#fff}
-.sel-zxj{border:1px solid #0dc2b3;border-radius:8px;padding:5px 8px;font-size:14px;color:#0dc2b3;background:#f0fdfa;outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer}
+.sel-zxj{border:1px solid #0dc2b3;border-radius:6px;padding:3px 6px;font-size:13px;color:#0dc2b3;background:#f0fdfa;outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer}
 #result{margin-top:0;display:none;padding-bottom:env(safe-area-inset-bottom, 30px)}
 #panHead{background:#fff;padding:0}
 #panHead td{background:#fff}
@@ -128,11 +128,11 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:#1a1a
 @media (max-width:500px) {
   #mainDIV{padding:0!important}
   .form-card{padding:2px 0!important}
-  .form-row{padding:6px 8px!important}
+  .form-row{padding:4px 6px!important}
   .form-row>div{flex-wrap:nowrap!important;white-space:nowrap!important}
-  .form-label{font-size:12px!important;min-width:50px!important}
-  .sel-date{font-size:13px!important;padding:6px 4px!important;min-width:42px!important;border-radius:4px!important;background:#fff!important}
-  .sel-zxj{font-size:13px!important;padding:6px 8px!important}
+  .form-label{font-size:11px!important;min-width:44px!important}
+  .sel-date{font-size:12px!important;padding:3px 3px!important;min-width:38px!important;border-radius:4px!important;background:#fff!important}
+  .sel-zxj{font-size:12px!important;padding:3px 6px!important}
   #pan td{padding-left:4px!important;padding-right:4px!important;padding-top:2px!important}
   #pan .panItem{line-height:22px!important;font-size:14px!important}
   .yiXingPan td{padding-left:4px!important;padding-right:4px!important;padding-top:2px!important;line-height:22px!important;font-size:14px!important}
