@@ -1551,7 +1551,7 @@ function _ensureSheet() {
   if (!sheet) {
     sheet = document.createElement('div');
     sheet.id = 'bottomSheet';
-    sheet.style.cssText = 'position:fixed;bottom:44px;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:600px;max-height:70vh;background:#fff;border-radius:14px 14px 0 0;z-index:10000;overflow-y:auto;transition:transform 0.3s ease;padding-bottom:env(safe-area-inset-bottom,0)';
+    sheet.style.cssText = 'position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:600px;max-height:70vh;background:#fff;border-radius:14px 14px 0 0;z-index:10000;overflow-y:auto;transition:transform 0.3s ease;padding-bottom:env(safe-area-inset-bottom,0)';
     document.body.appendChild(sheet);
   }
   return {overlay, sheet};
