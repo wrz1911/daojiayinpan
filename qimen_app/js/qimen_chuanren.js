@@ -452,8 +452,14 @@ window.renderChuanRen=(data,containerId) => {
         qimenGridHTML+='</div></div>';
       }
     }
-  }catch(e){console.log(e);}
-  if(!qimenGridHTML)qimenGridHTML='<div style=text-align:center;padding:20px>九宫</div>';
+  }catch(e){qimenGridHTML='<div style=color:red;text-align:center;padding:20px>九宫错误:'+e.message+'</div>';}
+  if(!qimenGridHTML){
+    let reason='';
+    if(!window.qimenChart) reason='qimenChart未定义';
+    else if(!window.buildPaipanGrid) reason='buildPaipanGrid未定义';
+    else{let qr2=window.qimenChart({year:2026,month:7,day:11,hour:14,minute:0,panType:1}); reason='qr.pals='+(qr2&&qr2.pals?'有':'无');}
+    qimenGridHTML='<div style=color:red;text-align:center;padding:20px>九宫:'+reason+'</div>';
+  }
 
   h+=qimenGridHTML;
 

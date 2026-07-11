@@ -143,8 +143,8 @@ function setPanType(t) {
   if(sxIn)sxIn.style.display=(t===4)?'flex':'none';
   let crIn=document.getElementById('crInputs');
   if(crIn)crIn.style.display=(t===5)?'block':'none';
-  let zxj=document.getElementById('zxjSpan');
-  if(zxj){let zxjRow=zxj.closest('.form-row');if(zxjRow)zxjRow.style.display=(t===3||t===4||t===5)?'none':'';}
+  let zxjRow=document.getElementById('zxjRow');
+  if(zxjRow){let hide=(t===3||t===4||t===5);zxjRow.style.display=hide?'none':'';if(!hide){let zs=document.getElementById('zxjSpan');if(zs)zs.style.display='';}}
   let tr=document.getElementById('timeRow');
   if(tr)tr.style.display=(t===4)?'none':'flex';
   document.body.className = document.body.className.replace(/mode-\w+/g,'');
@@ -787,9 +787,6 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
   let html =
     '<div id="panHead">' +
     '<TABLE class="pan" id="headTable">' +
-    '<TR><TD id="itemTitle" style="border:none">事项</TD><TD colspan="'+keCols+'" style="line-height:30px;border:none">' +
-    '<span id="title" onclick="editTitle()" style="cursor:pointer;min-width:60px;display:inline-block"></span> ' +
-    '<span onclick="editTitle()" style="cursor:pointer;font-size:16px">&#9998;</span></TD></TR>' +
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongli+')</TD></TR>' +
     '<TR><TD style="color:#dead68">节气</TD><TD colspan="'+keCols+'" id="jieqi">'+(jieqi||'节气')+'</TD></TR>' +
     '<TR><TD style="color:#dead68">类型</TD><TD colspan="'+keCols+'">' +
@@ -1059,6 +1056,7 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     '</TABLE></center></div>';
   return h;
 }
+window.buildPaipanGrid=buildPaipanGrid;
 
 function renderXinpan(useBg) {
   try {
@@ -2724,6 +2722,10 @@ div.innerHTML=ui+parts.join('');
     if(xd&&_xjuDegSaved) xd.value=_xjuDegSaved;
   },10);
   div.style.display='block';let xjuD=document.getElementById('xjuDeg');if(xjuD){if(xjuD.value==='0'){let md=document.getElementById('selShanXiangDeg');if(md)xjuD.value=md.value||'0';}xjuD.blur();}
+  // 程序化绑定向角度选局面板事件(Tauri兼容)
+  div.querySelectorAll('input[name="xjuYear"]').forEach(r => { r.onchange = refreshXiangJu; });
+  let xd2=div.querySelector('#xjuDeg'); if(xd2) xd2.onchange = function(){let v=parseInt(this.value);if(isNaN(v)||v<0)this.value=0;else if(v>359)this.value=359;refreshXiangJu();};
+  let chgBtn=div.querySelector('[onclick*="refreshXiangJu"]'); if(chgBtn) chgBtn.onclick = refreshXiangJu;
   if(!noScroll)setTimeout(() => {let btn=document.getElementById('btnXiangJu');if(btn){let top=btn.getBoundingClientRect().top+window.pageYOffset;let offset=document.body.classList.contains('is-mobile')?36:0;window.scrollTo({top:top-offset,behavior:'smooth'});}},200);
   // Re-align after display: square gongs, row sync, and yinGan positions
   setTimeout(() => {
@@ -2764,7 +2766,7 @@ function refreshXiangJu(){
 function doChuanRen(){
   let tip=document.getElementById("tip");if(tip)tip.innerHTML="";
   sxIn=document.getElementById("shanxiangInputs");if(sxIn)sxIn.style.display="none";
-  zxj=document.getElementById("zxjSpan");if(zxj)zxj.style.display="none";
+  let zxj2=document.getElementById("zxjSpan");if(zxj2)zxj2.style.display="none";
   document.getElementById("xinpanPanel").style.display="none";
   document.getElementById("result").style.display="block";
   // Create persistent穿壬 inputs if not exist
@@ -2868,7 +2870,6 @@ window.setPanType=setPanType;
 window.adjDays=adjDays;
 window.onZxjChange=onZxjChange;
 window.setNow=setNow;
-window.buildPaipanGrid=buildPaipanGrid;
 window.recalcColors=recalcColors;
 window.showPalace=showPalace;
 window.showXinpanEditor=showXinpanEditor;
