@@ -1697,7 +1697,7 @@ function _renderHistorySheet() {
     let im = document.getElementById('sheetImport');
     let da = document.getElementById('sheetDelAllBtn');
     if (cx) cx.onclick = _closeSheet;
-    if (ex) ex.onclick = _exportJSON;
+    if (ex) ex.onclick = function(){ try{_exportJSON();}catch(e){alert('导出错误:'+e.message);} };
     if (im) im.onclick = _importJSON;
     if (da) da.onclick = delChecked;
     // 过滤标签
