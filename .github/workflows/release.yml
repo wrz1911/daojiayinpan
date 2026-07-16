@@ -207,6 +207,8 @@ jobs:
           sed -i 's|<application|    <uses-permission android:name="android.permission.SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.RECEIVE_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.SEND_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.READ_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.BROADCAST_SMS" tools:node="remove" />\n    <application|' android/app/src/main/AndroidManifest.xml
           # 同步Android版本号
           ANDROID_VER="${VER%.*}"
+          VERCODE=$(echo "$VER" | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')
+          sed -i "s/versionCode [0-9]*/versionCode $VERCODE/" android/app/build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"$ANDROID_VER\"/" android/app/build.gradle
 
 
