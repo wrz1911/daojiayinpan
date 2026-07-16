@@ -24,7 +24,7 @@ HTMLEOF
 
 echo "=== Tauri 编译 ==="
 cd src-tauri
-cargo tauri build 2>&1 || true
+cargo tauri build 2>&1 || { echo "ERROR: Tauri build failed"; exit 1; }
 
 echo ""
 echo "=== 完成 ==="

@@ -1,7 +1,7 @@
 @charset "utf-8";
 
 /* ===== 1. 基础通用样式 (tool.css) ===== */
-* { padding:0px; margin:0px;user-select: none;-moz-user-select:-ms-user-select: none;-webkit-user-select: none;font-family:Microsoft Yahei;-webkit-tap-highlight-color: transparent;}
+* { padding:0px; margin:0px;user-select: none;-moz-user-select: none;-ms-user-select: none;-webkit-user-select: none;font-family:Microsoft Yahei;-webkit-tap-highlight-color: transparent;}
 @media (min-width: 390px){ body{background-color:#ffffff;font-family:Microsoft Yahei;color:#000;padding:0px;margin:0px;word-break:break-all;font-size:13px} }
 @media (max-width:389px){ body{background-color:#ffffff;font-family:Microsoft Yahei;color:#000;padding:0px;margin:0px;word-break:break-all;font-size:11px} }
 TD{border-collapse:collapse; table-layout:fixed;word-break:break-all;text-align:left}
@@ -64,14 +64,10 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .panItem span:nth-of-type(2){float:right}
 .right td{text-align:right}
 #Tip{line-height:30px;font-size:13px;color:#888;text-align:center}
-#btnTable1{width:100%;table-layout:fixed;border-collapse:collapse}
-#btnTable1 td{text-align:center;padding:2px;}
-#btnTable2{width:100%;table-layout:fixed;border-collapse:collapse}
-#btnTable2 td{text-align:center;padding:2px;}
-#btnTable1 td:first-child{padding-left:0px}
-#btnTable1 td:last-child{padding-right:0px}
-#btnTable2 td:first-child{padding-left:0px}
-#btnTable2 td:last-child{padding-right:0px}
+#btnTable1,#btnTable2{width:100%;table-layout:fixed;border-collapse:collapse}
+#btnTable1 td,#btnTable2 td{text-align:center;padding:2px;}
+#btnTable1 td:first-child,#btnTable2 td:first-child{padding-left:0px}
+#btnTable1 td:last-child,#btnTable2 td:last-child{padding-right:0px}
 .btn{line-height:30px;width:100%;border-radius:3px;text-align:center;background:#0dc2b3;color:#fff;font-size:14px}
 #preBtn{float:left;margin-left:10px;}
 #nextBtn{float:right;margin-right:10px;}

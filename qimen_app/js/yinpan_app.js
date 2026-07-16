@@ -37,6 +37,13 @@ let _expectedPals=[];
 const STORAGE_KEY = 'qimen_saved';
 const STORAGE_FILE = 'backups.json';
 const STORAGE_DIR = 'qimen';
+// 共享常量: 地支→宫位, 马星位置, 空亡序号, 入墓/击刑规则
+const ZHI2G = {'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
+const MA_POS = {4:'ma1',9:'ma2',2:'ma2',3:'ma3',7:'ma4',8:'ma3',1:'ma4',6:'ma4'};
+const KONG_ID = {4:4,9:5,2:6,3:3,7:7,8:2,1:1,6:8};
+const MU_RULES = {2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};
+const XING_RULES = {3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};
+const XM_RULES = {8:['庚'],4:['壬']};
 
 setPanType(1);
 // 绑定模式切换和日期选择器: 用程序化事件确保Tauri兼容
@@ -221,7 +228,7 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   let maGong=maIdx>=0?ZHI2GONG2[maIdx]:0;
   let maPosId=MA_POS[maGong]||'';
   // 空亡: 旬首→空亡地支→对应宫位标记◎
-  let ZHI2G={'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
+  // ZHI2G now uses shared constant at top
   let kongGongs={};let kw=sxData.kongWang||'';if(kw.length>=2){kongGongs[ZHI2G[kw[0]]]=true;kongGongs[ZHI2G[kw[1]]]=true;}
   // 阴干: 独立重算暗干排列, 不依赖doPan时干/旬首/值使落宫
   let shiZhi=shiZhu.split(' ')[1];let shiG=shiZhi?shiZhi[0]:'';
@@ -296,7 +303,7 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   document.getElementById('result').style.display='block';
   window._palaces=palaces;
   _renderBottomBar();
-  addColorStyles();setTimeout(_bindActionButtons,50);setTimeout(fixYinGanAlign,50);setTimeout(fixYinGanAlign,50);
+  addColorStyles();setTimeout(_bindActionButtons,50);setTimeout(fixYinGanAlign,50);
   }catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>山向错误:'+e.message+'</span>';}
 }
 
@@ -665,7 +672,6 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
   });
 
   // 马星: 时支查YiMa表→宫位→外圈位置标记外圈位置: 地支→宫位→ma角标
-  let MA_POS = {4:'ma1', 9:'ma2', 2:'ma2', 3:'ma3', 7:'ma4', 8:'ma3', 1:'ma4', 6:'ma4'};
   let ZHI_ARR = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
   let ZHI2GONG = [1,8,8,3,4,4,9,2,2,7,6,6];
   let maIdx2 = ZHI_ARR.indexOf(maXing);
@@ -674,11 +680,10 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
   window._maPosId = maPosId;
 
   // 空亡: 旬首→空亡地支→对应宫位标记◎宫位
-  let ZHI2G2 = {'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
   let kongGongs2 = {};
   if (kongWang && kongWang.length >= 2) {
-    kongGongs2[ZHI2G2[kongWang[0]]] = true;
-    kongGongs2[ZHI2G2[kongWang[1]]] = true;
+    kongGongs2[ZHI2G[kongWang[0]]] = true;
+    kongGongs2[ZHI2G[kongWang[1]]] = true;
   }
   window._kongGongs = kongGongs2;
 
@@ -723,10 +728,8 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
   let colorSpan = window._colorSpan;
 
   // 空亡: 旬首→空亡地支→对应宫位标记◎标记ID映射: 固定编号体系
-  let KONG_ID = {4:4, 9:5, 2:6, 3:3, 7:7, 8:2, 1:1, 6:8};
 
   // 空亡: 旬首→空亡地支→对应宫位标记◎宫位: 地支→宫位映射
-  let ZHI2G = {'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
   let kongGongs = {};
   if (kongWang.length >= 2) {
     kongGongs[ZHI2G[kongWang[0]]] = true;
@@ -995,7 +998,6 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
   let panOpen = panClass ? '<TABLE id="pan" class="'+panClass+'">' : '<TABLE id="pan">';
   let ytLeft = wrapperClass ? ' class="yinTable"' : '';
   let ytRight = wrapperClass ? ' class="yinTable right"' : '';
-  KONG_ID = {4:4, 9:5, 2:6, 3:3, 7:7, 8:2, 1:1, 6:8};
   let mkTag = '<font color=red style=font-size:18px>马</font>';
 
   function renderPalace(g) {
@@ -1084,15 +1086,13 @@ function renderXinpan(useBg) {
     };
     // 空亡: 旬首→空亡地支→对应宫位标记◎马星从背景计算
     if (useBg && _xpBgKongWang) {
-      let ZHI2G3 = {'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
       if (_xpBgKongWang.length >= 2) {
-        kongGongs[ZHI2G3[_xpBgKongWang[0]]] = true;
-        kongGongs[ZHI2G3[_xpBgKongWang[1]]] = true;
+        kongGongs[ZHI2G[_xpBgKongWang[0]]] = true;
+        kongGongs[ZHI2G[_xpBgKongWang[1]]] = true;
       }
     }
     if (useBg && _xpBgMaXing) {
-      let ZHI2G4 = {'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
-      maGong = ZHI2G4[_xpBgMaXing] || 0;
+      maGong = ZHI2G[_xpBgMaXing] || 0;
     }
   });
   recalcColors(palaces);
@@ -1104,7 +1104,6 @@ function renderXinpan(useBg) {
   window._xpEditGong = window._xpEditGong || 0;
 
   colorSpan = window._colorSpan || (v => {return v||'';});
-  let KONG_ID = {4:4, 9:5, 2:6, 3:3, 7:7, 8:2, 1:1, 6:8};
 
   function renderPalace(g) {
     let p = palaces['gong'+g];
