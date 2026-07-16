@@ -672,9 +672,9 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
   });
 
   // 马星: 时支查YiMa表→宫位→外圈位置标记外圈位置: 地支→宫位→ma角标
-  let ZHI_ARR = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  let ZHI_LIST = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
   let ZHI2GONG = [1,8,8,3,4,4,9,2,2,7,6,6];
-  let maIdx2 = ZHI_ARR.indexOf(maXing);
+  let maIdx2 = ZHI_LIST.indexOf(maXing);
   let maGongNum = maIdx2 >= 0 ? ZHI2GONG[maIdx2] : 0;
   let maPosId = MA_POS[maGongNum] || '';
   window._maPosId = maPosId;
@@ -901,10 +901,6 @@ function fixYinGanAlign() {
 
 // ============ 底部按钮功能 ============
 
-// === 自动化验证 ===
-
-// === 调试信息复制 ===
-
 // === 移星换斗 ===
 let ZHUAN_ORDER = [1,8,3,4,9,2,7,6];
 
@@ -1008,7 +1004,6 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     xingAbbr = (window.XING_ABBR||{})[p.xing] || p.xing || '';
     menAbbr = (window.MEN_ABBR||{})[p.men] || p.men || '';
     kongMark = kongGongs[g] ? '○' : '';
-    let hasState = p.isTianXing || p.isTianMu || p.isDiXing || p.isDiMu;
     muRules2 = {2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};
     xingRules2 = {3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};
     xmRules2 = {8:['庚'],4:['壬']};
@@ -1098,7 +1093,6 @@ function renderXinpan(useBg) {
   recalcColors(palaces);
   window._palaces = palaces;
   window._kongGongs = kongGongs;
-  MA_POS = {4:'ma1', 9:'ma2', 2:'ma2', 3:'ma3', 7:'ma4', 8:'ma3', 1:'ma4', 6:'ma4'};
   maPosId = MA_POS[maGong] || '';
   // 当前编辑宫位高亮
   window._xpEditGong = window._xpEditGong || 0;
@@ -2683,13 +2677,12 @@ function toggleXiangJu(noScroll){
 
     // 空亡: 旬首→空亡地支→对应宫位标记◎/马星/旬首
     let ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-    let xunShouGZ='甲'+ZHI[xunshou%12];
-    let kongWangStr=ZHI[xunkong1]+ZHI[xunkong2];
-    let maStr=ZHI[maxing];
-    let ZHI2G_KW={'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
-    let kongGongsT={};kongGongsT[ZHI2G_KW[ZHI[xunkong1]]]=true;kongGongsT[ZHI2G_KW[ZHI[xunkong2]]]=true;
-    let MA_POS2={4:'ma1',9:'ma2',2:'ma2',3:'ma3',7:'ma4',8:'ma3',1:'ma4',6:'ma4'};
-    maGong=ZHI2G_KW[maStr]||0,maPosId=MA_POS2[maGong]||'';
+    let xunShouGZ='甲'+ZHI_LIST[xunshou%12];
+    let kongWangStr=ZHI_LIST[xunkong1]+ZHI_LIST[xunkong2];
+    let maStr=ZHI_LIST[maxing];
+    let kongGongsT={};kongGongsT[ZHI2G[ZHI_LIST[xunkong1]]]=true;kongGongsT[ZHI2G[ZHI_LIST[xunkong2]]]=true;
+    
+    maGong=ZHI2G[maStr]||0,maPosId=MA_POS[maGong]||'';
     let agFn= g => {let a=palsT['gong'+g];return a&&a.anGan?window._anGanColor?window._anGanColor(a.anGan,g):a.anGan:'';};
     let csFn=window._colorSpan|| (v => {return v||'';});
     gridHTML=buildPaipanGrid(palsT,kongGongsT,maPosId,agFn,{colorSpan:csFn});
