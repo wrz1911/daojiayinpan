@@ -1836,26 +1836,25 @@ async function _doExport() {
     } catch(e) { alert('导出失败: '+e.message); }
     return;
   }
-  // Android: Capacitor Filesystem写文件到Downloads
+  // Android: Capacitor Filesystem
+  const FS = window.Capacitor.Plugins.Filesystem;
+  async function trySave(dir, dirName) {
+    try { await FS.mkdir({path: 'qimen', directory: dir, recursive: true}); } catch(e) {}
+    await FS.writeFile({path: 'qimen/'+fn, data: data, directory: dir});
+    alert('已保存到 '+dirName+'/qimen/'+fn);
+    return true;
+  }
   try {
     // Documents=0, External=1, Data=2, Cache=3, ExternalStorage=4
-    await window.Capacitor.Plugins.Filesystem.writeFile({
-      path: fn,
-      data: data,
-      directory: 4  // ExternalStorage = 公共外部存储
-    });
-    alert('已保存到下载目录');
-    return;
-  } catch(e1) {
-    try {
-      await window.Capacitor.Plugins.Filesystem.writeFile({
-        path: fn, data: data, directory: 0  // Documents
-      });
-      alert('已保存到文档目录');
-    } catch(e2) {
-      alert('导出失败: '+e2.message);
-    }
-  }
+    if (await trySave(0, 'Documents')) return;
+  } catch(e1) {}
+  try {
+    if (await trySave(4, 'ExternalStorage')) return;
+  } catch(e2) {}
+  try {
+    if (await trySave(1, 'External')) return;
+  } catch(e3) {}
+  alert('导出失败，请用PC端导出');
 }
 
 function _importJSON() {
