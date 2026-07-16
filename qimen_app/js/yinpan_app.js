@@ -1836,19 +1836,15 @@ async function _doExport() {
     } catch(e) { alert('导出失败: '+e.message); }
     return;
   }
-  // Android: 写App内部缓存, 然后分享
+  // Android: 写App内部Data目录 (始终可写)
   const FS = window.Capacitor.Plugins.Filesystem;
   try {
-    await FS.writeFile({path: fn, data: data, directory: 3}); // Cache=3, 始终可写
-    // 用Share插件打开分享面板
-    if (window.Capacitor.Plugins.Share) {
-      await window.Capacitor.Plugins.Share.share({
-        title: '排盘备份', text: data,
-        dialogTitle: '分享排盘数据'
-      });
-    } else {
-      alert('已保存到App缓存: '+fn);
-    }
+    // directory: 2=Data(私有内部存储, 始终可写)
+    await FS.mkdir({path: '.', directory: 2, recursive: true});
+  } catch(e) {}
+  try {
+    await FS.writeFile({path: fn, data: data, directory: 2});
+    alert('已保存到App数据目录');
   } catch(e) {
     alert('导出失败: '+e.message);
   }
