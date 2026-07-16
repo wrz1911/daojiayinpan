@@ -1836,20 +1836,26 @@ async function _doExport() {
     } catch(e) { alert('导出失败: '+e.message); }
     return;
   }
-  // Android/fallback
-  let blob = new Blob([data], {type: 'application/json'});
-  let file = new File([blob], fn, {type: 'application/json'});
-  if (navigator.canShare && navigator.canShare({files:[file]})) {
-    try {
-      await navigator.share({files:[file], title:'排盘数据备份'});
-      return;
-    } catch(e) {}
-  }
-  // 最后兜底: 复制到剪贴板
+  // Android: Capacitor Filesystem写文件到Downloads
   try {
-    await navigator.clipboard.writeText(data);
-    alert('已复制到剪贴板('+JSON.parse(data).length+'条)');
-  } catch(e) { alert('导出失败'); }
+    // Documents=0, External=1, Data=2, Cache=3, ExternalStorage=4
+    await window.Capacitor.Plugins.Filesystem.writeFile({
+      path: fn,
+      data: data,
+      directory: 4  // ExternalStorage = 公共外部存储
+    });
+    alert('已保存到下载目录');
+    return;
+  } catch(e1) {
+    try {
+      await window.Capacitor.Plugins.Filesystem.writeFile({
+        path: fn, data: data, directory: 0  // Documents
+      });
+      alert('已保存到文档目录');
+    } catch(e2) {
+      alert('导出失败: '+e2.message);
+    }
+  }
 }
 
 function _importJSON() {
