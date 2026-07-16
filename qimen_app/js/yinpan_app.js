@@ -1836,12 +1836,20 @@ async function _doExport() {
     } catch(e) { alert('导出失败: '+e.message); }
     return;
   }
-  // Android/fallback: download属性触发系统下载
+  // Android/fallback
   let blob = new Blob([data], {type: 'application/json'});
-  let url = URL.createObjectURL(blob);
-  let a = document.createElement('a'); a.href = url; a.download = fn;
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  let file = new File([blob], fn, {type: 'application/json'});
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try {
+      await navigator.share({files:[file], title:'排盘数据备份'});
+      return;
+    } catch(e) {}
+  }
+  // 最后兜底: 复制到剪贴板
+  try {
+    await navigator.clipboard.writeText(data);
+    alert('已复制到剪贴板('+JSON.parse(data).length+'条)');
+  } catch(e) { alert('导出失败'); }
 }
 
 function _importJSON() {
