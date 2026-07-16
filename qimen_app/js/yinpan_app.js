@@ -1826,24 +1826,22 @@ async function _doExport() {
   let data = localStorage.getItem(STORAGE_KEY)||'[]';
   let ts = new Date().toISOString().slice(0,10);
   let fn = 'qimen_'+ts+'.json';
-  // PC: Tauri fs写下载目录
-  if (window.__TAURI__ && window.__TAURI__.fs && window.__TAURI__.path) {
+  // PC Tauri: 系统保存对话框
+  if (window.__TAURI__ && window.__TAURI__.dialog) {
     try {
+      const {save} = window.__TAURI__.dialog;
       const {writeTextFile} = window.__TAURI__.fs;
-      const {downloadDir} = window.__TAURI__.path;
-      const dp = await downloadDir();
-      await writeTextFile(dp+'/'+fn, data);
-      alert('已保存到下载目录:\n'+fn);
-      return;
-    } catch(e) {}
+      const fp = await save({defaultPath: fn, filters: [{name:'JSON',extensions:['json']}]});
+      if (fp) { await writeTextFile(fp, data); alert('已保存'); }
+    } catch(e) { alert('导出失败: '+e.message); }
+    return;
   }
-  // Android/fallback: 复制到剪贴板
-  try {
-    await navigator.clipboard.writeText(data);
-    alert('已复制到剪贴板('+JSON.parse(data).length+'条记录)');
-  } catch(e) {
-    alert('导出失败: '+e.message);
-  }
+  // Android/fallback: download属性触发系统下载
+  let blob = new Blob([data], {type: 'application/json'});
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a'); a.href = url; a.download = fn;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
 }
 
 function _importJSON() {
