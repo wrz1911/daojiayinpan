@@ -1836,25 +1836,22 @@ async function _doExport() {
     } catch(e) { alert('导出失败: '+e.message); }
     return;
   }
-  // Android: Capacitor Filesystem
+  // Android: 写App内部缓存, 然后分享
   const FS = window.Capacitor.Plugins.Filesystem;
-  async function trySave(dir, dirName) {
-    try { await FS.mkdir({path: 'qimen', directory: dir, recursive: true}); } catch(e) {}
-    await FS.writeFile({path: 'qimen/'+fn, data: data, directory: dir});
-    alert('已保存到 '+dirName+'/qimen/'+fn);
-    return true;
+  try {
+    await FS.writeFile({path: fn, data: data, directory: 3}); // Cache=3, 始终可写
+    // 用Share插件打开分享面板
+    if (window.Capacitor.Plugins.Share) {
+      await window.Capacitor.Plugins.Share.share({
+        title: '排盘备份', text: data,
+        dialogTitle: '分享排盘数据'
+      });
+    } else {
+      alert('已保存到App缓存: '+fn);
+    }
+  } catch(e) {
+    alert('导出失败: '+e.message);
   }
-  try {
-    // Documents=0, External=1, Data=2, Cache=3, ExternalStorage=4
-    if (await trySave(0, 'Documents')) return;
-  } catch(e1) {}
-  try {
-    if (await trySave(4, 'ExternalStorage')) return;
-  } catch(e2) {}
-  try {
-    if (await trySave(1, 'External')) return;
-  } catch(e3) {}
-  alert('导出失败，请用PC端导出');
 }
 
 function _importJSON() {
