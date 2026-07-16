@@ -1697,24 +1697,7 @@ function _renderHistorySheet() {
     let im = document.getElementById('sheetImport');
     if (cx) cx.onclick = _closeSheet;
     if (ex) ex.onclick = function(){
-      let data = localStorage.getItem(STORAGE_KEY)||'[]';
-      let ts = new Date().toISOString().slice(0,10);
-      _openSheet('<div style="padding:16px">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
-        '<span style="font-weight:bold">导出数据 ('+JSON.parse(data).length+'条)</span>'+
-        '<span id="exportCloseX" style="cursor:pointer;font-size:20px;color:#999">&times;</span></div>'+
-        '<textarea id="exportText" readonly style="width:100%;height:50vh;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:monospace;resize:none;box-sizing:border-box">'+data+'</textarea>'+
-        '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">'+
-        '<span id="exportCopyBtn" style="cursor:pointer;padding:8px 16px;border-radius:8px;background:#0dc2b3;color:#fff;font-size:14px">复制到剪贴板</span></div></div>');
-      setTimeout(function(){
-        let cx2 = document.getElementById('exportCloseX'); if(cx2) cx2.onclick = _closeSheet;
-        let cp = document.getElementById('exportCopyBtn');
-        if(cp) cp.onclick = function(){
-          let ta = document.getElementById('exportText');
-          if(ta){ ta.select(); navigator.clipboard.writeText(ta.value).then(function(){alert('已复制到剪贴板');}).catch(function(){alert('复制失败，请手动全选复制');}); }
-        };
-        let ta = document.getElementById('exportText'); if(ta) ta.select();
-      },400);
+      _closeSheet(); _doExport();
     };
     if (im) im.onclick = _importJSON;
     // 过滤标签
@@ -1837,6 +1820,30 @@ function _downloadBlob(data) {
   a.download = 'qimen_backup_'+new Date().toISOString().slice(0,10)+'.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
+}
+
+async function _doExport() {
+  let data = localStorage.getItem(STORAGE_KEY)||'[]';
+  let ts = new Date().toISOString().slice(0,10);
+  let fn = 'qimen_'+ts+'.json';
+  // PC: Tauri fs写下载目录
+  if (window.__TAURI__ && window.__TAURI__.fs && window.__TAURI__.path) {
+    try {
+      const {writeTextFile} = window.__TAURI__.fs;
+      const {downloadDir} = window.__TAURI__.path;
+      const dp = await downloadDir();
+      await writeTextFile(dp+'/'+fn, data);
+      alert('已保存到下载目录:\n'+fn);
+      return;
+    } catch(e) {}
+  }
+  // Android/fallback: 复制到剪贴板
+  try {
+    await navigator.clipboard.writeText(data);
+    alert('已复制到剪贴板('+JSON.parse(data).length+'条记录)');
+  } catch(e) {
+    alert('导出失败: '+e.message);
+  }
 }
 
 function _importJSON() {
