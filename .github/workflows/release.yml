@@ -202,6 +202,17 @@ jobs:
           npx cap add android
           # 覆盖variables.gradle: 保留Capacitor默认的AndroidX版本号, 仅修改minSdk
           sed -i 's/minSdkVersion = 23/minSdkVersion = 31/' android/variables.gradle
+          # 开启R8混淆+资源压缩
+          sed -i 's/minifyEnabled false/minifyEnabled true/' android/app/build.gradle
+          sed -i '/minifyEnabled true/a\            shrinkResources true' android/app/build.gradle
+          sed -i 's|proguard-android.txt|proguard-android-optimize.txt|' android/app/build.gradle
+          # 添加ProGuard规则保留Capacitor
+          cat >> android/app/proguard-rules.pro << 'PGEOF'
+          -keep class com.getcapacitor.** { *; }
+          -keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }
+          PGEOF
+          # 开启硬件加速
+          sed -i 's|<application|<application android:hardwareAccelerated="true"|' android/app/src/main/AndroidManifest.xml
           # 移除所有SMS相关权限(Capacitor/WebView依赖可能注入)
           sed -i 's|<manifest |<manifest xmlns:tools="http://schemas.android.com/tools" |' android/app/src/main/AndroidManifest.xml
           sed -i 's|<application|    <uses-permission android:name="android.permission.SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.RECEIVE_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.SEND_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.READ_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.BROADCAST_SMS" tools:node="remove" />\n    <application|' android/app/src/main/AndroidManifest.xml
