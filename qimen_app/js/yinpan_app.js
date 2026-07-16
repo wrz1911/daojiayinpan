@@ -1687,7 +1687,7 @@ function _renderHistorySheet() {
           '<span style="font-size:10px;color:#aaa;flex-shrink:0">'+dStr+'</span>' +
           '<span class="sheetDelBtn" data-idx="'+origIdx+'" style="color:#ccc;cursor:pointer;font-size:18px;flex-shrink:0;padding:0 4px" title="删除">&times;</span></div>';
       });
-      h += '<div style="padding:12px 0;text-align:center"><span id="sheetDelAllBtn" style="cursor:pointer;color:#e74c3c;font-size:12px">删除 '+(_saveMode?(modeLabels[_saveMode]||_saveMode):'全部')+' 记录</span></div>';
+
       h += '</div>';
     }
     _openSheet(h);
@@ -1695,11 +1695,9 @@ function _renderHistorySheet() {
     let cx = document.getElementById('sheetCloseX2');
     let ex = document.getElementById('sheetExport');
     let im = document.getElementById('sheetImport');
-    let da = document.getElementById('sheetDelAllBtn');
     if (cx) cx.onclick = _closeSheet;
-    if (ex) ex.onclick = function(){ try{_exportJSON();}catch(e){alert('导出错误:'+e.message);} };
+    if (ex) ex.onclick = function(){ _downloadBlob(localStorage.getItem(STORAGE_KEY)||'[]'); };
     if (im) im.onclick = _importJSON;
-    if (da) da.onclick = delChecked;
     // 过滤标签
     let fbs = document.querySelectorAll('#sheetFilters .sheetFilterBtn');
     fbs.forEach(fb => {
