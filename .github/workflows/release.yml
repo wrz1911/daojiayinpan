@@ -202,9 +202,9 @@ jobs:
           npx cap add android
           # 覆盖variables.gradle: 保留Capacitor默认的AndroidX版本号, 仅修改minSdk
           sed -i 's/minSdkVersion = 23/minSdkVersion = 31/' android/variables.gradle
-          # 移除SMS权限
+          # 移除所有SMS相关权限(Capacitor/WebView依赖可能注入)
           sed -i 's|<manifest |<manifest xmlns:tools="http://schemas.android.com/tools" |' android/app/src/main/AndroidManifest.xml
-          sed -i 's|<application|    <uses-permission android:name="android.permission.SMS" tools:node="remove" />\n    <application|' android/app/src/main/AndroidManifest.xml
+          sed -i 's|<application|    <uses-permission android:name="android.permission.SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.RECEIVE_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.SEND_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.READ_SMS" tools:node="remove" />\n    <uses-permission android:name="android.permission.BROADCAST_SMS" tools:node="remove" />\n    <application|' android/app/src/main/AndroidManifest.xml
           # 同步Android版本号
           ANDROID_VER="${VER%.*}"
           sed -i "s/versionName \"[^\"]*\"/versionName \"$ANDROID_VER\"/" android/app/build.gradle
