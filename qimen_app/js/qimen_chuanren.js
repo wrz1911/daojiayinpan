@@ -1,4 +1,5 @@
 // 奇门遁甲排盘引擎  作者: 地天泰  微信/手机: 18626256203
+var QM=window.QM||{};
 // 项目地址: https://github.com/wrz1911/daojiayinpan
 // 开源依赖: tyme4ts (MIT) https://github.com/6tail/tyme4ts
 // 开源依赖: Tauri (MIT) https://github.com/tauri-apps/tauri
@@ -241,11 +242,11 @@ window.computeBaZiDaYun= opts => {
   let nayin=bz.map(b => {return T.SixtyCycle.fromName(b.gz).getSound().getName();});
 
   // 藏干
-  let cangGanMap={子:'癸',丑:'癸辛己',寅:'甲丙戊',卯:'乙',辰:'乙戊癸',巳:'丙庚戊',午:'丁己',未:'乙己丁',申:'庚壬戊',酉:'辛',戌:'辛丁戊',亥:'壬甲'};
+  let cangGanMap=QM.CANG_GAN||{子:'癸',丑:'癸辛己',寅:'甲丙戊',卯:'乙',辰:'乙戊癸',巳:'丙庚戊',午:'丁己',未:'乙己丁',申:'庚壬戊',酉:'辛',戌:'辛丁戊',亥:'壬甲'};
   let cangGan=bz.map(b => {return cangGanMap[b.z]||'';});
 
   // 十神 (以日干为基准)
-  let wxMap={甲:2,乙:2,丙:3,丁:3,戊:4,己:4,庚:5,辛:5,壬:1,癸:1};
+  let wxMap=QM.WX_MAP||{甲:2,乙:2,丙:3,丁:3,戊:4,己:4,庚:5,辛:5,壬:1,癸:1};
   let rgWx=wxMap[bz[2].g], rgYin=bz[2].gIdx%2===0?1:0;
   let shishen=bz.map(b => {
     let twx=wxMap[b.g], tyin=b.gIdx%2===0?1:0;

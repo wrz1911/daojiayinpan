@@ -299,7 +299,7 @@ function buildRaw(d) {
   if (d.customJu) s += '<font color=#FF00FF>自选 </font>';
   s += `农历 :${d.nongli}<br>`;
   s += `四柱: ${d.sizhu.y.ganZhi}\u3000${d.sizhu.m.ganZhi}\u3000${d.sizhu.d.ganZhi}\u3000${d.sizhu.h.ganZhi}`;
-  if (d.sizhu.minute && d.sizhu.minute) s += d.sizhu.minute;
+  if (d.sizhu.minute) s += d.sizhu.minute;
   s += '<br>';
   s += `节气: ${d.jieqi} 月将:${d.yueJiang} `;
   s += `${d.yinYang}遁${d.juNum}局<br> 值符:${d.zf.n}落${d.zf.g}宫 值使:${d.zs.n}落${d.zs.g}宫<br>`;

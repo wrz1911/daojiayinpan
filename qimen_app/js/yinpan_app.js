@@ -73,8 +73,8 @@ function getJu(deg){
   if(ju>9)ju-=9;return ju;
 }
 function getIsYin(deg){
-  duu=Math.floor(((deg%360+360)%360)/5),du=Math.floor(duu/3);
-  _s=[-7,-2,-1,-9,-7,-6,-5,-6,-5,4,1,2,3,8,9,1,3,4,5,4,5,-6,-9,-8][du];
+  let duu=Math.floor(((deg%360+360)%360)/5),du=Math.floor(duu/3);
+  let _s=[-7,-2,-1,-9,-7,-6,-5,-6,-5,4,1,2,3,8,9,1,3,4,5,4,5,-6,-9,-8][du];
   return (_s<0?_s+9:_s+8)<9;
 }
 let SHAN_XIANG_DATA = (function(){
@@ -347,7 +347,7 @@ function doPan() {
           let zfzsF=zfzs%9;if(zfzsF===0)zfzsF=9;
           let ZF={1:'蓬',2:'芮',3:'冲',4:'辅',5:'禽',6:'心',7:'柱',8:'任',9:'英'};
           let ZS={1:'休',2:'死',3:'伤',4:'杜',5:'中',6:'开',7:'惊',8:'生',9:'景'};
-          let zfStar=ZF[zfzsF]||'蓬',zsMenH=ZS[zfzsF]||'休';if(zfzsF===5){zfStar='芮';zsMenH='死';}if(zfzsF===5){zfStar='芮';zsMenH='死';}
+          let zfStar=ZF[zfzsF]||'蓬',zsMenH=ZS[zfzsF]||'休';if(zfzsF===5){zfStar='芮';zsMenH='死';}
           let MAGIC='163468725';let GAN9=['戊','己','庚','辛','壬','癸','丁','丙','乙'];
           let dgs={};if(!sxIsYin){for(let y1=1;y1<=9;y1++){let yi=y1-sxJu+1;if(yi<1)yi+=9;dgs[y1]=GAN9[yi-1];}}
           else{for(let y1=1;y1<=9;y1++){let yi=sxJu-y1+1;if(yi<1)yi+=9;dgs[y1]=GAN9[yi-1];}}
@@ -711,13 +711,11 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
   // 阴干颜色计算(逐字处理寄干)
   window._anGanColor = (ganStr, gong) => {
     if (!ganStr) return '';
-    let muRules = {2:['癸'], 6:['戊','丙','乙'], 8:['庚','丁','己'], 4:['辛','壬']};
-    let xingRules = {3:['戊'], 2:['己'], 8:['庚'], 9:['辛'], 4:['壬','癸']};
-    result = '';
+    let result = '';
     for(let ai = 0; ai < ganStr.length; ai++) {
       let ch = ganStr[ai];
-      let isX = xingRules[gong] && xingRules[gong].indexOf(ch) >= 0;
-      let isM = muRules[gong] && muRules[gong].indexOf(ch) >= 0;
+      let isX = XING_RULES[gong] && XING_RULES[gong].indexOf(ch) >= 0;
+      let isM = MU_RULES[gong] && MU_RULES[gong].indexOf(ch) >= 0;
       if (isX && isM) result += '<font color="#009cef">'+ch+'</font>';
       else if (isX) result += '<font color="#b745ce">'+ch+'</font>';
       else if (isM) result += '<font color="#ca610e">'+ch+'</font>';
@@ -736,21 +734,17 @@ function renderPan(raw, engineData) { let gongli,nongli,sizhu,jieqi,zhiFuStr,zhi
     kongGongs[ZHI2G[kongWang[1]]] = true;
   }
   function renderPalace(g) {
-    p = palaces['gong'+g];
+    let p = palaces['gong'+g];
     if (!p) return '<TD></TD>';
     let w = (g === 9 || g === 1) ? '34%' : '33%';
     let shenAbbr = SHEN_ABBR[p.shen] || p.shen;
     let xingAbbr = XING_ABBR[p.xing] || p.xing;
     let menAbbr = MEN_ABBR[p.men] || p.men;
     let kongMark = kongGongs[g] ? '○' : '';
-    // 逐字颜色: 在渲染时当场按宫位+天干规则判断, 不依赖预计算标记
-    let muRules2 = {2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};
-    let xingRules2 = {3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};
-    let xmRules2 = {8:['庚'],4:['壬']};
     function spanGan(ch) {
-      isM = muRules2[g] && muRules2[g].indexOf(ch) >= 0;
-      isX = xingRules2[g] && xingRules2[g].indexOf(ch) >= 0;
-      let isXM = xmRules2[g] && xmRules2[g].indexOf(ch) >= 0;
+      let isM = MU_RULES[g] && MU_RULES[g].indexOf(ch) >= 0;
+      let isX = XING_RULES[g] && XING_RULES[g].indexOf(ch) >= 0;
+      let isXM = XM_RULES[g] && XM_RULES[g].indexOf(ch) >= 0;
       if (isXM) return '<font color="#009cef">'+ch+'</font>';
       if (isX) return '<font color="#b745ce">'+ch+'</font>';
       if (isM) return '<font color="#ca610e">'+ch+'</font>';
@@ -919,35 +913,28 @@ function applyZhuan(palaces) {
 }
 
 function recalcColors(palaces) {
-  let muRules = {2:['癸'], 6:['戊','丙','乙'], 8:['庚','丁','己'], 4:['辛','壬']};
-  let xingRules = {3:['戊'], 2:['己'], 8:['庚'], 9:['辛'], 4:['壬','癸']};
-  let xmRules = {8:['庚'], 4:['壬']};
   let menKeGong = {'休':[9], '生':[1], '伤':[2,8], '杜':[2,8], '景':[7,6], '死':[1], '惊':[3,4], '开':[3,4]};
 
   function getMenShort(men) {
     if (!men) return '';
-    // 全称→简称 (死门→死)
     let s = (window._MEN_ABBR && window._MEN_ABBR[men]) || '';
     if (s) return s;
-    // 已是简称或未知, 直接校验 menKeGong 中是否存在
     if (menKeGong[men]) return men;
     return '';
   }
   for(let g = 1; g <= 9; g++) {
-    p = palaces['gong'+g]; if (!p) continue;
+    let p = palaces['gong'+g]; if (!p) continue;
     p.isTianXing = false; p.isTianMu = false; p.isDiXing = false; p.isDiMu = false; p.isMenPo = false;
     p.isTianXing1 = false; p.isTianMu1 = false; p.isTianXing2 = false; p.isTianMu2 = false;
     p.isDiXing1 = false; p.isDiMu1 = false; p.isDiXing2 = false; p.isDiMu2 = false;
-    // 门迫检查
     let menShort2 = getMenShort(p.men);
     if (menShort2 && menKeGong[menShort2] && menKeGong[menShort2].indexOf(g) >= 0) p.isMenPo = true;
     if (!p.tian) continue;
-    // 逐字检查天盘干(含寄干)
     for(let ti = 0; ti < p.tian.length; ti++) {
       let tg = p.tian[ti];
-      isM = muRules[g] && muRules[g].indexOf(tg) >= 0;
-      isX = xingRules[g] && xingRules[g].indexOf(tg) >= 0;
-      isXM = xmRules[g] && xmRules[g].indexOf(tg) >= 0;
+      let isM = MU_RULES[g] && MU_RULES[g].indexOf(tg) >= 0;
+      let isX = XING_RULES[g] && XING_RULES[g].indexOf(tg) >= 0;
+      let isXM = XM_RULES[g] && XM_RULES[g].indexOf(tg) >= 0;
       if (ti === 0) {
         if (isXM) { p.isTianXing1 = true; p.isTianMu1 = true; p.isTianXing = true; p.isTianMu = true; }
         else { if (isM) { p.isTianMu1 = true; p.isTianMu = true; } if (isX) { p.isTianXing1 = true; p.isTianXing = true; } }
@@ -960,9 +947,9 @@ function recalcColors(palaces) {
     if (p.di) {
       for(let di = 0; di < p.di.length; di++) {
         let dg = p.di[di];
-        let isM = muRules[g] && muRules[g].indexOf(dg) >= 0;
-        let isX = xingRules[g] && xingRules[g].indexOf(dg) >= 0;
-        let isXM = xmRules[g] && xmRules[g].indexOf(dg) >= 0;
+        let isM = MU_RULES[g] && MU_RULES[g].indexOf(dg) >= 0;
+        let isX = XING_RULES[g] && XING_RULES[g].indexOf(dg) >= 0;
+        let isXM = XM_RULES[g] && XM_RULES[g].indexOf(dg) >= 0;
         if (di === 0) {
           if (isXM) { p.isDiXing1 = true; p.isDiMu1 = true; p.isDiXing = true; p.isDiMu = true; }
           else { if (isM) { p.isDiMu1 = true; p.isDiMu = true; } if (isX) { p.isDiXing1 = true; p.isDiXing = true; } }
@@ -986,7 +973,7 @@ function recalcColors(palaces) {
 // ============ 共享九宫格渲染 ============
 function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
   opts = opts || {};
-  colorSpan = opts.colorSpan || (v => {return v||'';});
+  let colorSpan = opts.colorSpan || (v => {return v||'';});
   let xpEditGong = opts.xpEditGong || 0;
   let wrapperClass = opts.wrapperClass || '';
   let panClass = opts.panClass || '';
@@ -997,17 +984,14 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
   let mkTag = '<font color=red style=font-size:18px>马</font>';
 
   function renderPalace(g) {
-    p = palaces['gong'+g];
+    let p = palaces['gong'+g];
     if (!p) return '<TD></TD>';
-    w = (g === 9 || g === 1) ? '34%' : '33%';
-    shenAbbr = (window.SHEN_ABBR||{})[p.shen] || p.shen || '';
-    xingAbbr = (window.XING_ABBR||{})[p.xing] || p.xing || '';
-    menAbbr = (window.MEN_ABBR||{})[p.men] || p.men || '';
-    kongMark = kongGongs[g] ? '○' : '';
-    muRules2 = {2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};
-    xingRules2 = {3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};
-    xmRules2 = {8:['庚'],4:['壬']};
-    function spanGan(ch) { let isM=muRules2[g]&&muRules2[g].indexOf(ch)>=0; let isX=xingRules2[g]&&xingRules2[g].indexOf(ch)>=0; let isXM=xmRules2[g]&&xmRules2[g].indexOf(ch)>=0; if(isXM)return'<font color="#009cef">'+ch+'</font>'; if(isX)return'<font color="#b745ce">'+ch+'</font>'; if(isM)return'<font color="#ca610e">'+ch+'</font>'; return ch; }
+    let w = (g === 9 || g === 1) ? '34%' : '33%';
+    let shenAbbr = (window.SHEN_ABBR||{})[p.shen] || p.shen || '';
+    let xingAbbr = (window.XING_ABBR||{})[p.xing] || p.xing || '';
+    let menAbbr = (window.MEN_ABBR||{})[p.men] || p.men || '';
+    let kongMark = kongGongs[g] ? '○' : '';
+    function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; if(isXM)return'<font color="#009cef">'+ch+'</font>'; if(isX)return'<font color="#b745ce">'+ch+'</font>'; if(isM)return'<font color="#ca610e">'+ch+'</font>'; return ch; }
     function charColor(str) { if(!str)return''; let r=''; for(let ci=0;ci<str.length;ci++)r+=spanGan(str[ci]); return r; }
     let hlt = (xpEditGong === g) ? 'box-shadow:0 0 0 2px #0dc2b3 inset;' : '';
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
@@ -1107,10 +1091,7 @@ function renderXinpan(useBg) {
     let xingAbbr = XING_ABBR[p.xing] || p.xing || '';
     let menAbbr = MEN_ABBR[p.men] || p.men || '';
     let kongMark = kongGongs[g] ? '○' : '';
-    let muRules2 = {2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};
-    let xingRules2 = {3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};
-    let xmRules2 = {8:['庚'],4:['壬']};
-    function spanGan(ch) { let isM=muRules2[g]&&muRules2[g].indexOf(ch)>=0; let isX=xingRules2[g]&&xingRules2[g].indexOf(ch)>=0; let isXM=xmRules2[g]&&xmRules2[g].indexOf(ch)>=0; if(isXM)return'<font color="#009cef">'+ch+'</font>'; if(isX)return'<font color="#b745ce">'+ch+'</font>'; if(isM)return'<font color="#ca610e">'+ch+'</font>'; return ch; }
+    function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; if(isXM)return'<font color="#009cef">'+ch+'</font>'; if(isX)return'<font color="#b745ce">'+ch+'</font>'; if(isM)return'<font color="#ca610e">'+ch+'</font>'; return ch; }
     function charColor(str) { if(!str)return''; let r=''; for(let ci=0;ci<str.length;ci++)r+=spanGan(str[ci]); return r; }
     let hlt = (window._xpEditGong === g) ? 'box-shadow:0 0 0 2px #0dc2b3 inset;' : '';
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
@@ -1201,17 +1182,13 @@ function showYixing() {
   let cs = window._colorSpan || (v => {return v||'';});
   let sab = window._SHEN_ABBR || {}; let xab = window._XING_ABBR || {}; let mab = window._MEN_ABBR || {};
   let kg = window._kongGongs || {};
-  maPosId = window._maPosId || '';
+  let maPosId = window._maPosId || '';
   let mk = p => {return'<font color=red>马</font>';};
 
-  // 逐字颜色函数(移星换斗用, 当场按宫位判断)
-  let muYx = {2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};
-  let xingYx = {3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};
-  let xmYx = {8:['庚'],4:['壬']};
   let spanYx = (ch, g) => {
-    let isM = muYx[g] && muYx[g].indexOf(ch) >= 0;
-    let isX = xingYx[g] && xingYx[g].indexOf(ch) >= 0;
-    let isXM = xmYx[g] && xmYx[g].indexOf(ch) >= 0;
+    let isM = MU_RULES[g] && MU_RULES[g].indexOf(ch) >= 0;
+    let isX = XING_RULES[g] && XING_RULES[g].indexOf(ch) >= 0;
+    let isXM = XM_RULES[g] && XM_RULES[g].indexOf(ch) >= 0;
     if (isXM) return '<font color="#009cef">'+ch+'</font>';
     if (isX) return '<font color="#b745ce">'+ch+'</font>';
     if (isM) return '<font color="#ca610e">'+ch+'</font>';
@@ -1224,8 +1201,8 @@ function showYixing() {
   };
 
   let yxCell = g => {
-    p = cur['gong'+g]; if (!p || !p.shen) return '<td></td>';
-    w = (g === 9 || g === 1) ? '34%' : '33%';
+    let p = cur['gong'+g]; if (!p || !p.shen) return '<td></td>';
+    let w = (g === 9 || g === 1) ? '34%' : '33%';
     let km = kg[g] ? '○' : '';
     return '<td style="width:'+w+'">' +
       '<div class="panItem top"><span>'+(sab[p.shen]||p.shen||'')+'</span><span>'+km+'</span></div>' +
@@ -1234,7 +1211,7 @@ function showYixing() {
   };
 
   let yxAg = g => {
-    a = cur['gong'+g] ? cur['gong'+g].anGan || '' : '';
+    let a = cur['gong'+g] ? cur['gong'+g].anGan || '' : '';
     let anc = window._anGanColor || (v => {return v||'';});
     return anc(a, g);
   };
