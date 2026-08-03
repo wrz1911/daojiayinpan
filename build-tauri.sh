@@ -14,6 +14,7 @@ cp qimen_app/js/yinpan_app.js web/qimen_app/js/
 cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
 cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
 cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
+cp qimen_app/js/qimen_constants.js web/qimen_app/js/
 cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
 
 
