@@ -1792,11 +1792,34 @@ async function _exportJSON() {
 }
 
 function _downloadBlob(data) {
+  // Android Capacitor: 走分享通道
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+    _shareTextFile(data).catch(e => { alert('分享失败: '+e.message); });
+    return;
+  }
+  // PC/浏览器: Blob下载
   let blob = new Blob([data], {type:'application/json'});
   let a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'qimen_backup_'+new Date().toISOString().slice(0,10)+'.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
+}
+
+// Android: 写文件到缓存目录 → 用Share插件调起系统分享/保存
+async function _shareTextFile(data) {
+  let ts = new Date().toISOString().slice(0,10);
+  let fn = 'qimen_'+ts+'.json';
+  let FS = window.Capacitor.Plugins.Filesystem;
+  let Share = window.Capacitor.Plugins.Share;
+  // 先写缓存目录
+  try { await FS.mkdir({path: '.', directory: 'CACHE', recursive: true}); } catch(e) {}
+  let wr = await FS.writeFile({path: fn, data: data, directory: 'CACHE'});
+  // 用Share插件分享文件URI, 用户可选择保存到文件管理器
+  if (wr && wr.uri) {
+    await Share.share({title: '奇门排盘备份', files: [wr.uri], dialogTitle: '保存排盘数据'});
+  } else {
+    await Share.share({title: '奇门排盘备份', text: data, dialogTitle: '保存排盘数据'});
+  }
 }
 
 async function _doExport() {
@@ -1813,18 +1836,17 @@ async function _doExport() {
     } catch(e) { alert('导出失败: '+e.message); }
     return;
   }
-  // Android: 写App内部Data目录 (始终可写)
-  const FS = window.Capacitor.Plugins.Filesystem;
-  try {
-    // directory: 2=Data(私有内部存储, 始终可写)
-    await FS.mkdir({path: '.', directory: 2, recursive: true});
-  } catch(e) {}
-  try {
-    await FS.writeFile({path: fn, data: data, directory: 2});
-    alert('已保存到App数据目录');
-  } catch(e) {
-    alert('导出失败: '+e.message);
+  // Android Capacitor: 分享方式导出 (用户可选文件管理器保存)
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+    try {
+      await _shareTextFile(data);
+    } catch(e) {
+      alert('导出失败: '+e.message);
+    }
+    return;
   }
+  // 浏览器回退: Blob下载
+  _downloadBlob(data);
 }
 
 function _importJSON() {
