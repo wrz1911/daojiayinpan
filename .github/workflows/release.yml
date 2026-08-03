@@ -31,6 +31,7 @@ jobs:
           cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
           cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
+          cp qimen_app/js/qimen_constants.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
 
@@ -76,6 +77,7 @@ jobs:
           cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
           cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
+          cp qimen_app/js/qimen_constants.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
@@ -125,6 +127,7 @@ jobs:
           cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
           cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
+          cp qimen_app/js/qimen_constants.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
@@ -193,6 +196,7 @@ jobs:
           cp qimen_app/js/qimen_engine_min.js www/qimen_app/js/
           cp qimen_app/js/qimen_chuanren.js www/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
+          cp qimen_app/js/qimen_constants.js www/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
           cp qimen_app/yinpan_standalone.html www/qimen_app/
 
