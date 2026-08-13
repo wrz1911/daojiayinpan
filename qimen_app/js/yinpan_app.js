@@ -203,15 +203,29 @@ let XING_ABBR = {}; for(let k in XING) XING_ABBR[XING[k]] = k;
 let MEN_ABBR = {}; for(let k in MEN) MEN_ABBR[MEN[k]] = k;
 window.SHEN_ABBR = SHEN_ABBR; window.XING_ABBR = XING_ABBR; window.MEN_ABBR = MEN_ABBR;
 window._SHEN_ABBR = SHEN_ABBR; window._XING_ABBR = XING_ABBR; window._MEN_ABBR = MEN_ABBR;
-// 全局颜色标记: 入墓(棕)/击刑(紫)/门迫(红)/刑+墓(蓝)
+// 全局四害着色: 共用逐字标记, 颜色由 CSS 类(cx-xing/cx-mu/cx-xingmu)驱动, 暗色主题自动适配
+window._siHaiSpan = (ch, isXing, isMu) => {
+  if (!ch) return '';
+  if (isXing && isMu) return '<span class="cx-xingmu">'+ch+'</span>';
+  if (isXing) return '<span class="cx-xing">'+ch+'</span>';
+  if (isMu) return '<span class="cx-mu">'+ch+'</span>';
+  return ch;
+};
+// 全局颜色标记: 入墓(棕)/击刑(紫)/门迫(红)/刑+墓(蓝)/空亡(灰)
 window._colorSpan = (val, isXing, isMu, isPo, isKong) => {
   if (!val) return '';
-  if (isPo) return '<font color="red">'+val+'</font>';
-  if (isXing && isMu) return '<font color="#009cef">'+val+'</font>';
-  if (isXing) return '<font color="#b745ce">'+val+'</font>';
-  if (isMu) return '<font color="#ca610e">'+val+'</font>';
-  if (isKong) return '<span style="color:#999">'+val+'</span>';
-  return val;
+  if (isPo) return '<span class="cx-po">'+val+'</span>';
+  if (isKong) return '<span class="cx-kong">'+val+'</span>';
+  return window._siHaiSpan(val, isXing, isMu);
+};
+// 五行着色: 木绿/火红/土棕/金橙/水蓝, CSS 类驱动
+window._wxSpan = (s) => {
+  if (!s) return '';
+  let c = s[0];
+  let cls = '甲乙寅卯'.indexOf(c) >= 0 ? 'wx-mu' : '丙丁巳午'.indexOf(c) >= 0 ? 'wx-huo'
+    : '戊己辰戌丑未'.indexOf(c) >= 0 ? 'wx-tu' : '庚辛申酉'.indexOf(c) >= 0 ? 'wx-jin'
+    : '壬癸亥子'.indexOf(c) >= 0 ? 'wx-shui' : '';
+  return cls ? '<span class="'+cls+'">'+s+'</span>' : s;
 };
 
 // 十天干与十二地支列表, 用于干支转换与查找
@@ -283,7 +297,7 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   // 将重算后的暗干应用到各宫palaces对象
   for(let g=1;g<=9;g++){if(g===5)continue;palaces['gong'+g].anGan=angan[g]||palaces['gong'+g].di||'';}
 
-  if(!window._anGanColor){window._anGanColor=(gs,gong)=>{if(!gs)return'';let muR={2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};let xingR={3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};let r='';for(let ai=0;ai<gs.length;ai++){let ch=gs[ai];let isX=xingR[gong]&&xingR[gong].indexOf(ch)>=0;let isM=muR[gong]&&muR[gong].indexOf(ch)>=0;if(isX&&isM)r+='<font color="#009cef">'+ch+'</font>';else if(isX)r+='<font color="#b745ce">'+ch+'</font>';else if(isM)r+='<font color="#ca610e">'+ch+'</font>';else r+=ch;}return r;};}
+  if(!window._anGanColor){window._anGanColor=(gs,gong)=>{if(!gs)return'';let muR={2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};let xingR={3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};let r='';for(let ai=0;ai<gs.length;ai++){let ch=gs[ai];let isX=xingR[gong]&&xingR[gong].indexOf(ch)>=0;let isM=muR[gong]&&muR[gong].indexOf(ch)>=0;r+=window._siHaiSpan(ch,isX,isM);}return r;};}
   let agColor= g => {let ag=palaces['gong'+g]?palaces['gong'+g].anGan:'';return ag?window._anGanColor(ag,g):'';};
   let colorSpan=window._colorSpan|| (v => {return v||'';});
   let gridHTML=buildPaipanGrid(palaces,kongGongs,maPosId,agColor,{colorSpan:colorSpan});
@@ -291,10 +305,10 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   let degStart=Math.floor(deg/5)*5,degEnd=degStart+4;
   let shiZhuParts=shiZhu.split(' ');
   let sxYearEl=document.getElementById('selShanXiangYear'),sxY=sxYearEl?sxYearEl.value:new Date().getFullYear();
-  let html='<style>.xj-head #tdTitle td{color:#dead68}.xj-head #itemTitle{color:#dead68;line-height:30px}.xj-head #dTitle{width:16%;color:#dead68}</style>'+
+  let html='<style>.xj-head #tdTitle td{color:var(--c-gold)}.xj-head #itemTitle{color:var(--c-gold);line-height:30px}.xj-head #dTitle{width:16%;color:var(--c-gold)}</style>'+
     '<div id="panHead"><TABLE class="pan xj-head" id="headTable">'+
     '<TR><TD id="itemTitle">山向</TD><TD colspan="3">'+name+' '+degStart+'～'+degEnd+'°</TD><TD>'+sxY+'年</TD></TR>'+
-    '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+shiZhuParts[0]+'</TD><TD class="sizhu" style="color:#c00000;font-weight:bold">'+shiZhuParts[1]+'</TD><TD>黄泉<b>'+hq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
+    '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+shiZhuParts[0]+'</TD><TD class="sizhu" style="color:var(--c-sizhu);font-weight:bold">'+shiZhuParts[1]+'</TD><TD>黄泉<b>'+hq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>空亡</TD><TD>马星</TD></TR>'+
     '<TR><TD>'+(sxData.xunShou||'—')+'</TD><TD>天'+sxData.zfStar+'</TD><TD>'+sxData.zsMen+'门</TD><TD>'+(sxData.kongWang||'—')+'</TD><TD>'+(sxData.maXing||'—')+'</TD></TR>'+
     '</TABLE></div>'+gridHTML+
@@ -636,7 +650,7 @@ function renderPan(raw, engineData) {
   window._kongGongs = kongGongs2;
 
   // 检测自选局标记
-  let ziXuanMark = raw.indexOf('自选') >= 0 ? '<font color=#FF00FF>自选 </font>' : '';
+  let ziXuanMark = raw.indexOf('自选') >= 0 ? '<span class="cx-zixuan">自选 </span>' : '';
 
   // 根据规则重新计算颜色标记(含逐字标记)
   recalcColors(palaces);
@@ -646,17 +660,7 @@ function renderPan(raw, engineData) {
   window._yueJiang = yueJiang;
   window._shiZhi = shiGz.length >= 2 ? shiGz[1] : '';
 
-  // 全局颜色标记函数
-  window._colorSpan = (val, isXing, isMu, isPo, isKong) => {
-    if (!val) return '';
-    if (isPo) return '<font color="red">'+val+'</font>';
-    if (isXing && isMu) return '<font color="#009cef">'+val+'</font>';
-    if (isXing) return '<font color="#b745ce">'+val+'</font>';
-    if (isMu) return '<font color="#ca610e">'+val+'</font>';
-    if (isKong) return '<span style="color:#999">'+val+'</span>';
-    return val;
-  };
-  // 阴干颜色计算(逐字处理寄干)
+  // 阴干颜色计算(逐字处理寄干): 委托顶层 _siHaiSpan
   window._anGanColor = (ganStr, gong) => {
     if (!ganStr) return '';
     let result = '';
@@ -664,10 +668,7 @@ function renderPan(raw, engineData) {
       let ch = ganStr[ai];
       let isX = XING_RULES[gong] && XING_RULES[gong].indexOf(ch) >= 0;
       let isM = MU_RULES[gong] && MU_RULES[gong].indexOf(ch) >= 0;
-      if (isX && isM) result += '<font color="#009cef">'+ch+'</font>';
-      else if (isX) result += '<font color="#b745ce">'+ch+'</font>';
-      else if (isM) result += '<font color="#ca610e">'+ch+'</font>';
-      else result += ch;
+      result += window._siHaiSpan(ch, isX, isM);
     }
     return result;
   };
@@ -690,13 +691,11 @@ function renderPan(raw, engineData) {
     let menAbbr = MEN_ABBR[p.men] || p.men;
     let kongMark = kongGongs[g] ? '○' : '';
     function spanGan(ch) {
+      // XM_RULES ≡ XING∩MU, 故 isX||isXM / isM||isXM 委托共用函数与原优先级等价
       let isM = MU_RULES[g] && MU_RULES[g].indexOf(ch) >= 0;
       let isX = XING_RULES[g] && XING_RULES[g].indexOf(ch) >= 0;
       let isXM = XM_RULES[g] && XM_RULES[g].indexOf(ch) >= 0;
-      if (isXM) return '<font color="#009cef">'+ch+'</font>';
-      if (isX) return '<font color="#b745ce">'+ch+'</font>';
-      if (isM) return '<font color="#ca610e">'+ch+'</font>';
-      return ch;
+      return window._siHaiSpan(ch, isX || isXM, isM || isXM);
     }
     function charColor(str) {
       if (!str) return '';
@@ -708,8 +707,8 @@ function renderPan(raw, engineData) {
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
       '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span><span id="men'+g+'">'+colorSpan(menAbbr, false, false, p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:#888"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
+      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
       '</div></TD>';
   }
 
@@ -721,26 +720,25 @@ function renderPan(raw, engineData) {
     let ag = palaces['gong'+g] ? palaces['gong'+g].anGan : '';
     return ag ? window._anGanColor(ag, g) : '';
   };
-  let wxColor = c => { if(!c)return'#333'; if('甲乙寅卯'.indexOf(c)>=0)return'#2e7d32'; if('丙丁巳午'.indexOf(c)>=0)return'#d50000'; if('戊己辰戌丑未'.indexOf(c)>=0)return'#795548'; if('庚辛申酉'.indexOf(c)>=0)return'#f9a825'; if('壬癸亥子'.indexOf(c)>=0)return'#0d47a1'; return'#333'; };
-  let wxSpan = s => '<font color="'+wxColor(s)+'">'+(s||'')+'</font>';
+  let wxSpan = window._wxSpan;
   let gridHTML = buildPaipanGrid(palaces, kongGongs, maPosId, agColor, {colorSpan: window._colorSpan});
 
   let dStr = Y+'-'+String(M).padStart(2,'0')+'-'+String(D).padStart(2,'0')+' '+
              String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0')+':00';
   let keCols = panType===2 ? 5 : 4;
-  ziXuanMark = raw.indexOf('自选') >= 0 ? '<font color=#FF00FF>自选 </font>' : '';
+  ziXuanMark = raw.indexOf('自选') >= 0 ? '<span class="cx-zixuan">自选 </span>' : '';
   let html =
     '<div id="panHead">' +
     '<TABLE class="pan" id="headTable">' +
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongli+')</TD></TR>' +
-    '<TR><TD style="color:#dead68">节气</TD><TD colspan="'+keCols+'" id="jieqi">'+(jieqi||'节气')+'</TD></TR>' +
-    '<TR><TD style="color:#dead68">类型</TD><TD colspan="'+keCols+'">' +
+    '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'" id="jieqi">'+(jieqi||'节气')+'</TD></TR>' +
+    '<TR><TD style="color:var(--c-gold)">类型</TD><TD colspan="'+keCols+'">' +
     (panType===2?'刻盘':'时盘')+'·			'+ziXuanMark+'<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+yueJiang+'</B>】</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD>'+(panType===2?'<TD colspan=2>空亡</TD>':'<TD>空亡</TD>')+'</TR>' +
     '<TR><TD id="xunShou">'+xunShou+'</TD><TD>天<font id="zhiFu">'+zhiFuShort+'</font></TD>' +
     '<TD><font id="zhiShi">'+zhiShiShort+'</font>门</TD>' +
     '<TD id="maXing">'+maXing+'</TD>'+(panType===2?'<TD colspan=2 id="kongWang">'+kongWang+'</TD>':'<TD id="kongWang">'+kongWang+'</TD>')+'</TR>' +
-    '<TR><TD style="color:#dead68" rowspan=2>'+(panType===2?'五柱':'四柱')+'</TD>' +
+    '<TR><TD style="color:var(--c-gold)" rowspan=2>'+(panType===2?'五柱':'四柱')+'</TD>' +
     '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD>' +
     '<TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD>' +
     (panType===2?'<TD class="sizhuTitle">刻柱</TD>':'') + '</TR>' +
@@ -751,7 +749,7 @@ function renderPan(raw, engineData) {
     (panType===2 ? '<TD class="sizhu" id="kezhu">'+wxSpan(keGz[0]||'')+'<br>'+wxSpan(keGz[1]||'')+'</TD>' : '') +
     '</TR></TABLE></div>' +
     gridHTML +
-    '<div id="Tip">颜色说明：<span style="color:#ca610e">入墓</span>、<span style="color:#b745ce">击刑</span>、<span style="color:red">门迫</span>、<span style="color:#009cef">刑+墓</span></div>' +
+    '<div id="Tip">颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span></div>' +
     '<TABLE id="btnTable1"><TR>' +
     '<TD><div class="btn" id="btn1" onclick="showYixing()">移星换斗</div></TD>' +
     '<TD><div class="btn" id="btn3" onclick="tianmenDihu()">天门地户</div></TD>' +
@@ -821,7 +819,7 @@ function fixYinGanAlign() {
       if (!yin || !tian || !gong) return;
       let go = gong.getBoundingClientRect().top;
       yin.style.paddingTop = Math.max(0, tian.getBoundingClientRect().top - go) + 'px';
-      if (isMain) { yin.style.textAlign = 'right'; yin.style.verticalAlign = 'top'; yin.style.fontSize = '15px'; yin.style.lineHeight = '25px'; yin.style.color = '#333'; }
+      if (isMain) { yin.style.textAlign = 'right'; yin.style.verticalAlign = 'top'; yin.style.fontSize = '15px'; yin.style.lineHeight = '25px'; yin.style.color = 'var(--c-text)'; }
     });
     [2,7,6].forEach(g => {
       let yin = scope.querySelector('#yinGan'+g);
@@ -830,12 +828,12 @@ function fixYinGanAlign() {
       if (!yin || !xing || !gong) return;
       let go = gong.getBoundingClientRect().top;
       yin.style.paddingTop = Math.max(0, xing.getBoundingClientRect().top - go) + 'px';
-      if (isMain) { yin.style.textAlign = 'left'; yin.style.verticalAlign = 'top'; yin.style.fontSize = '15px'; yin.style.lineHeight = '25px'; yin.style.color = '#333'; }
+      if (isMain) { yin.style.textAlign = 'left'; yin.style.verticalAlign = 'top'; yin.style.fontSize = '15px'; yin.style.lineHeight = '25px'; yin.style.color = 'var(--c-text)'; }
     });
     if (isMain) {
       let y9 = scope.querySelector('#yinGan9'), y1 = scope.querySelector('#yinGan1');
-      if (y9) { y9.style.verticalAlign = 'bottom'; y9.style.fontSize = '15px'; y9.style.color = '#333'; }
-      if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = '15px'; y1.style.color = '#333'; }
+      if (y9) { y9.style.verticalAlign = 'bottom'; y9.style.fontSize = '15px'; y9.style.color = 'var(--c-text)'; }
+      if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = '15px'; y1.style.color = 'var(--c-text)'; }
     }
   });
 }
@@ -929,7 +927,7 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
   let panOpen = panClass ? '<TABLE id="pan" class="'+panClass+'">' : '<TABLE id="pan">';
   let ytLeft = wrapperClass ? ' class="yinTable"' : '';
   let ytRight = wrapperClass ? ' class="yinTable right"' : '';
-  let mkTag = '<font color=red style=font-size:18px>马</font>';
+  let mkTag = '<span class="cx-horse" style="font-size:18px">马</span>';
 
   function renderPalace(g) {
     let p = palaces['gong'+g];
@@ -939,16 +937,16 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     let xingAbbr = (window.XING_ABBR||{})[p.xing] || p.xing || '';
     let menAbbr = (window.MEN_ABBR||{})[p.men] || p.men || '';
     let kongMark = kongGongs[g] ? '○' : '';
-    function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; if(isXM)return'<font color="#009cef">'+ch+'</font>'; if(isX)return'<font color="#b745ce">'+ch+'</font>'; if(isM)return'<font color="#ca610e">'+ch+'</font>'; return ch; }
+    function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; return window._siHaiSpan(ch, isX||isXM, isM||isXM); }
     function charColor(str) { if(!str)return''; let r=''; for(let ci=0;ci<str.length;ci++)r+=spanGan(str[ci]); return r; }
-    let hlt = (xpEditGong === g) ? 'box-shadow:0 0 0 2px #0dc2b3 inset;' : '';
+    let hlt = (xpEditGong === g) ? 'box-shadow:0 0 0 2px var(--c-theme) inset;' : '';
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
       '<div style="display:grid;grid-template-rows:1fr 1fr 1fr;height:100%;position:relative">' +
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
       '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span><span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:#888"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
+      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
       '</div></TD>';
   }
 
@@ -1039,25 +1037,24 @@ function renderXinpan(useBg) {
     let xingAbbr = XING_ABBR[p.xing] || p.xing || '';
     let menAbbr = MEN_ABBR[p.men] || p.men || '';
     let kongMark = kongGongs[g] ? '○' : '';
-    function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; if(isXM)return'<font color="#009cef">'+ch+'</font>'; if(isX)return'<font color="#b745ce">'+ch+'</font>'; if(isM)return'<font color="#ca610e">'+ch+'</font>'; return ch; }
+    function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; return window._siHaiSpan(ch, isX||isXM, isM||isXM); }
     function charColor(str) { if(!str)return''; let r=''; for(let ci=0;ci<str.length;ci++)r+=spanGan(str[ci]); return r; }
-    let hlt = (window._xpEditGong === g) ? 'box-shadow:0 0 0 2px #0dc2b3 inset;' : '';
+    let hlt = (window._xpEditGong === g) ? 'box-shadow:0 0 0 2px var(--c-theme) inset;' : '';
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
       '<div style="display:grid;grid-template-rows:1fr 1fr 1fr;height:100%;position:relative">' +
       '<div class="panItem top" style="align-self:start"><span>'+shenAbbr+'</span><span>'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span>'+charColor(p.tian)+'</span><span>'+xingAbbr+'</span></div>' +
       '<div class="panItem" style="align-self:end"><span>'+charColor(p.di)+'</span><span>'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:#888"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:#888"></div>' +
+      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
+      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
       '</div></TD>';
   }
 
-  let mkTag = '<font color=red style=font-size:18px>马</font>';
+  let mkTag = '<span class="cx-horse" style="font-size:18px">马</span>';
   let sizhuParts = _xpBgSizhu ? _xpBgSizhu.split(/\s+/) : [];
   let sizhuHTML = '';
   for(let si = 0; si < 4; si++) { let gz = sizhuParts[si] || '—'; sizhuHTML += '<TD class="sizhu">'+(gz.length>=2?gz[0]+'<br>'+gz[1]:gz)+'</TD>'; }
-  let wxColor = c => { if(!c)return'#333'; if('甲乙寅卯'.indexOf(c)>=0)return'#2e7d32'; if('丙丁巳午'.indexOf(c)>=0)return'#d50000'; if('戊己辰戌丑未'.indexOf(c)>=0)return'#795548'; if('庚辛申酉'.indexOf(c)>=0)return'#f9a825'; if('壬癸亥子'.indexOf(c)>=0)return'#0d47a1'; return'#333'; };
-  let wxSpanBg = s => '<font color="'+wxColor(s)+'">'+(s||'')+'</font>';
+  let wxSpanBg = window._wxSpan;
   let sizhuColorHTML = '';
   for(let si2 = 0; si2 < 4; si2++) { let gz2 = sizhuParts[si2] || '——'; sizhuColorHTML += '<TD class="sizhu">'+wxSpanBg(gz2[0]||'')+'<br>'+wxSpanBg(gz2[1]||'')+'</TD>'; }
   let dStr = Y+'-'+String(M).padStart(2,'0')+'-'+String(D).padStart(2,'0');
@@ -1087,12 +1084,12 @@ function renderXinpan(useBg) {
     '<TR><TD>局数</TD><TD colspan="4">'+(_xpCalcJu||_xpBgJu||'心盘')+'</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD><TD>空亡</TD></TR>' +
     '<TR><TD>' + (_xpBgXunShou||'—') + '</TD><TD>' + zhiFuVal + '</TD><TD>' + zhiShiVal + '</TD><TD>' + (_xpBgMaXing||(maGong?'马[宫'+maGong+']':'—')) + '</TD><TD>' + (_xpBgKongWang||'—') + '</TD></TR>' +
-    '<TR><TD rowspan=2 style="color:#dead68">四柱</TD>' +
+    '<TR><TD rowspan=2 style="color:var(--c-gold)">四柱</TD>' +
     '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD><TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD></TR>' +
     '<TR>' + (sizhuParts.length>=4 ? sizhuColorHTML : sizhuHTML) + '</TR>' +
     '</TABLE></div>' +
     gridHTML +
-    '<div id="Tip">颜色说明：<span style="color:#ca610e">入墓</span>、<span style="color:#b745ce">击刑</span>、<span style="color:red">门迫</span>、<span style="color:#009cef">刑+墓</span></div>' +
+    '<div id="Tip">颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span></div>' +
     '<TABLE id="btnTable1"><TR>' +
     '<TD><div class="btn" id="btn1" onclick="showYixing()">移星换斗</div></TD>' +
     '<TD><div class="btn" id="btn3" onclick="tianmenDihu()">天门地户</div></TD>' +
@@ -1125,22 +1122,19 @@ function showYixing() {
   let ag = g => cur['gong'+g] ? cur['gong'+g].anGan || '' : '';
   let yxYin = (g, side) => {
     let a = ag(g); if (!a) return '';
-    return '<td style="text-align:'+(side==='left'?'right':'left')+';vertical-align:top;padding-top:22px;font-size:15px;color:#333">'+a+'</td>';
+    return '<td style="text-align:'+(side==='left'?'right':'left')+';vertical-align:top;padding-top:22px;font-size:15px;color:var(--c-text)">'+a+'</td>';
   };
   let cs = window._colorSpan || (v => {return v||'';});
   let sab = window._SHEN_ABBR || {}; let xab = window._XING_ABBR || {}; let mab = window._MEN_ABBR || {};
   let kg = window._kongGongs || {};
   let maPosId = window._maPosId || '';
-  let mk = p => {return'<font color=red>马</font>';};
+  let mk = p => {return'<span class="cx-horse">马</span>';};
 
   let spanYx = (ch, g) => {
     let isM = MU_RULES[g] && MU_RULES[g].indexOf(ch) >= 0;
     let isX = XING_RULES[g] && XING_RULES[g].indexOf(ch) >= 0;
     let isXM = XM_RULES[g] && XM_RULES[g].indexOf(ch) >= 0;
-    if (isXM) return '<font color="#009cef">'+ch+'</font>';
-    if (isX) return '<font color="#b745ce">'+ch+'</font>';
-    if (isM) return '<font color="#ca610e">'+ch+'</font>';
-    return ch;
+    return window._siHaiSpan(ch, isX || isXM, isM || isXM);
   };
   let yxColor = (str, g) => {
     if (!str) return '';
@@ -1272,9 +1266,9 @@ function tianmenDihu() {
         jc = JIANCHU[offsetMJ];
       }
       if (wpVertical[wp]) {
-        el2.innerHTML = fullName.split('').join('<br>')+'<br><font color="#0dc2b3">'+jc+'</font>';
+        el2.innerHTML = fullName.split('').join('<br>')+'<br><span class="cx-theme">'+jc+'</span>';
       } else {
-        el2.innerHTML = fullName+'<font color="#0dc2b3">'+jc+'</font>';
+        el2.innerHTML = fullName+'<span class="cx-theme">'+jc+'</span>';
         el2.style.whiteSpace = 'nowrap';
       }
       el2.style.fontSize = '12px';
@@ -1329,11 +1323,11 @@ function showState() {
     if (!p || !p.tian) continue;
     let gan = p.tian[0];
     let states = CHANGSHENG[gan];
-    if (states && idx !== undefined && st) st.innerHTML = '<span style="font-size:10px;color:#666">'+states[idx]+'</span>';
+    if (states && idx !== undefined && st) st.innerHTML = '<span style="font-size:10px;color:var(--c-text-2)">'+states[idx]+'</span>';
     if (p.di && sd) {
       let dgan = p.di[0];
       let dStates = CHANGSHENG[dgan];
-      if (dStates && idx !== undefined) sd.innerHTML = '<span style="font-size:10px;color:#666">'+dStates[idx]+'</span>';
+      if (dStates && idx !== undefined) sd.innerHTML = '<span style="font-size:10px;color:var(--c-text-2)">'+dStates[idx]+'</span>';
     }
   }
 }
@@ -1394,7 +1388,7 @@ function shen12(type) {
       el.innerHTML = SHENJIANG_NAMES[i];
       el.style.fontSize = '12px';
       el.style.lineHeight = '15px';
-      el.style.color = '#333';
+      el.style.color = 'var(--c-text)';
     }
   }
 }
@@ -1415,7 +1409,7 @@ function editTitle() {
     el.style.padding = '';
   } else {
     el.setAttribute('contenteditable', 'true');
-    el.style.border = '1px dashed #ccc';
+    el.style.border = '1px dashed var(--c-text-6)';
     el.style.padding = '2px 6px';
     el.focus();
   }
@@ -1479,7 +1473,7 @@ function _ensureSheet() {
   if (!sheet) {
     sheet = document.createElement('div');
     sheet.id = 'bottomSheet';
-    sheet.style.cssText = 'position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:600px;max-height:70vh;background:#fff;border-radius:14px 14px 0 0;z-index:10000;overflow-y:auto;transition:transform 0.3s ease;padding-bottom:env(safe-area-inset-bottom,0)';
+    sheet.style.cssText = 'position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:600px;max-height:70vh;background:var(--c-bg);border-radius:14px 14px 0 0;z-index:10000;overflow-y:auto;transition:transform 0.3s ease;padding-bottom:env(safe-area-inset-bottom,0)';
     document.body.appendChild(sheet);
   }
   return {overlay, sheet};
@@ -1515,13 +1509,13 @@ function savePan() {
   let h = '<div style="padding:16px 16px 8px">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
     '<span style="font-weight:bold;font-size:16px">保存排盘</span>' +
-    '<span id="sheetCloseX" style="cursor:pointer;font-size:20px;color:#999">&times;</span>' +
+    '<span id="sheetCloseX" style="cursor:pointer;font-size:20px;color:var(--c-text-4)">&times;</span>' +
     '</div>' +
-    '<div style="margin-bottom:8px"><span style="font-size:12px;color:#999">输入事项</span></div>' +
-    '<input id="sheetSaveName" placeholder="请输入事项名称" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:15px;outline:none;box-sizing:border-box" value="'+defaultName.replace(/"/g,'&quot;')+'" autofocus>' +
+    '<div style="margin-bottom:8px"><span style="font-size:12px;color:var(--c-text-4)">输入事项</span></div>' +
+    '<input id="sheetSaveName" placeholder="请输入事项名称" style="width:100%;padding:10px;border:1px solid var(--c-border);border-radius:8px;font-size:15px;outline:none;box-sizing:border-box" value="'+defaultName.replace(/"/g,'&quot;')+'" autofocus>' +
     '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">' +
-    '<span id="sheetCancelBtn" style="cursor:pointer;padding:8px 16px;border-radius:8px;color:#666;font-size:14px">取消</span>' +
-    '<span id="sheetSaveBtn" style="cursor:pointer;padding:8px 24px;border-radius:8px;background:#0dc2b3;color:#fff;font-size:14px">保存</span>' +
+    '<span id="sheetCancelBtn" style="cursor:pointer;padding:8px 16px;border-radius:8px;color:var(--c-text-2);font-size:14px">取消</span>' +
+    '<span id="sheetSaveBtn" style="cursor:pointer;padding:8px 24px;border-radius:8px;background:var(--c-theme);color:#fff;font-size:14px">保存</span>' +
     '</div></div>';
   _openSheet(h);
   // 绑定事件
@@ -1593,34 +1587,34 @@ function _renderHistorySheet() {
     let filtered = _saveMode ? saved.filter(r => r.mode === _saveMode) : saved;
     let h = '<div style="padding:16px 16px 0">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-      '<span style="font-weight:bold;font-size:16px">排盘历史 <span style="font-size:11px;color:#999">('+filtered.length+'条'+(filtered.length!==saved.length?'/共'+saved.length+'条':'')+')</span></span>' +
+      '<span style="font-weight:bold;font-size:16px">排盘历史 <span style="font-size:11px;color:var(--c-text-4)">('+filtered.length+'条'+(filtered.length!==saved.length?'/共'+saved.length+'条':'')+')</span></span>' +
       '<span style="display:flex;gap:10px;align-items:center">' +
-      '<span id="sheetExport" style="cursor:pointer;color:#0dc2b3;font-size:12px">导出</span>' +
-      '<span id="sheetImport" style="cursor:pointer;color:#0dc2b3;font-size:12px">导入</span>' +
-      '<span id="sheetCloseX2" style="cursor:pointer;font-size:20px;color:#999">&times;</span>' +
+      '<span id="sheetExport" style="cursor:pointer;color:var(--c-theme);font-size:12px">导出</span>' +
+      '<span id="sheetImport" style="cursor:pointer;color:var(--c-theme);font-size:12px">导入</span>' +
+      '<span id="sheetCloseX2" style="cursor:pointer;font-size:20px;color:var(--c-text-4)">&times;</span>' +
       '</span></div>';
-    h += '<div id="sheetFilters" style="padding:6px 0;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #f0f0f0;margin-bottom:4px">';
+    h += '<div id="sheetFilters" style="padding:6px 0;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--c-gray-bg);margin-bottom:4px">';
     let allModes = [{k:'',v:'全部'},{k:'shi',v:'时盘'},{k:'ke',v:'刻盘'},{k:'xin',v:'心盘'},{k:'shanxiang',v:'山向'},{k:'chuanren',v:'穿壬'}];
     allModes.forEach(m => {
       let isActive = _saveMode === m.k || (!m.k && !_saveMode);
-      h += '<span class="sheetFilterBtn" data-mode="'+m.k+'" style="cursor:pointer;padding:2px 8px;border-radius:10px;font-size:12px;'+(isActive?'background:#0dc2b3;color:#fff':'background:#f0f0f0;color:#666')+'">'+m.v+'</span>';
+      h += '<span class="sheetFilterBtn" data-mode="'+m.k+'" style="cursor:pointer;padding:2px 8px;border-radius:10px;font-size:12px;'+(isActive?'background:var(--c-theme);color:#fff':'background:var(--c-gray-bg);color:var(--c-text-2)')+'">'+m.v+'</span>';
     });
     h += '</div></div>';
     if (!filtered.length) {
-      h += '<div style="padding:30px;color:#999;text-align:center">暂无记录</div>';
+      h += '<div style="padding:30px;color:var(--c-text-4);text-align:center">暂无记录</div>';
     } else {
-      h += '<div style="padding:2px 16px 0;font-size:11px;color:#aaa;text-align:center">点击记录加载排盘</div>';
+      h += '<div style="padding:2px 16px 0;font-size:11px;color:var(--c-text-5);text-align:center">点击记录加载排盘</div>';
       h += '<div id="sheetHistoryList" style="padding:0 16px">';
       filtered.forEach((r, i) => {
         let origIdx = saved.indexOf(r);
         let modeLabel = modeLabels[r.mode] || r.mode || '时盘';
         let d = r.date ? new Date(r.date) : null;
         let dStr = d ? (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')) : '';
-        h += '<div style="padding:10px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f5f5f5;font-size:14px">' +
-          '<span style="font-size:10px;color:#fff;background:#0dc2b3;padding:1px 5px;border-radius:3px;flex-shrink:0">'+modeLabel+'</span>' +
+        h += '<div style="padding:10px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--c-border);font-size:14px">' +
+          '<span style="font-size:10px;color:#fff;background:var(--c-theme);padding:1px 5px;border-radius:3px;flex-shrink:0">'+modeLabel+'</span>' +
           '<span class="sheetLoadBtn" data-idx="'+origIdx+'" style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.title+'</span>' +
-          '<span style="font-size:10px;color:#aaa;flex-shrink:0">'+dStr+'</span>' +
-          '<span class="sheetDelBtn" data-idx="'+origIdx+'" style="color:#ccc;cursor:pointer;font-size:18px;flex-shrink:0;padding:0 4px" title="删除">&times;</span></div>';
+          '<span style="font-size:10px;color:var(--c-text-5);flex-shrink:0">'+dStr+'</span>' +
+          '<span class="sheetDelBtn" data-idx="'+origIdx+'" style="color:var(--c-text-6);cursor:pointer;font-size:18px;flex-shrink:0;padding:0 4px" title="删除">&times;</span></div>';
       });
 
       h += '</div>';
@@ -1654,7 +1648,7 @@ function _renderHistorySheet() {
         }
       };
     });
-  } catch(e) { _openSheet('<div style="padding:20px;color:#999">加载失败</div>'); }
+  } catch(e) { _openSheet('<div style="padding:20px;color:var(--c-text-4)">加载失败</div>'); }
 }
 
 function _delRecord(idx) {
@@ -1868,7 +1862,7 @@ function _renderBottomBar() {
     if (!bar) {
       bar = document.createElement('div');
       bar.id = 'bottomBar';
-      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:44px;background:#fff;border-top:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-around;z-index:9999;padding-bottom:env(safe-area-inset-bottom,0);max-width:600px;margin:0 auto;pointer-events:auto';
+      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:44px;background:var(--c-bg);border-top:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-around;z-index:9999;padding-bottom:env(safe-area-inset-bottom,0);max-width:600px;margin:0 auto;pointer-events:auto';
       let md = document.getElementById('mainDIV') || document.body;
       if (md) md.appendChild(bar);
     }
@@ -1877,12 +1871,12 @@ function _renderBottomBar() {
     bar.innerHTML = '';
     let hb = document.createElement('span');
     hb.id = 'barHistoryBtn';
-    hb.style.cssText = 'cursor:pointer;color:#666;font-size:14px;display:flex;align-items:center;gap:4px';
+    hb.style.cssText = 'cursor:pointer;color:var(--c-text-2);font-size:14px;display:flex;align-items:center;gap:4px';
     hb.innerHTML = '<span style="font-size:16px">&#128196;</span>排盘历史'+(cnt>0?' ('+cnt+')':'');
     hb.addEventListener('click', function(e){e.stopPropagation();showSavedList();});
     let sb = document.createElement('span');
     sb.id = 'barSaveBtn';
-    sb.style.cssText = 'cursor:pointer;color:#0dc2b3;font-size:14px;display:flex;align-items:center;gap:4px';
+    sb.style.cssText = 'cursor:pointer;color:var(--c-theme);font-size:14px;display:flex;align-items:center;gap:4px';
     sb.innerHTML = '<span style="font-size:16px">&#128190;</span>保存';
     sb.addEventListener('click', function(e){e.stopPropagation();savePan();});
     bar.appendChild(hb);
@@ -1976,7 +1970,7 @@ function showPalace(g) {
         let sp = rest.search(/[。，\s]/);
         let title = sp > 0 ? rest.slice(0, sp) : rest.slice(0, 20);
         let desc = sp > 0 ? rest.slice(sp) : rest.slice(20);
-        out += '<div style="margin-top:8px"><b style="color:#0dc2b3">'+numMatch[1]+'、</b><b>'+title+'</b>'+desc+'</div>';
+        out += '<div style="margin-top:8px"><b style="color:var(--c-theme)">'+numMatch[1]+'、</b><b>'+title+'</b>'+desc+'</div>';
         continue;
       }
       // 标签检测：已知标签关键词后跟 ：/为/代表
@@ -2013,7 +2007,7 @@ function showPalace(g) {
   }
 
   function makeTab(id, label, active) {
-    return '<span onclick="event.stopPropagation();switchPalaceTab(\''+id+'\',\''+tabId+'\')" id="tab_'+id+'" style="display:inline-block;padding:6px 14px;cursor:pointer;font-size:14px;border-radius:20px;margin:2px;'+(active?'background:#0dc2b3;color:#fff':'background:#f0f0f0;color:#666')+'">'+label+'</span>';
+    return '<span onclick="event.stopPropagation();switchPalaceTab(\''+id+'\',\''+tabId+'\')" id="tab_'+id+'" style="display:inline-block;padding:6px 14px;cursor:pointer;font-size:14px;border-radius:20px;margin:2px;'+(active?'background:var(--c-theme);color:#fff':'background:var(--c-gray-bg);color:var(--c-text-2)')+'">'+label+'</span>';
   }
 
   // 构建各标签页内容
@@ -2027,11 +2021,11 @@ function showPalace(g) {
 
   function contentGong() {
     let s = '<div style="font-size:20px;font-weight:bold">第'+g+'宫 '+gi.name+' '+wxBadge(gi.wx)+'</div>';
-    s += '<div style="color:#999;margin:4px 0">'+gi.key+'</div>';
+    s += '<div style="color:var(--c-text-4);margin:4px 0">'+gi.key+'</div>';
     if (window.GONG_FULL && window.GONG_FULL[g]) {
       s += fmtText(window.GONG_FULL[g].text);
     } else {
-      s += '<p>'+gi.desc+'</p><p style="color:#999;font-size:12px">完整详解加载中…</p>';
+      s += '<p>'+gi.desc+'</p><p style="color:var(--c-text-4);font-size:12px">完整详解加载中…</p>';
       ensureGongDetail(function() {
         var el = document.getElementById(tabId + '_gong');
         if (el && window.GONG_FULL) el.innerHTML = contentGong();
@@ -2043,21 +2037,21 @@ function showPalace(g) {
     let s = '<div style="font-size:18px;font-weight:bold">八神：'+p.shen+'</div>';
     if (window.SHEN_FULL && window.SHEN_FULL[p.shen]) s += fmtText(window.SHEN_FULL[p.shen].text);
     else s += '<p>'+sh.desc+'</p>';
-    if (window.WUCHENG_SHEN && window.WUCHENG_SHEN[p.shen]) s += '<hr style="border:0;border-top:1px dashed #ddd;margin:12px 0">'+fmtText(window.WUCHENG_SHEN[p.shen].text);
+    if (window.WUCHENG_SHEN && window.WUCHENG_SHEN[p.shen]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_SHEN[p.shen].text);
     return s;
   }
   function contentXing() {
     let s = '<div style="font-size:18px;font-weight:bold">九星：'+p.xing+'</div>';
     if (window.XING_FULL && window.XING_FULL[p.xing]) s += fmtText(window.XING_FULL[p.xing].text);
     else s += '<p>'+xi.desc+'</p>';
-    if (window.WUCHENG_XING && window.WUCHENG_XING[p.xing]) s += '<hr style="border:0;border-top:1px dashed #ddd;margin:12px 0">'+fmtText(window.WUCHENG_XING[p.xing].text);
+    if (window.WUCHENG_XING && window.WUCHENG_XING[p.xing]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_XING[p.xing].text);
     return s;
   }
   function contentMen() {
     let s = '<div style="font-size:18px;font-weight:bold">八门：'+p.men+'</div>';
     if (window.MEN_FULL && window.MEN_FULL[p.men]) s += fmtText(window.MEN_FULL[p.men].text);
     else s += '<p>'+me.desc+'</p>';
-    if (window.WUCHENG_MEN && window.WUCHENG_MEN[p.men]) s += '<hr style="border:0;border-top:1px dashed #ddd;margin:12px 0">'+fmtText(window.WUCHENG_MEN[p.men].text);
+    if (window.WUCHENG_MEN && window.WUCHENG_MEN[p.men]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_MEN[p.men].text);
     return s;
   }
   function contentGan() {
@@ -2072,31 +2066,31 @@ function showPalace(g) {
     s += '<div style="margin:8px 0"><span style="font-weight:bold">暗干：</span>'+ag+'</div>';
     if (window.GAN_FULL&&tg0&&window.GAN_FULL[tg0]) s += '<details style="margin-top:8px"><summary style="font-weight:bold;cursor:pointer">天盘干详解('+p.tian[0]+')</summary>'+fmtText(window.GAN_FULL[tg0].text)+'</details>';
     if (window.GAN_FULL&&dg0&&dg0!==tg0&&window.GAN_FULL[dg0]) s += '<details style="margin-top:4px"><summary style="font-weight:bold;cursor:pointer">地盘干详解('+p.di[0]+')</summary>'+fmtText(window.GAN_FULL[dg0].text)+'</details>';
-    if (window.WUCHENG_SANQI&&tg0&&window.WUCHENG_SANQI[tg0]) s += '<details style="margin-top:4px"><summary style="font-weight:bold;cursor:pointer;color:#0dc2b3">三奇六仪('+p.tian[0]+')</summary>'+fmtText(window.WUCHENG_SANQI[tg0].text)+'</details>';
+    if (window.WUCHENG_SANQI&&tg0&&window.WUCHENG_SANQI[tg0]) s += '<details style="margin-top:4px"><summary style="font-weight:bold;cursor:pointer;color:var(--c-theme)">三奇六仪('+p.tian[0]+')</summary>'+fmtText(window.WUCHENG_SANQI[tg0].text)+'</details>';
     return s;
   }
   function contentGeju() {
     let tg0 = p.tian[0]||'', dg0 = p.di[0]||'';
     let key = tg0 + dg0;
     let s = '<div style="font-size:18px;font-weight:bold">格局：'+key+'</div>';
-    s += '<div style="color:#999;margin:4px 0">天盘'+tg0+' + 地盘'+dg0+'</div>';
+    s += '<div style="color:var(--c-text-4);margin:4px 0">天盘'+tg0+' + 地盘'+dg0+'</div>';
     if (window.GEJU_81 && window.GEJU_81[key]) {
       s += fmtText(window.GEJU_81[key].text);
     } else {
-      s += '<p style="margin:8px 0;color:#999">该组合无对应格局记录（甲为值符，隐于旬首之下）</p>';
+      s += '<p style="margin:8px 0;color:var(--c-text-4)">该组合无对应格局记录（甲为值符，隐于旬首之下）</p>';
     }
     // Also show 天干克应 for 天盘干 as reference below
     if (window.WUCHENG_GANKEYING && tg0 && window.WUCHENG_GANKEYING[tg0]) {
-      s += '<hr style="border:0;border-top:1px dashed #ddd;margin:12px 0">';
-      s += '<details><summary style="font-weight:bold;cursor:pointer;color:#0dc2b3">天干克应参考('+tg0+')</summary>'+fmtText(window.WUCHENG_GANKEYING[tg0].text)+'</details>';
+      s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">';
+      s += '<details><summary style="font-weight:bold;cursor:pointer;color:var(--c-theme)">天干克应参考('+tg0+')</summary>'+fmtText(window.WUCHENG_GANKEYING[tg0].text)+'</details>';
     }
     return s;
   }
 
   let h = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
-    + '<div style="position:relative;background:#fff;border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:#333;cursor:default" onclick="event.stopPropagation()">'
-    + '<span onclick="event.stopPropagation();let p=this;while(p){if(p.style&&p.style.position==\'fixed\'){p.remove();break;}p=p.parentNode;}" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:#f0f0f0;border-radius:50%;font-size:18px;color:#999;cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
-    + '<div id="'+tabId+'_tabs" style="text-align:center;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:10px">'+tabs+'</div>'
+    + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
+    + '<span onclick="event.stopPropagation();let p=this;while(p){if(p.style&&p.style.position==\'fixed\'){p.remove();break;}p=p.parentNode;}" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-gray-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
+    + '<div id="'+tabId+'_tabs" style="text-align:center;margin-bottom:12px;border-bottom:1px solid var(--c-border);padding-bottom:10px">'+tabs+'</div>'
     + '<div id="'+tabId+'_gong" class="ptab">'+contentGong()+'</div>'
     + '<div id="'+tabId+'_shen" class="ptab" style="display:none">'+contentShen()+'</div>'
     + '<div id="'+tabId+'_xing" class="ptab" style="display:none">'+contentXing()+'</div>'
@@ -2113,12 +2107,12 @@ function showPalace(g) {
     // 隐藏所有标签页
     let all = container.querySelectorAll('.ptab'); for(let a=0;a<all.length;a++) all[a].style.display='none';
     // 切换标签样式
-    let allT = container.querySelectorAll('[id^="tab_"]'); for(let t=0;t<allT.length;t++) { allT[t].style.background='#f0f0f0'; allT[t].style.color='#666'; }
+    let allT = container.querySelectorAll('[id^="tab_"]'); for(let t=0;t<allT.length;t++) { allT[t].style.background='var(--c-gray-bg)'; allT[t].style.color='var(--c-text-2)'; }
     // 显示目标
     let el = container.querySelector('#'+id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
     if (el) el.style.display='block';
     let tb = container.querySelector('#tab_'+id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
-    if (tb) { tb.style.background='#0dc2b3'; tb.style.color='#fff'; }
+    if (tb) { tb.style.background='var(--c-theme)'; tb.style.color='#fff'; }
   };
 
   document.body.insertAdjacentHTML('beforeend', h);
@@ -2389,11 +2383,11 @@ function showJuSelectForKun2(gan) {
   let dlg = document.createElement('div');
   dlg.id = 'xpJuSelect';
   dlg.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:center;justify-content:center';
-  dlg.innerHTML = '<div style="background:#fff;border-radius:12px;padding:16px;max-width:320px;width:90%;text-align:center">' +
+  dlg.innerHTML = '<div style="background:var(--c-bg);border-radius:12px;padding:16px;max-width:320px;width:90%;text-align:center">' +
     '<div style="font-size:15px;margin-bottom:4px">坤2宫地盘干 戊</div>' +
-    '<div style="font-size:13px;color:#888;margin-bottom:12px">请选择局数（中5寄坤2宫）</div>' +
-    '<button id="xpJuBtn2" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid #0dc2b3;border-radius:8px;background:#f0fdfa;color:#0dc2b3;font-size:15px;cursor:pointer">'+ju2Label+'</button>' +
-    '<button id="xpJuBtn5" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;color:#333;font-size:15px;cursor:pointer">'+ju5Label+'</button>' +
+    '<div style="font-size:13px;color:var(--c-text-3);margin-bottom:12px">请选择局数（中5寄坤2宫）</div>' +
+    '<button id="xpJuBtn2" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid var(--c-theme);border-radius:8px;background:var(--c-theme-bg);color:var(--c-theme);font-size:15px;cursor:pointer">'+ju2Label+'</button>' +
+    '<button id="xpJuBtn5" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid var(--c-border);border-radius:8px;background:var(--c-gray-bg);color:var(--c-text);font-size:15px;cursor:pointer">'+ju5Label+'</button>' +
     '</div>';
   document.body.appendChild(dlg);
 
@@ -2437,24 +2431,24 @@ function showJuSelectForKun2(gan) {
 	  ];
 
 	  // 构建HTML，所有按钮用data属性替代onclick
-	  h = '<div id="xpEditorCard" style="background:#fff;border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:85vh;overflow-y:auto">';
+	  h = '<div id="xpEditorCard" style="background:var(--c-bg);border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:85vh;overflow-y:auto">';
 	  h += '<div style="font-weight:bold;font-size:17px;text-align:center;margin-bottom:10px">'+GONG_NAMES[g]+'宫 编辑</div>';
 	  for(let ci = 0; ci < cats.length; ci++) {
 	    let cat = cats[ci];
 	    let curVal = d[cat.key] || '';
-	    h += '<div style="font-size:12px;color:#888;margin-bottom:2px">'+cat.label+'</div>';
+	    h += '<div style="font-size:12px;color:var(--c-text-3);margin-bottom:2px">'+cat.label+'</div>';
 	    h += '<div class="xp-btn-group" data-cat="'+cat.key+'" style="margin-bottom:8px">';
 	    for(let oi = 0; oi < cat.opts.length; oi++) {
 	      let val = cat.opts[oi];
-	      let sel = (curVal === val) ? 'background:#0dc2b3;color:#fff;border-color:#0dc2b3' : 'background:#fafafa;border-color:#e0e0e0';
+	      let sel = (curVal === val) ? 'background:var(--c-theme);color:#fff;border-color:var(--c-theme)' : 'background:var(--c-gray-bg);border-color:var(--c-border)';
 	      h += '<span class="xp-btn" data-cat="'+cat.key+'" data-val="'+val+'" style="display:inline-block;padding:6px 12px;margin:2px;border:1px solid;border-radius:16px;font-size:14px;cursor:pointer;'+sel+'">'+val+'</span>';
 	    }
 	    h += '</div>';
 	  }
 	  h += '<div style="text-align:center;margin:8px 0">';
-	  h += '<span id="xpAutoFillBtn" style="display:inline-block;padding:8px 20px;background:#0dc2b3;color:#fff;border-radius:20px;font-size:14px;cursor:pointer">以此宫推算全盘</span>';
+	  h += '<span id="xpAutoFillBtn" style="display:inline-block;padding:8px 20px;background:var(--c-theme);color:#fff;border-radius:20px;font-size:14px;cursor:pointer">以此宫推算全盘</span>';
 	  h += '</div>';
-	  h += '<div style="text-align:center"><span id="xpCloseBtn" style="font-size:13px;color:#888;cursor:pointer">关闭</span></div>';
+	  h += '<div style="text-align:center"><span id="xpCloseBtn" style="font-size:13px;color:var(--c-text-3);cursor:pointer">关闭</span></div>';
 	  h += '</div>';
 
 	  overlay.innerHTML = h;
@@ -2487,10 +2481,10 @@ function showJuSelectForKun2(gan) {
 	    let group = btn.parentElement;
 	    let siblings = group.querySelectorAll('.xp-btn');
 	    for(let si = 0; si < siblings.length; si++) {
-	      siblings[si].style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid #e0e0e0;border-radius:16px;font-size:14px;cursor:pointer;background:#fafafa';
+	      siblings[si].style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-border);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-gray-bg)';
 	    }
 	    // 高亮选中按钮
-	    btn.style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid #0dc2b3;border-radius:16px;font-size:14px;cursor:pointer;background:#0dc2b3;color:#fff';
+	    btn.style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-theme);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-theme);color:#fff';
 
 	    // 坤2宫地盘干戊选择后弹出局数选择
 	    if (g === 2 && catKey === 'di' && val === '戊') {
@@ -2555,10 +2549,10 @@ function toggleXiangJu(noScroll){
     let agFn= g => {let a=palsT['gong'+g];return a&&a.anGan?window._anGanColor?window._anGanColor(a.anGan,g):a.anGan:'';};
     let csFn=window._colorSpan|| (v => {return v||'';});
     let gridHTML=buildPaipanGrid(palsT,kongGongsT,maPosId,agFn,{colorSpan:csFn});
-    let html='<style>.xj-head #tdTitle td{color:#dead68}.xj-head #itemTitle{color:#dead68;line-height:30px}.xj-head #dTitle{width:16%;color:#dead68}</style>'+
+    let html='<style>.xj-head #tdTitle td{color:var(--c-gold)}.xj-head #itemTitle{color:var(--c-gold);line-height:30px}.xj-head #dTitle{width:16%;color:var(--c-gold)}</style>'+
       '<div id="panHead"><TABLE class="pan xj-head" id="headTable">'+
       '<TR><TD id="itemTitle">度数</TD><TD colspan="3">'+sxName+' '+degStart+'～'+degEnd+'°</TD><TD>'+sxYear+'年</TD></TR>'+
-      '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+sxShiZhuParts[0]+'</TD><TD class="sizhu" style="color:#c00000;font-weight:bold">'+sxShiZhuParts[1]+'</TD><TD>黄泉<b>'+sxHq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
+      '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+sxShiZhuParts[0]+'</TD><TD class="sizhu" style="color:var(--c-sizhu);font-weight:bold">'+sxShiZhuParts[1]+'</TD><TD>黄泉<b>'+sxHq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
       '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>空亡</TD><TD>马星</TD></TR>'+
       '<TR><TD>'+xunShouGZ+'</TD><TD>天'+zhiFu+'星</TD><TD>'+zhiShi+'门</TD><TD>'+kongWangStr+'</TD><TD>'+maStr+'</TD></TR>'+
       '</TABLE></div>'+gridHTML;
@@ -2567,13 +2561,13 @@ function toggleXiangJu(noScroll){
     parts.push('<div class="xj-pan" style="margin:8px 0">'+html+'</div>');
   }
   let ui='<div style="padding:6px 0;display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
-ui+='<span style="font-size:13px;color:#666">年:</span>';
+ui+='<span style="font-size:13px;color:var(--c-text-2)">年:</span>';
 ui+='<label style="font-size:13px;cursor:pointer;margin:0"><input type="radio" name="xjuYear" value="0" checked onchange="refreshXiangJu()" style="vertical-align:middle"> 今年</label>';
 ui+='<label style="font-size:13px;cursor:pointer;margin:0"><input type="radio" name="xjuYear" value="1" onchange="refreshXiangJu()" style="vertical-align:middle"> 明年</label>';
 ui+='<label style="font-size:13px;cursor:pointer;margin:0"><input type="radio" name="xjuYear" value="2" onchange="refreshXiangJu()" style="vertical-align:middle"> 后年</label>';
-ui+='<span style="font-size:13px;color:#666;margin-left:8px">度数:</span>';
+ui+='<span style="font-size:13px;color:var(--c-text-2);margin-left:8px">度数:</span>';
 ui+='<input id="xjuDeg" class="sel-date" style="width:55px" type="number" min="0" max="359" value="'+sxDeg+'" tabindex="-1" onchange="let v=parseInt(this.value);if(isNaN(v)||v<0){this.value=0;}else if(v>359){this.value=359;}refreshXiangJu();">';
-ui+='<span onclick="refreshXiangJu()" style="display:inline-block;padding:4px 14px;font-size:13px;cursor:pointer;border:1px solid #0dc2b3;color:#0dc2b3;border-radius:4px;background:#fff">更改</span>';
+ui+='<span onclick="refreshXiangJu()" style="display:inline-block;padding:4px 14px;font-size:13px;cursor:pointer;border:1px solid var(--c-theme);color:var(--c-theme);border-radius:4px;background:var(--c-bg)">更改</span>';
 ui+='</div>';
 div.innerHTML=ui+parts.join('');
   // Restore saved values
@@ -2598,11 +2592,11 @@ div.innerHTML=ui+parts.join('');
       let pRows=pan.querySelectorAll('#pan tr'),lRows=pan.querySelectorAll('#leftTable tr'),rRows=pan.querySelectorAll('#rightTable tr');
       for(let i=0;i<3&&i<pRows.length;i++){let rh=pRows[i].getBoundingClientRect().height;if(rh>0){if(lRows[i])lRows[i].style.height=rh+'px';if(rRows[i])rRows[i].style.height=rh+'px';}}
       // YinGan alignment: left side (gong4,3,8) align to tian, right side (gong2,7,6) align to xing
-      [4,3,8].forEach(g => {let y=pan.querySelector('#yinGan'+g),t=pan.querySelector('#tian'+g),go=pan.querySelector('#gong'+g);if(y&&t&&go){y.style.paddingTop=Math.max(0,t.getBoundingClientRect().top-go.getBoundingClientRect().top)+'px';y.style.textAlign='right';y.style.verticalAlign='top';y.style.fontSize='15px';y.style.lineHeight='25px';y.style.color='#333';}});
-      [2,7,6].forEach(g => {let y=pan.querySelector('#yinGan'+g),x=pan.querySelector('#xing'+g),go=pan.querySelector('#gong'+g);if(y&&x&&go){y.style.paddingTop=Math.max(0,x.getBoundingClientRect().top-go.getBoundingClientRect().top)+'px';y.style.textAlign='left';y.style.verticalAlign='top';y.style.fontSize='15px';y.style.lineHeight='25px';y.style.color='#333';}});
+      [4,3,8].forEach(g => {let y=pan.querySelector('#yinGan'+g),t=pan.querySelector('#tian'+g),go=pan.querySelector('#gong'+g);if(y&&t&&go){y.style.paddingTop=Math.max(0,t.getBoundingClientRect().top-go.getBoundingClientRect().top)+'px';y.style.textAlign='right';y.style.verticalAlign='top';y.style.fontSize='15px';y.style.lineHeight='25px';y.style.color='var(--c-text)';}});
+      [2,7,6].forEach(g => {let y=pan.querySelector('#yinGan'+g),x=pan.querySelector('#xing'+g),go=pan.querySelector('#gong'+g);if(y&&x&&go){y.style.paddingTop=Math.max(0,x.getBoundingClientRect().top-go.getBoundingClientRect().top)+'px';y.style.textAlign='left';y.style.verticalAlign='top';y.style.fontSize='15px';y.style.lineHeight='25px';y.style.color='var(--c-text)';}});
       let y9=pan.querySelector('#yinGan9'),y1=pan.querySelector('#yinGan1');
-      if(y9){y9.style.verticalAlign='bottom';y9.style.fontSize='15px';y9.style.color='#333';}
-      if(y1){y1.style.verticalAlign='top';y1.style.fontSize='15px';y1.style.color='#333';}
+      if(y9){y9.style.verticalAlign='bottom';y9.style.fontSize='15px';y9.style.color='var(--c-text)';}
+      if(y1){y1.style.verticalAlign='top';y1.style.fontSize='15px';y1.style.color='var(--c-text)';}
     });
   },50);
   // Self-verification: compare rendered DOM against expected paipanrest data
@@ -2679,8 +2673,8 @@ function doChuanRen(){
         let topRow=go.querySelector('.panItem.top');if(!topRow)return;
         let kw=topRow.querySelector('[id^=kong]');
         let wrap=document.createElement('span');wrap.style.cssText='float:right;white-space:nowrap;margin-left:4px';
-        if(kw&&kw.textContent.replace(/\s/g,'').trim()=='○'){let ks=document.createElement('span');ks.textContent='○';ks.style.cssText='font-weight:bold;color:#1a1a2e;margin-right:1px';wrap.appendChild(ks);kw.style.display='none';}
-        let ag=document.createElement('span');ag.textContent=agText;ag.style.cssText='color:#8B7D6B;font-size:70%';wrap.appendChild(ag);
+        if(kw&&kw.textContent.replace(/\s/g,'').trim()=='○'){let ks=document.createElement('span');ks.textContent='○';ks.style.cssText='font-weight:bold;color:var(--c-text);margin-right:1px';wrap.appendChild(ks);kw.style.display='none';}
+        let ag=document.createElement('span');ag.textContent=agText;ag.style.cssText='color:var(--c-text-3);font-size:70%';wrap.appendChild(ag);
         topRow.appendChild(wrap);
       });
       // 3. 12地支卡片: 各自上方/下方居中于对应宫
