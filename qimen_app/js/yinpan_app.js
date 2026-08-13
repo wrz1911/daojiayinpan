@@ -2434,7 +2434,7 @@ function showJuSelectForKun2(gan) {
 	  ];
 
 	  // 构建HTML，所有按钮用data属性替代onclick
-	  h = '<div id="xpEditorCard" style="background:var(--c-bg);border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:85vh;overflow-y:auto">';
+	  let h = '<div id="xpEditorCard" style="background:var(--c-bg);border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:85vh;overflow-y:auto">';
 	  h += '<div style="font-weight:bold;font-size:17px;text-align:center;margin-bottom:10px">'+GONG_NAMES[g]+'宫 编辑</div>';
 	  for(let ci = 0; ci < cats.length; ci++) {
 	    let cat = cats[ci];
