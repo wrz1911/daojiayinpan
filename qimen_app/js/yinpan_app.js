@@ -38,13 +38,19 @@ let _expectedPals=[];
 const STORAGE_KEY = 'qimen_saved';
 const STORAGE_FILE = 'backups.json';
 const STORAGE_DIR = 'qimen';
-// 共享常量: 地支→宫位, 马星位置, 空亡序号, 入墓/击刑规则
-const ZHI2G = {'子':1,'丑':8,'寅':8,'卯':3,'辰':4,'巳':4,'午':9,'未':2,'申':2,'酉':7,'戌':6,'亥':6};
-const MA_POS = {4:'ma1',9:'ma2',2:'ma2',3:'ma3',7:'ma4',8:'ma3',1:'ma4',6:'ma4'};
-const KONG_ID = {4:4,9:5,2:6,3:3,7:7,8:2,1:1,6:8};
+// 共享常量: 由 qimen_constants.js 的 window.QM 派生, 避免重复定义
+const ZHI2G = QM.ZHI2G_OBJ;   // 地支→宫位(对象版)
+const MA_POS = QM.MP;         // 马星位置
+const KONG_ID = QM.KONG_ID;   // 空亡序号
+const XM_RULES = QM.XM_G;     // 相门规则
+// 入墓规则: QM.MU_G 不含壬(壬墓辰在4宫, 山向显示需要), 故保留独立定义
 const MU_RULES = {2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};
-const XING_RULES = {3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};
-const XM_RULES = {8:['庚'],4:['壬']};
+// 击刑规则: 由 QM.XING_G(干→宫)反向派生(宫→干列表)
+const XING_RULES = Object.keys(QM.XING_G).reduce((acc, gan) => {
+  const g = QM.XING_G[gan];
+  (acc[g] = acc[g] || []).push(gan);
+  return acc;
+}, {});
 
 setPanType(1);
 // 绑定模式切换和日期选择器: 用程序化事件确保Tauri兼容
@@ -2532,156 +2538,16 @@ function toggleXiangJu(noScroll){
   let parts=[];
   _expectedPals=[];
 
-  // ShanJu数组 (24山), 用于向角度选局副盘局数计算
-  let SHAN_JU=[-7,-2,-1,-9,-7,-6,-5,-6,-5,4,1,2,3,8,9,1,3,4,5,4,5,-6,-9,-8];
-  for(let offset=-30;offset<=30;offset+=5){
-    let deg=((sxDeg+offset)%360+360)%360;
-    // 向角度选局使用24山查表算法
-    let _duu=Math.floor(((deg%360+360)%360)/5);
-    let _du=Math.floor(_duu/3);
-    let _t=SHAN_JU[_du];
-    let _tJ=(_t<0)?_t+9:_t+8;
-    let sxJu,sxIsYin;
-    if(_tJ<9){sxJu=9-_tJ;sxIsYin=true;}else{sxJu=_tJ-8;sxIsYin=false;}
-    let _v=_duu%3;
-    if(sxIsYin)sxJu+=_v*3;else sxJu+=9-_v*3;
-    if(sxJu>9)sxJu-=9;
-    let degStart=Math.floor(deg/5)*5,degEnd=degStart+4;
-    // 山向排盘核心: 虚拟时柱hCyl驱动地盘飞步, 不依赖真实日历
-    let XiangZhi=[1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,0,0];
-    let _cY=(sxYear-1864)%60;
-    let _hGan=_cY%10;if(_hGan>4)_hGan-=5; // 年干支天干偏移计算
-    let hCyl=_hGan*12+XiangZhi[_du];
-    let jiang=(13-_cY%12)%12;
-    let ju=sxJu,yy=sxIsYin?'阴':'阳';
-    jiang=(13-_cY%12)%12;
-
-    // paipanrest核心: 旬首/空亡/马星
-    let xunshou=Math.floor(hCyl/10)*10;
-    let xunkong1=(xunshou+10)%12,xunkong2=(xunshou+11)%12;
-    let maxing=[2,8,11,5][hCyl%4]; // YiMa
-
-    // 地盘
-    let LIUYI=['','戊','己','庚','辛','壬','癸','丁','丙','乙'];
-    let _g10=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-    let dg=Math.floor(xunshou/10)+1; // 旬首对应的liuyi索引 (AppStudio +4 = JS +1)
-    let digan={},dgg=0,sgg=0;
-    for(let i=0;i<9;i++){
-      let g=yy=='阴'?ju-i:ju+i;
-      if(g>9)g-=9;if(g<1)g+=9;
-      digan[g]=LIUYI[i+1];
-      if(i+1==dg)dgg=g;
-      if(LIUYI[i+1]==_g10[hCyl%10])sgg=g; // AppStudio: hCyl%10→Gan char
-    }
-    if(sgg==0)sgg=dgg;
-    // 寄宫
-    if(digan[5]&&digan[2])digan[2]=digan[2]+digan[5];
-
-    // 值符星/值使门
-    let FZHUAN=[0,1,6,3,4,6,8,7,2,5],ZHUAN=[0,1,8,3,4,9,2,7,6];
-    let XING=['','蓬','任','冲','辅','英','芮','柱','心'];
-    let MEN=['','休','生','伤','杜','景','死','惊','开'];
-    let SHEN_YIN=['','符','天','地','玄','白','六','阴','蛇'];
-    let SHEN_YANG=['','符','蛇','阴','六','白','玄','地','天'];
-    let zhiFu=XING[FZHUAN[dgg]];if(dgg==5)zhiFu='禽';
-    let zhiShi=MEN[FZHUAN[dgg]];
-    let mgg=yy=='阳'?hCyl%10+dgg:dgg-(hCyl%10);
-    if(mgg<1)mgg+=9;if(mgg>9)mgg-=9;
-
-    // 排星/天盘
-    let xinpan={},tiangan={};
-    let v1=FZHUAN[sgg]-FZHUAN[dgg];
-    for(let j=1;j<=8;j++){
-      let k=j-v1;if(k<1)k+=8;if(k>8)k-=8;
-      xinpan[ZHUAN[j]]=XING[k];
-      tiangan[ZHUAN[j]]=digan[ZHUAN[k]]||'';
-    }
-    // 排门
-    let menpan={};
-    let v2=FZHUAN[mgg]-FZHUAN[dgg];
-    for(let j=1;j<=8;j++){
-      k=j-v2;if(k<1)k+=8;if(k>8)k-=8;
-      menpan[ZHUAN[j]]=MEN[k];
-    }
-    // 排神
-    let shenpan={};
-    let v3=FZHUAN[sgg]-1;
-    for(let j=1;j<=8;j++){
-      let kw=j-v3;if(kw<1)kw+=8;if(kw>8)kw-=8;
-      shenpan[ZHUAN[j]]=yy=='阳'?SHEN_YANG[kw]:SHEN_YIN[kw];
-    }
-    // 暗干
-    let angan={};
-    let v4=FZHUAN[sgg]-FZHUAN[mgg];
-    for(let j=1;j<=8;j++){
-      let kw=j+v4;if(kw<1)kw+=8;if(kw>8)kw-=8;
-      angan[ZHUAN[j]]=digan[ZHUAN[kw]]||'';
-    }
-    // 伏吟局暗干特殊排列
-    // 真伏吟: 全部天盘==地盘
-    let _isFY=true;
-    for(let _g=1;_g<=9;_g++){if(_g===5)continue;if(tiangan[_g]!==digan[_g]){_isFY=false;break;}}
-    if(_isFY){
-      let _vj;
-      if(hCyl%10==0){let _vc=LIUYI[Math.floor(hCyl/10)+1];for(_vj=1;_vj<10;_vj++)if(LIUYI[_vj]==_vc)break;}
-      else _vj=hCyl%10;
-      let _v2=yy=='阳'?_vj-4:_vj+4;
-      for(let _i=1;_i<10;_i++){
-        let _g=yy=='阳'?_v2+_i-1:_v2-_i+1;
-        if(_g<1)_g+=9;if(_g>9)_g-=9;
-        angan[_i]=LIUYI[_g];
-      }
-      if(angan[1]==tiangan[1]){
-        let _gan=angan[2][0];
-        for(_vj=1;_vj<10;_vj++)if(LIUYI[_vj]==_gan)break;
-        _v2=yy=='阳'?_vj-4:_vj+4;
-        for(let _i=1;_i<10;_i++){
-          let _g=yy=='阳'?_v2+_i-1:_v2-_i+1;
-          if(_g<1)_g+=9;if(_g>9)_g-=9;
-          angan[_i]=LIUYI[_g];
-        }
-      }
-      if(angan[2]&&angan[5])angan[2]=angan[2][0]+angan[5][0];
-      angan[5]='';
-    }
-
-    // 组装palaces + 保存预期值用于渲染验证
-    let palsT={},_exp={};
-    for(let g=1;g<=9;g++){if(g===5)continue;
-      palsT['gong'+g]={shen:shenpan[g]||'',tian:(tiangan[g]||''),di:(digan[g]||''),xing:xinpan[g]||'',men:menpan[g]||'',anGan:(angan[g]||''),isMenPo:false};
-      _exp[g]={shen:shenpan[g]||'',tian:(tiangan[g]||''),di:(digan[g]||''),xing:xinpan[g]||'',men:menpan[g]||''};
-    }
+  // 山向排盘计算已下沉到 engine(window.shanxiangChart), 此处只做 UI 渲染
+  let items = window.shanxiangChart(sxDeg, sxYear);
+  for (const it of items) {
+    let { sxName, degStart, degEnd, sxShiZhuParts, sxHq, juLabel, xunShouGZ, kongWangStr, maStr, maPosId, zhiFu, zhiShi, palsT, kongGongsT, _exp } = it;
     _expectedPals.push(_exp);
     recalcColors(palsT);
 
-    // 空亡: 旬首→空亡地支→对应宫位标记◎/马星/旬首
-    let ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-    let xunShouGZ='甲'+ZHI_LIST[xunshou%12];
-    let kongWangStr=ZHI_LIST[xunkong1]+ZHI_LIST[xunkong2];
-    let maStr=ZHI_LIST[maxing];
-    let kongGongsT={};kongGongsT[ZHI2G[ZHI_LIST[xunkong1]]]=true;kongGongsT[ZHI2G[ZHI_LIST[xunkong2]]]=true;
-    
-    let maGong=ZHI2G[maStr]||0,maPosId=MA_POS[maGong]||'';
     let agFn= g => {let a=palsT['gong'+g];return a&&a.anGan?window._anGanColor?window._anGanColor(a.anGan,g):a.anGan:'';};
     let csFn=window._colorSpan|| (v => {return v||'';});
     let gridHTML=buildPaipanGrid(palsT,kongGongsT,maPosId,agFn,{colorSpan:csFn});
-
-    // 黄泉: 原始公式 v=jiang-hCyl%12, hG=2
-    let _tablesha=[11,3,3,3,5,5,5,6,6,6,4,4,4,2,2,2,8,8,8,9,9,9,11,11];
-    let _duSub=Math.floor(((deg%360+360)%360)/5);_duSub=Math.floor(_duSub/3);
-    let _XZ=[1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,0,0];
-    let _hCylSub=2*12+_XZ[_duSub];
-    let _vSub=(jiang||0)-_hCylSub%12;
-    let _Z2G=[1,8,8,3,4,4,9,2,2,7,6,6];
-    let sxHq=ZHI_LIST[_tablesha[_duSub]]+_Z2G[(_tablesha[_duSub]-_vSub+12)%12];
-    let sxName=SHAN_XIANG_DATA.getName(deg);
-    let sxYearGan=GAN_LIST[(sxYear-4)%10],sxYearZhi=ZHI_LIST[(sxYear-4)%12];
-    let ZHI12=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-    let SGX_OFF={'甲':0,'己':0,'乙':2,'庚':2,'丙':4,'辛':4,'丁':6,'壬':6,'戊':8,'癸':8};
-    let sxShiZhu=GAN_LIST[_cY%10]+ZHI12[_cY%12]+' '+GAN_LIST[hCyl%10]+ZHI12[hCyl%12];
-    let juLabel=(sxIsYin?'阴遁':'阳遁')+sxJu+'局';
-
-    let sxShiZhuParts=sxShiZhu.split(' ');
     let html='<style>.xj-head #tdTitle td{color:#dead68}.xj-head #itemTitle{color:#dead68;line-height:30px}.xj-head #dTitle{width:16%;color:#dead68}</style>'+
       '<div id="panHead"><TABLE class="pan xj-head" id="headTable">'+
       '<TR><TD id="itemTitle">度数</TD><TD colspan="3">'+sxName+' '+degStart+'～'+degEnd+'°</TD><TD>'+sxYear+'年</TD></TR>'+

@@ -3,34 +3,12 @@
 // 开源依赖: tyme4ts (MIT) https://github.com/6tail/tyme4ts
 // 开源依赖: Tauri (MIT) https://github.com/tauri-apps/tauri
 (function(){
+'use strict';
 const _global = typeof globalThis !== 'undefined' ? globalThis : window;
 function _t() { return _global.tyme4j || window.tyme || {}; }
 
-// ====== 引擎常量: 干支/八门/九星/八神/飞转宫映射 ======
-const GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-const ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-const GAN6 = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
-const MEN = ['','休','生','伤','杜','景','死','惊','开'];
-const XING = ['','蓬','任','冲','辅','英','芮','柱','心'];
-const SHEN_Y = ['','符','天','地','玄','白','六','阴','蛇'];
-const SHEN_A = ['','符','蛇','阴','六','白','玄','地','天'];
-const ZHUAN = [0,1,8,3,4,9,2,7,6];
-const FZHUAN = [0,1,6,3,4,6,8,7,2,5];
-const YIMA = [2,11,8,5];
-const ZHI2G = [1,8,8,3,4,4,9,2,2,7,6,6];
-const SG_MAP = {甲:0,己:0,乙:2,庚:2,丙:4,辛:4,丁:6,壬:6,戊:8,癸:8};
-const HE = [1,0,11,10,9,8,7,6,5,4,3,2];
-const STN = ['冬至','小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪'];
-const MNM = ['','正月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','腊月'];
-const DNM = ['','初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
-const KE_Y = '子丑寅卯辰巳';
-const KE_N = '午未申酉戌亥';
-const XING_G = {'戊':3,'己':2,'庚':8,'辛':9,'壬':4,'癸':4};
-const MU_G = {'癸':2,'戊':6,'丙':6,'乙':6,'庚':8,'丁':8,'己':8,'辛':4};
-const MEN_PO = {休:[1],生:[8,3,4],伤:[8,3,4],杜:[8,3,4],景:[9,2,7,6],死:[9,2,7,6],惊:[9,2,7,6],开:[9,2,7,6]};
-const MP = {4:'ma1',9:'ma2',2:'ma2',3:'ma3',7:'ma4',8:'ma3',1:'ma4',6:'ma4'};
-const TMS = ['神后子','大吉丑','功曹寅','太冲卯','天罡辰','太乙巳','胜光午','小吉未','传送申','从魁酉','河魁戌','登明亥'];
-const DHS = ['建','除','满','平','定','执','破','危','成','收','开','闭'];
+// ====== 引擎常量: 统一引用 qimen_constants.js 的 window.QM ======
+const { GAN, ZHI, GAN6, MEN, XING, SHEN_Y, SHEN_A, ZHUAN, FZHUAN, YIMA, ZHI2G, SG_MAP, HE, STN, MNM, DNM, KE_Y, KE_N, XING_G, MU_G, MEN_PO, MP, TMS, DHS } = window.QM;
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 const zi = s => ZHI.indexOf(s)
@@ -349,6 +327,150 @@ function buildGrid(d) {
   return h;
 }
 
+// ====== 山向排盘(向角度选局): 纯计算, 由 app 原 renderShanxiang 算法下沉 ======
+// 入参: sxDeg 向角度(0-359), sxYear 公历年。返回 items 数组(offset -30..30 步长5, 共13项),
+// 每项含盘面数据(palsT/kongGongsT/_exp等)与头部信息, DOM/着色/HTML 拼接由 app 层完成
+function shanxiangChart(sxDeg, sxYear) {
+  const { SHAN_JU, XIANGZHI, TABLESHA, ZHI2G_OBJ, SX_NAMES } = window.QM;
+  const LIUYI = ['','戊','己','庚','辛','壬','癸','丁','丙','乙'];
+  const items = [];
+  for (let offset = -30; offset <= 30; offset += 5) {
+    let deg = ((sxDeg + offset) % 360 + 360) % 360;
+    // 向角度选局使用24山查表算法
+    let _duu = Math.floor(((deg % 360 + 360) % 360) / 5);
+    let _du = Math.floor(_duu / 3);
+    let _t = SHAN_JU[_du];
+    let _tJ = (_t < 0) ? _t + 9 : _t + 8;
+    let sxJu, sxIsYin;
+    if (_tJ < 9) { sxJu = 9 - _tJ; sxIsYin = true; } else { sxJu = _tJ - 8; sxIsYin = false; }
+    let _v = _duu % 3;
+    if (sxIsYin) sxJu += _v * 3; else sxJu += 9 - _v * 3;
+    if (sxJu > 9) sxJu -= 9;
+    let degStart = Math.floor(deg / 5) * 5, degEnd = degStart + 4;
+    // 山向排盘核心: 虚拟时柱hCyl驱动地盘飞步, 不依赖真实日历
+    let _cY = (sxYear - 1864) % 60;
+    let _hGan = _cY % 10; if (_hGan > 4) _hGan -= 5; // 年干支天干偏移计算
+    let hCyl = _hGan * 12 + XIANGZHI[_du];
+    let jiang = (13 - _cY % 12) % 12;
+    let ju = sxJu, yy = sxIsYin ? '阴' : '阳';
+
+    // paipanrest核心: 旬首/空亡/马星
+    let xunshou = Math.floor(hCyl / 10) * 10;
+    let xunkong1 = (xunshou + 10) % 12, xunkong2 = (xunshou + 11) % 12;
+    let maxing = [2, 8, 11, 5][hCyl % 4]; // YiMa
+
+    // 地盘
+    let dg = Math.floor(xunshou / 10) + 1; // 旬首对应的liuyi索引 (AppStudio +4 = JS +1)
+    let digan = {}, dgg = 0, sgg = 0;
+    for (let i = 0; i < 9; i++) {
+      let g = yy == '阴' ? ju - i : ju + i;
+      if (g > 9) g -= 9; if (g < 1) g += 9;
+      digan[g] = GAN6[i];
+      if (i + 1 == dg) dgg = g;
+      if (GAN6[i] == GAN[hCyl % 10]) sgg = g; // AppStudio: hCyl%10→Gan char
+    }
+    if (sgg == 0) sgg = dgg;
+    // 寄宫: 中宫仪寄坤2宫(组合串语义与 app 原实现一致)
+    if (digan[5] && digan[2]) digan[2] = digan[2] + digan[5];
+
+    // 值符星/值使门
+    let zhiFu = XING[FZHUAN[dgg]]; if (dgg == 5) zhiFu = '禽';
+    let zhiShi = MEN[FZHUAN[dgg]];
+    let mgg = yy == '阳' ? hCyl % 10 + dgg : dgg - (hCyl % 10);
+    if (mgg < 1) mgg += 9; if (mgg > 9) mgg -= 9;
+
+    // 排星/天盘
+    let xinpan = {}, tiangan = {};
+    let v1 = FZHUAN[sgg] - FZHUAN[dgg];
+    for (let j = 1; j <= 8; j++) {
+      let k = j - v1; if (k < 1) k += 8; if (k > 8) k -= 8;
+      xinpan[ZHUAN[j]] = XING[k];
+      tiangan[ZHUAN[j]] = digan[ZHUAN[k]] || '';
+    }
+    // 排门
+    let menpan = {};
+    let v2 = FZHUAN[mgg] - FZHUAN[dgg];
+    for (let j = 1; j <= 8; j++) {
+      let k = j - v2; if (k < 1) k += 8; if (k > 8) k -= 8;
+      menpan[ZHUAN[j]] = MEN[k];
+    }
+    // 排神
+    let shenpan = {};
+    let v3 = FZHUAN[sgg] - 1;
+    for (let j = 1; j <= 8; j++) {
+      let kw = j - v3; if (kw < 1) kw += 8; if (kw > 8) kw -= 8;
+      shenpan[ZHUAN[j]] = yy == '阳' ? SHEN_A[kw] : SHEN_Y[kw];
+    }
+    // 暗干
+    let angan = {};
+    let v4 = FZHUAN[sgg] - FZHUAN[mgg];
+    for (let j = 1; j <= 8; j++) {
+      let kw = j + v4; if (kw < 1) kw += 8; if (kw > 8) kw -= 8;
+      angan[ZHUAN[j]] = digan[ZHUAN[kw]] || '';
+    }
+    // 伏吟局暗干特殊排列: 真伏吟 = 全部天盘==地盘
+    let _isFY = true;
+    for (let _g = 1; _g <= 9; _g++) { if (_g === 5) continue; if (tiangan[_g] !== digan[_g]) { _isFY = false; break; } }
+    if (_isFY) {
+      let _vj;
+      if (hCyl % 10 == 0) { let _vc = LIUYI[Math.floor(hCyl / 10) + 1]; for (_vj = 1; _vj < 10; _vj++) if (LIUYI[_vj] == _vc) break; }
+      else _vj = hCyl % 10;
+      let _v2 = yy == '阳' ? _vj - 4 : _vj + 4;
+      for (let _i = 1; _i < 10; _i++) {
+        let _g = yy == '阳' ? _v2 + _i - 1 : _v2 - _i + 1;
+        if (_g < 1) _g += 9; if (_g > 9) _g -= 9;
+        angan[_i] = LIUYI[_g];
+      }
+      if (angan[1] == tiangan[1]) {
+        let _gan = angan[2][0];
+        for (_vj = 1; _vj < 10; _vj++) if (LIUYI[_vj] == _gan) break;
+        _v2 = yy == '阳' ? _vj - 4 : _vj + 4;
+        for (let _i = 1; _i < 10; _i++) {
+          let _g = yy == '阳' ? _v2 + _i - 1 : _v2 - _i + 1;
+          if (_g < 1) _g += 9; if (_g > 9) _g -= 9;
+          angan[_i] = LIUYI[_g];
+        }
+      }
+      if (angan[2] && angan[5]) angan[2] = angan[2][0] + angan[5][0];
+      angan[5] = '';
+    }
+
+    // 组装palaces + 期望值(供渲染验证)
+    let palsT = {}, _exp = {};
+    for (let g = 1; g <= 9; g++) { if (g === 5) continue;
+      palsT['gong' + g] = { shen: shenpan[g] || '', tian: (tiangan[g] || ''), di: (digan[g] || ''), xing: xinpan[g] || '', men: menpan[g] || '', anGan: (angan[g] || ''), isMenPo: false };
+      _exp[g] = { shen: shenpan[g] || '', tian: (tiangan[g] || ''), di: (digan[g] || ''), xing: xinpan[g] || '', men: menpan[g] || '' };
+    }
+
+    // 空亡: 旬首→空亡地支→对应宫位标记◎/马星/旬首
+    let xunShouGZ = '甲' + ZHI[xunshou % 12];
+    let kongWangStr = ZHI[xunkong1] + ZHI[xunkong2];
+    let maStr = ZHI[maxing];
+    let kongGongsT = {}; kongGongsT[ZHI2G_OBJ[ZHI[xunkong1]]] = true; kongGongsT[ZHI2G_OBJ[ZHI[xunkong2]]] = true;
+    let maGong = ZHI2G_OBJ[maStr] || 0, maPosId = MP[maGong] || '';
+
+    // 黄泉: 原始公式 v=jiang-hCyl%12, hG=2
+    let _duSub = Math.floor(((deg % 360 + 360) % 360) / 5); _duSub = Math.floor(_duSub / 3);
+    let _hCylSub = 2 * 12 + XIANGZHI[_duSub];
+    let _vSub = (jiang || 0) - _hCylSub % 12;
+    let sxHq = ZHI[TABLESHA[_duSub]] + ZHI2G[(TABLESHA[_duSub] - _vSub + 12) % 12];
+
+    let sxName = SX_NAMES[Math.floor(deg / 15)];
+    let sxYearGan = GAN[(sxYear - 4) % 10], sxYearZhi = ZHI[(sxYear - 4) % 12];
+    let sxShiZhu = GAN[_cY % 10] + ZHI[_cY % 12] + ' ' + GAN[hCyl % 10] + ZHI[hCyl % 12];
+    let juLabel = (sxIsYin ? '阴遁' : '阳遁') + sxJu + '局';
+
+    items.push({
+      deg, degStart, degEnd, sxName, sxYearGan, sxYearZhi,
+      sxShiZhu, sxShiZhuParts: sxShiZhu.split(' '),
+      juLabel, xunShouGZ, kongWangStr, maStr, maGong, maPosId,
+      zhiFu, zhiShi, sxHq, palsT, kongGongsT, _exp
+    });
+  }
+  return items;
+}
+
 window.qimenChart = qimenChart;
+window.shanxiangChart = shanxiangChart;
 
 })();
