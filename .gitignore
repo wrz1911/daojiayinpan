@@ -14,7 +14,7 @@ qimen-release.keystore
 qimen-yinpan.desktop
 src-tauri/target/
 code-sign-*.pem
-test_*.js
-test_render.html
+tests/legacy/*.js
+tests/test_render.html
 setup-desktop.sh
 qimen-yinpan.desktop
