@@ -2028,8 +2028,15 @@ function showPalace(g) {
   function contentGong() {
     let s = '<div style="font-size:20px;font-weight:bold">第'+g+'宫 '+gi.name+' '+wxBadge(gi.wx)+'</div>';
     s += '<div style="color:#999;margin:4px 0">'+gi.key+'</div>';
-    if (window.GONG_FULL && window.GONG_FULL[g]) s += fmtText(window.GONG_FULL[g].text);
-    else s += '<p>'+gi.desc+'</p>';
+    if (window.GONG_FULL && window.GONG_FULL[g]) {
+      s += fmtText(window.GONG_FULL[g].text);
+    } else {
+      s += '<p>'+gi.desc+'</p><p style="color:#999;font-size:12px">完整详解加载中…</p>';
+      ensureGongDetail(function() {
+        var el = document.getElementById(tabId + '_gong');
+        if (el && window.GONG_FULL) el.innerHTML = contentGong();
+      });
+    }
     return s;
   }
   function contentShen() {
@@ -2769,5 +2776,27 @@ window.ZHI12=ZHI12;
 window.SHENJIANG_NAMES=SHENJIANG_NAMES;
 window.SHENJUE=SHENJUE;
 window.ZXJ_NAMES=ZXJ_NAMES;
+// gong_detail_data.js(258KB)懒加载: 未加载时首次需要注入脚本, 完成后执行回调(重绘详情)
+// 定义在 IIFE 顶层, 供 showPalace 内部调用与下方空闲预取共用
+var _gongDetailLoading = false;
+var _gongDetailPending = [];
+function ensureGongDetail(cb) {
+  if (window.GONG_FULL) { if (cb) cb(); return; }
+  if (cb) _gongDetailPending.push(cb);
+  if (_gongDetailLoading) return;
+  _gongDetailLoading = true;
+  var sc = document.createElement('script');
+  sc.src = 'js/gong_detail_data.js';
+  sc.onload = function() {
+    _gongDetailLoading = false;
+    var q = _gongDetailPending; _gongDetailPending = [];
+    for (var i = 0; i < q.length; i++) q[i]();
+  };
+  sc.onerror = function() { _gongDetailLoading = false; };
+  document.head.appendChild(sc);
+}
+
+// 页面空闲时预取宫详解数据(3 秒后), 用户点开宫详情时无需等待
+setTimeout(ensureGongDetail, 3000);
 _iifeReady = true;
 })();

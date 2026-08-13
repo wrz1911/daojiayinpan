@@ -27,11 +27,10 @@ jobs:
           <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
           EOF
           cp qimen_app/css/yinpan_app.css web/qimen_app/css/
-          cp qimen_app/js/yinpan_app.js web/qimen_app/js/
-          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
-          cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
+          npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
+          npm run build:bundle
+          cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
-          cp qimen_app/js/qimen_constants.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
 
@@ -73,11 +72,10 @@ jobs:
         run: |
           mkdir -p web/qimen_app/css web/qimen_app/js
           cp qimen_app/css/yinpan_app.css web/qimen_app/css/
-          cp qimen_app/js/yinpan_app.js web/qimen_app/js/
-          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
-          cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
+          npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
+          npm run build:bundle
+          cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
-          cp qimen_app/js/qimen_constants.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
@@ -123,11 +121,10 @@ jobs:
         run: |
           mkdir -p web/qimen_app/css web/qimen_app/js
           cp qimen_app/css/yinpan_app.css web/qimen_app/css/
-          cp qimen_app/js/yinpan_app.js web/qimen_app/js/
-          cp qimen_app/js/qimen_engine_min.js web/qimen_app/js/
-          cp qimen_app/js/qimen_chuanren.js web/qimen_app/js/
+          npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
+          npm run build:bundle
+          cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
-          cp qimen_app/js/qimen_constants.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
@@ -181,7 +178,7 @@ jobs:
           node-version: '24'
 
       - name: Install deps
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Setup www dir
         run: |
@@ -192,11 +189,10 @@ jobs:
           <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
           EOF
           cp qimen_app/css/yinpan_app.css www/qimen_app/css/
-          cp qimen_app/js/yinpan_app.js www/qimen_app/js/
-          cp qimen_app/js/qimen_engine_min.js www/qimen_app/js/
-          cp qimen_app/js/qimen_chuanren.js www/qimen_app/js/
+          npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
+          npm run build:bundle
+          cp qimen_app/js/qimen_bundle.min.js www/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
-          cp qimen_app/js/qimen_constants.js www/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
           cp qimen_app/yinpan_standalone.html www/qimen_app/
 

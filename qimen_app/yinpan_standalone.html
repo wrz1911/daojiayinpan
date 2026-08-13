@@ -65,10 +65,8 @@
 
 	<script src="js/tyme4j-browser.js"></script>
 	<script>window.tyme4j = window.tyme || {};</script>
-	<script src="js/qimen_constants.js"></script>
-	<script src="js/qimen_engine_min.js"></script>
-	<script src="js/qimen_chuanren.js"></script>
-<script src="js/gong_detail_data.js"></script>
-	<script src="js/yinpan_app.js"></script>
+	<!-- 四个自有 JS 由 npm run build:bundle 打包合成(见 scripts/build_bundle.sh) -->
+	<script src="js/qimen_bundle.min.js"></script>
+	<!-- gong_detail_data.js(258KB)由 yinpan_app 首次打开宫详情时懒加载 -->
 </body>
 </html>

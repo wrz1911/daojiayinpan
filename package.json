@@ -4,6 +4,7 @@
   "scripts": {
     "start": "./run-desktop.sh",
     "build:linux": "bash build-tauri.sh",
+    "build:bundle": "sh scripts/build_bundle.sh",
     "cap:sync": "npx cap sync",
     "cap:open": "npx cap open android"
   },
@@ -15,6 +16,7 @@
   "devDependencies": {
     "@capacitor/android": "^7.2.1",
     "@capacitor/cli": "^7.2.1",
-    "@capacitor/core": "^7.2.1"
+    "@capacitor/core": "^7.2.1",
+    "esbuild": "^0.28.2"
   }
 }
