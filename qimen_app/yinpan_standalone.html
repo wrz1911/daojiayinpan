@@ -68,16 +68,6 @@
 	<script src="js/qimen_constants.js"></script>
 	<script src="js/qimen_engine_min.js"></script>
 	<script src="js/qimen_chuanren.js"></script>
-	<script>
-	function paipan(zxjus) {
-	  const copts={year:window.Y,month:window.M,day:window.D,hour:window.hr,minute:window.mn,panType:window.panType};
-	  if(zxjus){const i=parseInt(document.getElementById("selZxj").value)||0;if(i>0){const t=i-1;copts.customJu=t<9?{yinYang:"阴",number:9-t}:{yinYang:"阳",number:t-8};}}
-	  const tmdhEl=document.getElementById("tianmendihu");
-	  if(tmdhEl&&tmdhEl.checked)copts.tmdh=true;
-	  const r=window.qimenChart(copts);
-	  return r&&r.raw?r.raw:"";
-	}
-	</script>
 <script src="js/gong_detail_data.js"></script>
 	<script src="js/yinpan_app.js"></script>
 </body>
