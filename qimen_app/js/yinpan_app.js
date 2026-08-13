@@ -1064,7 +1064,7 @@ function renderXinpan(useBg) {
 
   // 暗干颜色函数
   let agColor = g => {
-    ag = palaces['gong'+g] ? palaces['gong'+g].anGan : '';
+    let ag = palaces['gong'+g] ? palaces['gong'+g].anGan : '';
     return ag ? (window._anGanColor|| (v => {return v||'';}))(ag, g) : '';
   };
   // 自动计算值符和值使门
