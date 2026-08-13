@@ -317,6 +317,8 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
     '</TR></TABLE>'+
     '<div id="yixinghuandouDIV"></div>';
   document.getElementById('panWrap').innerHTML=html;
+  // 山向盘禁用宫位点击解释
+  document.querySelectorAll('[id^="gong"]').forEach(x => {x.onclick=null;x.style.cursor='default';});
   // 重新绑定宫格点击事件(WebView中比inline onclick更可靠)
   let xjBtn=document.getElementById('btnXiangJu');
   if(xjBtn){xjBtn.onclick = () =>{try{toggleXiangJu();}catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>选局错误:'+e.message+'</span>';}};}
@@ -1838,8 +1840,8 @@ function _bindActionButtons() {
     let el = document.querySelector(id);
     if (el && !el._bound) { el.onclick = btns[id]; el._bound = true; }
   }
-  // 宫位点击 (穿壬不绑定)
-  if (panType !== 5) {
+  // 宫位点击 (山向/穿壬不绑定)
+  if (panType !== 4 && panType !== 5) {
     let gongs = document.querySelectorAll('[id^="gong"]');
     gongs.forEach(g => {
       if (!g._bound) { let gn = parseInt(g.id.replace('gong','')); if (gn) g.onclick = ()=>showPalace(gn); g._bound = true; }
@@ -1942,6 +1944,7 @@ let MEN_INFO = {
 };
 
 function showPalace(g) {
+  if (panType === 4 || panType === 5) return; // 山向/穿壬盘无宫位解释
   if (panType === 3) { showXinpanEditor(g); return; }
   let p = window._palaces ? window._palaces['gong'+g] : null;
   if (!p) return;
@@ -2570,6 +2573,8 @@ ui+='<input id="xjuDeg" class="sel-date" style="width:55px" type="number" min="0
 ui+='<span onclick="refreshXiangJu()" style="display:inline-block;padding:4px 14px;font-size:13px;cursor:pointer;border:1px solid var(--c-theme);color:var(--c-theme);border-radius:4px;background:var(--c-bg)">更改</span>';
 ui+='</div>';
 div.innerHTML=ui+parts.join('');
+  // 山向盘禁用宫位点击解释
+  div.querySelectorAll('[id^="gong"]').forEach(x => {x.onclick=null;x.style.cursor='default';});
   // Restore saved values
   setTimeout(() => {
     let rd=div.querySelector('input[name="xjuYear"][value="'+_xjuYearSaved+'"]');
@@ -2705,7 +2710,8 @@ function doChuanRen(){
       });
 
       // 移除宫位点击(穿壬不需要)
-      document.querySelectorAll('[id^=yinGan]').forEach(y => {y.onclick=null;y.style.cursor='default';});    });});
+      document.querySelectorAll('[id^=yinGan]').forEach(y => {y.onclick=null;y.style.cursor='default';});
+      document.querySelectorAll('[id^=gong]').forEach(x => {x.onclick=null;x.style.cursor='default';});    });});
   }catch(e){
     document.getElementById("panWrap").innerHTML="<span style=\"color:red;user-select:text;-webkit-user-select:text\">穿壬错误:"+e.message+"</span>";
   }
