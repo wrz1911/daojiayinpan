@@ -6,7 +6,6 @@ web/
 __pycache__/
 *.log
 pan_cache.json
-.claude/
 .tmp/
 js/tyme4j/
 tyme4j/

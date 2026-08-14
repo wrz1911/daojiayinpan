@@ -1,6 +1,6 @@
 # 奇门排盘(道家阴盘)项目记忆
 
-> 迁移自 Claude Code 记忆(FACT.md / JOURNAL.jsonl),2026-08-15。源文件:
+> 迁移自历史会话记忆(FACT.md / JOURNAL.jsonl),2026-08-15。源文件:
 > /home/wrz/.config/CherryStudio/Data/Agents/1405ee64-5dd3-5d4c-9c4b-373a34a32f21/memory/
 
 ## 项目概况
