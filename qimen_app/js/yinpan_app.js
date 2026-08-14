@@ -38,7 +38,38 @@ let _expectedPals=[];
 const STORAGE_KEY = 'qimen_saved';
 const STORAGE_FILE = 'backups.json';
 const STORAGE_DIR = 'qimen';
+
+// === 全局错误静默记录(catch 静默后保留排查线索) ===
+let _errLog = [];
+try { _errLog = JSON.parse(localStorage.getItem('qimen_errlog') || '[]'); } catch(e) { _errLog = []; }
+function _logErr(src, msg) {
+  try {
+    _errLog.push(new Date().toISOString().slice(0,19).replace('T',' ') + ' ' + src + ': ' + msg);
+    if (_errLog.length > 30) _errLog = _errLog.slice(-30);
+    localStorage.setItem('qimen_errlog', JSON.stringify(_errLog));
+    let bad = document.getElementById('errBadge');
+    if (!bad) {
+      bad = document.createElement('span');
+      bad.id = 'errBadge';
+      bad.textContent = '⚠';
+      bad.style.cssText = 'position:fixed;right:8px;bottom:8px;font-size:13px;cursor:pointer;color:var(--c-text-3);opacity:0.7;z-index:10000;background:var(--c-gray-bg);border-radius:50%;width:24px;height:24px;line-height:24px;text-align:center';
+      bad.title = '检测到异常, 点击复制日志';
+      bad.onclick = function() {
+        try {
+          let txt = '【奇门排盘错误日志】\n' + _errLog.join('\n');
+          if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt); }
+          _errLog = []; localStorage.removeItem('qimen_errlog');
+          this.remove(); alert('错误日志已复制到剪贴板并清空, 请粘贴给开发者');
+        } catch(e2) {}
+      };
+      document.body.appendChild(bad);
+    }
+  } catch(e) {}
+}
+window.addEventListener('error', ev => { _logErr('error', (ev.message||'') + ' @' + (ev.filename||'').split('/').pop() + ':' + ev.lineno); });
+window.addEventListener('unhandledrejection', ev => { _logErr('rejection', String((ev.reason && ev.reason.message) || ev.reason)); });
 // 共享常量: 由 qimen_constants.js 的 window.QM 派生, 避免重复定义
+var QM = window.QM || {};     // 挂接 constants 导出的共享常量(同 chuanren)
 const ZHI2G = QM.ZHI2G_OBJ;   // 地支→宫位(对象版)
 const MA_POS = QM.MP;         // 马星位置
 const KONG_ID = QM.KONG_ID;   // 空亡序号
@@ -2286,13 +2317,13 @@ function autoFillXinpan(anchorGong) {
     let jiGong = 2; // 始终寄坤2
     let startGanIdx = GAN.indexOf(anGanStart);
     if (startGanIdx >= 0) {
-      let zhongIdx2 = fw.indexOf(5); // 中宫在飞序中的位置
-      let jiIdx2 = fw.indexOf(jiGong); // 寄宫在飞序中的位置
+      let zhongIdx2 = fwDi.indexOf(5); // 中宫在飞序中的位置
+      let jiIdx2 = fwDi.indexOf(jiGong); // 寄宫在飞序中的位置
       let skipSteps = (jiIdx2 - zhongIdx2 + 9) % 9; // 中宫到寄宫的飞步数
       let jiFlyGan = GAN[(startGanIdx + skipSteps) % 9]; // 寄宫飞序分配值
       anGanMap[jiGong] = (jiFlyGan||'') + anGanStart; // 飞序值+寄干
       for(let ai = 1; ai < 9; ai++) {
-        let agong = fw[(jiIdx2 + ai) % 9];
+        let agong = fwDi[(jiIdx2 + ai) % 9];
         if (agong === 5) continue;
         let gIdx = (startGanIdx + ai + skipSteps) % 9;
         anGanMap[agong] = GAN[gIdx];

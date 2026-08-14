@@ -293,28 +293,28 @@ function buildGrid(d) {
     if (m) return `<FONT color=#009100>${ch}</FONT>`;
     if (x) return `<FONT color=#6F00D2>${ch}</FONT>`;
     return ch;
-  };
+  }
   function tc(g) {
     if (!d.pals[g]) return '';
     const t = d.pals[g].tian || '';
     return csp(t[0] || '', d.pals[g].tx, d.pals[g].tm) + (t[1] ? csp(t[1], false, false) : '');
-  };
+  }
   function dc(g) {
     if (!d.pals[g]) return '';
     const dd = d.pals[g].di || '';
     return csp(dd[0] || '', d.pals[g].dx, d.pals[g].dm) + (dd[1] ? csp(dd[1], false, false) : '');
-  };
+  }
   function kd(g) { return d.pals[g] && d.pals[g].kong ? '<font color=#000080>◎</font>' : '\u3000'; }
   function ms(g) {
     if (!d.pals[g]) return '';
     const m_ = d.pals[g].men || '';
     return d.pals[g].mp ? `<i><FONT color=#FF0000>${m_}</FONT></i>` : m_;
-  };
+  }
   function cell(g, cls) {
     if (!d.pals[g]) return '<td>&nbsp;</td>';
     const pp = d.pals[g];
     return `<td class="${cls}">${pp.shen || ''}\u3000${kd(g)}<br />${tc(g)}\u3000${pp.xing || ''}<br />${dc(g)}\u3000${ms(g)}</td>`;
-  };
+  }
   const ag = d.agM || {};
 
   let h = ' <table class="gridst" cellSpacing=0>';

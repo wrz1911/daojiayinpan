@@ -75,9 +75,9 @@ C.XING_FULL = {'蓬':'天蓬','任':'天任','冲':'天冲','辅':'天辅','英'
 C.MEN_FULL = {'休':'休门','生':'生门','伤':'伤门','杜':'杜门','景':'景门','死':'死门','惊':'惊门','开':'开门'};
 
 // 全名→简写
-C.SHEN_ABBR = {}; for(var k in C.SHEN) C.SHEN_ABBR[C.SHEN[k]] = k;
-C.XING_ABBR = {}; for(var k in C.XING_FULL) C.XING_ABBR[C.XING_FULL[k]] = k;
-C.MEN_ABBR = {}; for(var k in C.MEN_FULL) C.MEN_ABBR[C.MEN_FULL[k]] = k;
+C.SHEN_ABBR = {}; for(let k in C.SHEN) C.SHEN_ABBR[C.SHEN[k]] = k;
+C.XING_ABBR = {}; for(let k in C.XING_FULL) C.XING_ABBR[C.XING_FULL[k]] = k;
+C.MEN_ABBR = {}; for(let k in C.MEN_FULL) C.MEN_ABBR[C.MEN_FULL[k]] = k;
 
 // 穿壬扩展常量
 C.GR_TAB = {甲:[1,7],戊:[1,7],庚:[1,7],乙:[0,8],己:[0,8],丙:[11,9],丁:[11,9],辛:[6,2],壬:[5,3],癸:[5,3]};
