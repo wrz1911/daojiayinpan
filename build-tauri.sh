@@ -15,6 +15,7 @@ npm run build:bundle
 cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
 cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
 cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
+cp qimen_app/js/html2canvas.min.js web/qimen_app/js/
 
 
 # 入口页

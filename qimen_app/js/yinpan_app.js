@@ -1909,14 +1909,72 @@ function _renderBottomBar() {
     ab.style.cssText = 'cursor:pointer;color:var(--c-text-2);font-size:14px;display:flex;align-items:center;gap:4px';
     ab.innerHTML = '<span style="font-size:16px">&#8505;</span>关于';
     ab.addEventListener('click', function(e){e.stopPropagation();showAbout();});
+    let pi = document.createElement('span');
+    pi.id = 'barPanImgBtn';
+    pi.style.cssText = 'cursor:pointer;color:var(--c-text-2);font-size:14px;display:flex;align-items:center;gap:4px';
+    pi.innerHTML = '<span style="font-size:16px">&#128444;</span>盘图';
+    pi.addEventListener('click', function(e){e.stopPropagation();savePanImage();});
     bar.appendChild(hb);
     bar.appendChild(ab);
     bar.appendChild(sb);
+    bar.appendChild(pi);
   } catch(e) {}
 }
 
+// === 盘面截图保存/分享(html2canvas 懒加载, 不进主 bundle) ===
+var _h2cLoading = false;
+var _h2cPending = [];
+function ensureHtml2canvasP() {
+  return new Promise(function(resolve) {
+    if (window.html2canvas) { resolve(); return; }
+    _h2cPending.push(resolve);
+    if (_h2cLoading) return;
+    _h2cLoading = true;
+    var sc = document.createElement('script');
+    sc.src = 'js/html2canvas.min.js';
+    sc.onload = function() {
+      _h2cLoading = false;
+      var q = _h2cPending; _h2cPending = [];
+      for (var i = 0; i < q.length; i++) q[i]();
+    };
+    sc.onerror = sc.onload; // 加载失败也放行, 由调用方检查 window.html2canvas
+    document.head.appendChild(sc);
+  });
+}
+async function savePanImage() {
+  try {
+    let pw = document.getElementById('panWrap');
+    if (!pw) { alert('当前没有盘面'); return; }
+    await ensureHtml2canvasP();
+    if (!window.html2canvas) { alert('图片组件加载失败'); return; }
+    let bg = getComputedStyle(document.body).getPropertyValue('--c-bg').trim() || '#fff5f5f5';
+    let canvas = await window.html2canvas(pw, {backgroundColor: bg, scale: 2, useCORS: true});
+    let blob = await new Promise(function(res) { canvas.toBlob(function(b) { res(b); }, 'image/png'); });
+    if (!blob) { alert('生成图片失败'); return; }
+    let ts = new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');
+    let fn = 'qimen_pan_' + ts + '.png';
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+      // Android: 写缓存目录 + 系统分享面板(可存相册/发送)
+      let FS = window.Capacitor.Plugins.Filesystem;
+      let Share = window.Capacitor.Plugins.Share;
+      let dataUrl = await new Promise(function(res) { let r = new FileReader(); r.onload = function() { res(r.result); }; r.readAsDataURL(blob); });
+      let base64 = String(dataUrl).split(',')[1] || '';
+      try { await FS.mkdir({path: '.', directory: 'CACHE', recursive: true}); } catch(e) {}
+      let wr = await FS.writeFile({path: fn, data: base64, directory: 'CACHE'});
+      await Share.share({title: '奇门盘面', files: [wr.uri], dialogTitle: '保存/分享盘面图片'});
+    } else {
+      // Tauri/网页: 直接下载
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url; a.download = fn;
+      document.body.appendChild(a); a.click();
+      setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
+    }
+  } catch(e) { alert('截图失败: ' + (e.message || e)); }
+}
+
 // === 关于弹窗 ===
-const APP_VERSION = '1.3.8';
+const APP_VERSION = '1.3.9';
 const APP_AUTHOR = '王润梓';
 const APP_REPO = 'github.com/wrz1911/daojiayinpan';
 function showAbout() {

@@ -32,6 +32,7 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
+          cp qimen_app/js/html2canvas.min.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
 
       - uses: dtolnay/rust-toolchain@stable
@@ -76,6 +77,7 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
+          cp qimen_app/js/html2canvas.min.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -125,6 +127,7 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
+          cp qimen_app/js/html2canvas.min.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -193,6 +196,7 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js www/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
+          cp qimen_app/js/html2canvas.min.js www/qimen_app/js/
           cp qimen_app/yinpan_standalone.html www/qimen_app/
 
       - name: Init Capacitor
@@ -290,6 +294,17 @@ jobs:
       contents: write
       pages: write
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Build web bundle
+        run: |
+          npm install --legacy-peer-deps >/dev/null 2>&1
+          npm run build:bundle
+
       - uses: actions/download-artifact@v4
         with:
           name: app-exe
@@ -336,11 +351,23 @@ jobs:
 
       - name: Prepare Pages
         run: |
-          mkdir -p pages/v1
+          mkdir -p pages/v1 pages/qimen_app/css pages/qimen_app/js
           cp *.exe pages/v1/ 2>/dev/null || true
           cp *.dll pages/v1/ 2>/dev/null || true
           cp *.exe pages/ 2>/dev/null || true
           cp *.dll pages/ 2>/dev/null || true
+          # 网页版排盘(零安装): 入口重定向到 standalone 页
+          cat > pages/index.html << 'EOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
+          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          EOF
+          cp qimen_app/yinpan_standalone.html pages/qimen_app/
+          cp qimen_app/css/yinpan_app.css pages/qimen_app/css/
+          cp qimen_app/js/qimen_bundle.min.js pages/qimen_app/js/
+          cp qimen_app/js/tyme4j-browser.js pages/qimen_app/js/
+          cp qimen_app/js/gong_detail_data.js pages/qimen_app/js/
+          cp qimen_app/js/html2canvas.min.js pages/qimen_app/js/
           ls -la pages/v1/
 
       - name: Deploy to GitHub Pages
