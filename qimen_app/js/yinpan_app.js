@@ -1916,7 +1916,7 @@ function _renderBottomBar() {
 }
 
 // === 关于弹窗 ===
-const APP_VERSION = '1.3.7';
+const APP_VERSION = '1.3.8';
 const APP_AUTHOR = '王润梓';
 const APP_REPO = 'github.com/wrz1911/daojiayinpan';
 function showAbout() {
@@ -2700,12 +2700,14 @@ function doChuanRen(){
     document.getElementById("panWrap").innerHTML=window.renderChuanRen(data,null);
     _renderBottomBar();
     setTimeout(_bindActionButtons, 50);
-    requestAnimationFrame(() =>{requestAnimationFrame(() =>{
+    requestAnimationFrame(() =>{
       let crW=document.querySelector('.cr-grid-wrap');if(!crW)return;
       let pans=crW.querySelectorAll('#pan');if(!pans.length)return;
       let pan=pans[0];
-      // 正方化宫格: 内层TD需手动设置
-      pan.querySelectorAll('[id^=gong]').forEach(el => { let w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; });
+      // 1. 正方化宫格: 批量读宽度再批量写高度, 避免读写交替强制布局
+      let gongs = Array.from(pan.querySelectorAll('[id^=gong]'));
+      let widths = gongs.map(el => el.getBoundingClientRect().width);
+      gongs.forEach((el, i) => { let w = widths[i]; if (w > 0) el.style.height = w + 'px'; });
 // 2. 阴干移入宫内, 隐藏外圈yinGan
       pan.querySelectorAll('[id^="gong"]').forEach(go => {
         let g=parseInt(go.id.replace('gong',''));if(g===5)return;
@@ -2720,13 +2722,14 @@ function doChuanRen(){
         let ag=document.createElement('span');ag.textContent=agText;ag.style.cssText='color:var(--c-text-3);font-size:70%';wrap.appendChild(ag);
         topRow.appendChild(wrap);
       });
-      // 3. 12地支卡片: 各自上方/下方居中于对应宫
+      // 3. 12地支卡片: 预读全部宫格 rect 再统一写样式, 消除每卡一次强制布局
       let wr2=crW.getBoundingClientRect();
+      let gRectMap = {};
+      [1,2,3,4,6,7,8,9].forEach(g => { let el = pan.querySelector('#gong'+g); if (el) gRectMap[g] = el.getBoundingClientRect(); });
       crW.querySelectorAll('.cr-card').forEach(card => {
         let side=card.getAttribute('data-side');
         let gref=parseInt(card.getAttribute('data-gref'))||1;
-        let refGo=pan.querySelector('#gong'+gref);if(!refGo)return;
-        let gr=refGo.getBoundingClientRect();
+        let gr=gRectMap[gref];if(!gr)return;
         card.style.position='absolute';
         if(side==='top'){
           card.style.bottom=(wr2.bottom-gr.top+1)+'px';
@@ -2749,7 +2752,7 @@ function doChuanRen(){
 
       // 移除宫位点击(穿壬不需要)
       document.querySelectorAll('[id^=yinGan]').forEach(y => {y.onclick=null;y.style.cursor='default';});
-      document.querySelectorAll('[id^=gong]').forEach(x => {x.onclick=null;x.style.cursor='default';});    });});
+      document.querySelectorAll('[id^=gong]').forEach(x => {x.onclick=null;x.style.cursor='default';});    });
   }catch(e){
     document.getElementById("panWrap").innerHTML="<span style=\"color:red;user-select:text;-webkit-user-select:text\">穿壬错误:"+e.message+"</span>";
   }
