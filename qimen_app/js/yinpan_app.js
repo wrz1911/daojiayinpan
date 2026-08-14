@@ -129,9 +129,6 @@ let _xpBgMaXing = '';     // 背景马星
 let _xpBgJu = '';         // 背景局数
 let _xpBgXunShou = '';    // 背景旬首
 let _xpBgPalaces = {};    // 背景完整宫位数据
-let _xpErrors = [];       // 错误/调试信息收集
-let _xpOpLog = [];        // 完整操作日志
-let _xpOpSeq = 0;         // 操作序号
 let _xpCalcJu = '';       // 用户推算的局数
 let _xpBgIsYin = true;    // 背景阴阳遁
 (function initXpData() {
@@ -141,8 +138,6 @@ let _xpBgIsYin = true;    // 背景阴阳遁
   });
 })();
 function clearXinpan() {
-  _xpOpLog = []; _xpOpSeq = 0;
-  _xpOpLog.push('[1] 心盘重置');
   [1,2,3,4,6,7,8,9].forEach(g => {
     _xpData[g] = {shen:'', tian:'', di:'', xing:'', men:'', ma:false, kong:false};
     _xpManual[g] = false;
@@ -415,7 +410,7 @@ function doPan() {
           if(!zhiShiFG)zhiShiFG=szsgs;
           let sxInfo={palaces:pals,zfStar:zfStar,zsMen:zsMenH,zhiFuGong:zhiShiFG,kongWang:kongWang,maXing:maXing,xunShou:xunShou,zfzsF:zfzsF,szsgs:szsgs,sgg:gs,dgg:dgg,hCyl:hCyl,sgy:sgy};
           renderShanXiangPan2(sxDeg,sxName,sxJu,sxIsYin,sxHq,sxShiZhu,sxInfo);
-          }catch(e){let em=e.message||e;console.error(e);let tipEl=document.getElementById('tip');if(tipEl){tipEl.style.display='block';tipEl.innerHTML='<span style=color:red>山向错误:'+em+'</span>';}}
+          }catch(e){let em=e.message||e;let tipEl=document.getElementById('tip');if(tipEl){tipEl.style.display='block';tipEl.innerHTML='<span style=color:red>山向错误:'+em+'</span>';}}
           return;
         }
 
@@ -491,7 +486,6 @@ function doPan() {
     _renderBottomBar();
   } catch(e) {
     tip.style.display='block'; tip.innerHTML = '<span style="color:red">错误: ' + e.message + '</span>';
-    console.error(e);
   }
 }
 
@@ -1108,7 +1102,7 @@ function renderXinpan(useBg) {
   setTimeout(_bindActionButtons, 50);
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
-  } catch(e) { _xpErrors.push('心盘渲染错误:'+e.message); console.error(e); }
+  } catch(e) {}
 }
 
 function showYixing() {
@@ -1431,7 +1425,7 @@ async function _fsWrite(data) {
     const dir = await documentDir() + STORAGE_DIR;
     if (!(await exists(dir))) await mkdir(dir, {recursive:true});
     await writeTextFile(dir+'/'+STORAGE_FILE, data);
-  } catch(e) { console.error('fs write:', e); }
+  } catch(e) {}
 }
 
 async function _fsRead() {
@@ -1442,7 +1436,7 @@ async function _fsRead() {
     const fp = await documentDir() + STORAGE_DIR + '/' + STORAGE_FILE;
     if (!(await exists(fp))) return null;
     return await readTextFile(fp);
-  } catch(e) { console.error('fs read:', e); return null; }
+  } catch(e) { return null; }
 }
 
 async function _syncToFile() {
@@ -1707,15 +1701,13 @@ function loadSaved(i) {
       window._xpBgKongWang = r._xpBgKongWang || '';
       window._xpBgMaXing = r._xpBgMaXing || '';
       window._xpBgXunShou = r._xpBgXunShou || '';
-      window._xpOpLog = [];
-      window._xpOpSeq = 0;
       document.getElementById('xinpanPanel').style.display = '';
     }
     if (r.mode) _saveMode = r.mode;
     _renderBottomBar();
     _bindActionButtons();
     setTimeout(fixYinGanAlign, 50);
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 function delChecked() {
@@ -1883,7 +1875,7 @@ function _renderBottomBar() {
     sb.addEventListener('click', function(e){e.stopPropagation();savePan();});
     bar.appendChild(hb);
     bar.appendChild(sb);
-  } catch(e) { console.error('bottomBar:', e); }
+  } catch(e) {}
 }
 
 // Tauri启动时从文件同步记录
@@ -2126,9 +2118,7 @@ function showPalace(g) {
 function autoFillXinpan(anchorGong) {
   try {
   let d = _xpData[anchorGong];
-  _xpOpLog.push('['+(++_xpOpSeq)+'] 推算全盘 锚点=宫'+anchorGong+' 神='+(d.shen||'')+' 天='+(d.tian||'')+' 地='+(d.di||'')+' 星='+(d.xing||'')+' 门='+(d.men||''));
   if (!d || !d.di || !d.tian || !d.shen) {
-    _xpErrors.push('推算失败: 请先选择神、天盘干、地盘干、星、门');
     return;
   }
   let anchorSaved = {shen:d.shen||'',tian:d.tian||'',tian2:d.tian2||'',di:d.di||'',di2:d.di2||'',xing:d.xing||'',men:d.men||''};
@@ -2325,19 +2315,11 @@ function autoFillXinpan(anchorGong) {
     if (_xpBgPalaces[ag]) _xpBgPalaces[ag].anGan = anGanMap[ag];
   }
 
-  // 诊断日志
-  _xpErrors.push('--- 推算诊断 ---');
-  _xpErrors.push('锚点:宫'+anchorGong+' 天='+anchorSaved.tian+' 地='+anchorSaved.di+' 伏吟='+isFuYinLocal);
-  _xpErrors.push('局:'+_xpCalcJu+' fwDi='+JSON.stringify(fwDi));
-  _xpErrors.push('diMap:'+JSON.stringify(diMap));
-  _xpErrors.push('tianMap:'+JSON.stringify(tianMap));
-  _xpErrors.push('_xpData[2]:天='+(_xpData[2].tian||'')+(_xpData[2].tian2||'')+' 地='+(_xpData[2].di||'')+(_xpData[2].di2||''));
-
   let ov = window._xpOverlay || document.getElementById('xpOverlay');
   if (ov) ov.style.display = 'none';
   window._xpEditGong = 0;
   renderXinpan(true);
-  } catch(e) { _xpErrors.push('推算错误:'+e.message); console.error(e); }
+  } catch(e) {}
 }
 
 // 地盘/天盘干变更时自动计算寄干
@@ -2397,14 +2379,12 @@ function showJuSelectForKun2(gan) {
   document.getElementById('xpJuBtn2').addEventListener('click', () => {
     _xpCalcJu = yinYangLabel + '2局';
     _xpData[2].di2 = jiGan2;
-    _xpOpLog.push('['+(++_xpOpSeq)+'] 坤2局选择:'+ju2Label);
     dlg.parentNode.removeChild(dlg);
   });
   document.getElementById('xpJuBtn5').addEventListener('click', () => {
     _xpCalcJu = yinYangLabel + '5局';
     _xpData[2].di = kunGan5;
     _xpData[2].di2 = gan;
-    _xpOpLog.push('['+(++_xpOpSeq)+'] 坤2局选择:'+ju5Label);
     dlg.parentNode.removeChild(dlg);
   });
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.parentNode.removeChild(dlg); });
@@ -2414,13 +2394,12 @@ function showJuSelectForKun2(gan) {
 	function showXinpanEditor(g) {
 	  window._xpEditGong = g;
 	  let d = _xpData[g] || {};
-	  _xpOpLog.push('['+(++_xpOpSeq)+'] 打开宫'+g+'编辑器 当前:神='+(d.shen||'空')+' 天='+(d.tian||'空')+(d.tian2||'')+' 地='+(d.di||'空')+(d.di2||'')+' 星='+(d.xing||'空')+' 门='+(d.men||'空'));
 	  let overlay = document.getElementById('xpOverlay');
 	  if (!overlay) {
 	    overlay = document.createElement('div');
 	    overlay.id = 'xpOverlay';
 	    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:999;display:flex;align-items:center;justify-content:center';
-	    overlay.addEventListener('click', e => { if (e.target === overlay) { _xpOpLog.push('['+(++_xpOpSeq)+'] 点击背景关闭编辑器'); overlay.style.display = 'none'; window._xpEditGong = 0; renderXinpan(true); } });
+	    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.style.display = 'none'; window._xpEditGong = 0; renderXinpan(true); } });
 	    document.body.appendChild(overlay);
 	    window._xpOverlay = overlay;
 	  }
@@ -2478,7 +2457,6 @@ function showJuSelectForKun2(gan) {
 	    // 干变更时清除旧寄干（局可能已变，旧寄干无效）
 	    if (catKey === 'di') { _xpData[g].di2 = ''; d.di2 = ''; }
 	    if (catKey === 'tian') { _xpData[g].tian2 = ''; d.tian2 = ''; }
-	    _xpOpLog.push('['+(++_xpOpSeq)+'] 宫'+g+' '+({'shen':'神','tian':'天','di':'地','xing':'星','men':'门'})[catKey]+'→'+val);
 
 	    // 重置同组所有按钮样式
 	    let group = btn.parentElement;
@@ -2499,7 +2477,6 @@ function showJuSelectForKun2(gan) {
 	  let closeBtn = document.getElementById('xpCloseBtn');
 	  if (closeBtn) {
 	    closeBtn.addEventListener('click', () => {
-	      _xpOpLog.push('['+(++_xpOpSeq)+'] 关闭编辑器(宫'+g+')');
 	      overlay.style.display = 'none';
 	      window._xpEditGong = 0;
 	      renderXinpan(true);
@@ -2511,7 +2488,6 @@ function showJuSelectForKun2(gan) {
 	  if (fillBtn) {
 	    fillBtn.addEventListener('click', e => {
 	      e.stopPropagation();
-	      _xpOpLog.push('['+(++_xpOpSeq)+'] 点击推算全盘(宫'+g+') 锚点符号:神='+(_xpData[g].shen||'')+' 天='+(_xpData[g].tian||'')+' 地='+(_xpData[g].di||'')+' 星='+(_xpData[g].xing||'')+' 门='+(_xpData[g].men||''));
 	      window._xpAutoFillAnchor = g;
 	      setTimeout(() => { autoFillXinpan(window._xpAutoFillAnchor); }, 50);
 	    });

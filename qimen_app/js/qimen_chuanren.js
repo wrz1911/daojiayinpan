@@ -534,7 +534,7 @@ window.renderChuanRen=(data,containerId) => {
       h+='</tr>';
     }
     h+='</table>';
-  }catch(e){console.log('大运:',e);}
+  }catch(e){}
 
   // ====== CSS ======
   h+='<style>'+
