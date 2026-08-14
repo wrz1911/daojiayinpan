@@ -223,12 +223,9 @@ jobs:
           sed -i "s/versionName \"[^\"]*\"/versionName \"$ANDROID_VER\"/" android/app/build.gradle
 
 
-      - name: Generate keystore
-        run: |
-          keytool -genkey -v -keystore qimen-release.keystore -alias qimen \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass qimen123 -keypass qimen123 \
-            -dname "CN=qimen" -noprompt
+      - name: Restore keystore
+        # 从 Secrets 恢复固定签名密钥, 保证每次 Release APK 签名一致(可覆盖安装升级)
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > qimen-release.keystore
 
       - name: Inject signing config
         run: |
