@@ -32,7 +32,6 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
-          cp qimen_app/js/html2canvas.min.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
 
       - uses: dtolnay/rust-toolchain@stable
@@ -77,7 +76,6 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
-          cp qimen_app/js/html2canvas.min.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -127,7 +125,6 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
-          cp qimen_app/js/html2canvas.min.js web/qimen_app/js/
           cp qimen_app/yinpan_standalone.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -196,7 +193,6 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js www/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
-          cp qimen_app/js/html2canvas.min.js www/qimen_app/js/
           cp qimen_app/yinpan_standalone.html www/qimen_app/
 
       - name: Init Capacitor
@@ -367,7 +363,6 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js pages/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js pages/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js pages/qimen_app/js/
-          cp qimen_app/js/html2canvas.min.js pages/qimen_app/js/
           ls -la pages/v1/
 
       - name: Deploy to GitHub Pages
