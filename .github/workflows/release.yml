@@ -27,7 +27,7 @@ jobs:
           <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
           EOF
           cp qimen_app/css/yinpan_app.css web/qimen_app/css/
-          npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
+          npm install --legacy-peer-deps >/dev/null 2>&1
           npm run build:bundle
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
@@ -36,16 +36,15 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '24'
 
-      - name: Install Tauri CLI
-        run: npm install -g @tauri-apps/cli
-
       - name: Tauri build
-        run: tauri build --no-bundle
+        run: npx tauri build --no-bundle
 
       - name: Upload exe
         uses: actions/upload-artifact@v4
@@ -72,7 +71,7 @@ jobs:
         run: |
           mkdir -p web/qimen_app/css web/qimen_app/js
           cp qimen_app/css/yinpan_app.css web/qimen_app/css/
-          npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
+          npm install --legacy-peer-deps >/dev/null 2>&1
           npm run build:bundle
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
@@ -86,10 +85,10 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: Tauri build
-        run: |
-          cargo install tauri-cli --version "^2"
-          cargo tauri build --bundles dmg
+        run: npx tauri build --bundles dmg
 
       - name: Upload macOS
         uses: actions/upload-artifact@v4
@@ -121,7 +120,7 @@ jobs:
         run: |
           mkdir -p web/qimen_app/css web/qimen_app/js
           cp qimen_app/css/yinpan_app.css web/qimen_app/css/
-          npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
+          npm install --legacy-peer-deps >/dev/null 2>&1
           npm run build:bundle
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
@@ -135,10 +134,10 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: Tauri build
-        run: |
-          cargo install tauri-cli --version "^2"
-          cargo tauri build --bundles deb,rpm
+        run: npx tauri build --bundles deb,rpm
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
@@ -235,9 +234,9 @@ jobs:
             signingConfigs {
               release {
                 storeFile rootProject.file('../qimen-release.keystore')
-                storePassword 'qimen123'
+                storePassword project.findProperty('QIMEN_STORE_PASSWORD')
                 keyAlias 'qimen'
-                keyPassword 'qimen123'
+                keyPassword project.findProperty('QIMEN_KEY_PASSWORD')
               }
             }
             buildTypes {
@@ -247,6 +246,11 @@ jobs:
             }
           }
           GRADLEEOF
+          # 签名密码从 Secrets 运行时注入 gradle.properties(明文不入库)
+          cat >> android/gradle.properties << PROPOF
+          QIMEN_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+          QIMEN_KEY_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+          PROPOF
 
       - name: Inject launcher icons
         run: |
@@ -262,6 +266,8 @@ jobs:
             cp "$dir/ic_launcher.png" "$dir/ic_launcher_round.png"
             echo "$size: ${s}x${s}"
           done
+
+      - uses: gradle/actions/setup-gradle@v3
 
       - name: Sync and build
         timeout-minutes: 20
