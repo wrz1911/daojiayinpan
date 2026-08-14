@@ -6,13 +6,11 @@
     "build:linux": "bash build-tauri.sh",
     "build:bundle": "sh scripts/build_bundle.sh",
     "cap:sync": "npx cap sync",
-    "cap:open": "npx cap open android",
-    "test": "node tests/run.js"
+    "cap:open": "npx cap open android"
   },
   "dependencies": {
     "@capacitor/filesystem": "^8.1.2",
-    "@capacitor/share": "^8.0.1",
-    "jsdom": "^29.1.1"
+    "@capacitor/share": "^8.0.1"
   },
   "devDependencies": {
     "@capacitor/android": "^7.2.1",
