@@ -1904,8 +1904,38 @@ function _renderBottomBar() {
     sb.style.cssText = 'cursor:pointer;color:var(--c-theme);font-size:14px;display:flex;align-items:center;gap:4px';
     sb.innerHTML = '<span style="font-size:16px">&#128190;</span>保存';
     sb.addEventListener('click', function(e){e.stopPropagation();savePan();});
+    let ab = document.createElement('span');
+    ab.id = 'barAboutBtn';
+    ab.style.cssText = 'cursor:pointer;color:var(--c-text-2);font-size:14px;display:flex;align-items:center;gap:4px';
+    ab.innerHTML = '<span style="font-size:16px">&#8505;</span>关于';
+    ab.addEventListener('click', function(e){e.stopPropagation();showAbout();});
     bar.appendChild(hb);
+    bar.appendChild(ab);
     bar.appendChild(sb);
+  } catch(e) {}
+}
+
+// === 关于弹窗 ===
+const APP_VERSION = '1.3.7';
+const APP_AUTHOR = '王润梓';
+const APP_REPO = 'github.com/wrz1911/daojiayinpan';
+function showAbout() {
+  try {
+    let old = document.getElementById('aboutDlg');
+    if (old) old.parentNode.removeChild(old);
+    let dlg = document.createElement('div');
+    dlg.id = 'aboutDlg';
+    dlg.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center';
+    dlg.innerHTML = '<div style="background:var(--c-bg);border-radius:12px;padding:20px;max-width:340px;width:88%;text-align:center">' +
+      '<div style="font-size:18px;font-weight:bold;margin-bottom:4px">道家阴盘奇门遁甲</div>' +
+      '<div style="font-size:13px;color:var(--c-text-3);margin-bottom:14px">v' + APP_VERSION + '</div>' +
+      '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">作者: ' + APP_AUTHOR + '</div>' +
+      '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">项目地址:<br><span style="color:var(--c-theme)">https://' + APP_REPO + '</span></div>' +
+      '<button id="aboutCloseBtn" style="margin-top:16px;padding:8px 32px;border:1px solid var(--c-border);border-radius:20px;background:var(--c-gray-bg);color:var(--c-text);font-size:14px;cursor:pointer">关闭</button>' +
+      '</div>';
+    document.body.appendChild(dlg);
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.parentNode.removeChild(dlg); });
+    document.getElementById('aboutCloseBtn').addEventListener('click', () => { dlg.parentNode.removeChild(dlg); });
   } catch(e) {}
 }
 

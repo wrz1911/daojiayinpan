@@ -14,7 +14,9 @@ fi
 
 echo "=== 同步版本号到 v${VER} ==="
 sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${VER}\"/" src-tauri/tauri.conf.json package.json
-git add src-tauri/tauri.conf.json package.json
+# 同步关于弹窗中的 APP_VERSION 常量
+sed -i "s/const APP_VERSION = '[^']*'/const APP_VERSION = '${VER}'/" qimen_app/js/yinpan_app.js
+git add src-tauri/tauri.conf.json package.json qimen_app/js/yinpan_app.js
 if git diff --cached --quiet; then
   echo "版本号已是 v${VER}, 跳过同步提交"
 else
