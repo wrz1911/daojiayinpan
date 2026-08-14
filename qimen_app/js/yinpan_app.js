@@ -2650,10 +2650,11 @@ function doChuanRen(){
         let g=parseInt(go.id.replace('gong',''));if(g===5)return;
         let yg=document.getElementById('yinGan'+g);if(!yg)return;
         let agText=yg.textContent.replace(/\s/g,'').trim();
-        yg.style.display='none';if(!agText)return;
+        yg.style.display='none';yg.textContent='';if(!agText)return;
         let topRow=go.querySelector('.panItem.top');if(!topRow)return;
         let kw=topRow.querySelector('[id^=kong]');
-        let wrap=document.createElement('span');wrap.style.cssText='float:right;white-space:nowrap;margin-left:4px';
+        let old=topRow.querySelector('.cr-anGan');if(old)old.remove();
+        let wrap=document.createElement('span');wrap.className='cr-anGan';wrap.style.cssText='float:right;white-space:nowrap;margin-left:4px';
         if(kw&&kw.textContent.replace(/\s/g,'').trim()=='○'){let ks=document.createElement('span');ks.textContent='○';ks.style.cssText='font-weight:bold;color:var(--c-text);margin-right:1px';wrap.appendChild(ks);kw.style.display='none';}
         let ag=document.createElement('span');ag.textContent=agText;ag.style.cssText='color:var(--c-text-3);font-size:70%';wrap.appendChild(ag);
         topRow.appendChild(wrap);
