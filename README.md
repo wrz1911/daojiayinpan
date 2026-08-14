@@ -53,48 +53,6 @@ npx cap sync android                          # 同步 www 资源到 android ass
 cd android && ./gradlew assembleRelease       # 产物: android/app/build/outputs/apk/release/app-release.apk
 ```
 
-## Android 无线调试部署
-
-手机与电脑同一局域网，手机开启「开发者选项 → 无线调试」：
-
-1. 首次使用需配对（手机点「使用配对码配对设备」，获得配对端口与 6 位配对码）：
-
-   ```bash
-   adb pair 192.168.x.x:<配对端口>   # 输入配对码
-   ```
-
-2. 连接（端口见无线调试主界面「IP 地址和端口」）：
-
-   ```bash
-   adb connect 192.168.x.x:<连接端口>
-   adb install -r android/app/build/outputs/apk/release/app-release.apk
-   ```
-
-设备 IP 未知时可用 `nmap -p <端口> --open 192.168.1.0/24` 扫描网段定位。
-
-## Android 签名
-
-- keystore：`android/qimen-release.keystore`（**不入库**，`.gitignore` 排除）
-- 签名密码：`android/gradle.properties` 的 `QIMEN_STORE_PASSWORD` / `QIMEN_KEY_PASSWORD`（不入库），build.gradle 通过 `findProperty` 读取，不硬编码明文
-- CI 签名：keystore 与密码存于 GitHub Secrets（`KEYSTORE_BASE64` / `KEYSTORE_PASSWORD`），CI 运行时恢复，保证 **Release APK 与本地构建签名一致**（可覆盖安装升级）
-- versionCode 规则：`major*10000 + minor*100 + patch`（如 1.3.7 → 10307），本地与 CI 保持一致
-
-## 发布
-
-```bash
-bash release.sh 1.3.7
-```
-
-自动完成：版本号同步（tauri.conf.json / package.json / APP_VERSION 常量，无变化自动跳过）→ push main → 创建/重建 tag v1.3.7 → 触发 GitHub Actions 四平台构建并发布 Release。
-
-## 开发
-
-```bash
-npx eslint qimen_app/js/*.js   # 静态检查（no-undef 等，防止 IIFE strict 下未声明变量运行时错误）
-```
-
-运行时错误静默记录：应用内发生异常时右下角出现 ⚠，点击可复制错误日志（localStorage ring buffer，30 条）便于报障排查。
-
 ## 开源声明
 
 本项目基于以下开源项目：
