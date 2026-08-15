@@ -35,15 +35,12 @@ cat > www/index.html << 'HTMLEOF'
 </html>
 HTMLEOF
 
-# 复制所有必需文件 (CSS已合并到yinpan_app.css)
+# 复制所有必需文件 (CSS已合并到yinpan_app.css; html 只引用 bundle + tyme4j + 懒加载 gong_detail)
 cp qimen_app/css/yinpan_app.css www/qimen_app/css/
 cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
-cp qimen_app/js/qimen_constants.js www/qimen_app/js/
 cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
+cp qimen_app/js/qimen_bundle.min.js www/qimen_app/js/
 cp qimen_app/yinpan_standalone.html www/qimen_app/
-cp qimen_app/js/qimen_engine_min.js www/qimen_app/js/
-cp qimen_app/js/qimen_chuanren.js www/qimen_app/js/
-cp qimen_app/js/yinpan_app.js www/qimen_app/js/
 
 # 3. 初始化 Android 平台（首次）
 if [ ! -d "android" ]; then
