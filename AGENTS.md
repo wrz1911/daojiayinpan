@@ -5,7 +5,7 @@
 
 ## 项目概况
 
-- 路径 `/home/wrz/文档/奇门排盘`,作者 王润梓,仓库 github.com/wrz1911/daojiayinpan
+- 路径 `/home/wrz/文档/奇门排盘`,作者 地天泰,仓库 github.com/wrz1911/daojiayinpan
 - 五种盘型:1=时盘 2=刻盘 3=心盘 4=山向 5=穿壬;纯 HTML+JS 前端,Tauri 2 桌面 + Capacitor Android,当前版本 **1.3.9**(Android versionCode 10309)
 - 前端:qimen_app/yinpan_standalone.html + css/yinpan_app.css + 4 个自有 IIFE JS(qimen_constants.js 112 行 / qimen_engine_min.js 475 行 / qimen_chuanren.js 617 行 / **yinpan_app.js 2800+ 行**)由 scripts/build_bundle.sh(cat 拼接 + esbuild --minify --target=es2017)合成 qimen_bundle.min.js(~149KB);tyme4j-browser.js 日历库;gong_detail_data.js(258KB 宫位详解)懒加载
 - **yinpan_app IIFE 是 strict 模式——未声明赋值必抛 ReferenceError,历史踩过 4 次同类雷(h/ag/agColor/fw,均被 catch 吞掉表现为功能无反应)。ESLint(eslint.config.js,no-undef/no-redeclare error 级)已设防,0 errors;50 个 no-unused-vars warning 是历史遗留未清理**
@@ -22,7 +22,7 @@
 
 ## Android 签名(2026-08-14 全部理顺)
 
-- **keystore:android/qimen-release.keystore**,DN=`CN=王润梓, OU=道家阴盘奇门遁甲, O=github.com/wrz1911/daojiayinpan, C=CN`,SHA-256 指纹 141d8361...059a,RSA2048/SHA384withRSA/10000 天,别名 qimen
+- **keystore:android/qimen-release.keystore**,DN=`CN=地天泰, OU=道家阴盘奇门遁甲, O=github.com/wrz1911/daojiayinpan, C=CN`,SHA-256 指纹 5376ae5f...e8a9(**2026-08-15 重生成;旧 CN=王润梓 keystore 归档于 ~/qimen-sign-old/,旧签名 App 无法覆盖安装,用户需先卸载再装新版**),RSA2048/SHA384withRSA/10000 天,别名 qimen
 - 密码 qimen123 存 android/gradle.properties(QIMEN_STORE_PASSWORD/QIMEN_KEY_PASSWORD,不入库),build.gradle 用 `project.findProperty()` 读取;**CI:Secrets KEYSTORE_BASE64(keystore 的 base64)+ KEYSTORE_PASSWORD,运行时注入 gradle.properties,仓库零明文密码**;CI APK 与本地签名一致,可覆盖安装升级
 - 历史坑:曾经根目录 qimen-release.keystore 与 android/ 下的 keystore 是两个不同文件(CI 与本地签名不一致,覆盖安装失败);旧签名文件已归档 ~/qimen-sign-old/
 - 验证:`/home/wrz/Android/sdk/build-tools/35.0.0/apksigner verify --print-certs <apk>`
@@ -36,7 +36,7 @@
 
 ## 产品功能要点
 
-- bottomBar 三按钮:**排盘历史/关于/保存**(关于在中间是用户指定);关于弹窗=应用名+APP_VERSION+作者 王润梓+项目地址
+- bottomBar 三按钮:**排盘历史/关于/保存**(关于在中间是用户指定);关于弹窗=应用名+APP_VERSION+作者 地天泰+项目地址
 - 心盘(panType 3):showPalace 里 `if(panType===3){showXinpanEditor(g);return;}` 路由到编辑器、不弹解释;宫位编辑器=overlay 卡片+5 类符号按钮+事件委托+坤2地盘干戊弹局选择+以此宫推算全盘
 - 穿壬(panType 5):doChuanRen 渲染后 RAF 把外圈 yinGan 移入宫内 topRow——**该逻辑必须幂等**(移入后清空 yg.textContent + 移入前移除 .cr-anGan 标记 span),否则重复执行显示两次(踩过);山向/穿壬宫位点击解释均禁用
 - 全局错误静默记录:window.onerror/unhandledrejection → localStorage ring buffer 30 条,有错时右下角 ⚠,点击复制日志清空
