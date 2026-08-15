@@ -1930,7 +1930,7 @@ function showAbout() {
       '<div style="font-size:18px;font-weight:bold;margin-bottom:4px">道家阴盘奇门遁甲</div>' +
       '<div style="font-size:13px;color:var(--c-text-3);margin-bottom:14px">v' + APP_VERSION + '</div>' +
       '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">作者: ' + APP_AUTHOR + '</div>' +
-      '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">项目地址:<br><span style="color:var(--c-theme)">https://' + APP_REPO + '</span></div>' +
+      '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">开源项目地址:<br><span style="color:var(--c-theme)">https://' + APP_REPO + '</span></div>' +
       '<button id="aboutCloseBtn" style="margin-top:16px;padding:8px 32px;border:1px solid var(--c-border);border-radius:20px;background:var(--c-gray-bg);color:var(--c-text);font-size:14px;cursor:pointer">关闭</button>' +
       '</div>';
     document.body.appendChild(dlg);
