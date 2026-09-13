@@ -156,7 +156,7 @@ body.is-mobile #topBar{display:block}
 #panHead .sizhuTitle{color:var(--c-gold)!important;text-align:center}
 #panHead #itemTitle,#panHead #dTitle{color:var(--c-gold)!important}
 #panHead #tdTitle td{color:var(--c-gold)!important}
-#panHead .sizhu{font-weight:bold!important;text-align:center}
+#panHead #headTable .sizhu{font-weight:bold!important;text-align:center}
 #pan{table-layout:fixed!important}
 #pan td{vertical-align:top!important;padding-left:var(--pan-pad)!important;padding-right:var(--pan-pad)!important;padding-top:var(--pan-pad)!important}
 #pan .panItem{line-height:var(--pan-lh-sm)!important;font-size:var(--pan-fs-sm)!important}
@@ -167,9 +167,12 @@ body.is-mobile #topBar{display:block}
 .tempTable{max-width:none!important;width:100%!important}
 .yiXingPan td{width:33.3%!important;vertical-align:top!important}
 #panHead #headTable td{padding:var(--pan-pad) 6px!important;font-size:var(--pan-fs)!important;line-height:var(--pan-lh)!important}
-#panHead .sizhu{font-size:var(--pan-fs-sz)!important;line-height:var(--pan-lh-sz)!important}
-#panHead .sizhuTitle{font-size:calc(var(--pan-fs) - 4px)!important}
-#panHead #tdTitle td{font-size:calc(var(--pan-fs) - 4px)!important}
+/* 必须用 #panHead #headTable 双 id 选择器: 与 #panHead #headTable td 同级,
+   否则(1 个 id)会被那条正文尺寸规则压掉, 四柱将显示成正文字号 */
+#panHead #headTable .sizhu{font-size:var(--pan-fs-sz)!important;line-height:var(--pan-lh-sz)!important}
+#panHead #headTable .sizhuTitle{font-size:calc(var(--pan-fs) - 4px)!important}
+#panHead #headTable #tdTitle td{font-size:calc(var(--pan-fs) - 4px)!important}
+#panHead #headTable .hd-side{font-size:calc(var(--pan-fs) - 3px)!important}
 .yinGan{font-size:calc(var(--pan-fs-sm) + 6px)!important;line-height:calc(var(--pan-lh-sm) + 6px)!important}
 
 
