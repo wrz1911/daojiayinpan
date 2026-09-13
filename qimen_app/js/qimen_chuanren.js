@@ -552,8 +552,11 @@ window.renderChuanRen=(data,containerId) => {
   // 关键: 这两条必须用 #pan.cr-pan 提高特异性。全局规则 #pan .panItem(1,1,0)
   // 与 #pan td(1,0,1) 带 !important, 会压掉原先的 .cr-pan 写法(0,2,0/0,1,1),
   // 导致宫格沿用 26px 字/40px 行高与 14px 内边距 —— 内容把格子顶高, 失去正方形。
+  // 宫格字号/行高一律交给 --pan-fs-sm / --pan-lh-sm(yinpan_app.css 已按变量声明)。
+  // 这里原先写死 `font-size:14px!important;line-height:22px!important`, 与 CSS 里
+  // 那条规则特异性相同(1,2,0)又同带 !important, 而本 <style> 由 innerHTML 注入 body、
+  // 层叠顺序更靠后 —— 结果窄屏设的 --pan-fs-sm:13px 被彻底压掉, 变量形同虚设。
   '#pan.cr-pan td{vertical-align:top!important;padding-left:4px!important;padding-right:4px!important;padding-top:6px!important;padding-bottom:6px!important}'+
-  '#pan.cr-pan .panItem{line-height:22px!important;font-size:14px!important}'+
   // 穿壬外圈标签
   '.cr-card{position:absolute;display:flex;flex-direction:column;align-items:center;background:var(--c-bg);padding:4px 6px;text-align:center;white-space:nowrap;font-size:12px}'+
   // 外圈四层(天干/将神/贵神/十二建除)尺寸必须一致 —— 它们是并排的一组, 大小不齐
@@ -605,8 +608,8 @@ window.renderChuanRen=(data,containerId) => {
   '.cr-card{font-size:10px;line-height:13px;padding:1px 2px}'+
   '.cr-ckw{font-size:8px}'+
   '}'+
-  // 500~700px 的窄窗口: 卡片可回到稍大字号, 宫格仍有富余
-  '@media(min-width:501px) and (max-width:700px){#pan.cr-pan .panItem{font-size:14px!important;line-height:22px!important}}'+
+  // 500~700px 的窄窗口: 宫格仍有富余, 字号回到 14px —— 同样只改变量, 不写死字号
+  '@media(min-width:501px) and (max-width:700px){.cr-grid-wrap{--pan-fs-sm:14px;--pan-lh-sm:22px}}'+
   '</style>';
 
   if(containerId){let el=document.getElementById(containerId);if(el)el.innerHTML=h;else return h;}

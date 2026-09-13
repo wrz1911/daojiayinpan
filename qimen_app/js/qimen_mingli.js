@@ -26,6 +26,8 @@
 (function () {
   'use strict';
 
+  // 共享常量(见 qimen_constants.js): 显式挂接, 不依赖加载顺序
+  var QM = window.QM || {};
   var GAN = '甲乙丙丁戊己庚辛壬癸';
   var ZHI = '子丑寅卯辰巳午未申酉戌亥';
   var SX = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
