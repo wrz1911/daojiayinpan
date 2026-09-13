@@ -1152,11 +1152,12 @@ function _jkCenter(chart) {
     // 标记区 nowrap + 略小字号: 避免"四空·干"换行撑高行距, 各行间距才均匀。
     // 干支右对齐(末字对齐)。列宽须略大于两字、且与旺衰之间留足间隙,
     // 否则双字干支会与旺衰贴在一起(看起来像"丁酉旺"连成一串)
-    // 列宽用 em 单位随字号缩放, 窄屏整体等比缩小, 不会挤在一起
-    return '<div style="display:flex;align-items:baseline;height:1.75em;gap:0.7em">' +
-      '<span style="flex:0 0 2.7em;font-weight:bold;text-align:right">' + k + '</span>' +
-      '<span style="flex:0 0 2.5em;text-align:right">' + a + '</span>' +
-      '<span style="flex:0 0 1.3em;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+    // 列宽用百分比(不用 em/px) —— em 在部分 Android WebView 的 flex-basis 上算错,
+    // 会导致中宫挤成一团; 百分比在所有环境一致, 且天然随格子宽度缩放
+    return '<div style="display:flex;align-items:baseline;gap:3%;box-sizing:border-box;padding:0.15em 0">' +
+      '<span style="flex:0 0 24%;font-weight:bold;text-align:right">' + k + '</span>' +
+      '<span style="flex:0 0 22%;text-align:right">' + a + '</span>' +
+      '<span style="flex:0 0 12%;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
       (ms.length ? '<span style="flex:1 1 auto;display:inline-flex;flex-wrap:wrap;gap:0 0.35em;' +
         'overflow:hidden">' + ms.join('') + '</span>' : '') +
       '</div>';
