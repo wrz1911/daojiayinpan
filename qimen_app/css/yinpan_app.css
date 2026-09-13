@@ -153,10 +153,10 @@ body.is-mobile #topBar{display:block}
 #panHead td{background:var(--c-bg)}
 #panHead #headTable{width:100%;margin:0 auto;border:1px solid var(--c-border);border-bottom:none;border-collapse:collapse;table-layout:fixed}
 #panHead #headTable td{padding:4px 6px;font-size:16px;line-height:34px;color:var(--c-text);border:1px solid var(--c-border)}
-#panHead .sizhuTitle{color:var(--c-gold)!important;font-size:13px!important;text-align:center}
+#panHead .sizhuTitle{color:var(--c-gold)!important;text-align:center}
 #panHead #itemTitle,#panHead #dTitle{color:var(--c-gold)!important}
-#panHead #tdTitle td{color:var(--c-gold)!important;font-size:13px!important}
-#panHead .sizhu{font-size:20px!important;line-height:28px!important;font-weight:bold!important;text-align:center}
+#panHead #tdTitle td{color:var(--c-gold)!important}
+#panHead .sizhu{font-weight:bold!important;text-align:center}
 #pan{table-layout:fixed!important}
 #pan td{vertical-align:top!important;padding-left:var(--pan-pad)!important;padding-right:var(--pan-pad)!important;padding-top:var(--pan-pad)!important}
 #pan .panItem{line-height:var(--pan-lh-sm)!important;font-size:var(--pan-fs-sm)!important}
@@ -165,7 +165,7 @@ body.is-mobile #topBar{display:block}
 #yixinghuandouDIV #content{margin-top:0!important}
 #content table{max-width:none!important}
 .tempTable{max-width:none!important;width:100%!important}
-.yiXingPan td{width:33.3%!important;vertical-align:top!important;padding:14px!important;padding-top:8px!important;line-height:40px!important;font-size:26px!important}
+.yiXingPan td{width:33.3%!important;vertical-align:top!important}
 #panHead #headTable td{padding:var(--pan-pad) 6px!important;font-size:var(--pan-fs)!important;line-height:var(--pan-lh)!important}
 #panHead .sizhu{font-size:var(--pan-fs-sz)!important;line-height:var(--pan-lh-sz)!important}
 #panHead .sizhuTitle{font-size:calc(var(--pan-fs) - 4px)!important}
@@ -185,7 +185,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
   .sel-zxj{font-size:12px!important;padding:3px 6px!important}
   #pan td{padding-top:2px!important}
 
-  .yiXingPan td{padding-left:4px!important;padding-right:4px!important;padding-top:2px!important;line-height:22px!important;font-size:14px!important}
+
   .yinGan{white-space:nowrap!important}
   span[id^="kong"]{font-size:16px!important;font-weight:bold!important;color:var(--c-text)!important;position:relative!important;top:-1px!important}
   #panHead #headTable td{padding-left:3px!important;padding-right:3px!important}
@@ -197,7 +197,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 @media (min-width:1025px) {
 
 
-  .yiXingPan td{font-size:24px!important;line-height:36px!important}
+
 
 
 
@@ -387,18 +387,9 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 /* ══════ 命理主盘四柱独立档位 ══════
    命理信息量大于时盘, 沿用 mode-shi 的 24px 会让主盘过长;
    这里给三档自适应尺寸, 选择器多一个 body 类, 稳定压过通用规则 */
-body.mode-mingli #panHead .sizhu{font-size:20px!important;line-height:24px!important}
-body.mode-mingli #panHead .sizhuTitle{font-size:12px!important}
-body.mode-mingli #panHead #tdTitle td{font-size:12px!important}
 @media (max-width:500px){
-  body.mode-mingli #panHead .sizhu{font-size:15px!important;line-height:20px!important}
-  body.mode-mingli #panHead .sizhuTitle{font-size:10px!important}
-  body.mode-mingli #panHead #tdTitle td{font-size:10px!important}
 }
 @media (min-width:1025px){
-  body.mode-mingli #panHead .sizhu{font-size:26px!important;line-height:32px!important}
-  body.mode-mingli #panHead .sizhuTitle{font-size:15px!important}
-  body.mode-mingli #panHead #tdTitle td{font-size:15px!important}
 }
 
 /* ══════ 命理宫格正方化 ══════
@@ -406,12 +397,12 @@ body.mode-mingli #panHead #tdTitle td{font-size:12px!important}
    会压掉普通写法, 使宫格沿用 14px 内边距与 26px 字/40px 行高 —— 内容把格子
    顶高, 宫位失去正方形。故用 #pan.ml-pan 提高特异性后收紧。 */
 #pan.ml-pan td{vertical-align:top!important;padding-left:4px!important;padding-right:4px!important;padding-top:6px!important;padding-bottom:6px!important}
-#pan.ml-pan .panItem{line-height:22px!important;font-size:14px!important}
+
 #pan.ml-pan .panItem span{white-space:nowrap}
 #pan.ml-pan .state{font-size:10px!important;line-height:11px!important}
 @media (min-width:1025px){
   #pan.ml-pan td{padding-left:6px!important;padding-right:6px!important}
-  #pan.ml-pan .panItem{line-height:26px!important;font-size:16px!important}
+
 }
 
 /* ══════ 6 个盘型底部区块与上部同宽 ══════
