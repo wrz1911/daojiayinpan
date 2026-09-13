@@ -934,12 +934,10 @@ const JK_HELP = {
     ]},
     { t: '三动五动（断课杀手锏）★', rows: [
       '<div style="background:var(--c-gray-bg);border-radius:6px;padding:8px 10px;margin-bottom:8px;line-height:1.95">' +
-        '<b>妻动</b>　干克方（人元克地分）<br>' +
-        '<b>官动</b>　神克干（贵神克人元）<br>' +
-        '<b>贼动</b>　神克将（贵神克将神）<br>' +
-        '<b>财动</b>　将克神（将神克贵神）<br>' +
-        '<b>鬼动</b>　方克干（地分克人元）<br>' +
-        '<b>父母动</b>　方生干（地分生人元）</div>',
+        '<b>五动</b>　妻动 干克方｜官动 神克干｜贼动 神克将｜财动 将克神｜鬼动 方克干<br>' +
+        '<b>三动</b>　子孙动 干生方（我生者为子孙）｜父母动 方生干｜兄弟动 干方比（五行相比者）</div>',
+      '讲义原话：「五动包括，妻动、官动、财动、贼动、鬼动。三动包括 子孙动、父母动、兄弟动。」',
+      '<b>子孙动</b>　主子孙之事，小吉。主添人进口、外来财物。<br><b>兄弟动</b>　事在比肩，多有不成，小凶；事在兄弟朋友之间，多为争执不和。',
       '三动五动是金口诀的速断法门 —— 课体一出，据其出现即可立判事情性质与吉凶。所谓高层不用看三动五动，实则是熟练到不必刻意去找，如同会奔跑便不再注意怎么迈第一步。',
       '<b>妻动</b>　「妻动于妻妾。官财防损折，占人人在家，访人人不悦，外旁来索取，卑下有口舌。论物多翻正，下旁或有缺。」<br>主事在妻妾；问婚姻多不成（男方有意见）。问财不成，因<b>地分是副财爻</b>，故有失田宅、失财物之说。上隔克下，贵神官必牵涉其中。上克下，寻人在家（地分受克无力逃脱）；行必有阻，人虽在家而主人不悦。',
       '<b>官动</b>　「官动利求官，相逢禄位迁，常人官府事，有官望财难，合得官中物，休从外处求，得财防暗损，问病在头部。」<br>官禄爻动，有官之人大利；<b>若逢驿马，必然迁官升职</b>。方生干主父母动，又主印在手、有职有权。官动逢冲，主帮别人打官司或虚假官职。',
@@ -949,7 +947,7 @@ const JK_HELP = {
       '<b>力量权衡</b>：妻动是隔克，期间还有二神的作用关系 —— 若同时官动，妻动力量减小；若再将神克人元，二力抵一力，妻动几乎没有了，只体现在形式阶段（雷声大雨点小）。若二神支持人元，妻动力度加强。「观其大意，后面的五行之内细推元」，这个「元」就是人元。',
     ]},
     { t: '起课法', rows: [
-      '<b>月将</b>：按【中气】过宫（标准）。另有按【交节】的简法，即月将取月建的六合。本面板两种可选。',
+      '<b>月将</b>：讲义原话「道家秘传起课一直用过节选将起课。过节选将比较简单，不用去计算时令，<b>直接选月建的六合</b>」—— 本体系实际用的是<b>交节</b>（月建六合），讲义 19 个课例无一例外；中气法与灵机课法并存，两种都可用，故面板仍可切换。',
       '<b>将神</b>：月将加时 —— 把月将放在时支上顺行，看地分落得何支；代数式 <code>将神 = 月将 + (地分 − 时支)</code>。',
       '<b>贵神</b>：日干起贵人，昼夜分顺逆。口诀「<b>甲戊庚牛羊，乙己鼠猴乡，丙丁猪鸡位，壬癸兔蛇藏，六辛逢马虎</b>」。昼夜以<b>卯至申为昼、酉至寅为夜</b>。贵人所落地盘在<b>亥子丑寅卯辰则顺行，巳午未申酉戌则逆行</b>，从贵人起十二贵神数至地分。',
       '<b>人元</b>：五子元遁 —— 「<b>甲己还加甲，乙庚丙作初，丙辛从戊起，丁壬庚子居，戊癸起壬子</b>」，即日干定其子时所起天干，顺数到地分。',
@@ -986,7 +984,7 @@ const JK_HELP = {
 };
 
 /* ══════ 金口诀 · 面板（仿"向角度选局"，内嵌在 #result 里） ══════ */
-let _jkShow = false, _jkDifen = null, _jkDayNight = 0, _jkJiang = 0;
+let _jkShow = false, _jkDifen = null, _jkDayNight = 0, _jkJiang = 1;   // 默认交节(月建六合), 讲义体系的实际用法
 function _jkSet(opt) {
   if (opt.difen !== undefined) _jkDifen = opt.difen;
   if (opt.dayNight !== undefined) _jkDayNight = opt.dayNight;
@@ -1039,7 +1037,7 @@ function toggleJinKouJue(noScroll) {
         '<div><b style="color:var(--c-theme)">将神</b>　' + chart.cur.jiangGanZhi + '　<span style="color:var(--c-gold)">' + chart.cur.jiangShen + '</span>　<span style="color:' + wsColor[chart.cur.jiangWs] + '">' + chart.cur.jiangWs + '</span></div>' +
         '<div><b style="color:var(--c-theme)">地分</b>　<span class="' + (wxCls[JK_WX_NAME[JK_ZHI_WX[chart.cur.difenIdx]]]||'') + '">' + chart.cur.difenZhi + '</span>　<span style="color:' + wsColor[chart.cur.difenWs] + '">' + chart.cur.difenWs + '</span></div>' +
         '<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--c-border);font-size:13px"><b style="color:var(--c-theme)">五动</b>　' +
-          (chart.dongs.length ? chart.dongs.join('　') : '—') +
+          (chart.wudong.length ? chart.wudong.join('　') : '—') +
           '<br><b style="color:var(--c-theme)">三动</b>　' + (chart.sandong.length ? chart.sandong.join('　') : '—') + '</div>' +
         '</div>';
       } else { cells += one(chart.houses[k]); }
@@ -1054,7 +1052,7 @@ function toggleJinKouJue(noScroll) {
       '<span>贵神起于 <b>' + chart.guiRenZhi + '</b>（' + chart.guiRenDir + '行·' + chart.dayNight + '贵）</span>' +
       '<span>地分 ' + sel('jkDifen', chart.cur.difenIdx, QM.ZHI.map((z,i)=>[i,z]), '_jkSet({difen:parseInt(this.value)})') + '</span>' +
       '<span>昼夜 ' + sel('jkDay', _jkDayNight, [[0,'自动'],[1,'昼'],[2,'夜']], '_jkSet({dayNight:parseInt(this.value)})') + '</span>' +
-      '<span>换将 ' + sel('jkJiang', _jkJiang, [[0,'中气'],[1,'交节']], '_jkSet({jiang:parseInt(this.value)})') + '</span>' +
+      '<span>换将 ' + sel('jkJiang', _jkJiang, [[1,'交节'],[0,'中气']], '_jkSet({jiang:parseInt(this.value)})') + '</span>' +
       '</div>';
     div.innerHTML = head + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px">' + cells + '</div>';
     div.style.display = 'block';
@@ -1684,23 +1682,26 @@ function jinkoujueChart(opt) {
   // 五动（按四位生克，取常见口径）
   // 五动/三动按【乘支】的五行判(起课结果), 与本位干支无关
   const rWx = cur.renWx, gWx = cur.guiWx, jWx = cur.jiangWx, dWx = JK_ZHI_WX[cur.difenIdx];
-  // 五动三动: 干=人元 神=贵神 将=将神 方=地分
+  // 五动三动(干=人元 神=贵神 将=将神 方=地分), 据讲义"五动包括妻官财贼鬼,
+  // 三动包括子孙父母兄弟":
   //   妻动 干克方 / 官动 神克干 / 贼动 神克将 / 财动 将克神 / 鬼动 方克干
-  //   父母动 方生干 (讲义提高班第七课"三动五动")
-  const dongs = [];
-  if (_jkKe(rWx, dWx)) dongs.push('妻动');
-  if (_jkKe(gWx, rWx)) dongs.push('官动');
-  if (_jkKe(gWx, jWx)) dongs.push('贼动');
-  if (_jkKe(jWx, gWx)) dongs.push('财动');
-  if (_jkKe(dWx, rWx)) dongs.push('鬼动');
-  if (_jkSheng(dWx, rWx)) dongs.push('父母动');
+  //   子孙动 干生方(我生者为子孙) / 父母动 方生干 / 兄弟动 干方比(五行相比)
+  const wudong = [], sandong = [];
+  if (_jkKe(rWx, dWx)) wudong.push('妻动');
+  if (_jkKe(gWx, rWx)) wudong.push('官动');
+  if (_jkKe(gWx, jWx)) wudong.push('贼动');
+  if (_jkKe(jWx, gWx)) wudong.push('财动');
+  if (_jkKe(dWx, rWx)) wudong.push('鬼动');
+  if (_jkSheng(rWx, dWx)) sandong.push('子孙动');
+  if (_jkSheng(dWx, rWx)) sandong.push('父母动');
+  if (rWx === dWx) sandong.push('兄弟动');
 
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
     yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ],
     dayNight: isDay ? '昼' : '夜',
     guiRenZhi: QM.ZHI[grZ], guiRenDir: dir === 1 ? '顺' : '逆',
-    houses, cur, dongs, sandong: [],
+    houses, cur, wudong, sandong,
   };
 }
 window.jinkoujueChart = jinkoujueChart;
