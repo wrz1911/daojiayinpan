@@ -1249,8 +1249,9 @@ function toggleJinKouJue(noScroll) {
     const one = (h) => {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
+      // 干支右对齐 —— 单字与双字末字对齐(人元的"癸"与贵神的"卯"同尾), 仿易瑞
       const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px">' +
-        '<span style="flex:0 0 36px;overflow:hidden">' + a + '</span>' +
+        '<span style="flex:0 0 36px;overflow:hidden;text-align:right">' + a + '</span>' +
         '<span style="flex:0 0 14px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
