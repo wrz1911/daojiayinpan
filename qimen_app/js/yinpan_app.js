@@ -1100,7 +1100,7 @@ function _jkCenter(chart) {
   // 空亡: 按【日空】判 —— 该位地支落在日柱旬空内即标"空"(排在旺衰之后, 用爻之前)
   const kong2 = (chart.kong4 && chart.kong4[2]) || '';
   const kongOf = z => (z && kong2.indexOf(z) >= 0)
-    ? '<span style="color:var(--c-text-3)">空</span>' : '';
+    ? '<span style="color:var(--wx-huo);font-weight:bold">空</span>' : '';
   // 顺序: 标签 | 干支 | 神名 | 旺衰 | 空 | 用
   const row = (k, a, b, ws, useMark, kongMark) => '<tr style="height:26px">' +
     '<td style="width:42px;color:var(--c-theme);font-weight:bold;text-align:right;padding-right:5px;white-space:nowrap">' + k + '</td>' +
@@ -1243,7 +1243,7 @@ function toggleJinKouJue(noScroll) {
       '<tr>' + (chart.siZhu || []).map(g => tdV(sp(g[0]) + sp(g[1]))).join('') + '</tr>' +
       '<tr>' + tdL('空亡') + (chart.kong4 || []).map(k => tdV(sp(k))).join('') + '</tr>' +
       '<tr>' + tdL('日空') + tdV(sp(chart.kong4 ? chart.kong4[2] : '')) +
-              tdL('四大空亡') + tdV(chart.shensha && chart.shensha.sish ? sp(chart.shensha.sish) : '无', 2) + '</tr>' +
+              tdL('四大空亡') + tdV((chart.shensha && chart.shensha.sish ? sp(chart.shensha.sish) : '无') + (chart.shensha && chart.shensha.sish ? '　四空' : ''), 2) + '</tr>' +
       '</table>';
 
     // ── 输入区：与信息栏同一套表格样式 ──
