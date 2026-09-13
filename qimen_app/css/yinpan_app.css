@@ -173,7 +173,9 @@ body.is-mobile #topBar{display:block}
 #panHead #headTable .sizhuTitle{font-size:calc(var(--pan-fs) - 4px)!important}
 #panHead #headTable #tdTitle td{font-size:calc(var(--pan-fs) - 4px)!important}
 #panHead #headTable .hd-side{font-size:calc(var(--pan-fs) - 3px)!important}
-.yinGan{font-size:calc(var(--pan-fs-sm) + 6px)!important;line-height:calc(var(--pan-lh-sm) + 6px)!important}
+/* 阴干跟随宫格字号: 宫格内容已由 26px 收敛到 var(--pan-fs-sm),
+   阴干若仍用固定大字号会明显大于同格内的天盘干/九星/八门, 显得突兀 */
+.yinGan{font-size:var(--pan-fs-sm)!important;line-height:var(--pan-lh-sm)!important}
 
 
 .yinGan{white-space:nowrap!important}

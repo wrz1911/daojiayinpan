@@ -348,7 +348,7 @@
         y.style.paddingTop = Math.max(0, t.getBoundingClientRect().top - go.getBoundingClientRect().top) + 'px';
         y.style.textAlign = 'right';
       }
-      if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = '15px'; y.style.lineHeight = '25px'; y.style.color = 'var(--c-text)'; }
+      if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = 'var(--pan-fs-sm)'; y.style.lineHeight = 'var(--pan-lh-sm)'; y.style.color = 'var(--c-text)'; }
     });
     [2, 7, 6].forEach(function (g) {
       var y = box.querySelector('#yinGan' + g), x = box.querySelector('#xing' + g), go = box.querySelector('#gong' + g);
@@ -356,11 +356,11 @@
         y.style.paddingTop = Math.max(0, x.getBoundingClientRect().top - go.getBoundingClientRect().top) + 'px';
         y.style.textAlign = 'left';
       }
-      if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = '15px'; y.style.lineHeight = '25px'; y.style.color = 'var(--c-text)'; }
+      if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = 'var(--pan-fs-sm)'; y.style.lineHeight = 'var(--pan-lh-sm)'; y.style.color = 'var(--c-text)'; }
     });
     var y9 = box.querySelector('#yinGan9'), y1 = box.querySelector('#yinGan1');
-    if (y9) { y9.style.verticalAlign = 'bottom'; y9.style.fontSize = '15px'; y9.style.color = 'var(--c-text)'; }
-    if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = '15px'; y1.style.color = 'var(--c-text)'; }
+    if (y9) { y9.style.verticalAlign = 'bottom'; y9.style.fontSize = 'var(--pan-fs-sm)'; y9.style.color = 'var(--c-text)'; }
+    if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = 'var(--pan-fs-sm)'; y1.style.color = 'var(--c-text)'; }
   };
 
   /** 移星换斗(占位: 按钮结构已就位, 功能待补) */
