@@ -5,7 +5,7 @@
 :root{
   /* 主题 */
   --c-theme:#0dc2b3;      /* 主题青(寄宫/按钮/高亮) */
-  --c-theme-2:#0aa89a;    /* 主题青深端(topBar 渐变) */
+  --c-theme-2:#0aa89a;    /* 主题青深端(渐变备用, 顶部条已改素色) */
   --c-theme-bg:#f0fdfa;   /* 主题淡底 */
   --c-gold:#dead68;       /* 标题金(节气/类型/四柱等表头) */
   --c-sizhu:#c00000;      /* 日柱红 */
@@ -136,8 +136,11 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 
 /* ===== 3. 应用覆盖样式 (yinpan_app.css) ===== */
 body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;background:var(--c-bg);margin:0;padding-bottom:calc(44px + env(safe-area-inset-bottom, 24px))}
-body.is-mobile{padding-top:36px}
-#topBar{display:none;position:fixed;top:0;left:0;right:0;height:36px;background:linear-gradient(180deg,var(--c-theme-2),var(--c-theme));z-index:1000}
+body.is-mobile{padding-top:44px}
+/* 顶部装饰条与底部栏同色同高(见 yinpan_app.js 的 #bottomBar):
+   同一片背景 + 同样的 44px + 同样的 600px 居中, 上下呼应。
+   差别只在没有按钮, 且不加分隔线。原先这里是青绿渐变。 */
+#topBar{display:none;position:fixed;top:0;left:0;right:0;height:44px;background:var(--c-bg);z-index:1000;max-width:600px;margin:0 auto}
 body.is-mobile #topBar{display:block}
 #mainDIV{max-width:600px;margin:0 auto;padding:0}
 #mainDIV,#mainDIV *{user-select:text!important;-webkit-user-select:text!important}

@@ -218,6 +218,15 @@ jobs:
           npx cap add android
           # 覆盖variables.gradle: 保留Capacitor默认的AndroidX版本号, 仅修改minSdk
           sed -i 's/minSdkVersion = 23/minSdkVersion = 31/' android/variables.gradle
+          # 状态栏: 做成不透明的实色, 且与页面顶部装饰条同色。
+          # targetSdk 35 起 Android 15+ 强制 edge-to-edge, 主题里的 statusBarColor
+          # 会被忽略、状态栏变透明, 页面内容从状态栏底下穿过; 降一档到 34 即可
+          # 回到由主题控制的状态栏。
+          sed -i 's/targetSdkVersion = 35/targetSdkVersion = 34/' android/variables.gradle
+          sed -i 's|<item name="android:background">@null</item>|<item name="android:background">@null</item>\n        <item name="android:statusBarColor">#ffffff</item>\n        <item name="android:windowLightStatusBar">true</item>\n        <item name="android:windowTranslucentStatus">false</item>\n        <item name="android:windowDrawsSystemBarBackgrounds">true</item>|' android/app/src/main/res/values/styles.xml
+          # 暗色模式: 同名 style 会整体替换 values/ 里的定义, 故需写全各项
+          mkdir -p android/app/src/main/res/values-night
+          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<resources>' '    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">' '        <item name="windowActionBar">false</item>' '        <item name="windowNoTitle">true</item>' '        <item name="android:background">@null</item>' '        <item name="android:statusBarColor">#1b1b1b</item>' '        <item name="android:windowLightStatusBar">false</item>' '        <item name="android:windowTranslucentStatus">false</item>' '        <item name="android:windowDrawsSystemBarBackgrounds">true</item>' '    </style>' '</resources>' > android/app/src/main/res/values-night/styles.xml
           # 开启R8混淆+资源压缩
           sed -i 's/minifyEnabled false/minifyEnabled true/' android/app/build.gradle
           sed -i '/minifyEnabled true/a\            shrinkResources true' android/app/build.gradle
