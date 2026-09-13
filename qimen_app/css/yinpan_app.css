@@ -332,6 +332,8 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .mid-row span:nth-of-type(3){float:right}
 .dshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-tu)}
 .rshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-shui)}
+/* 四维宫那四个字(雷火风豹): 落在八神与空亡之间, 同样居中不占宽度 */
+.w4shen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--c-text-2)}
 /* 开关型按钮的"已开启"状态: 平时不描边(只有浅灰常驻边框), 点开后才描一圈。
    移星换斗/天门地户/长生状态/年月日时神将 一律深灰;
    地八神、人八神则各随其五行色, 与它们的文字和宫内符号一致。 */

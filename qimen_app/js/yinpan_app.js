@@ -794,6 +794,7 @@ function renderPan(raw, engineData) {
   if (panType === 1) {
     _diShenMap  = buildDiBaShenMap(palaces, isYin);
     _renShenMap = buildRenBaShenMap(palaces, isYin, zhiShiShort);
+    _xn4Map = buildXuanNv4Map(palaces, isYin);
     paintDiBaShen(_diShenShow); paintRenBaShen(_renShenShow);
   }
 
@@ -1091,7 +1092,7 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     // 漏一处就出错, 改为生成时就不挂。
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'"'+(opts.noClick?'':' onclick="showPalace('+g+')"')+'>' +
       '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
-      '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
+      '<div class="panItem top mid-row" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span>'+(opts.diShen?'<span class="w4shen" id="w4'+g+'"></span>':'')+'<span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem mid-row" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span>'+(opts.diShen?'<span class="rshen" id="rshen'+g+'"></span>':'')+'<span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
       '<div class="panItem mid-row" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span>'+(opts.diShen?'<span class="dshen" id="dshen'+g+'"></span>':'')+'<span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
       '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
@@ -1407,6 +1408,7 @@ function tianmenDihu() {
    与天门地户共用外圈那 12 个位置(waipan1~12), 所以两者必须互斥;
    切换时互相清场, 见各自的入口。 */
 let _xnShow = false;
+let _xn4Map = null;
 
 function buildXuanNvMap(hourZhi, isYin) {
   try {
@@ -1424,6 +1426,38 @@ function buildXuanNvMap(hourZhi, isYin) {
   } catch (e) { _logErr('xuanNv16', e && e.message); return null; }
 }
 
+/* 四维宫那四个字(雷火风豹): 以【天冲星】起 —— 从天冲所在宫的地支出发,
+   沿十二地支阳顺阴逆走, 遇到的第一个四维宫起"雷", 再按同方向依次落到
+   其余三个四维宫上。四维宫 = 巽4 坤2 乾6 艮8。 */
+function buildXuanNv4Map(palaces, isYin) {
+  try {
+    const Z12 = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    const Z2G = {子:1, 丑:8, 寅:8, 卯:3, 辰:4, 巳:4, 午:9, 未:2, 申:2, 酉:7, 戌:6, 亥:6};
+    const SI4 = ['雷','火','风','豹'], WEI = [4, 2, 6, 8];
+    if (!palaces) return null;
+    // 找天冲星落宫
+    let g0 = 0;
+    const abbr = window.XING_ABBR || {};
+    for (let g = 1; g <= 9; g++) {
+      const x = palaces['gong' + g] ? palaces['gong' + g].xing : '';
+      if (x && ((abbr[x] || x) === '冲' || x === '天冲')) { g0 = g; break; }
+    }
+    if (!g0) return null;
+    const step = isYin ? -1 : 1;
+    // 天冲宫的地支(四维宫取其一即可, 因为起点必落在本宫)
+    const zs = Object.keys(Z2G).filter(z => Z2G[z] === g0);
+    if (!zs.length) return null;
+    const map = {};
+    let n = 0;
+    for (let i = 0; i < 24 && n < 4; i++) {
+      const z = Z12[((Z12.indexOf(zs[0]) + step * i) % 12 + 12) % 12];
+      const g = Z2G[z];
+      if (WEI.indexOf(g) >= 0 && map[g] === undefined) { map[g] = SI4[n++]; }
+    }
+    return map;
+  } catch (e) { _logErr('xuanNv4', e && e.message); return null; }
+}
+
 function xuanNv16() {
   try {
     if (_tmdhShow) { _tmdhShow = false; clearWaipan(); }   // 与天门地户互斥
@@ -1433,6 +1467,11 @@ function xuanNv16() {
     const WPOF = {子:1,丑:2,寅:3,卯:4,辰:5,巳:6,午:7,未:8,申:9,酉:10,戌:11,亥:12};
     // 每次都按当前时支/阴阳遁重算 —— 换时辰后开关虽被复位, 手排一次也无妨
     const map = _xnShow ? buildXuanNvMap(window._shiZhi, !!window._isYin) : null;
+    // 四维宫那四个字(雷火风豹)同属十六字诀, 一起显隐
+    for (let g = 1; g <= 9; g++) {
+      const el = document.getElementById('w4' + g);
+      if (el) el.textContent = (_xnShow && _xn4Map && _xn4Map[g]) ? _xn4Map[g] : '';
+    }
     for (const z in WPOF) {
       const el = document.getElementById('waipan' + WPOF[z]);
       if (!el) continue;
@@ -1450,6 +1489,7 @@ function xuanNv16() {
 }
 window.xuanNv16 = xuanNv16;
 window.buildXuanNvMap = buildXuanNvMap;   // 导出便于单独验证排法
+window.buildXuanNv4Map = buildXuanNv4Map;
 
 // === 长生状态 ===
 // 天干在8宫(去中5)的十二长生状态, 双地支宫显示两个状态
