@@ -2598,6 +2598,10 @@ function panChange(dir) {
   let lbl = document.getElementById('zxjLabel');
   if (lbl) lbl.innerHTML = '';
   doPan();
+  // 上局/下局改了时间, 金口诀面板若开着要跟着重排(noScroll 参数避免跳回顶部)
+  try {
+    if (_jkShow && document.getElementById('jinkoujueDIV')) setTimeout(() => toggleJinKouJue(true), 30);
+  } catch (e) { _logErr('panChange.jk', e && e.message); }
 }
 
 // === 年月日时神将 ===
