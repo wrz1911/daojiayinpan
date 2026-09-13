@@ -263,3 +263,18 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
     --wx-shui:#4d9de0;
   }
 }
+
+/* === 命理奇门(panType 6) —— 样式类名与热卜 mingli.css 对齐 === */
+#dayun_liunian{margin-top:8px}
+#dayun_liunian .pan{width:100%;max-width:520px;margin:0 auto;border-collapse:collapse}
+.yunTitle{color:var(--c-gold);width:8%;vertical-align:middle;text-align:center;font-size:12px;line-height:15px}
+.yun1{font-size:11px;color:var(--c-gold);line-height:16px;text-align:center;font-family:Arial,sans-serif}
+.yun2{padding-top:4px;padding-bottom:2px;font-weight:bold;font-size:13px;line-height:17px;text-align:center;cursor:pointer}
+.yun2 .shishen{font-weight:normal;font-size:10px;color:var(--c-text-3)}
+.liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;background:var(--c-gray-bg);font-family:Arial,sans-serif}
+.liunian2{font-size:12px;background:var(--c-gray-bg);line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
+#btnTable1,#btnTable2{width:100%;max-width:520px;margin:8px auto;border-collapse:collapse}
+#btnTable1 .btn,#btnTable2 .btn{background:#0dc2b3;color:#fff;border-radius:4px;text-align:center;padding:6px 4px;font-size:13px;cursor:pointer;margin:2px}
+#Tip{max-width:520px;margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
+#yixinghuandouDIV{max-width:520px;margin:6px auto}
+.ml-inner{max-width:520px;margin:0 auto}

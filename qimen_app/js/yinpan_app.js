@@ -2636,17 +2636,10 @@ function doMingli(){
     _mlVals={gender:gEl?gEl.value:'男',nianMing:nEl?nEl.value:''};
     let data=window.mingliChart({year:Y,month:M,day:D,hour:hr,minute:mn,
       gender:_mlVals.gender,nianMing:_mlVals.nianMing});
+    window._mlData=data;   // 供按钮 onclick="mingliBtn(n, window._mlData)" 取用
     document.getElementById("panWrap").innerHTML=window.renderMingli(data,null);
-    // 外圈切换按钮(参照热卜: 十二神将四选一 / 天门地户 / 长生), 已按下的高亮
-    let mlBtns=document.querySelectorAll('#panWrap .ml-btn');
-    mlBtns.forEach(function(b){
-      b.onclick=function(){
-        let k=b.getAttribute('data-ml');
-        let kind=(k==='tmdh'||k==='state')?k:parseInt(k);
-        data.ringKind=window.mingliRing(kind,data);
-        mlBtns.forEach(function(x){ x.classList.toggle('on', x===b && data.ringKind!=='none'); });
-      };
-    });
+    // 首屏填充当前大运的流年(热卜进入页面即显示当前运对应的 10 个流年)
+    if(window.mingliYun) window.mingliYun(data.yunIdx||0, data);
     _renderBottomBar();
     setTimeout(_bindActionButtons,50);
   }catch(e){

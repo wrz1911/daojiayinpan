@@ -3,156 +3,181 @@
  *
  * 与「时盘/刻盘」的区别: 以**出生时间**排盘看命, 而非起局断事。
  *
- * 布局**参照热卜「命理奇门」(mod=mingli)**:
- *   头部表(日期/农历/节气/局/四柱/值符值使旬首空亡马星/月将年命性别)
- *   按钮行: 十二神将(按年|月|日|时) ｜ 天门地户 ｜ 长生状态
- *   盘体(九宫) + 外圈 waipan1..12(由上述按钮切换填充)
- *   八字表(十神/藏干/纳音/地势/自坐/星运空)
- *   大运表 + 流年表
+ * ⚠ 本文件的结构**逐段照搬热卜「命理奇门」(mod=mingli)** 的结果页, 取自其真实
+ * 模板(16979 字节), 顺序与 id 完全一致:
  *
- * 外圈复用本项目**已有的**三个函数(山向盘在用, 已导出到 window):
- *   shen12(1..4)    十二神将, 1=年 2=月 3=日 4=时   ← 与热卜 shen12 同构
+ *   #panHead          头部表: 名称/性别/生肖 ｜ 出生(公历+农历) ｜ 节气·月将·局
+ *                      ｜ 旬首·值符·值使·马星·空亡 ｜ 四柱(五行着色)
+ *   #content          #ma1 + 外圈上(waipan6/7/8) + yinGan9 + #ma2
+ *                     + leftTable(waipan5/4/3 + yinGan4/3/8) + #pan(九宫)
+ *                     + rightTable(yinGan2/7/6 + waipan9/10/11)
+ *                     + #ma3 + 外圈下(waipan2/1/12) + yinGan1 + #ma4
+ *                     末尾 #Tip 颜色说明
+ *   #dayun_liunian    大运表(yunTitle + dayun_year{n} + dayun{n} onclick=yunFocus)
+ *                     + 流年表(yunTitle + liunian1_{c} + liunian2_{c})
+ *   #btnTable1        移星换斗 | 天门地户 | 长生状态        (btn1/btn3/btn2)
+ *   #btnTable2        年神将 | 月神将 | 日神将 | 时神将     (btn4..btn7)
+ *   #yixinghuandouDIV + #tableTemp
+ *
+ * 外圈与状态复用本项目**已有的**函数(山向盘在用, 已导出到 window):
+ *   shen12(1..4)    十二神将, 1=年 2=月 3=日 4=时
  *   tianmenDihu()   天门地户(月将加时 + 建除十二神)
- *   showState()     十二长生状态(写入宫内的 stateTian/stateDi)
- * 它们读 window._raw / window._sizhuObj / window._palaces, 故命理排盘后需设置。
+ *   showState()     十二长生(写宫内 stateTian/stateDi)
+ * 它们读 window._raw / window._sizhuObj / window._palaces, 故排盘后需设置。
  */
 (function () {
   'use strict';
 
   var GAN = '甲乙丙丁戊己庚辛壬癸';
   var ZHI = '子丑寅卯辰巳午未申酉戌亥';
+  var SX = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+  /** 天干五行色 — 取自热卜结果页的内联着色 */
+  var GAN_COLOR = { 甲: '#43ab18', 乙: '#43ab18', 丙: '#e40b06', 丁: '#e40b06',
+                    戊: '#964607', 己: '#964607', 庚: '#f4a600', 辛: '#f4a600',
+                    壬: '#006aff', 癸: '#006aff' };
+  /** 地支五行色 */
+  var ZHI_COLOR = { 子: '#006aff', 丑: '#964607', 寅: '#43ab18', 卯: '#43ab18',
+                    辰: '#964607', 巳: '#e40b06', 午: '#e40b06', 未: '#964607',
+                    申: '#f4a600', 酉: '#f4a600', 戌: '#964607', 亥: '#006aff' };
 
   var dec = function (s) { return String(s == null ? '' : s); };
+  var ganSpan = function (g) { return '<font style="color:' + (GAN_COLOR[g] || '#333') + '">' + g + '</font>'; };
+  var zhiSpan = function (z) { return '<font style="color:' + (ZHI_COLOR[z] || '#333') + '">' + z + '</font>'; };
 
-  /**
-   * 某一柱的旬空: 旬空偏移 = 10 - (干序+1), 再与地支序相加取模。
-   * 与热卜命理模块的 kong() 同式, 也与本项目 QM 的 kwMap 口径一致。
-   */
+  /** 某一柱的旬空: 旬空偏移 = 10 - (干序+1), 与地支序相加取模(与热卜 kong() 同式) */
   function xunKongOf(gz) {
     gz = dec(gz);
     if (gz.length < 2) return '';
     var gi = GAN.indexOf(gz[0]), zi = ZHI.indexOf(gz[1]);
     if (gi < 0 || zi < 0) return '';
-    var off = 10 - (gi + 1);
-    var b = ((zi + off) % 12 + 12) % 12;
+    var b = ((zi + (10 - (gi + 1))) % 12 + 12) % 12;
     return ZHI[(b + 1) % 12] + ZHI[(b + 2) % 12];
   }
 
   /**
    * 命理奇门排盘。
-   * opts: { year, month, day, hour, minute, gender('男'|'女'), nianMing(地支, 可选) }
+   * opts: { year, month, day, hour, minute, gender('男'|'女'), nianMing(地支, 可选), name }
    */
   window.mingliChart = function (opts) {
     opts = opts || {};
     var year = opts.year, month = opts.month, day = opts.day, hour = opts.hour, minute = opts.minute || 0;
     var gender = opts.gender || '男';
 
-    // ① 奇门盘(复用现有引擎, 时盘)
     var qr = window.qimenChart({ year: year, month: month, day: day, hour: hour, minute: minute, panType: 1 });
 
-    // ② 八字大运(复用穿壬模块里已有的实现)
     var bz = null;
-    try {
-      bz = window.computeBaZiDaYun({ year: year, month: month, day: day, hour: hour, gender: gender });
-    } catch (e) {
-      if (window._logErr) window._logErr('mingli.bazi', e && e.message);
-    }
+    try { bz = window.computeBaZiDaYun({ year: year, month: month, day: day, hour: hour, gender: gender }); }
+    catch (e) { if (window._logErr) window._logErr('mingli.bazi', e && e.message); }
 
-    // ③ 四柱 —— qimenChart 的 sizhu 是**对象**({y:{ganZhi},m:…,d:…,h:…}),
-    //    与 chuanRenChart 的字符串 sizhu 不同, 勿混用。
+    // 四柱 —— qimenChart 的 sizhu 是**对象**(与 chuanRenChart 的字符串不同)
     var gzOf = function (k) { return dec(qr.sizhu && qr.sizhu[k] && qr.sizhu[k].ganZhi); };
     var siZhu = { nian: gzOf('y'), yue: gzOf('m'), ri: gzOf('d'), shi: gzOf('h') };
 
-    // ④ 四柱各自的旬空(命理特征: 四个而非一个)
-    var kong = {
-      nian: xunKongOf(siZhu.nian), yue: xunKongOf(siZhu.yue),
-      ri: xunKongOf(siZhu.ri), shi: xunKongOf(siZhu.shi),
-    };
+    var kong = { nian: xunKongOf(siZhu.nian), yue: xunKongOf(siZhu.yue),
+                 ri: xunKongOf(siZhu.ri), shi: xunKongOf(siZhu.shi) };
 
-    // ⑤ 供 shen12 / tianmenDihu / showState 使用(它们读这三个全局)
+    // 供 shen12 / tianmenDihu / showState 使用
     window._raw = qr.raw || '';
     window._sizhuObj = qr.sizhu || null;
     var palsForState = {};
-    for (var g = 1; g <= 9; g++) {
-      if (g === 5) continue;
-      palsForState['gong' + g] = (qr.pals && qr.pals[g]) || null;
-    }
+    for (var g = 1; g <= 9; g++) { if (g !== 5) palsForState['gong' + g] = (qr.pals && qr.pals[g]) || null; }
     window._palaces = palsForState;
 
+    // 生肖: 按年支
+    var shengXiao = SX[ZHI.indexOf(siZhu.nian[1])] || '';
+
     return {
-      qr: qr, bz: bz,
-      sizhu: siZhu,
-      gender: gender,
+      qr: qr, bz: bz, sizhu: siZhu, gender: gender, shengXiao: shengXiao,
+      name: opts.name || '未知',
       nianMing: opts.nianMing || siZhu.shi[1] || '',
       kong: kong,
       yueJiang: dec(qr.yueJiang),
       juLabel: qr.juLabel,
-      /** 当前外圈显示: 'none' | 1..4(十二神将按年月日时) | 'tmdh' */
+      /** 当前外圈: 'none' | 1..4(神将) | 'tmdh' | 'state' | 1|3(移星换斗) */
       ringKind: 'none',
+      /** 当前高亮的大运序号 */
+      yunIdx: (bz && bz.curDY) || 0,
     };
   };
 
-  /** 染色: 按五行给干着色 */
-  function wxSpan(ch) {
-    if (!ch) return '';
-    var color = (window.QM && window.QM.WX_COLOR && window.QM.WX_COLOR[ch]) || '#333';
-    return '<font color="' + color + '">' + ch + '</font>';
-  }
+  /* ───────────────── 外圈 / 状态切换 (照搬热卜 btn() 的按钮行为) ───────────────── */
 
-  /**
-   * 切换外圈 —— 复现热卜 btn() 的行为:
-   *   kind = 1..4   → 十二神将(年/月/日/时)
-   *   kind = 'tmdh' → 天门地户
-   *   kind = 'state'→ 十二长生(写宫内, 不动外圈)
-   *   kind = 'none' → 清空外圈
-   * 同一个 kind 再点一次则清空。
-   */
-  window.mingliRing = function (kind, data) {
-    var isRing = (kind === 1 || kind === 2 || kind === 3 || kind === 4 || kind === 'tmdh');
-    if (isRing && data && data.ringKind === kind) kind = 'none';   // 再点一次取消
-
-    if (kind === 'state') {
-      if (window.showState) window.showState();
-      return data ? data.ringKind : 'none';
+  /** 按钮高亮: 3..7 互斥, 再点同一个则取消并清空外圈 */
+  window.mingliBtn = function (b, data) {
+    var isRing = (b >= 3 && b <= 7);
+    if (isRing && data && data.ringKind === b) {          // 再点一次 → 取消
+      data.ringKind = 'none';
+      if (window.clearWaipan) { try { window.clearWaipan(); } catch (e) { if (window._logErr) window._logErr('clearWaipan', e && e.message); } }
+      return 'none';
     }
-
     if (window.clearWaipan) { try { window.clearWaipan(); } catch (e) { if (window._logErr) window._logErr('clearWaipan', e && e.message); } }
-    if (kind === 'none') return 'none';
-
     try {
-      if (kind === 'tmdh') { if (window.tianmenDihu) window.tianmenDihu(); }
-      else if (kind >= 1 && kind <= 4) { if (window.shen12) window.shen12(kind); }
-    } catch (e) {
-      if (window._logErr) window._logErr('mingliRing', e && e.message);
-    }
-    return kind;
+      if (b === 3) { if (window.tianmenDihu) window.tianmenDihu(); }      // 天门地户
+      else if (b === 4) { if (window.shen12) window.shen12(1); }          // 年神将
+      else if (b === 5) { if (window.shen12) window.shen12(2); }          // 月神将
+      else if (b === 6) { if (window.shen12) window.shen12(3); }          // 日神将
+      else if (b === 7) { if (window.shen12) window.shen12(4); }          // 时神将
+    } catch (e) { if (window._logErr) window._logErr('mingliBtn', e && e.message); }
+    return isRing ? b : (data ? data.ringKind : 'none');
   };
 
-  /** 按钮行(参照热卜: 十二神将四选一 + 天门地户 + 长生) */
-  function ringButtons() {
-    var lab = ['年', '月', '日', '时'];
-    var h = '<div class="ml-btns">';
-    h += '<span class="ml-btn-hd">十二神将</span>';
-    for (var i = 1; i <= 4; i++) h += '<span class="ml-btn" data-ml="' + i + '">' + lab[i - 1] + '</span>';
-    h += '<span class="ml-btn-hd" style="margin-left:8px">外圈</span>';
-    h += '<span class="ml-btn" data-ml="tmdh">天门地户</span>';
-    h += '<span class="ml-btn-hd" style="margin-left:8px">宫内</span>';
-    h += '<span class="ml-btn" data-ml="state">长生</span>';
-    h += '</div>';
-    return h;
-  }
+  /** 长生状态(btn2): 写宫内, 独立开关, 不动外圈 */
+  window.mingliState = function () { if (window.showState) window.showState(); };
 
-  /** 命理模块的输入面板(性别 + 年命)。出生时间复用页面顶部的年月日时选择器。 */
+  /* ───────────────── 大运 / 流年 ───────────────── */
+
+  /**
+   * 高亮第 n 步大运, 并把该运的 10 个流年填进 liunian1_{c}/liunian2_{c}。
+   * 照搬热卜 yun(a) 的行为: 一步大运 10 年, 虚岁 = 流年-出生年+1。
+   */
+  window.mingliYun = function (n, data) {
+    var bz = data && data.bz;
+    if (!bz || !bz.dayun || !bz.dayun.length) return;
+    n = parseInt(n, 10) || 0;
+    if (n < 0) n = 0;
+    if (n >= bz.dayun.length) n = bz.dayun.length - 1;
+
+    // 大运格高亮
+    for (var i = 0; i < 10; i++) {
+      var el = document.getElementById('dayun' + i);
+      var yr = document.getElementById('dayun_year' + i);
+      var on = (i === n);
+      if (el) { el.style.background = on ? '#faf8f3' : ''; el.style.color = on ? '#e40b06' : ''; el.style.fontWeight = on ? 'bold' : ''; }
+      if (yr) { yr.style.background = on ? '#faf8f3' : ''; }
+    }
+    // 流年: 该运第 c 年
+    var startYear = (bz.qiYunYear || 0) + 10 * n;
+    var birthYear = (data.qr && data.qr.gongli ? parseInt(dec(data.qr.gongli).slice(0, 4), 10) : 0);
+    var ln = bz.liuNian || [];
+    for (var c = 0; c < 10; c++) {
+      var y = ln[n * 10 + c];
+      var e1 = document.getElementById('liunian1_' + c);
+      var e2 = document.getElementById('liunian2_' + c);
+      if (!y) { if (e1) e1.innerHTML = ''; if (e2) e2.innerHTML = ''; continue; }
+      var age = birthYear ? (y.year - birthYear + 1) : '';
+      if (e1) e1.innerHTML = y.year + '<br>' + age + '岁';
+      if (e2) e2.innerHTML = ganSpan(y.g) + zhiSpan(y.z);
+    }
+    data.yunIdx = n;
+    void startYear;
+  };
+
+  /* ───────────────── 输入面板 ───────────────── */
+
+  /** 命理输入面板(姓名 + 性别 + 年命)。出生时间复用页面顶部的年月日时选择器。 */
   window.renderMingliInputs = function (d) {
     d = d || {};
     var gender = d.gender || '男';
     var nm = d.nianMing || '';
+    var name = d.name || '';
     var h = '<div class="ml-input-panel"><table style="width:100%;border-collapse:collapse"><tr>';
-    h += '<td style="width:48px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">性别</td>';
+    h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">姓名</td>';
+    h += '<td style="width:34%"><input id="mlName" class="sel-date" style="width:100%;box-sizing:border-box" type="text" maxlength="20" value="' + name.replace(/"/g, '&quot;') + '" onchange="doMingli()"></td>';
+    h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">性别</td>';
     h += '<td><select id="mlGender" class="sel-date" style="width:100%" onchange="doMingli()">';
     ['男', '女'].forEach(function (g) { h += '<option value="' + g + '"' + (g === gender ? ' selected' : '') + '>' + g + '</option>'; });
     h += '</select></td>';
-    h += '<td style="width:48px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">年命</td>';
+    h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">年命</td>';
     h += '<td><select id="mlNianMing" class="sel-date" style="width:100%" onchange="doMingli()">';
     h += '<option value=""' + (nm === '' ? ' selected' : '') + '>（按时支）</option>';
     for (var i = 0; i < 12; i++) h += '<option value="' + ZHI[i] + '"' + (ZHI[i] === nm ? ' selected' : '') + '>' + ZHI[i] + '</option>';
@@ -161,29 +186,47 @@
     return h;
   };
 
-  /**
-   * 渲染命理奇门。
-   * data: mingliChart 的返回值 ｜ containerId: 传入则写入该元素
-   */
+  /* ───────────────── 渲染(逐段照搬热卜结果页) ───────────────── */
+
   window.renderMingli = function (data, containerId) {
     var h = '';
     try {
       var qr = data.qr, bz = data.bz, sz = data.sizhu;
 
-      // ── 头部 ──
+      /* ── ① #panHead 头部表 ── */
       h += '<div id="panHead"><TABLE class="pan" id="headTable">';
-      h += '<TR><TD id="dTitle">日期</TD><TD colspan="4" id="dateTime">' + qr.gongli + '（' + qr.nongli + '）</TD></TR>';
-      h += '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="2">' + qr.jieqi + '</TD><TD colspan="2">' + qr.juLabel + ' <b>' + (data.gender === '女' ? '坤造' : '乾造') + '</b></TD></TR>';
-      h += '<TR id="tdTitle"><TD>值符</TD><TD>值使</TD><TD>旬首</TD><TD>空亡</TD><TD>马星</TD></TR>';
-      h += '<TR><TD>' + qr.zf.n + '</TD><TD>' + qr.zs.n + '</TD><TD>' + qr.xs.gz + '</TD><TD>' + qr.kw.gz + '</TD><TD>' + qr.ma.z + '</TD></TR>';
-      h += '<TR id="tdTitle"><TD>月将</TD><TD>年命</TD><TD>性别</TD><TD colspan="2">四柱</TD></TR>';
-      h += '<TR><TD>' + data.yueJiang + '</TD><TD>' + data.nianMing + '</TD><TD>' + data.gender + '</TD><TD colspan="2">' + [sz.nian, sz.yue, sz.ri, sz.shi].join(' ') + '</TD></TR>';
-      h += '</TABLE></div>';
+      h += '<TR><TD colspan="5" style="line-height:30px">' +
+           '<font style="color:#dead68">名称：</font><font id="name">' + data.name + '</font>&emsp;' +
+           '<font style="color:#dead68">性别：</font><font id="gender">' + data.gender + '</font>&emsp;' +
+           '<font style="color:#dead68">生肖：</font>' + data.shengXiao + '</TD></TR>';
+      // 热卜格式: 1986-12-11(农历十一月初十)
+      var birthYmd = qr.gongli.replace(/^(\d+)年(\d+)月(\d+)日.*$/, function (m, a, b, c) {
+        return a + '-' + ('0' + b).slice(-2) + '-' + ('0' + c).slice(-2);
+      });
+      h += '<TR><TD style="width:16%;color:#dead68">出生</TD>' +
+           '<TD colspan="4" id="datetime">' + birthYmd + '(' + qr.nongli + ')</TD></TR>';
+      h += '<TR><TD style="color:#dead68">节气</TD>' +
+           '<TD colspan="2">' + qr.jieqi + '&nbsp;&nbsp;&nbsp;月将<B>' + data.yueJiang + '</B></TD>' +
+           '<TD colspan="2">' + qr.juLabel.replace(/^(\D+)/, '$1<B>').replace(/(\d+)$/, '$1</B>') + '</TD></TR>';
+      h += '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD><TD>空亡</TD></TR>';
+      // 旬首显示为「旬首+遁干」(热卜格式: 甲子戊), 六甲遁于六仪
+      var XUN_DUN = { 子: '戊', 戌: '己', 申: '庚', 午: '辛', 辰: '壬', 寅: '癸' };
+      var xunShouTxt = dec(qr.xs.gz) + (XUN_DUN[dec(qr.xs.gz)[1]] || '');
+      h += '<TR><TD id="xunShou">' + xunShouTxt + '</TD>' +
+           '<TD>天<font id="zhiFu">' + qr.zf.s + '</font></TD>' +
+           '<TD><font id="zhiShi">' + qr.zs.s + '</font>门</TD>' +
+           '<TD id="maXing">' + qr.ma.z + '</TD>' +
+           '<TD>' + qr.kw.gz + '</TD></TR>';
+      h += '<TR><TD style="color:#dead68" rowspan="2">四柱</TD>' +
+           '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD>' +
+           '<TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD></TR>';
+      h += '<TR id="sizhu">';
+      [sz.nian, sz.yue, sz.ri, sz.shi].forEach(function (gz) {
+        h += '<TD>' + ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
+      });
+      h += '</TR></TABLE></div>';
 
-      // ── 外圈切换按钮(参照热卜) ──
-      h += ringButtons();
-
-      // ── 盘体 + 外圈 waipan(外圈内容由 mingliRing 填充) ──
+      /* ── ② #content 盘体 + 外圈 ── */
       if (window.buildPaipanGrid && qr.pals) {
         var pals = {}, kongGongs = {};
         for (var g = 1; g <= 9; g++) {
@@ -199,97 +242,67 @@
         if (window.recalcColors) window.recalcColors(pals);
         var csFn = window._colorSpan || function (v) { return v || ''; };
         var agFn = function () { return ''; };
+        // 不传 wrapperClass/panClass, 让 buildPaipanGrid 生成与热卜一致的
+        // <div id="content"> 与 <TABLE id="pan">
         h += window.buildPaipanGrid(pals, kongGongs, (qr.ma && qr.ma.p) || 'ma2', agFn,
-               { colorSpan: csFn, wrapperClass: 'ml-inner', panClass: 'ml-pan' });
+               { colorSpan: csFn });
+        // 颜色说明(热卜 #Tip)
+        h += '<div id="Tip">颜色说明：' +
+             '<span style="color:#ca610e">入墓</span>、<span style="color:#b745ce">击刑</span>、' +
+             '<span style="color:red">门迫</span>、<span style="color:#009cef;">刑+墓</span>；' +
+             '<span style="color:#aaa">点击宫位查看信息</span></div>';
       }
 
-      // ── 八字表 ──
-      h += '<table class="ml-bz-tbl"><tr><td>四柱</td><td>年柱</td><td>月柱</td><td>日柱</td><td>时柱</td></tr>';
-      if (bz) {
-        h += '<tr><td>十神</td>';
-        bz.bz.forEach(function (c, i) { h += '<td>' + (i === 2 ? '日元' : (bz.shishen[i] || '')) + '</td>'; });
-        h += '</tr>';
-        h += '<tr class="ml-bz-zao"><td>' + (data.gender === '女' ? '坤造' : '乾造') + '</td>';
-        bz.bz.forEach(function (c) { h += '<td>' + wxSpan(c.g) + '<br>' + wxSpan(c.z) + '</td>'; });
-        h += '</tr>';
-        h += '<tr class="ml-bz-cg"><td>藏干</td>';
-        bz.bz.forEach(function (c, i) {
-          var cg = bz.cangGan[i] || '', s = '';
-          for (var k = 0; k < cg.length; k++) s += wxSpan(cg[k]);
-          h += '<td>' + s + '<br><span class="ml-bz-cgss">' +
-               [bz.cgSS[i * 3], bz.cgSS[i * 3 + 1], bz.cgSS[i * 3 + 2]].filter(Boolean).join(' ') + '</span></td>';
-        });
-        h += '</tr>';
-        h += '<tr><td>纳音</td>';
-        (bz.nayin || []).forEach(function (c) { h += '<td>' + c + '</td>'; });
-        h += '</tr>';
-        h += '<tr><td>地势</td>';
-        (bz.dishi || []).forEach(function (c) { h += '<td>' + c + '</td>'; });
-        h += '</tr>';
-        h += '<tr><td>自坐</td>';
-        (bz.zizuo || []).forEach(function (c) { h += '<td>' + c + '</td>'; });
-        h += '</tr>';
-        h += '<tr><td>星运空</td>';
-        (bz.xunKong || []).forEach(function (c) { h += '<td>' + c + '</td>'; });
-        h += '</tr>';
-      } else {
-        h += '<tr><td>十神</td><td colspan="4">（八字大运计算失败，详见错误日志）</td></tr>';
-      }
-      h += '<tr><td>旬空</td><td>' + data.kong.nian + '</td><td>' + data.kong.yue + '</td><td>' + data.kong.ri + '</td><td>' + data.kong.shi + '</td></tr>';
-      h += '</table>';
-
-      // ── 大运 + 流年 ──
+      /* ── ③ #dayun_liunian 大运 + 流年(两个独立 TABLE, 照搬热卜) ── */
       if (bz && bz.dayun && bz.dayun.length) {
         var n = Math.min(bz.dayun.length, 10);
-        h += '<table class="ml-dy-tbl">';
-        h += '<tr class="ml-dy-info"><td colspan="' + (n + 1) + '">' + (bz.qiYunDesc || '') + '</td></tr>';
-        h += '<tr class="ml-dy-hdr"><td class="ml-dy-lbl" rowspan="2">大运</td>';
-        for (var d = 0; d < n; d++) h += '<td>' + (bz.qiYunYear + d * 10) + '</td>';
-        h += '</tr><tr>';
+
+        h += '<div id="dayun_liunian"><TABLE class="pan">';
+        h += '<TR><TD class="yunTitle" rowspan="2">大<br>运</TD>';
+        for (var d = 0; d < n; d++) {
+          h += '<TD class="yun1" id="dayun_year' + d + '">' + (bz.qiYunYear + d * 10) + '</TD>';
+        }
+        h += '</TR><TR>';
         for (var d2 = 0; d2 < n; d2++) {
           var dy = bz.dayun[d2], ss = (bz.dayunSS || [])[d2] || '';
-          var cur = (d2 === bz.curDY);
-          h += '<td><span class="ml-dy-gz' + (cur ? ' ml-cur' : '') + '">' +
-               wxSpan(dy.g) + '<br>' + wxSpan(dy.z) + '</span><br><span class="ml-dy-ss">' + ss + '</span></td>';
+          var cur = (d2 === data.yunIdx);
+          h += '<TD class="yun2" id="dayun' + d2 + '" onclick="mingliYun(' + d2 + ',window._mlData)"' +
+               (cur ? ' style="font-weight:bold;color:#e40b06;background:#faf8f3"' : '') + '>' +
+               ganSpan(dy.g) + '<br>' + zhiSpan(dy.z) + '<br><font class="shishen">' + ss + '</font></TD>';
         }
-        h += '</tr>';
-        var ln = bz.liuNian || [];
-        for (var r = 0; r < 10; r++) {
-          h += '<tr class="ml-dy-liu">';
-          if (r === 0) h += '<td class="ml-dy-lbl" rowspan="10">流年</td>';
-          for (var c2 = 0; c2 < n; c2++) {
-            var y = ln[c2 * 10 + r];
-            var isCur = y && y.year === bz.curYear;
-            h += '<td>' + (isCur ? '<span class="ml-cur">' : '') +
-                 (y ? wxSpan(y.g) + wxSpan(y.z) : '') + (isCur ? '</span>' : '') + '</td>';
-          }
-          h += '</tr>';
-        }
-        h += '</table>';
+        h += '</TR></TABLE>';
+
+        h += '<TABLE class="pan">';
+        h += '<TR><TD class="yunTitle" rowspan="2">流<br>年</TD>';
+        for (var c = 0; c < 10; c++) h += '<TD class="liunian1" id="liunian1_' + c + '"></TD>';
+        h += '</TR><TR>';
+        for (var c2 = 0; c2 < 10; c2++) h += '<TD class="liunian2" id="liunian2_' + c2 + '"></TD>';
+        h += '</TR></TABLE></div>';
       }
+
+      /* ── ④ #btnTable1 ── */
+      h += '<TABLE id="btnTable1"><TR>';
+      h += '<TD><div class="btn" id="btn1" onclick="showMingliYixing();mingliBtn(1,window._mlData);">移星换斗</div></TD>';
+      h += '<TD><div class="btn" id="btn3" onclick="mingliBtn(3,window._mlData);">天门地户</div></TD>';
+      h += '<TD><div class="btn" id="btn2" onclick="mingliState();mingliBtn(2,window._mlData);">长生状态</div></TD>';
+      h += '</TR></TABLE>';
+
+      /* ── ⑤ #btnTable2 ── */
+      h += '<TABLE id="btnTable2"><TR>';
+      ['年神将', '月神将', '日神将', '时神将'].forEach(function (t, i) {
+        h += '<TD><div class="btn" id="btn' + (i + 4) + '" onclick="mingliBtn(' + (i + 4) + ',window._mlData);">' + t + '</div></TD>';
+      });
+      h += '</TR></TABLE>';
+
+      /* ── ⑥ 移星换斗容器 ── */
+      h += '<div id="yixinghuandouDIV"></div><div id="tableTemp" style="display:none"></div>';
     } catch (e) {
       h += '<div style="color:red;padding:12px">命理渲染错误: ' + (e && e.message) + '</div>';
       if (window._logErr) window._logErr('renderMingli', e && e.message);
     }
 
-    // ── 样式 ──
     h += '<style>' +
-      '.ml-btns{display:flex;flex-wrap:wrap;align-items:center;width:100%;max-width:520px;margin:8px auto;gap:4px}' +
-      '.ml-btn-hd{font-size:11px;color:var(--c-text-3)}' +
-      '.ml-btn{display:inline-block;padding:2px 10px;border:1px solid var(--c-border);border-radius:12px;font-size:12px;cursor:pointer;background:var(--c-gray-bg)}' +
-      '.ml-btn.on{background:var(--c-theme);color:#fff;border-color:var(--c-theme)}' +
-      '.ml-bz-tbl,.ml-dy-tbl{width:100%;max-width:520px;margin:8px auto;border-collapse:collapse;font-size:12px}' +
-      '.ml-bz-tbl td,.ml-dy-tbl td{border:1px solid var(--c-border);text-align:center;vertical-align:middle;padding:3px 2px;line-height:1.3}' +
-      '.ml-bz-tbl tr td:first-child,.ml-dy-lbl{background:var(--c-gray-bg);color:var(--c-gold);font-size:11px;font-weight:500}' +
-      '.ml-bz-zao td{font-size:17px;font-weight:bold;padding:2px 1px!important}' +
-      '.ml-bz-cg td{font-size:13px}' +
-      '.ml-bz-cgss{font-size:10px;color:var(--c-text-3)}' +
-      '.ml-dy-hdr td:not(.ml-dy-lbl){background:var(--c-gray-bg);color:var(--c-gold);font-size:10px}' +
-      '.ml-dy-gz{font-size:14px}.ml-dy-ss{font-size:10px;color:var(--c-text-3)}' +
-      '.ml-cur{color:#d82828;font-weight:bold}' +
-      '.ml-dy-info td{background:var(--c-gray-bg);font-size:13px;padding:5px;color:var(--c-text)}' +
-      '.ml-dy-liu td{font-size:11px}' +
-      '.ml-pan{width:100%;border-collapse:collapse;table-layout:fixed!important}' +
+      '.ml-dy-wrap{width:100%;max-width:520px;margin:0 auto}' +
       '</style>';
 
     if (containerId) {
@@ -297,5 +310,16 @@
       if (el) el.innerHTML = h;
     }
     return h;
+  };
+
+  /** 移星换斗(占位: 保持与热卜一致的按钮结构, 功能待补) */
+  window.showMingliYixing = function () {
+    var d = document.getElementById('yixinghuandouDIV');
+    if (!d) return;
+    d.style.display = (d.style.display === 'block') ? 'none' : 'block';
+    if (d.style.display === 'block' && !d.innerHTML) {
+      d.innerHTML = '<div style="text-align:center;color:var(--c-text-3);font-size:12px;padding:8px">' +
+                    '移星换斗：点击盘面宫位查看各宫换斗星（待补全）</div>';
+    }
   };
 })();
