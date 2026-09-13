@@ -70,7 +70,7 @@ function qimenChart(opts) {
     cMin = (keG * 12 + kz) % 60;
     const keGan = cMin % 10;
     const keZhi = cMin % 12;
-    mGzStr = `\u3000<font color=red>${GAN[keGan]}${ZHI[keZhi]}</font>`;
+    mGzStr = `\u3000<font style="color:var(--c-po)">${GAN[keGan]}${ZHI[keZhi]}</font>`;
     keGanIdx = keGan;
   }
   // 刻盘局数公式: v+lD+(hCyl%12+1)+(cMin%12+1)+cY%12+1
@@ -266,7 +266,7 @@ function qimenChart(opts) {
 function buildRaw(d) {
   const Z = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
   let s = `公历 :${d.gongli}<br> `;
-  if (d.customJu) s += '<font color=#FF00FF>自选 </font>';
+  if (d.customJu) s += '<font style="color:var(--c-zixuan)">自选 </font>';
   s += `农历 :${d.nongli}<br>`;
   s += `四柱: ${d.sizhu.y.ganZhi}\u3000${d.sizhu.m.ganZhi}\u3000${d.sizhu.d.ganZhi}\u3000${d.sizhu.h.ganZhi}`;
   if (d.sizhu.minute) s += d.sizhu.minute;
@@ -274,7 +274,7 @@ function buildRaw(d) {
   s += `节气: ${d.jieqi} 月将:${d.yueJiang} `;
   s += `${d.yinYang}遁${d.juNum}局<br> 值符:${d.zf.n}落${d.zf.g}宫 值使:${d.zs.n}落${d.zs.g}宫<br>`;
   s += `旬首:${d.xs.gz}\u3000空亡:${d.kw.gz}\u3000马星:${d.ma.z}<br>`;
-  s += '四害颜色：<font color=#6f00d2>刑</font><font color=#009100>墓</font><font color=#FF0000>迫</font><font color=#EE00EE>【刑墓】</font><font color=#000080>空◎</font> <br>';
+  s += '四害颜色：<font style="color:var(--c-xing)">刑</font><font style="color:var(--c-mu)">墓</font><font style="color:var(--c-po)">迫</font><font style="color:var(--c-xingmu)">【刑墓】</font><font style="color:var(--c-kong)">空◎</font> <br>';
   s += buildGrid(d);
   return s;
 }
@@ -296,7 +296,7 @@ function buildGrid(d) {
     const dd = d.pals[g].di || '';
     return csp(dd[0] || '', d.pals[g].dx, d.pals[g].dm) + (dd[1] ? csp(dd[1], false, false) : '');
   }
-  function kd(g) { return d.pals[g] && d.pals[g].kong ? '<font color=#000080>◎</font>' : '\u3000'; }
+  function kd(g) { return d.pals[g] && d.pals[g].kong ? '<font style="color:var(--c-kong)">◎</font>' : '\u3000'; }
   function ms(g) {
     if (!d.pals[g]) return '';
     const m_ = d.pals[g].men || '';

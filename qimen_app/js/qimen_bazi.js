@@ -323,7 +323,7 @@
     bz.pillars.forEach(function (p) {
       h += '<TD class="cangGanTd">';
       p.cang.forEach(function (c, i) {
-        h += '<font color=' + GAN_COLOR[GAN.indexOf(c.gan)] + '>' + c.gan + '</font>' +
+        h += '<font style="color:' + GAN_COLOR[GAN.indexOf(c.gan)] + '">' + c.gan + '</font>' +
              (i === p.cang.length - 1 ? '<br>' : '');
       });
       h += '<font class="ganShen">' + p.cang.map(function (c) { return c.shen; }).join('') + '</font></TD>';
@@ -363,7 +363,7 @@
     var d = bz.jiaoYun;
     var dur = d.y + '年' + (d.m ? d.m + '个月' : '') + (d.d ? d.d + '日' : '');
     return '<TR' + (rc || '') + '><TD colspan="5" id="jiaoYun">出生后' + dur +
-           '起大运，每逢<font color="var(--wx-huo)">' + d.gan + '</font>年' + d.month + '月' +
+           '起大运，每逢<font style="color:var(--wx-huo)">' + d.gan + '</font>年' + d.month + '月' +
            d.day + '日前后交运。</TD></TR>';
   }
 
@@ -372,7 +372,7 @@
     var d = bz.jiaoYun;
     var dur = d.y + '年' + (d.m ? d.m + '个月' : '') + (d.d ? d.d + '日' : '');
     return '<div class="bz-jy-out">出生后' + dur +
-           '起大运，每逢<font color="var(--wx-huo)">' + d.gan + '</font>年' + d.month + '月' +
+           '起大运，每逢<font style="color:var(--wx-huo)">' + d.gan + '</font>年' + d.month + '月' +
            d.day + '日前后交运。</div>';
   }
 

@@ -39,8 +39,8 @@
                     申: 'var(--wx-jin)', 酉: 'var(--wx-jin)', 戌: 'var(--wx-tu)', 亥: 'var(--wx-shui)' };
 
   var dec = function (s) { return String(s == null ? '' : s); };
-  var ganSpan = function (g) { return '<font style="color:' + (GAN_COLOR[g] || '#333') + '">' + g + '</font>'; };
-  var zhiSpan = function (z) { return '<font style="color:' + (ZHI_COLOR[z] || '#333') + '">' + z + '</font>'; };
+  var ganSpan = function (g) { return '<font style="color:' + (GAN_COLOR[g] || 'var(--c-text)') + '">' + g + '</font>'; };
+  var zhiSpan = function (z) { return '<font style="color:' + (ZHI_COLOR[z] || 'var(--c-text)') + '">' + z + '</font>'; };
 
   /** 某一柱的旬空: 旬空偏移 = 10 - (干序+1), 与地支序相加取模(旬空 = 10-(干序+1) 与地支序相加取模) */
   function xunKongOf(gz) {

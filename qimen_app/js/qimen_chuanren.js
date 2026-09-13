@@ -363,7 +363,7 @@ window.renderChuanRen=(data,containerId) => {
   let d=data;
   let szParts=d.sizhu.split(' ');
   let nianGz=szParts[0]||'',yueGz=szParts[1]||'',riGz=szParts[2]||'',shiGz=szParts[3]||'';
-  function wxSpan(s){let c='#333';if('甲乙寅卯'.indexOf(s)>=0)c='var(--wx-mu)';else if('丙丁巳午'.indexOf(s)>=0)c='var(--wx-huo)';else if('戊己辰戌丑未'.indexOf(s)>=0)c='var(--wx-tu)';else if('庚辛申酉'.indexOf(s)>=0)c='var(--wx-jin)';else if('壬癸亥子'.indexOf(s)>=0)c='var(--wx-shui)';return '<font color="'+c+'">'+(s||'')+'</font>';}
+  function wxSpan(s){let c='#333';if('甲乙寅卯'.indexOf(s)>=0)c='var(--wx-mu)';else if('丙丁巳午'.indexOf(s)>=0)c='var(--wx-huo)';else if('戊己辰戌丑未'.indexOf(s)>=0)c='var(--wx-tu)';else if('庚辛申酉'.indexOf(s)>=0)c='var(--wx-jin)';else if('壬癸亥子'.indexOf(s)>=0)c='var(--wx-shui)';return '<font style="color:'+c+'">'+(s||'')+'</font>';}
 
   let h='';
 
@@ -390,7 +390,7 @@ window.renderChuanRen=(data,containerId) => {
   h+='</TR>';
   // 颜色
   h+='<TR><TD style="color:var(--c-gold);font-size:12px">颜色</TD><TD colspan="'+cols+'" style="font-size:12px;line-height:20px">'+
-    '<font color=var(--c-mu)>入墓</font> <font color=var(--c-xing)>击刑</font> <font color=var(--c-po)>门破</font> <font color=var(--c-xingmu)>刑墓</font></TD></TR>';
+    '<font style="color:var(--c-mu)">入墓</font> <font style="color:var(--c-xing)">击刑</font> <font style="color:var(--c-po)">门破</font> <font style="color:var(--c-xingmu)">刑墓</font></TD></TR>';
   h+='</TABLE></div><div style="height:40px"></div>';
 
   // ====== 穿壬外圈 + 奇门九宫 (时盘风格, 无额外框线) ======
