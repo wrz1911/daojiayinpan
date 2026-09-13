@@ -1504,7 +1504,7 @@ function savePan() {
     '<input id="sheetSaveName" placeholder="请输入事项名称" style="width:100%;padding:10px;border:1px solid var(--c-border);border-radius:8px;font-size:15px;outline:none;box-sizing:border-box" value="'+defaultName.replace(/"/g,'&quot;')+'" autofocus>' +
     '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">' +
     '<span id="sheetCancelBtn" style="cursor:pointer;padding:8px 16px;border-radius:8px;color:var(--c-text-2);font-size:14px">取消</span>' +
-    '<span id="sheetSaveBtn" style="cursor:pointer;padding:8px 24px;border-radius:8px;background:var(--c-theme);color:#fff;font-size:14px">保存</span>' +
+    '<span id="sheetSaveBtn" style="cursor:pointer;padding:8px 24px;border-radius:8px;background:var(--c-btn-bg);color:var(--c-btn-fg);font-size:14px">保存</span>' +
     '</div></div>';
   _openSheet(h);
   // 绑定事件
@@ -1591,7 +1591,7 @@ function _renderHistorySheet() {
     let allModes = [{k:'',v:'全部'},{k:'shi',v:'时盘'},{k:'ke',v:'刻盘'},{k:'xin',v:'心盘'},{k:'shanxiang',v:'山向'},{k:'chuanren',v:'穿壬'}];
     allModes.forEach(m => {
       let isActive = _saveMode === m.k || (!m.k && !_saveMode);
-      h += '<span class="sheetFilterBtn" data-mode="'+m.k+'" style="cursor:pointer;padding:2px 8px;border-radius:10px;font-size:12px;'+(isActive?'background:var(--c-theme);color:#fff':'background:var(--c-bg);color:var(--c-text-2)')+'">'+m.v+'</span>';
+      h += '<span class="sheetFilterBtn" data-mode="'+m.k+'" style="cursor:pointer;padding:2px 8px;border-radius:10px;font-size:12px;'+(isActive?'background:var(--c-btn-bg);color:var(--c-btn-fg)':'background:var(--c-bg);color:var(--c-text-2)')+'">'+m.v+'</span>';
     });
     h += '</div></div>';
     if (!filtered.length) {
@@ -2047,7 +2047,7 @@ function showPalace(g) {
   }
 
   function makeTab(id, label, active) {
-    return '<span onclick="event.stopPropagation();switchPalaceTab(\''+id+'\',\''+tabId+'\')" id="tab_'+id+'" style="display:inline-block;padding:6px 14px;cursor:pointer;font-size:14px;border-radius:20px;margin:2px;'+(active?'background:var(--c-theme);color:#fff':'background:var(--c-bg);color:var(--c-text-2)')+'">'+label+'</span>';
+    return '<span onclick="event.stopPropagation();switchPalaceTab(\''+id+'\',\''+tabId+'\')" id="tab_'+id+'" style="display:inline-block;padding:6px 14px;cursor:pointer;font-size:14px;border-radius:20px;margin:2px;'+(active?'background:var(--c-btn-bg);color:var(--c-btn-fg)':'background:var(--c-bg);color:var(--c-text-2)')+'">'+label+'</span>';
   }
 
   // 构建各标签页内容
@@ -2467,13 +2467,13 @@ function showJuSelectForKun2(gan) {
 	    h += '<div class="xp-btn-group" data-cat="'+cat.key+'" style="margin-bottom:8px">';
 	    for(let oi = 0; oi < cat.opts.length; oi++) {
 	      let val = cat.opts[oi];
-	      let sel = (curVal === val) ? 'background:var(--c-theme);color:#fff;border-color:var(--c-theme)' : 'background:var(--c-bg);border-color:var(--c-border)';
+	      let sel = (curVal === val) ? 'background:var(--c-btn-bg);color:var(--c-btn-fg);border-color:var(--c-theme)' : 'background:var(--c-bg);border-color:var(--c-border)';
 	      h += '<span class="xp-btn" data-cat="'+cat.key+'" data-val="'+val+'" style="display:inline-block;padding:6px 12px;margin:2px;border:1px solid;border-radius:16px;font-size:14px;cursor:pointer;'+sel+'">'+val+'</span>';
 	    }
 	    h += '</div>';
 	  }
 	  h += '<div style="text-align:center;margin:8px 0">';
-	  h += '<span id="xpAutoFillBtn" style="display:inline-block;padding:8px 20px;background:var(--c-theme);color:#fff;border-radius:20px;font-size:14px;cursor:pointer">以此宫推算全盘</span>';
+	  h += '<span id="xpAutoFillBtn" style="display:inline-block;padding:8px 20px;background:var(--c-btn-bg);color:var(--c-btn-fg);border-radius:20px;font-size:14px;cursor:pointer">以此宫推算全盘</span>';
 	  h += '</div>';
 	  h += '<div style="text-align:center"><span id="xpCloseBtn" style="font-size:13px;color:var(--c-text-3);cursor:pointer">关闭</span></div>';
 	  h += '</div>';
@@ -2510,7 +2510,7 @@ function showJuSelectForKun2(gan) {
 	      siblings[si].style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-border);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-bg)';
 	    }
 	    // 高亮选中按钮
-	    btn.style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-theme);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-theme);color:#fff';
+	    btn.style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-theme);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-btn-bg);color:var(--c-btn-fg)';
 
 	    // 坤2宫地盘干戊选择后弹出局数选择
 	    if (g === 2 && catKey === 'di' && val === '戊') {
