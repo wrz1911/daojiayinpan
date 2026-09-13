@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "1.3.10"
+version = "1.3.11"
 description = "道家阴盘奇门遁甲排盘系统"
 authors = ["地天泰"]
 license = "MIT"
