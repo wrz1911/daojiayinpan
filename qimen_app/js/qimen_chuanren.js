@@ -362,14 +362,14 @@ window.computeBaZiDaYun= opts => {
 window.renderChuanRen=(data,containerId) => {
   let d=data;
   let szParts=d.sizhu.split(' ');
-  let nianGz=szParts[0]||'',yueGz=szParts[1]||'',riGz=szParts[2]||'',shiGz=szParts[3]||'';
+  // 四柱干支与刻柱干支: 盘头已不再显示(下方 .cr-bz-tbl 提供完整四柱), 无需解构
   function wxSpan(s){let c='#333';if('甲乙寅卯'.indexOf(s)>=0)c='var(--wx-mu)';else if('丙丁巳午'.indexOf(s)>=0)c='var(--wx-huo)';else if('戊己辰戌丑未'.indexOf(s)>=0)c='var(--wx-tu)';else if('庚辛申酉'.indexOf(s)>=0)c='var(--wx-jin)';else if('壬癸亥子'.indexOf(s)>=0)c='var(--wx-shui)';return '<font style="color:'+c+'">'+(s||'')+'</font>';}
 
   let h='';
 
   // ====== 信息栏 ======
   let isKe=d.shiKe==='刻家';
-  let keGan=d.keGzStr?d.keGzStr[0]:'',keZhi=d.keGzStr?d.keGzStr[1]:'';
+  // 刻柱干支: 同上
   let cols=isKe?5:4;
   h+='<div id="panHead"><TABLE class="pan" id="headTable">';
   h+='<TR><TD id="dTitle">日期</TD><TD colspan="'+cols+'" id="dateTime">'+d.gongli+' ('+d.nongli+')</TD></TR>';
@@ -379,15 +379,8 @@ window.renderChuanRen=(data,containerId) => {
   h+='<TR><TD>'+d.zhiFu+'</TD><TD>'+d.zhiShi+'</TD><TD>'+d.xunShou+'</TD><TD>'+d.kongWang+'</TD><TD>'+d.maXing+'</TD>'+(isKe?'<TD></TD>':'')+'</TR>';
   h+='<TR id="tdTitle"><TD>月将</TD><TD>年命</TD><TD>用神</TD><TD colspan="'+(isKe?3:2)+'">贵人</TD></TR>';
   h+='<TR><TD>'+d.yueJiang.name+'</TD><TD>'+(d.opts.nianMing||'子')+'</TD><TD>'+(d.opts.yongShen||d.riGz||'')+'</TD><TD colspan="'+(isKe?3:2)+'">'+(d.opts.guiRen||'阳贵')+' ('+(d.opts.gender||'男')+') '+(d.guiRen.sun?'顺':'逆')+'</TD></TR>';
-  // 四柱标题+数据
-  h+='<TR id="tdTitle"><TD>'+(isKe?'五柱':'四柱')+'</TD><TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD><TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD>'+(isKe?'<TD class="sizhuTitle">刻柱</TD>':'')+'</TR>';
-  h+='<TR><TD></TD>';
-  h+='<TD class="sizhu" id="nianzhu">'+wxSpan(nianGz[0]||'')+'<br>'+wxSpan(nianGz[1]||'')+'</TD>';
-  h+='<TD class="sizhu" id="yuezhu">'+wxSpan(yueGz[0]||'')+'<br>'+wxSpan(yueGz[1]||'')+'</TD>';
-  h+='<TD class="sizhu" id="rizhu">'+wxSpan(riGz[0]||'')+'<br>'+wxSpan(riGz[1]||'')+'</TD>';
-  h+='<TD class="sizhu" id="shizhu">'+wxSpan(shiGz[0]||'')+'<br>'+wxSpan(shiGz[1]||'')+'</TD>';
-  if(isKe)h+='<TD class="sizhu" id="kezhu">'+wxSpan(keGan)+'<br>'+wxSpan(keZhi)+'</TD>';
-  h+='</TR>';
+  // 四柱: 此处不再重复列出 —— 下方 .cr-bz-tbl 已给出完整四柱(十神/乾造/藏干/
+  //       纳音/地势/自坐/空亡/神煞), 盘头再列一遍干支属冗余; 去掉后盘头更紧凑
   // 颜色
   h+='<TR><TD style="color:var(--c-gold);font-size:12px">颜色</TD><TD colspan="'+cols+'" style="font-size:12px;line-height:20px">'+
     '<font style="color:var(--c-mu)">入墓</font> <font style="color:var(--c-xing)">击刑</font> <font style="color:var(--c-po)">门破</font> <font style="color:var(--c-xingmu)">刑墓</font></TD></TR>';
