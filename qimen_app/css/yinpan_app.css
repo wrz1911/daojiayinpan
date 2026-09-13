@@ -63,7 +63,7 @@ p{margin:0px;}
 i{vertical-align:middle}
 input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .text{LINE-HEIGHT:30px;height:30px;border:0px;width:100%;outline:none;-webkit-user-select:text;user-select: text}
-.grayBack{background-color:var(--c-gray-bg);}
+.grayBack{background-color:var(--c-bg);}
 
 /* ===== 2. 排盘面板样式 (yinpan.css) ===== */
 @media (min-width: 390px){
@@ -131,21 +131,21 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .maGONG2{width:55px;text-align:left;vertical-align:bottom;color:var(--c-horse);line-height:10px}
 .maGONG3{width:55px;text-align:right;vertical-align:top;color:var(--c-horse);line-height:10px}
 .maGONG4{width:55px;text-align:left;vertical-align:top;color:var(--c-horse);line-height:10px}
-#itemInput{width:100%;float:left;margin-top:-13px;margin-left:-5px;padding:5px;border-radius:3px;border:solid 1px var(--c-border);line-height:30px;outline:none;background:var(--c-gray-bg)}
+#itemInput{width:100%;float:left;margin-top:-13px;margin-left:-5px;padding:5px;border-radius:3px;border:solid 1px var(--c-border);line-height:30px;outline:none;background:var(--c-bg)}
 #attention{height:10px;line-height:25px;color:red;text-align:center}
 
 /* ===== 3. 应用覆盖样式 (yinpan_app.css) ===== */
-body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;background:var(--c-gray-bg);margin:0;padding-bottom:calc(44px + env(safe-area-inset-bottom, 24px))}
+body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;background:var(--c-bg);margin:0;padding-bottom:calc(44px + env(safe-area-inset-bottom, 24px))}
 body.is-mobile{padding-top:36px}
 #topBar{display:none;position:fixed;top:0;left:0;right:0;height:36px;background:linear-gradient(180deg,var(--c-theme-2),var(--c-theme));z-index:1000}
 body.is-mobile #topBar{display:block}
 #mainDIV{max-width:600px;margin:0 auto;padding:0}
 #mainDIV,#mainDIV *{user-select:text!important;-webkit-user-select:text!important}
 .form-card{background:var(--c-bg);border-radius:0;padding:4px 0;margin:0;box-shadow:none}
-.form-row{display:flex;align-items:center;border-bottom:1px solid var(--c-gray-bg);padding:6px 10px}
+.form-row{display:flex;align-items:center;border-bottom:1px solid var(--c-border);padding:6px 10px}
 .form-row:last-child{border-bottom:none}
 .form-label{color:var(--c-text-2);font-size:13px;min-width:55px}
-.sel-date{border:1px solid var(--c-border);border-radius:6px;padding:3px 6px;font-size:14px;color:var(--c-text);background:var(--c-gray-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:48px}
+.sel-date{border:1px solid var(--c-border);border-radius:6px;padding:3px 6px;font-size:14px;color:var(--c-text);background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:48px}
 .sel-date:focus{border-color:var(--c-theme);background:var(--c-bg)}
 .sel-zxj{border:1px solid var(--c-theme);border-radius:6px;padding:3px 6px;font-size:13px;color:var(--c-theme);background:var(--c-theme-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer}
 #result{margin-top:0;display:none;padding-bottom:env(safe-area-inset-bottom, 30px)}
@@ -422,3 +422,28 @@ body.mode-mingli #panHead #tdTitle td{font-size:12px!important}
 .cr-bz-tbl td, .cr-dy-tbl td, .cr-dy-lbl, .cr-dy-hdr td, .cr-dy-info-row td,
 .cr-card, .gong, .shenShaTd{ background: var(--c-bg) }
 .cr-card{ background: var(--c-bg) }
+
+/* ══════ 6 大模块(时/刻/心/山向/穿壬/命理)风格统一 ══════
+   统一四项: 背景一律白、表格边框与对齐、表头金色、说明行样式。
+   各模块原有类名不同, 这里归并到同一组规则, 后续新增盘型照此接入即可。 */
+body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
+.xj-pan, .cr-grid-wrap, .cr-content, .cr-inner, #yixinghuandouDIV,
+.ml-inner, .ml-dy-wrap, .ml-input-panel, .tempTable, .grayBack, #itemInput,
+.sel-date, .sel-zxj { background: var(--c-bg) }
+
+#panHead TABLE, #content TABLE, #dayun_liunian TABLE, .xj-pan TABLE,
+#yixinghuandouDIV TABLE, .cr-bz-tbl, .cr-dy-tbl {
+  border-color: var(--c-border); border-collapse: collapse
+}
+
+/* 表头/行标签统一金色 */
+#panHead .sizhuTitle, #panHead #tdTitle td, #panHead #itemTitle, #panHead #dTitle,
+#panHead #dateTitle, #panHead .hd-side, .yunTitle, .cr-dy-lbl,
+.cr-bz-tbl tr td:first-child, .cr-dy-hdr td:not(.cr-dy-lbl-v),
+.xj-head #itemTitle, .xj-head #dTitle, .xj-head #tdTitle td { color: var(--c-gold) }
+
+/* 说明行(颜色说明/交运/提示)统一为居中次级色 */
+#Tip, .bz-jy-out, #jieshiTip, .cr-dy-ss { text-align: center; color: var(--c-text-3) }
+
+/* 输入控件: 白底 + 统一边框, 保证改白后仍可辨识 */
+.sel-date, .sel-zxj, #itemInput { border: 1px solid var(--c-border) }

@@ -52,7 +52,7 @@ function _logErr(src, msg) {
       bad = document.createElement('span');
       bad.id = 'errBadge';
       bad.textContent = '⚠';
-      bad.style.cssText = 'position:fixed;right:8px;bottom:8px;font-size:13px;cursor:pointer;color:var(--c-text-3);opacity:0.7;z-index:10000;background:var(--c-gray-bg);border-radius:50%;width:24px;height:24px;line-height:24px;text-align:center';
+      bad.style.cssText = 'position:fixed;right:8px;bottom:8px;font-size:13px;cursor:pointer;color:var(--c-text-3);opacity:0.7;z-index:10000;background:var(--c-bg);border-radius:50%;width:24px;height:24px;line-height:24px;text-align:center';
       bad.title = '检测到异常, 点击复制日志';
       bad.onclick = function() {
         try {
@@ -1580,7 +1580,7 @@ function _renderHistorySheet() {
     let allModes = [{k:'',v:'全部'},{k:'shi',v:'时盘'},{k:'ke',v:'刻盘'},{k:'xin',v:'心盘'},{k:'shanxiang',v:'山向'},{k:'chuanren',v:'穿壬'}];
     allModes.forEach(m => {
       let isActive = _saveMode === m.k || (!m.k && !_saveMode);
-      h += '<span class="sheetFilterBtn" data-mode="'+m.k+'" style="cursor:pointer;padding:2px 8px;border-radius:10px;font-size:12px;'+(isActive?'background:var(--c-theme);color:#fff':'background:var(--c-gray-bg);color:var(--c-text-2)')+'">'+m.v+'</span>';
+      h += '<span class="sheetFilterBtn" data-mode="'+m.k+'" style="cursor:pointer;padding:2px 8px;border-radius:10px;font-size:12px;'+(isActive?'background:var(--c-theme);color:#fff':'background:var(--c-bg);color:var(--c-text-2)')+'">'+m.v+'</span>';
     });
     h += '</div></div>';
     if (!filtered.length) {
@@ -1888,7 +1888,7 @@ function showAbout() {
       '<div style="font-size:13px;color:var(--c-text-3);margin-bottom:14px">v' + APP_VERSION + '</div>' +
       '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">作者: ' + APP_AUTHOR + '</div>' +
       '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">开源项目地址:<br><span style="color:var(--c-theme)">https://' + APP_REPO + '</span></div>' +
-      '<button id="aboutCloseBtn" style="margin-top:16px;padding:8px 32px;border:1px solid var(--c-border);border-radius:20px;background:var(--c-gray-bg);color:var(--c-text);font-size:14px;cursor:pointer">关闭</button>' +
+      '<button id="aboutCloseBtn" style="margin-top:16px;padding:8px 32px;border:1px solid var(--c-border);border-radius:20px;background:var(--c-bg);color:var(--c-text);font-size:14px;cursor:pointer">关闭</button>' +
       '</div>';
     document.body.appendChild(dlg);
     dlg.addEventListener('click', e => { if (e.target === dlg) dlg.parentNode.removeChild(dlg); });
@@ -2020,7 +2020,7 @@ function showPalace(g) {
   }
 
   function makeTab(id, label, active) {
-    return '<span onclick="event.stopPropagation();switchPalaceTab(\''+id+'\',\''+tabId+'\')" id="tab_'+id+'" style="display:inline-block;padding:6px 14px;cursor:pointer;font-size:14px;border-radius:20px;margin:2px;'+(active?'background:var(--c-theme);color:#fff':'background:var(--c-gray-bg);color:var(--c-text-2)')+'">'+label+'</span>';
+    return '<span onclick="event.stopPropagation();switchPalaceTab(\''+id+'\',\''+tabId+'\')" id="tab_'+id+'" style="display:inline-block;padding:6px 14px;cursor:pointer;font-size:14px;border-radius:20px;margin:2px;'+(active?'background:var(--c-theme);color:#fff':'background:var(--c-bg);color:var(--c-text-2)')+'">'+label+'</span>';
   }
 
   // 构建各标签页内容
@@ -2102,7 +2102,7 @@ function showPalace(g) {
 
   let h = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
     + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
-    + '<span onclick="event.stopPropagation();let p=this;while(p){if(p.style&&p.style.position==\'fixed\'){p.remove();break;}p=p.parentNode;}" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-gray-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
+    + '<span onclick="event.stopPropagation();let p=this;while(p){if(p.style&&p.style.position==\'fixed\'){p.remove();break;}p=p.parentNode;}" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
     + '<div id="'+tabId+'_tabs" style="text-align:center;margin-bottom:12px;border-bottom:1px solid var(--c-border);padding-bottom:10px">'+tabs+'</div>'
     + '<div id="'+tabId+'_gong" class="ptab">'+contentGong()+'</div>'
     + '<div id="'+tabId+'_shen" class="ptab" style="display:none">'+contentShen()+'</div>'
@@ -2390,7 +2390,7 @@ function showJuSelectForKun2(gan) {
     '<div style="font-size:15px;margin-bottom:4px">坤2宫地盘干 戊</div>' +
     '<div style="font-size:13px;color:var(--c-text-3);margin-bottom:12px">请选择局数（中5寄坤2宫）</div>' +
     '<button id="xpJuBtn2" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid var(--c-theme);border-radius:8px;background:var(--c-theme-bg);color:var(--c-theme);font-size:15px;cursor:pointer">'+ju2Label+'</button>' +
-    '<button id="xpJuBtn5" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid var(--c-border);border-radius:8px;background:var(--c-gray-bg);color:var(--c-text);font-size:15px;cursor:pointer">'+ju5Label+'</button>' +
+    '<button id="xpJuBtn5" style="display:block;width:100%;padding:10px;margin:6px 0;border:1px solid var(--c-border);border-radius:8px;background:var(--c-bg);color:var(--c-text);font-size:15px;cursor:pointer">'+ju5Label+'</button>' +
     '</div>';
   document.body.appendChild(dlg);
 
@@ -2440,7 +2440,7 @@ function showJuSelectForKun2(gan) {
 	    h += '<div class="xp-btn-group" data-cat="'+cat.key+'" style="margin-bottom:8px">';
 	    for(let oi = 0; oi < cat.opts.length; oi++) {
 	      let val = cat.opts[oi];
-	      let sel = (curVal === val) ? 'background:var(--c-theme);color:#fff;border-color:var(--c-theme)' : 'background:var(--c-gray-bg);border-color:var(--c-border)';
+	      let sel = (curVal === val) ? 'background:var(--c-theme);color:#fff;border-color:var(--c-theme)' : 'background:var(--c-bg);border-color:var(--c-border)';
 	      h += '<span class="xp-btn" data-cat="'+cat.key+'" data-val="'+val+'" style="display:inline-block;padding:6px 12px;margin:2px;border:1px solid;border-radius:16px;font-size:14px;cursor:pointer;'+sel+'">'+val+'</span>';
 	    }
 	    h += '</div>';
@@ -2480,7 +2480,7 @@ function showJuSelectForKun2(gan) {
 	    let group = btn.parentElement;
 	    let siblings = group.querySelectorAll('.xp-btn');
 	    for(let si = 0; si < siblings.length; si++) {
-	      siblings[si].style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-border);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-gray-bg)';
+	      siblings[si].style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-border);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-bg)';
 	    }
 	    // 高亮选中按钮
 	    btn.style.cssText = 'display:inline-block;padding:6px 12px;margin:2px;border:1px solid var(--c-theme);border-radius:16px;font-size:14px;cursor:pointer;background:var(--c-theme);color:#fff';
