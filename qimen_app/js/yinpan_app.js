@@ -1150,9 +1150,9 @@ function _jkCenter(chart) {
     const ms = marks.filter(Boolean);
     // 各列固定宽度 —— 点击 12 宫切换内容时, 四位/干支/旺衰的横向位置不跟着漂移。
     // 标记区 nowrap + 略小字号: 避免"四空·干"换行撑高行距, 各行间距才均匀。
-    return '<div style="display:flex;align-items:baseline;height:23px">' +
+    return '<div style="display:flex;align-items:baseline;height:23px;gap:6px">' +
       '<span style="flex:0 0 42px;font-weight:bold">' + k + '</span>' +
-      '<span style="flex:0 0 48px;text-align:right">' + a + '</span>' +
+      '<span style="flex:0 0 44px;text-align:right">' + a + '</span>' +
       '<span style="flex:0 0 18px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
       (ms.length ? '<span style="flex:1 1 auto;font-size:11.5px;white-space:nowrap;overflow:hidden;' +
         'text-overflow:ellipsis">' + ms.join(' ') + '</span>' : '') +
@@ -1251,8 +1251,8 @@ function toggleJinKouJue(noScroll) {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
       // 干支右对齐 —— 单字与双字末字对齐(人元的"癸"与贵神的"卯"同尾), 仿易瑞
-      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:3px">' +
-        '<span style="flex:0 0 34px;overflow:hidden;text-align:right">' + a + '</span>' +
+      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:6px">' +
+        '<span style="flex:0 0 30px;overflow:hidden;text-align:right">' + a + '</span>' +
         '<span style="flex:0 0 13px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
