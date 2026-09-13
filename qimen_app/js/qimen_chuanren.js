@@ -147,15 +147,17 @@ window.chuanRenChart= opts => {
   let jieqiStr='';
   try{let t2=solarDay.getTerm(),nt=t2.next(1);jieqiStr=t2.getName()+'~'+nt.getName();}catch(e){jieqiStr='节气';}
   let juNum=0,juLabel='',zfVal='',zsVal='',_xunShou='';
+  /* 引擎结果只算一次: 局数与九宫都要用, 分两处各调一次 qimenChart 会白白翻倍
+     (实测穿壬渲染 13.6ms, 是时盘的近 3 倍, 重复计算是主因之一)。 */
+  let qrShared=null;
   try{
     let isY2=ti>=12;let lM2=Math.abs(ld.getLunarMonth().getMonthWithLeap());if(lM2===0)lM2=12;
     /* 局数必须与九宫同源。九宫由 qimenChart({panType:刻家?2:1}) 排, 而刻家的引擎公式
        比时家多一项时柱 —— v+lD+(hCyl%12+1)+(cMin%12+1)+(yI%12+1); 这里原先自算成
        (yI%12+1)+lM2+day+(hI%12+1)(刻家分支下 hI 已被换成刻柱), 于是盘头显示的局数
        与九宫实际排布对不上, 只在个别时柱下偶然相等。改为直接取引擎结果。 */
-    let qrJu=null;
-    try{ qrJu=window.qimenChart?window.qimenChart({year:opts.year,month:opts.month,day:opts.day,hour:opts.hour,minute:opts.minute,panType:opts.shiKe==='刻家'?2:1,customJu:customJu||undefined}):null; }catch(e3){}
-    if(qrJu&&qrJu.juNum){ juNum=qrJu.juNum; isY2=(qrJu.yinYang==='阴'); }
+    try{ qrShared=window.qimenChart?window.qimenChart({year:opts.year,month:opts.month,day:opts.day,hour:opts.hour,minute:opts.minute,panType:opts.shiKe==='刻家'?2:1,customJu:customJu||undefined}):null; }catch(e3){}
+    if(qrShared&&qrShared.juNum){ juNum=qrShared.juNum; isY2=(qrShared.yinYang==='阴'); }
     else { juNum=((yI%12+1)+lM2+ld.getDay()+(hI%12+1))%9;if(juNum===0)juNum=9; }
     juLabel=(isY2?'阴遁':'阳遁')+juNum+'局';
     let GAN9='戊己庚辛壬癸丁丙乙';
@@ -184,7 +186,7 @@ window.chuanRenChart= opts => {
     gongli:yr+'年'+mo+'月'+dy+'日 '+hr+':'+(mi<10?'0':'')+mi,
     nongli:nongliStr,
     sizhu:yGz.getName()+' '+mGz.getName()+' '+dGz.getName()+' '+hGz.getName()+(keGzStr?' '+keGzStr:''),
-    jieqi:jieqiStr,juLabel:juLabel,
+    jieqi:jieqiStr,juLabel:juLabel,qr:qrShared,
     zhiFu:zfVal,zhiShi:zsVal,
     xunShou:_xunShou,kongWang:_kongWang,maXing:_maXing,
     riGz:dGz.getName(),
@@ -442,7 +444,7 @@ window.renderChuanRen=(data,containerId) => {
     if(window.qimenChart&&window.buildPaipanGrid){
       let qopts={year:d.opts.year||2026,month:d.opts.month||7,day:d.opts.day||5,hour:d.opts.hour||12,minute:d.opts.minute||0,panType:d.shiKe==='刻家'?2:1};
       if(d.customJu)qopts.customJu=d.customJu;
-      let qr=window.qimenChart(qopts);
+      let qr=d.qr||window.qimenChart(qopts);   // 复用上面算好的那次, 拿不到再算
       if(qr&&qr.pals){
         let qimenPalaces={};
         for(let g=1;g<=9;g++){if(g===5)continue;

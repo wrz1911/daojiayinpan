@@ -1111,15 +1111,10 @@ function showYixing() {
   for(let g = 1; g <= 9; g++) { cur['gong'+g] = {}; let s = window._palaces['gong'+g]||{}; for(let k in s) cur['gong'+g][k] = s[k]; }
 
   let ag = g => cur['gong'+g] ? cur['gong'+g].anGan || '' : '';
-  let yxYin = (g, side) => {
-    let a = ag(g); if (!a) return '';
-    return '<td style="text-align:'+(side==='left'?'right':'left')+';vertical-align:top;padding-top:22px;font-size:15px;color:var(--c-text)">'+a+'</td>';
-  };
   let cs = window._colorSpan || (v => {return v||'';});
   let sab = window._SHEN_ABBR || {}; let xab = window._XING_ABBR || {}; let mab = window._MEN_ABBR || {};
   let kg = window._kongGongs || {};
   let maPosId = window._maPosId || '';
-  let mk = p => {return'<span class="cx-horse">马</span>';};
 
   let spanYx = (ch, g) => {
     let isM = MU_RULES[g] && MU_RULES[g].indexOf(ch) >= 0;
@@ -1131,22 +1126,6 @@ function showYixing() {
     if (!str) return '';
     let r = ''; for(let ci = 0; ci < str.length; ci++) r += spanYx(str[ci], g);
     return r;
-  };
-
-  let yxCell = g => {
-    let p = cur['gong'+g]; if (!p || !p.shen) return '<td></td>';
-    let w = (g === 9 || g === 1) ? '34%' : '33%';
-    let km = kg[g] ? '○' : '';
-    return '<td style="width:'+w+'">' +
-      '<div class="panItem top"><span>'+(sab[p.shen]||p.shen||'')+'</span><span>'+km+'</span></div>' +
-      '<div class="panItem"><span>'+yxColor(p.tian,g)+'</span><span>'+cs(xab[p.xing]||p.xing||'')+'</span></div>' +
-      '<div class="panItem"><span>'+yxColor(p.di,g)+'</span><span>'+cs(mab[p.men]||p.men||'',false,false,p.isMenPo)+'</span></div></td>';
-  };
-
-  let yxAg = g => {
-    let a = cur['gong'+g] ? cur['gong'+g].anGan || '' : '';
-    let anc = window._anGanColor || (v => {return v||'';});
-    return anc(a, g);
   };
 
   let html = '';
