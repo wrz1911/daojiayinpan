@@ -800,7 +800,7 @@ function fixYinGanAlign() {
   containers.forEach(scope => {
     let isMain = (scope === document);
     // 宫格正方形: 每个容器内独立处理
-    [4,9,2,3,7,8,1,6].forEach(g => {
+    if (needJsSquare()) [4,9,2,3,7,8,1,6].forEach(g => {
       let el = scope.querySelector('#gong'+g);
       if (el) { let w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
     });
@@ -921,6 +921,9 @@ function recalcColors(palaces) {
 // === 心盘渲染 ===
 
 // ============ 共享九宫格渲染 ============
+/* CSS 的 aspect-ratio 已保证宫位正方; 仅在旧环境才需 JS 量宽回写 */
+function needJsSquare(){ return !(window.CSS && CSS.supports && CSS.supports('aspect-ratio','1 / 1')); }
+
 function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
   opts = opts || {};
   let colorSpan = opts.colorSpan || (v => {return v||'';});
@@ -945,7 +948,7 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     function charColor(str) { if(!str)return''; let r=''; for(let ci=0;ci<str.length;ci++)r+=spanGan(str[ci]); return r; }
     let hlt = (xpEditGong === g) ? 'box-shadow:0 0 0 2px var(--c-theme) inset;' : '';
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
-      '<div style="display:grid;grid-template-rows:1fr 1fr 1fr;height:100%;position:relative">' +
+      '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
       '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span><span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
@@ -1169,7 +1172,7 @@ function showYixing() {
 	    for(let ti = 0; ti < contents.length; ti++) {
 	      let ct = contents[ti];
 	      // 宫格正方形
-	      [4,9,2,3,7,8,1,6].forEach(g => {
+	      if (needJsSquare()) [4,9,2,3,7,8,1,6].forEach(g => {
 	        let el = ct.querySelector('#gong'+g);
 	        if (el) { let w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
 	      });
@@ -2586,7 +2589,7 @@ div.innerHTML=ui+parts.join('');
   setTimeout(() => {
     div.querySelectorAll('.xj-pan').forEach(pan => {
       // Square gongs
-      [4,9,2,3,7,8,1,6].forEach(g => {let el=pan.querySelector('#gong'+g);if(el){let w=el.getBoundingClientRect().width;if(w>0)el.style.height=w+'px';}});
+      if(needJsSquare())[4,9,2,3,7,8,1,6].forEach(g => {let el=pan.querySelector('#gong'+g);if(el){let w=el.getBoundingClientRect().width;if(w>0)el.style.height=w+'px';}});
       // Row height sync
       let pRows=pan.querySelectorAll('#pan tr'),lRows=pan.querySelectorAll('#leftTable tr'),rRows=pan.querySelectorAll('#rightTable tr');
       for(let i=0;i<3&&i<pRows.length;i++){let rh=pRows[i].getBoundingClientRect().height;if(rh>0){if(lRows[i])lRows[i].style.height=rh+'px';if(rRows[i])rRows[i].style.height=rh+'px';}}
@@ -2708,8 +2711,10 @@ function doChuanRen(){
       let pan=pans[0];
       // 1. 正方化宫格: 批量读宽度再批量写高度, 避免读写交替强制布局
       let gongs = Array.from(pan.querySelectorAll('[id^=gong]'));
-      let widths = gongs.map(el => el.getBoundingClientRect().width);
-      gongs.forEach((el, i) => { let w = widths[i]; if (w > 0) el.style.height = w + 'px'; });
+      if(needJsSquare()){
+        let widths = gongs.map(el => el.getBoundingClientRect().width);
+        gongs.forEach((el, i) => { let w = widths[i]; if (w > 0) el.style.height = w + 'px'; });
+      }
 // 2. 阴干移入宫内, 隐藏外圈yinGan
       pan.querySelectorAll('[id^="gong"]').forEach(go => {
         let g=parseInt(go.id.replace('gong',''));if(g===5)return;

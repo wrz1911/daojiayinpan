@@ -322,11 +322,14 @@
     if (!wrap) return;
     var box = wrap.querySelector('#content');
     if (!box) return;
-    /* 宫位正方形 */
-    [4, 9, 2, 3, 7, 8, 1, 6].forEach(function (g) {
-      var el = box.querySelector('#gong' + g);
-      if (el) { var w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
-    });
+    /* 宫位正方形: 已由 .pan-cell 的 aspect-ratio 保证, 旧环境才回写高度 */
+    var _noAR = !(window.CSS && CSS.supports && CSS.supports('aspect-ratio', '1 / 1'));
+    if (_noAR) {
+      [4, 9, 2, 3, 7, 8, 1, 6].forEach(function (g) {
+        var el = box.querySelector('#gong' + g);
+        if (el) { var w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
+      });
+    }
     /* 左右外圈行高与中宫对齐 */
     var pRows = box.querySelectorAll('#pan tr'),
         lRows = box.querySelectorAll('#leftTable tr'),

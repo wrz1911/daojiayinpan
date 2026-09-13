@@ -469,3 +469,14 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
 /* 兜底: 穿壬外圈卡片定位在盘体外侧, 极端窄屏下不允许撑出横向滚动条 */
 #mainDIV, #result, #panWrap{overflow-x:hidden}
 .cr-grid-wrap{max-width:100%}
+
+/* ══════ 宫位正方化交给 CSS ══════
+   原先宫位高度由 JS 用 getBoundingClientRect 量宽后回写(见 layoutCrOuter /
+   mingliFixLayout), 受字体加载时机与平台差异影响, 会出现宫格不正方。
+   现在由单元格内层 .pan-cell 的 aspect-ratio 保证: 宽高比恒为 1:1,
+   内容超出时自然撑高(不会截断)。JS 仅在不支持 aspect-ratio 的环境下兜底。 */
+.pan-cell{ width:100%; aspect-ratio:1 / 1 }
+/* 不支持 aspect-ratio 的旧环境回退为原来的行为 */
+@supports not (aspect-ratio: 1 / 1){
+  .pan-cell{ min-height:0 }
+}
