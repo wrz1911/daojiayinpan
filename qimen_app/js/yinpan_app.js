@@ -1176,9 +1176,9 @@ function _jkCenter(chart) {
     // 横杠分隔, 下方接五动三动
     '<div style="border-top:1px solid var(--c-border);margin:4px 0 3px"></div>' +
     row('<span style="font-weight:bold;color:var(--c-text)">五动</span>',
-        '<span>' + ((chart.wudong && chart.wudong.length) ? chart.wudong.join(' ') : '—') + '</span>', '', []) +
+        '<span style="white-space:nowrap">' + ((chart.wudong && chart.wudong.length) ? chart.wudong.join(' ') : '—') + '</span>', '', []) +
     row('<span style="font-weight:bold;color:var(--c-text)">三动</span>',
-        '<span>' + ((chart.sandong && chart.sandong.length) ? chart.sandong.join(' ') : '—') + '</span>', '', []) +
+        '<span style="white-space:nowrap">' + ((chart.sandong && chart.sandong.length) ? chart.sandong.join(' ') : '—') + '</span>', '', []) +
     '</div></div>';
 }
 
@@ -1347,8 +1347,7 @@ function toggleJinKouJue(noScroll) {
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;' +
       'border-top:1px solid var(--c-border);border-left:1px solid var(--c-border)">' + cells + '</div>' +
       '<div id="jkInfo" style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
-      _jkInfoHtml(chart) + '</div>' +
-      '<div style="font-size:12px;color:var(--c-text-4);padding:4px 2px">点周围任一圈宫可切换中宫四位</div>';
+      _jkInfoHtml(chart) + '</div>';
     div.style.display = 'block';
     if (!noScroll) setTimeout(() => { const r = document.getElementById('jinkoujueDIV'); if (r) r.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
   } catch (e) {
