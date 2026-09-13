@@ -177,14 +177,16 @@ function clearXinpan() {
 }
 function setPanType(t) {
   panType = t;
-  _saveMode = t===1?'shi':t===2?'ke':t===3?'xin':t===4?'shanxiang':'chuanren';
+  _saveMode = t===1?'shi':t===2?'ke':t===3?'xin':t===4?'shanxiang':t===5?'chuanren':'mingli';
   _renderBottomBar();
   let sxIn=document.getElementById('shanxiangInputs');
   if(sxIn)sxIn.style.display=(t===4)?'flex':'none';
   let crIn=document.getElementById('crInputs');
   if(crIn)crIn.style.display=(t===5)?'block':'none';
+  let mlIn=document.getElementById('mlInputs');
+  if(mlIn)mlIn.style.display=(t===6)?'block':'none';
   let zxjRow=document.getElementById('zxjRow');
-  if(zxjRow){let hide=(t===3||t===4||t===5);zxjRow.style.display=hide?'none':'';if(!hide){let zs=document.getElementById('zxjSpan');if(zs)zs.style.display='';}}
+  if(zxjRow){let hide=(t===3||t===4||t===5||t===6);zxjRow.style.display=hide?'none':'';if(!hide){let zs=document.getElementById('zxjSpan');if(zs)zs.style.display='';}}
   let tr=document.getElementById('timeRow');
   if(tr)tr.style.display=(t===4)?'none':'flex';
   document.body.className = document.body.className.replace(/mode-\w+/g,'');
@@ -482,6 +484,7 @@ function doPan() {
 	      
 	        
           if (panType === 5) { doChuanRen(); return; }
+          if (panType === 6) { doMingli(); return; }
         
 	        // 清空天门地户缓存(新排盘后需重新点击)
 	        _qrData = null;
@@ -1559,7 +1562,7 @@ function showSavedList() {
 function _renderHistorySheet() {
   try {
     let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    let modeLabels = {shi:'时盘', ke:'刻盘', xin:'心盘', shanxiang:'山向', chuanren:'穿壬'};
+    let modeLabels = {shi:'时盘', ke:'刻盘', xin:'心盘', shanxiang:'山向', chuanren:'穿壬', mingli:'命理'};
     let filtered = _saveMode ? saved.filter(r => r.mode === _saveMode) : saved;
     let h = '<div style="padding:16px 16px 0">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
@@ -1654,7 +1657,7 @@ function loadSaved(i) {
     if (p.hour!=null) { hr=p.hour; selH.value=p.hour; }
     if (p.minute!=null) { mn=p.minute; selI.value=p.minute; }
     // 自动切换到对应模块
-    let modeMap = {shi:1, ke:2, xin:3, shanxiang:4, chuanren:5};
+    let modeMap = {shi:1, ke:2, xin:3, shanxiang:4, chuanren:5, mingli:6};
     let targetType = modeMap[r.mode] || 1;
     if (targetType !== panType) {
       let radio = document.querySelector('input[name="panType"][value="'+targetType+'"]');
@@ -1947,7 +1950,7 @@ let MEN_INFO = {
 };
 
 function showPalace(g) {
-  if (panType === 4 || panType === 5) return; // 山向/穿壬盘无宫位解释
+  if (panType === 4 || panType === 5 || panType === 6) return; // 山向/穿壬/命理盘无宫位解释
   if (panType === 3) { showXinpanEditor(g); return; }
   let p = window._palaces ? window._palaces['gong'+g] : null;
   if (!p) return;
@@ -2611,6 +2614,37 @@ function refreshXiangJu(){
 }
 
 
+let _mlVals={gender:'男',nianMing:''};
+function doMingli(){
+  try{
+    let tip=document.getElementById("tip");if(tip)tip.innerHTML="";
+    let sxIn=document.getElementById("shanxiangInputs");if(sxIn)sxIn.style.display="none";
+    let crIn=document.getElementById("crInputs");if(crIn)crIn.style.display="none";
+    let zxj2=document.getElementById("zxjSpan");if(zxj2)zxj2.style.display="none";
+    let xp=document.getElementById("xinpanPanel");if(xp)xp.style.display="none";
+    document.getElementById("result").style.display="block";
+    // 输入面板(出生时间复用顶部选择器, 这里只放性别/年命)
+    if(!document.getElementById("mlInputs")){
+      let d=document.createElement("div");d.id="mlInputs";
+      let pw=document.getElementById("panWrap");
+      if(pw&&pw.parentNode)pw.parentNode.insertBefore(d,pw);
+    }
+    let box=document.getElementById("mlInputs");
+    box.style.display="block";
+    box.innerHTML=window.renderMingliInputs?window.renderMingliInputs(_mlVals):"";
+    let gEl=document.getElementById("mlGender"),nEl=document.getElementById("mlNianMing");
+    _mlVals={gender:gEl?gEl.value:'男',nianMing:nEl?nEl.value:''};
+    let data=window.mingliChart({year:Y,month:M,day:D,hour:hr,minute:mn,
+      gender:_mlVals.gender,nianMing:_mlVals.nianMing});
+    document.getElementById("panWrap").innerHTML=window.renderMingli(data,null);
+    _renderBottomBar();
+    setTimeout(_bindActionButtons,50);
+  }catch(e){
+    let pw=document.getElementById("panWrap");
+    if(pw)pw.innerHTML='<span style="color:red">命理错误:'+(e&&e.message)+'</span>';
+    window._logErr&&window._logErr('doMingli',e&&e.message);
+  }
+}
 function doChuanRen(){
   let tip=document.getElementById("tip");if(tip)tip.innerHTML="";
   let sxIn=document.getElementById("shanxiangInputs");if(sxIn)sxIn.style.display="none";
@@ -2729,7 +2763,7 @@ window.setNow=setNow;
 window.recalcColors=recalcColors;
 window.showPalace=showPalace;
 window.showXinpanEditor=showXinpanEditor;
-window.doChuanRen=doChuanRen;
+window.doChuanRen=doChuanRen,window.doMingli=doMingli;
 window.tianmenDihu=tianmenDihu;
 window.shen12=shen12;
 window.clearWaipan=clearWaipan;
