@@ -1152,7 +1152,7 @@ function _jkCenter(chart) {
     // 标记区 nowrap + 略小字号: 避免"四空·干"换行撑高行距, 各行间距才均匀。
     return '<div style="display:flex;align-items:baseline;height:23px">' +
       '<span style="flex:0 0 42px;font-weight:bold">' + k + '</span>' +
-      '<span style="flex:0 0 48px">' + a + '</span>' +
+      '<span style="flex:0 0 48px;text-align:right">' + a + '</span>' +
       '<span style="flex:0 0 18px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
       (ms.length ? '<span style="flex:1 1 auto;font-size:11.5px;white-space:nowrap;overflow:hidden;' +
         'text-overflow:ellipsis">' + ms.join(' ') + '</span>' : '') +
@@ -1160,8 +1160,9 @@ function _jkCenter(chart) {
   };
   // 外层 flex 负责把整个中宫块在 2x2 格内居中; 内层列容器让各行左边缘对齐(行内左起)
   // 外层纵向居中; 内层占满整格宽度, 行内各列用固定宽度定位 —— 位置稳定不漂移
-  return '<div style="height:100%;display:flex;align-items:flex-start;overflow:hidden">' +
-    '<div style="width:100%;display:flex;flex-direction:column;gap:0;padding:7px 2px 3px;' +
+  // 上下居中, 不留下方空白
+  return '<div style="height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden">' +
+    '<div style="width:100%;display:flex;flex-direction:column;gap:0;padding:2px;' +
     'font-size:14px;line-height:1.35;box-sizing:border-box">' +
     row('<span class="' + wxCls(c.renYuan) + '">人元</span>',
         '<span class="' + wxCls(c.renYuan) + '">' + c.renYuan + '</span>', c.renWs,
@@ -1250,9 +1251,9 @@ function toggleJinKouJue(noScroll) {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
       // 干支右对齐 —— 单字与双字末字对齐(人元的"癸"与贵神的"卯"同尾), 仿易瑞
-      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px">' +
-        '<span style="flex:0 0 36px;overflow:hidden;text-align:right">' + a + '</span>' +
-        '<span style="flex:0 0 14px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:3px">' +
+        '<span style="flex:0 0 34px;overflow:hidden;text-align:right">' + a + '</span>' +
+        '<span style="flex:0 0 13px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
         ' class="jk-cell' + (isCur ? ' jk-sel' : '') + '"' +
