@@ -1093,50 +1093,53 @@ function _jkSet(opt) {
    用表格对齐 —— flex 固定列宽在字段空缺时会错位 */
 function _jkCenter(chart) {
   const c = chart.cur;
-  const wx = { 水:'wx-shui', 木:'wx-mu', 火:'wx-huo', 土:'wx-tu', 金:'wx-jin' };
-  const col = n => wx[JK_WX_NAME[n]] || '';
-  const use = n => chart.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold;margin-left:3px">用</span>' : '';
+  const WXO = QM.WX_OF || {};
+  const wxSpan = window._wxSpan || (x => x);
+  // 五行类名: 单字查 WX_OF(干支与八神名都在表内)
+  const wxCls = ch => WXO[ch] ? 'wx-' + WXO[ch] : '';
+  // 神名着色: 八神名首字已在 WX_OF 中(太阴→阴→金、六合→六→木…);
+  // 十二月将名(从魁/天罡…)不在表内, 回退用其地支的五行
+  const shenSpan = (name, zhiIdx) => {
+    const k = WXO[name.charAt(0)] || WXO[QM.ZHI[zhiIdx]];
+    return k ? '<span class="wx-' + k + '">' + name + '</span>' : name;
+  };
+  const use = n => chart.yongwei === n ? '<span style="font-weight:bold;color:var(--wx-huo)">用</span>' : '';
   const wsc = { '旺':'var(--wx-huo)', '相':'var(--wx-mu)', '休':'var(--c-text-3)', '囚':'var(--c-text-3)', '死':'var(--c-text-4)' };
-  // 空亡: 按【日空】判 —— 该位地支落在日柱旬空内即标"空"(排在旺衰之后, 用爻之前)
+  // 空亡(日空): 命中即按该地支的五行着色
   const kong2 = (chart.kong4 && chart.kong4[2]) || '';
-  const kongOf = z => (z && kong2.indexOf(z) >= 0)
-    ? '<span style="color:var(--wx-huo);font-weight:bold">空</span>' : '';
-  // 顺序: 标签 | 干支 | 神名 | 旺衰 | 空 | 用
-  // 四大空亡: 该旬的四空是"地支两支 + 天干两干"(如申酉庚辛), 干支都要查
+  const kongMark = z => (z && kong2.indexOf(z) >= 0)
+    ? '<span class="wx-' + (WXO[z] || 'tu') + '" style="font-weight:bold">空</span>' : '';
+  // 四大空亡: 命中天干标·干、命中地支标·支, 各按其自身五行着色
   const sishStr = (chart.shensha && chart.shensha.sish) || '';
-  // 四空区分干/支: 命中天干标"·干", 命中地支标"·支", 两者都中则并列
-  const SISH_GAN = '甲乙丙丁戊己庚辛壬癸', SISH_ZHI = '子丑寅卯辰巳午未申酉戌亥';
   const sishMark = gz => {
     if (!sishStr || !gz) return '';
-    let g = false, z = false;
+    let g = '', z = '';
     for (let i = 0; i < gz.length; i++) {
       const ch = gz.charAt(i);
-      if (sishStr.indexOf(ch) < 0) continue;
-      if (SISH_GAN.indexOf(ch) >= 0) g = true;
-      else if (SISH_ZHI.indexOf(ch) >= 0) z = true;
+      if (sishStr.indexOf(ch) < 0 || !WXO[ch]) continue;
+      if (QM.GAN.indexOf(ch) >= 0) g = WXO[ch];
+      else if (QM.ZHI.indexOf(ch) >= 0) z = WXO[ch];
     }
     if (!g && !z) return '';
-    return '<span style="color:var(--wx-huo);font-weight:bold">四空' +
-      (g ? '·干' : '') + (z ? '·支' : '') + '</span>';
+    let h = '';
+    if (g) h += '<span class="wx-' + g + '" style="font-weight:bold">四空·干</span>';
+    if (z) h += '<span class="wx-' + z + '" style="font-weight:bold">四空·支</span>';
+    return h;
   };
-  // 空与用同处一列(依次排列), 不再各占一列
-  const row = (k, a, b, ws, useMark, kongMark, sishM) => '<tr style="height:26px">' +
-    '<td style="width:46px;color:var(--c-theme);font-weight:bold;text-align:right;padding-right:5px;white-space:nowrap">' + k + '</td>' +
+  const row = (k, a, b, ws, useMark, kongM, sishM) => '<tr style="height:26px">' +
+    '<td style="width:46px;font-weight:bold;text-align:right;padding-right:5px;white-space:nowrap">' + k + '</td>' +
     '<td style="min-width:50px;text-align:center;white-space:nowrap">' + a + '</td>' +
-    '<td style="min-width:56px;text-align:left;white-space:nowrap">' + (b || '') + '</td>' +
+    '<td style="min-width:34px;text-align:left;white-space:nowrap">' + (b || '') + '</td>' +
     '<td style="width:20px;color:' + (wsc[ws] || 'var(--c-text-3)') + ';text-align:left;padding-left:4px">' + ws + '</td>' +
-    '<td style="width:82px;text-align:left;white-space:nowrap">' + (kongMark || '') + (useMark || '') + (sishM || '') + '</td></tr>';
+    '<td style="width:82px;text-align:left;white-space:nowrap">' + (useMark || '') + (kongM || '') + (sishM || '') + '</td></tr>';
   return '<div style="height:100%;display:flex;align-items:center;justify-content:center">' +
     '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' +
-      row('人元', '<span class="' + col(c.renWx) + '">' + c.renYuan + '</span>', '', c.renWs, '', kongOf(c.renYuan), sishMark(c.renYuan)) +
-      // 贵神/将神: 标签位直接放神名, 不再重复显示(原先标签"贵神"与神名"青龙"并列)
-      row('<span style="color:var(--c-gold)">' + c.guiShen + '</span>',
-          '<span class="' + col(c.guiWx) + '">' + c.guiGanZhi + '</span>', '',
-          c.guiWs, use(2), kongOf(c.guiGanZhi[1]), sishMark(c.guiGanZhi)) +
-      row('<span style="color:var(--c-gold)">' + c.jiangShen + '</span>',
-          '<span class="' + col(c.jiangWx) + '">' + c.jiangGanZhi + '</span>', '',
-          c.jiangWs, use(3), kongOf(c.jiangGanZhi[1]), sishMark(c.jiangGanZhi)) +
-      row('地分', '<span class="' + col(JK_ZHI_WX[c.difenIdx]) + '">' + c.difenZhi + '</span>', '', c.difenWs, '', kongOf(c.difenZhi), sishMark(c.difenZhi)) +
+      row('<span class="' + wxCls(c.renYuan) + '">人元</span>', '<span class="' + wxCls(c.renYuan) + '">' + c.renYuan + '</span>', '', c.renWs, '', kongMark(c.renYuan), sishMark(c.renYuan)) +
+      row(shenSpan(c.guiShen, QM.ZHI.indexOf(c.guiGanZhi[1])), wxSpan(c.guiGanZhi), '',
+          c.guiWs, use(2), kongMark(c.guiGanZhi[1]), sishMark(c.guiGanZhi)) +
+      row(shenSpan(c.jiangShen, c.jiangZhiIdx), wxSpan(c.jiangGanZhi), '',
+          c.jiangWs, use(3), kongMark(c.jiangGanZhi[1]), sishMark(c.jiangGanZhi)) +
+      row('<span class="' + wxCls(c.difenZhi) + '">地分</span>', '<span class="' + wxCls(c.difenZhi) + '">' + c.difenZhi + '</span>', '', c.difenWs, '', kongMark(c.difenZhi), sishMark(c.difenZhi)) +
     '</table></div>';
 }
 
@@ -1196,6 +1199,12 @@ function toggleJinKouJue(noScroll) {
     const wx = { 水:'wx-shui', 木:'wx-mu', 火:'wx-huo', 土:'wx-tu', 金:'wx-jin' };
     const col = n => wx[JK_WX_NAME[n]] || '';
     const wsc = { '旺':'var(--wx-huo)', '相':'var(--wx-mu)', '休':'var(--c-text-3)', '囚':'var(--c-text-3)', '死':'var(--c-text-4)' };
+    const wxSpan = window._wxSpan || (x => x);          // 干支逐字五行色
+    const WXO = QM.WX_OF || {};
+    const shenSpan = (name, zhiIdx) => {                // 神名五行色, 月将名回退其支
+      const k = WXO[name.charAt(0)] || WXO[QM.ZHI[zhiIdx]];
+      return k ? '<span class="wx-' + k + '">' + name + '</span>' : name;
+    };
     const curIdx = chart.cur.difenIdx;
 
     // 单宫：四行(人元 / 干支+贵神 / 干支+将神 / 地分)，触按选中
@@ -1210,10 +1219,10 @@ function toggleJinKouJue(noScroll) {
         'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' +
         '<div><span class="' + col(h.renWx) + '">' + h.renYuan + '</span>' +
           '<span style="float:right;color:' + wsc[h.renWs] + '">' + h.renWs + '</span></div>' +
-        '<div><span class="' + col(h.guiWx) + '">' + h.guiGanZhi + '</span>' +
-          '<span style="float:right;color:var(--c-gold)">' + h.guiShen + '</span></div>' +
-        '<div><span class="' + col(h.jiangWx) + '">' + h.jiangGanZhi + '</span>' +
-          '<span style="float:right;color:var(--c-gold)">' + h.jiangShen + '</span></div>' +
+        '<div><span>' + wxSpan(h.guiGanZhi) + '</span>' +
+          '<span style="float:right">' + shenSpan(h.guiShen, QM.ZHI.indexOf(h.guiGanZhi[1])) + '</span></div>' +
+        '<div><span>' + wxSpan(h.jiangGanZhi) + '</span>' +
+          '<span style="float:right">' + shenSpan(h.jiangShen, h.jiangZhiIdx) + '</span></div>' +
         '<div><span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>' +
           '<span style="float:right;color:' + wsc[h.difenWs] + '">' + h.difenWs + '</span></div>' +
         '</div>';
