@@ -885,6 +885,19 @@ function paintDiBaShen(show) {
   }
 }
 
+/* 开关型按钮的"已开启"态与各开关的实际状态保持同步(描边由 CSS .btn.on 给)。
+   移星换斗看面板显隐, 其余三个看各自的标志位。 */
+function _syncToggleBtns() {
+  const yxDiv = document.getElementById('yixinghuandouDIV');
+  const on = {
+    btn1: !!(yxDiv && yxDiv.style.display === 'block'),
+    btn2: !!_stateShowing,
+    btn3: !!_tmdhShow,
+    btn4: _shenShow === 1, btn5: _shenShow === 2, btn6: _shenShow === 3, btn7: _shenShow === 4
+  };
+  for (const id in on) { const el = document.getElementById(id); if (el) el.classList.toggle('on', on[id]); }
+}
+
 function toggleDiBaShen() {
   _diShenShow = !_diShenShow;
   paintDiBaShen(_diShenShow);
@@ -1224,7 +1237,7 @@ function renderXinpan(useBg) {
 function showYixing() {
   let div = document.getElementById('yixinghuandouDIV');
   if (!div) return;
-  if (div.style.display === 'block') { div.style.display = 'none'; div.innerHTML = ''; return; }
+  if (div.style.display === 'block') { div.style.display = 'none'; div.innerHTML = ''; _syncToggleBtns(); return; }
   let firstShow = div.style.display !== 'block';
   if (!window._palaces) return;
 
@@ -1268,6 +1281,7 @@ function showYixing() {
     html += '<div class="tableTitle"><B>【顺转'+t+'宫】</B></div>' + gridHTML;
   }
   div.style.display = 'block';
+  _syncToggleBtns();
    div.innerHTML = html;
    if(firstShow) setTimeout(() => { let top=0,el=div; while(el){top+=el.offsetTop;el=el.offsetParent;} window.scrollTo({top:top-60,behavior:'smooth'}); }, 20);
    // 延迟对齐暗干，多次尝试确保渲染完成
@@ -1305,6 +1319,7 @@ function tianmenDihu() {
   try{
   if (_shenShow) { _shenShow = 0; clearWaipan(); }
   _tmdhShow = !_tmdhShow;
+  _syncToggleBtns();
   if (!window._palaces) return;
 
   // 天门地户: 月将+建除均基于时支, 将月将加在时支之上顺排
@@ -1404,6 +1419,7 @@ let _stateShowing = false;
 function showState() {
   if (!window._palaces) return;
   _stateShowing = !_stateShowing;
+  _syncToggleBtns();
   for(let g = 1; g <= 9; g++) {
     if (g === 5) continue;
     let st = document.getElementById('stateTian'+g);
@@ -1453,8 +1469,9 @@ function shen12(type) {
   // 互斥: 如果天门地户在显示，先关闭
   if (_tmdhShow) tianmenDihu();
   // 如果已显示同类型则关闭
-  if (_shenShow === type) { _shenShow = 0; clearWaipan(); return; }
+  if (_shenShow === type) { _shenShow = 0; clearWaipan(); _syncToggleBtns(); return; }
   _shenShow = type;
+  _syncToggleBtns();
 
   if (!window._raw) return;
   let ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];

@@ -27,6 +27,7 @@
   --c-bg:#fff;            /* 面板/弹层底 */
   --c-gray-bg:#f5f5f5;    /* 浅灰底(页面背景/次级元素) */
   --c-btn-gray:#e0e0e0;   /* 功能按钮灰底: 比 --c-gray-bg 深一档, 否则在白底上看不出按钮 */
+  --c-btn-line:#888;      /* 功能按钮描边: 用深灰而非 --c-border(#ddd), 灰底才有轮廓 */
   --c-border:#ddd;        /* 边框 */
   /* 四害与标记 */
   --c-xing:#b745ce;       /* 击刑 紫 */
@@ -286,6 +287,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
     --c-bg:#1a1a2e;         /* 深蓝灰面板 */
     --c-gray-bg:#232338;
     --c-btn-gray:#3a3a46;
+    --c-btn-line:#5a5a6e;
     --c-border:#3c3c54;
     /* 四害与标记(提亮保证暗底可读) */
     --c-xing:#d98cf5;
@@ -330,9 +332,10 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .mid-row span:nth-of-type(3){float:right}
 .dshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-tu)}
 .rshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-shui)}
-/* 已开启的开关型按钮: 描一圈边表示当前生效。
-   描边取各自的主题色 —— 地八神随土、人八神随水, 与它们的文字和宫内符号一致。 */
-.btn.on{box-shadow:inset 0 0 0 2px var(--c-gold)}
+/* 开关型按钮的"已开启"状态: 平时不描边(只有浅灰常驻边框), 点开后才描一圈。
+   移星换斗/天门地户/长生状态/年月日时神将 一律深灰;
+   地八神、人八神则各随其五行色, 与它们的文字和宫内符号一致。 */
+.btn.on{box-shadow:inset 0 0 0 2px var(--c-btn-line)}
 #btnTable3 #btnDiShen.on{box-shadow:inset 0 0 0 2px var(--wx-tu)}
 #btnTable3 #btnRenShen.on{box-shadow:inset 0 0 0 2px var(--wx-shui)}
 /* 三排功能按钮(移星换斗…/年月日时神将/地八神): 底色改中性灰 —— 深青底
