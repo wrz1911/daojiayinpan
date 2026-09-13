@@ -1124,16 +1124,21 @@ function _jkCenter(chart) {
   // 弹性行: 标签 / 干支 / 旺衰 / 标记组(可自动换行), 窄屏不溢出
   const row = (k, a, ws, marks) => {
     const ms = marks.filter(Boolean);
-    return '<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:0 4px">' +
-      '<span style="flex:0 0 auto;min-width:32px;text-align:right;font-weight:bold">' + k + '</span>' +
-      '<span style="flex:0 0 auto">' + a + '</span>' +
-      '<span style="flex:0 0 auto;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
-      (ms.length ? '<span style="flex:1 1 auto;display:flex;flex-wrap:wrap;gap:0 3px;justify-content:flex-end">' +
-        ms.join('') + '</span>' : '') +
+    // 各列固定宽度 —— 点击 12 宫切换内容时, 四位/干支/旺衰的横向位置不跟着漂移。
+    // 标记区 nowrap + 略小字号: 避免"四空·干"换行撑高行距, 各行间距才均匀。
+    return '<div style="display:flex;align-items:baseline">' +
+      '<span style="flex:0 0 42px;font-weight:bold">' + k + '</span>' +
+      '<span style="flex:0 0 48px">' + a + '</span>' +
+      '<span style="flex:0 0 18px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+      (ms.length ? '<span style="flex:1 1 auto;font-size:11.5px;white-space:nowrap;overflow:hidden;' +
+        'text-overflow:ellipsis">' + ms.join(' ') + '</span>' : '') +
       '</div>';
   };
-  return '<div style="height:100%;display:flex;flex-direction:column;justify-content:center;' +
-    'padding:0 3px;font-size:12px;line-height:1.5;overflow:hidden">' +
+  // 外层 flex 负责把整个中宫块在 2x2 格内居中; 内层列容器让各行左边缘对齐(行内左起)
+  // 外层纵向居中; 内层占满整格宽度, 行内各列用固定宽度定位 —— 位置稳定不漂移
+  return '<div style="height:100%;display:flex;align-items:center;overflow:hidden">' +
+    '<div style="width:100%;display:flex;flex-direction:column;gap:7px;padding:2px 5px;' +
+    'font-size:14px;line-height:1.35;box-sizing:border-box">' +
     row('<span class="' + wxCls(c.renYuan) + '">人元</span>',
         '<span class="' + wxCls(c.renYuan) + '">' + c.renYuan + '</span>', c.renWs,
         [kongMark(c.renYuan)].concat(sishMarks(c.renYuan))) +
@@ -1144,7 +1149,7 @@ function _jkCenter(chart) {
     row('<span class="' + wxCls(c.difenZhi) + '">地分</span>',
         '<span class="' + wxCls(c.difenZhi) + '">' + c.difenZhi + '</span>', c.difenWs,
         [kongMark(c.difenZhi)].concat(sishMarks(c.difenZhi))) +
-    '</div>';
+    '</div></div>';
 }
 
 /* 点周围十二宫 → 更新中宫（局部刷新，不重排整盘、不丢滚动位置） */
