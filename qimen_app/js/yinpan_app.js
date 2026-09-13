@@ -1249,12 +1249,26 @@ function toggleJinKouJue(noScroll) {
           radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn') +
         '</span>' +
       '</div>';
-    const infoLine = '<div style="display:flex;flex-wrap:wrap;gap:4px 12px;padding:8px 6px;font-size:13px;color:var(--c-text-3)">' +
-      '<span>' + chart.siZhu.join(' ') + '</span>' +
-      '<span>月将 <b style="color:var(--c-gold)">' + chart.yueJiang + chart.yueJiangName + '</b>' + (_jkJiangZhi >= 0 ? '（自定义）' : '') + '</span>' +
-      '<span>贵神起于 <b>' + chart.guiRenZhi + '</b>（' + chart.guiRenDir + '行·' + chart.dayNight + '贵）</span></div>';
+    // ── 信息栏：照漫步者版式的表格 ──
+    const wxOf = z => (QM.WX_OF && QM.WX_OF[z]) || '';
+    const tdL = (t, span) => '<td' + (span ? ' colspan="' + span + '"' : '') + ' style="border:1px solid var(--c-border);padding:4px 6px;' +
+      'color:var(--c-gold);text-align:center;white-space:nowrap">' + t + '</td>';
+    const tdV = (t, span, align) => '<td' + (span ? ' colspan="' + span + '"' : '') + ' style="border:1px solid var(--c-border);padding:4px 6px;' +
+      'text-align:' + (align || 'center') + ';white-space:nowrap">' + t + '</td>';
+    const sp = window._wxSpan || (x => x);
+    const jiangLabel = chart.yueJiang + (_jkJiangZhi >= 0 ? '(自定义)' : (_jkJiang === 1 ? '(交节)' : '(中气)'));
+    const dfLabel = chart.cur.difenZhi + (_jkDfType === 2 ? '(报数)' : '(手动)');
+    const infoTbl = '<table style="width:100%;border-collapse:collapse;font-size:14px;margin:2px 0">' +
+      '<tr>' + tdL('日期', 1) + tdV(chart.dateFull || '', 3) + '</tr>' +
+      '<tr>' + tdL('节气', 1) + tdV(chart.termStr || '', 3) + '</tr>' +
+      '<tr>' + tdL('四柱', 1) + tdV('年柱') + tdV('月柱') + tdV('日柱') + tdV('时柱') + '</tr>' +
+      '<tr>' + tdL('', 1) + chart.siZhu.map(g => tdV(sp(g[0]) + sp(g[1]))).join('') + '</tr>' +
+      '<tr>' + tdL('空亡', 1) + (chart.kong4 || []).slice(0, 3).map(k => tdV(sp(k))).join('') + tdV(sp((chart.kong4 || [])[3] || '')) + '</tr>' +
+      '<tr>' + tdL('月将', 1) + tdV(jiangLabel) + tdL('地分', 1) + tdV(dfLabel) + '</tr>' +
+      '<tr>' + tdL('日空', 1) + tdV(sp(chart.kong4 ? chart.kong4[2] : '')) + tdL('四大空亡', 1) + tdV(chart.shensha && chart.shensha.sish ? sp(chart.shensha.sish) : '无') + '</tr>' +
+      '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
-    div.innerHTML = inputArea + infoLine +
+    div.innerHTML = infoTbl + inputArea +
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;' +
       'border-top:1px solid var(--c-border);border-left:1px solid var(--c-border)">' + cells + '</div>' +
       '<div id="jkInfo" style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
@@ -1904,6 +1918,24 @@ function jinkoujueChart(opt) {
   if (_jkSheng(dWx, rWx)) sandong.push('父母动');
   if (rWx === dWx) sandong.push('兄弟动');
 
+  // ── 信息栏所需: 农历、节气时刻、四柱旬空 ──
+  const lh = st.getLunarHour(), ld = lh.getLunarDay(), lm = ld.getLunarMonth();
+  const lY = lm.getLunarYear().getYear(), lMr = lm.getMonthWithLeap();
+  const lunarStr = (lMr < 0 ? '闰' : '') + QM.MNM[Math.abs(lMr) % 12] + QM.DNM[ld.getDay()] + '日';
+  const pad2 = n => (n < 10 ? '0' : '') + n;
+  const fmtTime = o => o.getYear() + '.' + pad2(o.getMonth()) + '.' + pad2(o.getDay()) + ' ' + pad2(o.getHour()) + ':' + pad2(o.getMinute());
+  const curTerm = st.getTerm();
+  // 节气串(名称 + 月.日 时:分), 写法照主盘 543 行的 tyme4j 用法
+  const nextTerm = curTerm.next(1);
+  const tJD = curTerm.getJulianDay(), tST = tJD.getSolarTime(), tD = tJD.getSolarDay();
+  const nJD = nextTerm.getJulianDay(), nST = nJD.getSolarTime(), nD = nJD.getSolarDay();
+  const termStr = curTerm.getName() + tD.getYear() + '.' + pad2(tD.getMonth()) + '.' + pad2(tD.getDay()) + ' ' + pad2(tST.getHour()) + ':' + pad2(tST.getMinute())
+    + ' ~ ' + nextTerm.getName() + nD.getYear() + '.' + pad2(nD.getMonth()) + '.' + pad2(nD.getDay()) + ' ' + pad2(nST.getHour()) + ':' + pad2(nST.getMinute());
+  // 四柱旬空: 甲子旬空戌亥, 甲戌旬空申酉, 甲申旬空午未, 甲午旬空辰巳, 甲辰旬空寅卯, 甲寅旬空子丑
+  const KONG6 = [[10,11],[8,9],[6,7],[4,5],[2,3],[0,1]];
+  const xunKong = gz => { const k = KONG6[Math.floor(((gz % 60) + 60) % 60 / 10)]; return QM.ZHI[k[0]] + QM.ZHI[k[1]]; };
+  const kong4 = [xunKong(yGzO.getIndex()), xunKong(mGzO.getIndex()), xunKong(dGzO.getIndex()), xunKong(hGzO.getIndex())];
+
   // 神煞（按四位落位）
   const ganIdx = [0, yGzO.getHeavenStem().getIndex(), mGzO.getHeavenStem().getIndex(),
                   dGzO.getHeavenStem().getIndex(), hGzO.getHeavenStem().getIndex()];
@@ -1918,7 +1950,9 @@ function jinkoujueChart(opt) {
 
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
-    shensha: ss,
+    shensha: ss, lunar: lunarStr, kong4: kong4, termStr: termStr,
+    dateFull: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
+    dateStr: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
     yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ], yueJiangIdx: jiangZ, yueJiangAuto: jiangZAuto,
     dayNight: isDay ? '昼' : '夜',
     guiRenZhi: QM.ZHI[grZ], guiRenDir: dir === 1 ? '顺' : '逆',
