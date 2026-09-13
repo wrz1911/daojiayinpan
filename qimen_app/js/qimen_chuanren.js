@@ -293,9 +293,9 @@ window.computeBaZiDaYun= opts => {
   });
 
   // 五行色
-  let wxColor={甲:'#30b030',乙:'#30b030',丙:'#d82828',丁:'#d82828',戊:'#805020',己:'#805020',庚:'#f2b820',辛:'#f2b820',壬:'#2080d0',癸:'#2080d0',
-    寅:'#30b030',卯:'#30b030',巳:'#d82828',午:'#d82828',辰:'#805020',戌:'#805020',丑:'#805020',未:'#805020',申:'#f2b820',酉:'#f2b820',亥:'#2080d0',子:'#2080d0'};
-  function wxSpanBZ(ch){let c=wxColor[ch]||'#333';return '<span style="color:'+c+'">'+ch+'</span>';}
+  let wxColor={甲:'var(--wx-mu)',乙:'var(--wx-mu)',丙:'var(--wx-huo)',丁:'var(--wx-huo)',戊:'var(--wx-tu)',己:'var(--wx-tu)',庚:'var(--wx-jin)',辛:'var(--wx-jin)',壬:'var(--wx-shui)',癸:'var(--wx-shui)',
+    寅:'var(--wx-mu)',卯:'var(--wx-mu)',巳:'var(--wx-huo)',午:'var(--wx-huo)',辰:'var(--wx-tu)',戌:'var(--wx-tu)',丑:'var(--wx-tu)',未:'var(--wx-tu)',申:'var(--wx-jin)',酉:'var(--wx-jin)',亥:'var(--wx-shui)',子:'var(--wx-shui)'};
+  function wxSpanBZ(ch){let c=wxColor[ch]||'var(--c-text)';return '<span style="color:'+c+'">'+ch+'</span>';}
   function wxClass(ch){let m={甲:'绿',乙:'绿',丙:'红',丁:'红',戊:'褐',己:'褐',庚:'金',辛:'金',壬:'蓝',癸:'蓝',
     寅:'绿',卯:'绿',巳:'红',午:'红',辰:'褐',戌:'褐',丑:'褐',未:'褐',申:'金',酉:'金',亥:'蓝',子:'蓝'};return m[ch]||'';}
 
@@ -327,7 +327,7 @@ window.computeBaZiDaYun= opts => {
 
   // 交运信息: 起运年的天干
   let jiaoYunGan=G2[(qiYunYear-4)%10]; // 起运年的年干
-  let jyGanColor=wxColor[jiaoYunGan]||'#333';
+  let jyGanColor=wxColor[jiaoYunGan]||'var(--c-text)';
   let qiYunDesc='出生后'+qiYunMonth+'个月起大运，每逢<span style="color:'+jyGanColor+'">'+jiaoYunGan+'</span>年交运';
 
   // 藏干十神
@@ -363,7 +363,7 @@ window.renderChuanRen=(data,containerId) => {
   let d=data;
   let szParts=d.sizhu.split(' ');
   let nianGz=szParts[0]||'',yueGz=szParts[1]||'',riGz=szParts[2]||'',shiGz=szParts[3]||'';
-  function wxSpan(s){let c='#333';if('甲乙寅卯'.indexOf(s)>=0)c='#2e7d32';else if('丙丁巳午'.indexOf(s)>=0)c='#d50000';else if('戊己辰戌丑未'.indexOf(s)>=0)c='#795548';else if('庚辛申酉'.indexOf(s)>=0)c='#f9a825';else if('壬癸亥子'.indexOf(s)>=0)c='#0d47a1';return '<font color="'+c+'">'+(s||'')+'</font>';}
+  function wxSpan(s){let c='#333';if('甲乙寅卯'.indexOf(s)>=0)c='var(--wx-mu)';else if('丙丁巳午'.indexOf(s)>=0)c='var(--wx-huo)';else if('戊己辰戌丑未'.indexOf(s)>=0)c='var(--wx-tu)';else if('庚辛申酉'.indexOf(s)>=0)c='var(--wx-jin)';else if('壬癸亥子'.indexOf(s)>=0)c='var(--wx-shui)';return '<font color="'+c+'">'+(s||'')+'</font>';}
 
   let h='';
 
@@ -374,7 +374,7 @@ window.renderChuanRen=(data,containerId) => {
   h+='<div id="panHead"><TABLE class="pan" id="headTable">';
   h+='<TR><TD id="dTitle">日期</TD><TD colspan="'+cols+'" id="dateTime">'+d.gongli+' ('+d.nongli+')</TD></TR>';
   let juTitle=d.juLabel+(d.customJu?'<b>自选</b>':'')+(isKe?' <b>刻家</b>':'');
-  h+='<TR><TD style="color:#dead68">节气</TD><TD colspan="'+Math.floor(cols/2)+'">'+d.jieqi+(d.isFuYin?' <b style=color:#c00>伏吟</b>':'')+'</TD><TD colspan="'+Math.ceil(cols/2)+'">'+juTitle+'</TD></TR>';
+  h+='<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+Math.floor(cols/2)+'">'+d.jieqi+(d.isFuYin?' <b style=color:#c00>伏吟</b>':'')+'</TD><TD colspan="'+Math.ceil(cols/2)+'">'+juTitle+'</TD></TR>';
   h+='<TR id="tdTitle"><TD>值符</TD><TD>值使</TD><TD>旬首</TD><TD>空亡</TD><TD>马星</TD>'+(isKe?'<TD></TD>':'')+'</TR>';
   h+='<TR><TD>'+d.zhiFu+'</TD><TD>'+d.zhiShi+'</TD><TD>'+d.xunShou+'</TD><TD>'+d.kongWang+'</TD><TD>'+d.maXing+'</TD>'+(isKe?'<TD></TD>':'')+'</TR>';
   h+='<TR id="tdTitle"><TD>月将</TD><TD>年命</TD><TD>用神</TD><TD colspan="'+(isKe?3:2)+'">贵人</TD></TR>';
@@ -389,8 +389,8 @@ window.renderChuanRen=(data,containerId) => {
   if(isKe)h+='<TD class="sizhu" id="kezhu">'+wxSpan(keGan)+'<br>'+wxSpan(keZhi)+'</TD>';
   h+='</TR>';
   // 颜色
-  h+='<TR><TD style="color:#dead68;font-size:12px">颜色</TD><TD colspan="'+cols+'" style="font-size:12px;line-height:20px">'+
-    '<font color=#ca610e>入墓</font> <font color=#b745ce>击刑</font> <font color=red>门破</font> <font color=#009cef>刑墓</font></TD></TR>';
+  h+='<TR><TD style="color:var(--c-gold);font-size:12px">颜色</TD><TD colspan="'+cols+'" style="font-size:12px;line-height:20px">'+
+    '<font color=var(--c-mu)>入墓</font> <font color=var(--c-xing)>击刑</font> <font color=var(--c-po)>门破</font> <font color=var(--c-xingmu)>刑墓</font></TD></TR>';
   h+='</TABLE></div><div style="height:40px"></div>';
 
   // ====== 穿壬外圈 + 奇门九宫 (时盘风格, 无额外框线) ======
@@ -460,13 +460,13 @@ window.renderChuanRen=(data,containerId) => {
         qimenGridHTML+='</div></div>';
       }
     }
-  }catch(e){qimenGridHTML='<div style=color:red;text-align:center;padding:20px>九宫错误:'+e.message+'</div>';}
+  }catch(e){qimenGridHTML='<div style=color:var(--c-po);text-align:center;padding:20px>九宫错误:'+e.message+'</div>';}
   if(!qimenGridHTML){
     let reason='';
     if(!window.qimenChart) reason='qimenChart未定义';
     else if(!window.buildPaipanGrid) reason='buildPaipanGrid未定义';
     else{let qr2=window.qimenChart({year:2026,month:7,day:11,hour:14,minute:0,panType:1}); reason='qr.pals='+(qr2&&qr2.pals?'有':'无');}
-    qimenGridHTML='<div style=color:red;text-align:center;padding:20px>九宫:'+reason+'</div>';
+    qimenGridHTML='<div style=color:var(--c-po);text-align:center;padding:20px>九宫:'+reason+'</div>';
   }
 
   h+=qimenGridHTML;
@@ -548,44 +548,44 @@ window.renderChuanRen=(data,containerId) => {
   // 宽度交给 #mainDIV 统一约束, 与主盘/九宫等宽
   '.cr-grid-wrap{position:relative;margin:0 auto;width:100%}'+
   '.cr-content table{width:100%;border-collapse:collapse}'+
-  '.cr-pan{border:solid 1px #ddd;width:100%;border-collapse:collapse;table-layout:fixed!important}'+
+  '.cr-pan{border:solid 1px var(--c-border);width:100%;border-collapse:collapse;table-layout:fixed!important}'+
   // 关键: 这两条必须用 #pan.cr-pan 提高特异性。全局规则 #pan .panItem(1,1,0)
   // 与 #pan td(1,0,1) 带 !important, 会压掉原先的 .cr-pan 写法(0,2,0/0,1,1),
   // 导致宫格沿用 26px 字/40px 行高与 14px 内边距 —— 内容把格子顶高, 失去正方形。
   '#pan.cr-pan td{vertical-align:top!important;padding-left:4px!important;padding-right:4px!important;padding-top:6px!important;padding-bottom:6px!important}'+
   '#pan.cr-pan .panItem{line-height:22px!important;font-size:14px!important}'+
   // 穿壬外圈标签
-  '.cr-card{position:absolute;display:flex;flex-direction:column;align-items:center;border:1px solid #e0e0e0;border-radius:6px;background:#fff;padding:4px 6px;text-align:center;white-space:nowrap;font-size:12px}'+
-  '.cr-ctg{color:#333;font-size:13px;font-weight:bold}'+
-  '.cr-ctj{color:#C8A666;font-size:11px}'+
-  '.cr-czhi{color:#333;font-size:12px}'+
-  '.cr-ckw{color:#f00;font-size:10px}'+
-  '.cr-cdu{color:#226ACC;font-size:11px;display:flex;flex-direction:column;line-height:1.1}'+
+  '.cr-card{position:absolute;display:flex;flex-direction:column;align-items:center;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);padding:4px 6px;text-align:center;white-space:nowrap;font-size:12px}'+
+  '.cr-ctg{color:var(--c-text);font-size:13px;font-weight:bold}'+
+  '.cr-ctj{color:var(--c-gold);font-size:11px}'+
+  '.cr-czhi{color:var(--c-text);font-size:12px}'+
+  '.cr-ckw{color:var(--c-po);font-size:10px}'+
+  '.cr-cdu{color:var(--c-text-2);font-size:11px;display:flex;flex-direction:column;line-height:1.1}'+
   '.cr-hrow{display:flex;flex-direction:row;align-items:center;gap:3px;white-space:nowrap}'+
   '.cr-sanchuan{display:flex;justify-content:center;margin-top:40px}'+
   '.cr-sc-tbl{border-collapse:collapse;font-size:14px}'+
   '.cr-sc-tbl td{padding:2px 10px;text-align:center}'+
-  '.cr-sc-lb{color:#0dc2b3;font-size:12px;text-align:right!important}'+
-  '.cr-sc-tg{color:#c00;font-size:14px;font-weight:bold}'+
-  '.cr-sc-dz{color:#333;font-size:14px;font-weight:bold}'+
-  '.cr-sc-ex{color:#333;font-size:14px;font-weight:bold}'+
+  '.cr-sc-lb{color:var(--c-theme);font-size:12px;text-align:right!important}'+
+  '.cr-sc-tg{color:var(--c-po);font-size:14px;font-weight:bold}'+
+  '.cr-sc-dz{color:var(--c-text);font-size:14px;font-weight:bold}'+
+  '.cr-sc-ex{color:var(--c-text);font-size:14px;font-weight:bold}'+
   '.cr-bz-tbl{width:100%;margin:0 auto;border-collapse:collapse;font-size:12px}'+
-  '.cr-bz-tbl td{border:1px solid #e6e6e6;text-align:center;vertical-align:middle;padding:4px 2px;line-height:1.3}'+
-  '.cr-bz-tbl tr td:first-child{background:#f9f6ef;color:#c8a878;font-weight:500;font-size:11px}'+
+  '.cr-bz-tbl td{border:1px solid var(--c-border);text-align:center;vertical-align:middle;padding:4px 2px;line-height:1.3}'+
+  '.cr-bz-tbl tr td:first-child{color:var(--c-gold);font-weight:500;font-size:11px}'+
   '.cr-bz-zao td{font-size:18px;font-weight:bold;padding:2px 1px!important}'+
   '.cr-bz-cg td{font-size:13px;padding:2px 1px!important}'+
-  '.cr-bz-cgss{font-size:10px;color:#999}'+
-  '.cr-dy-tbl{width:100%;margin:0 auto;border-collapse:collapse;border:1px solid #e5e5e5;border-top:none}'+
-  '.cr-dy-tbl td{border:1px solid #e5e5e5;text-align:center;vertical-align:middle;padding:4px 2px;font-size:14px;line-height:1.35}'+
-  '.cr-dy-lbl{background:#f9f6ef;color:#c8a878;font-weight:500;font-size:14px!important}'+
+  '.cr-bz-cgss{font-size:10px;color:var(--c-text-3)}'+
+  '.cr-dy-tbl{width:100%;margin:0 auto;border-collapse:collapse;border:1px solid var(--c-border);border-top:none}'+
+  '.cr-dy-tbl td{border:1px solid var(--c-border);text-align:center;vertical-align:middle;padding:4px 2px;font-size:14px;line-height:1.35}'+
+  '.cr-dy-lbl{color:var(--c-gold);font-weight:500;font-size:14px!important}'+
   '.cr-dy-lbl-v{width:24px;writing-mode:vertical-rl;letter-spacing:4px}'+
-  '.cr-dy-hdr td:not(.cr-dy-lbl-v){background:#f9f6ef;color:#c8a878;font-size:10px!important}'+
+  '.cr-dy-hdr td:not(.cr-dy-lbl-v){color:var(--c-gold);font-size:10px!important}'+
   '.cr-dy-gz{font-size:14px}'+
-  '.cr-dy-ss{font-size:11px;color:#999;display:block;margin-top:0}'+
-  '.cr-dy-cur{color:#d82828;font-weight:bold}'+
+  '.cr-dy-ss{font-size:11px;color:var(--c-text-3);display:block;margin-top:0}'+
+  '.cr-dy-cur{color:var(--c-po);font-weight:bold}'+
   '.cr-dy-liu td{font-size:12px}'+
-  '.cr-dy-info-row td{font-size:14px;padding:6px;text-align:center;color:#333}'+
-  '.cr-dy-info-row td{background:#f3f3f3}'+
+  '.cr-dy-info-row td{font-size:14px;padding:6px;text-align:center;color:var(--c-text)}'+
+  '.cr-dy-info-row td{}'+
   '@media(max-width:340px){.cr-pan td{padding-left:8px!important;padding-right:8px!important}.cr-pan .panItem{font-size:15px!important;line-height:30px!important}.cr-card{font-size:11px;padding:4px 6px}.cr-bz-zao td{font-size:15px!important}.cr-dy-gz{font-size:14px!important}}'+
   '</style>';
 
@@ -602,25 +602,25 @@ window.renderChuanRenInputs= d => {
   let ZJ_OPTS=['自动','阳1','阳2','阳3','阳4','阳5','阳6','阳7','阳8','阳9','阴1','阴2','阴3','阴4','阴5','阴6','阴7','阴8','阴9'];
   let h='<div class="cr-input-panel">';
   h+='<table style="width:100%;border-collapse:collapse"><tr>';
-  h+='<td style="width:40px;font-size:13px;color:#666;text-align:right;padding-right:4px">用神</td>';
+  h+='<td style="width:40px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">用神</td>';
   h+='<td><select id="crYongShen" class="sel-date" style="width:100%" onchange="doChuanRen()">';
   GZ.forEach(gz => {h+='<option value="'+gz+'"'+(gz===selYS?' selected':'')+'>'+gz+'</option>';});
   h+='</select></td>';
-  h+='<td style="width:40px;font-size:13px;color:#666;text-align:right;padding-right:4px">贵人</td>';
+  h+='<td style="width:40px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">贵人</td>';
   h+='<td><select id="crGuiRen" class="sel-date" style="width:100%" onchange="doChuanRen()"><option value="阳贵"'+(selGR==='阳贵'?' selected':'')+'>阳贵</option><option value="阴贵"'+(selGR==='阴贵'?' selected':'')+'>阴贵</option></select></td>';
   h+='</tr><tr>';
-  h+='<td style="font-size:13px;color:#666;text-align:right;padding-right:4px">年命</td>';
+  h+='<td style="font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">年命</td>';
   h+='<td><select id="crNianMing" class="sel-date" style="width:100%" onchange="doChuanRen()">';
   Z12.forEach((z, i) => {h+='<option value="'+z+'"'+(z===selNM?' selected':'')+'>'+z+'</option>';});
   h+='</select></td>';
-  h+='<td style="font-size:13px;color:#666;text-align:right;padding-right:4px">性别</td>';
+  h+='<td style="font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">性别</td>';
   h+='<td><select id="crGender" class="sel-date" style="width:100%" onchange="doChuanRen()"><option value="男"'+(selGD==='男'?' selected':'')+'>男</option><option value="女"'+(selGD==='女'?' selected':'')+'>女</option></select></td>';
   h+='</tr><tr>';
-  h+='<td style="font-size:13px;color:#666;text-align:right;padding-right:4px">自选</td>';
+  h+='<td style="font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">自选</td>';
   h+='<td><select id="crZiJu" class="sel-date" style="width:100%" onchange="doChuanRen()">';
   ZJ_OPTS.forEach(z => {h+='<option value="'+z+'"'+(z===selZJ?' selected':'')+'>'+z+'</option>';});
   h+='</select></td>';
-  h+='<td style="font-size:13px;color:#666;text-align:right;padding-right:4px">时刻</td>';
+  h+='<td style="font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">时刻</td>';
   h+='<td><select id="crShiKe" class="sel-date" style="width:100%" onchange="doChuanRen()"><option value="时家"'+(selSK==='时家'?' selected':'')+'>时家</option><option value="刻家"'+(selSK==='刻家'?' selected':'')+'>刻家</option></select></td>';
   h+='</tr></table>';
   h+='</div>';

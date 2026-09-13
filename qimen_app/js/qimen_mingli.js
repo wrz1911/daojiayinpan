@@ -30,13 +30,13 @@
   var ZHI = '子丑寅卯辰巳午未申酉戌亥';
   var SX = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
   /** 天干五行色 */
-  var GAN_COLOR = { 甲: '#43ab18', 乙: '#43ab18', 丙: '#e40b06', 丁: '#e40b06',
-                    戊: '#964607', 己: '#964607', 庚: '#f4a600', 辛: '#f4a600',
-                    壬: '#006aff', 癸: '#006aff' };
+  var GAN_COLOR = { 甲: 'var(--wx-mu)', 乙: 'var(--wx-mu)', 丙: 'var(--wx-huo)', 丁: 'var(--wx-huo)',
+                    戊: 'var(--wx-tu)', 己: 'var(--wx-tu)', 庚: 'var(--wx-jin)', 辛: 'var(--wx-jin)',
+                    壬: 'var(--wx-shui)', 癸: 'var(--wx-shui)' };
   /** 地支五行色 */
-  var ZHI_COLOR = { 子: '#006aff', 丑: '#964607', 寅: '#43ab18', 卯: '#43ab18',
-                    辰: '#964607', 巳: '#e40b06', 午: '#e40b06', 未: '#964607',
-                    申: '#f4a600', 酉: '#f4a600', 戌: '#964607', 亥: '#006aff' };
+  var ZHI_COLOR = { 子: 'var(--wx-shui)', 丑: 'var(--wx-tu)', 寅: 'var(--wx-mu)', 卯: 'var(--wx-mu)',
+                    辰: 'var(--wx-tu)', 巳: 'var(--wx-huo)', 午: 'var(--wx-huo)', 未: 'var(--wx-tu)',
+                    申: 'var(--wx-jin)', 酉: 'var(--wx-jin)', 戌: 'var(--wx-tu)', 亥: 'var(--wx-shui)' };
 
   var dec = function (s) { return String(s == null ? '' : s); };
   var ganSpan = function (g) { return '<font style="color:' + (GAN_COLOR[g] || '#333') + '">' + g + '</font>'; };
@@ -139,8 +139,8 @@
       var el = document.getElementById('dayun' + i);
       var yr = document.getElementById('dayun_year' + i);
       var on = (i === n);
-      if (el) { el.style.background = on ? '#faf8f3' : ''; el.style.color = on ? '#e40b06' : ''; el.style.fontWeight = on ? 'bold' : ''; }
-      if (yr) { yr.style.background = on ? '#faf8f3' : ''; }
+      if (el) { el.style.color = on ? 'var(--wx-huo)' : ''; el.style.fontWeight = on ? 'bold' : ''; }
+      
     }
     // 流年: 该运第 c 年
     var startYear = (bz.qiYunYear || 0) + 10 * n;
@@ -187,16 +187,16 @@
       /* ── ① #panHead 头部表 ── */
       h += '<div id="panHead" class="bz-pan"><TABLE class="pan" id="headTable">';
       h += '<TR><TD colspan="5" style="line-height:30px">' +
-           '<font style="color:#dead68">名称：</font><font id="name">' + data.name + '</font>&emsp;' +
-           '<font style="color:#dead68">性别：</font><font id="gender">' + data.gender + '</font>&emsp;' +
-           '<font style="color:#dead68">生肖：</font>' + data.shengXiao + '</TD></TR>';
+           '<font style="color:var(--c-gold)">名称：</font><font id="name">' + data.name + '</font>&emsp;' +
+           '<font style="color:var(--c-gold)">性别：</font><font id="gender">' + data.gender + '</font>&emsp;' +
+           '<font style="color:var(--c-gold)">生肖：</font>' + data.shengXiao + '</TD></TR>';
       // 日期格式: 1986-12-11(农历十一月初十)
       var birthYmd = qr.gongli.replace(/^(\d+)年(\d+)月(\d+)日.*$/, function (m, a, b, c) {
         return a + '-' + ('0' + b).slice(-2) + '-' + ('0' + c).slice(-2);
       });
-      h += '<TR><TD style="width:16%;color:#dead68">出生</TD>' +
+      h += '<TR><TD style="width:16%;color:var(--c-gold)">出生</TD>' +
            '<TD colspan="4" id="datetime">' + birthYmd + '(' + qr.nongli + ')</TD></TR>';
-      h += '<TR><TD style="color:#dead68">节气</TD>' +
+      h += '<TR><TD style="color:var(--c-gold)">节气</TD>' +
            '<TD colspan="2">' + qr.jieqi + '&nbsp;&nbsp;&nbsp;月将<B>' + data.yueJiang + '</B></TD>' +
            '<TD colspan="2">' + qr.juLabel.replace(/^(\D+)/, '$1<B>').replace(/(\d+)$/, '$1</B>') + '</TD></TR>';
       /* 旬首/值符/值使/马星/空亡: 小标签内联在值上方, 省掉纯标题行 */
@@ -277,7 +277,7 @@
           var dy = bz.dayun[d2], ss = (bz.dayunSS || [])[d2] || '';
           var cur = (d2 === data.yunIdx);
           h += '<TD class="yun2" id="dayun' + d2 + '" onclick="mingliYun(' + d2 + ',window._mlData)"' +
-               (cur ? ' style="font-weight:bold;color:#e40b06;background:#faf8f3"' : '') + '>' +
+               (cur ? ' style="font-weight:bold;color:var(--c-po)"' : '') + '>' +
                ganSpan(dy.g) + '<br>' + zhiSpan(dy.z) + '<br><font class="shishen">' + ss + '</font></TD>';
         }
         h += '</TR></TABLE>';
@@ -301,7 +301,7 @@
       /* ── ⑤ 移星换斗容器 ── */
       h += '<div id="yixinghuandouDIV"></div><div id="tableTemp" style="display:none"></div>';
     } catch (e) {
-      h += '<div style="color:red;padding:12px">命理渲染错误: ' + (e && e.message) + '</div>';
+      h += '<div style="color:var(--c-po);padding:12px">命理渲染错误: ' + (e && e.message) + '</div>';
       if (window._logErr) window._logErr('renderMingli', e && e.message);
     }
 

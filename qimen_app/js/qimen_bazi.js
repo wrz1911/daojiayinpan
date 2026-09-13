@@ -27,10 +27,10 @@
   var GAN = '甲乙丙丁戊己庚辛壬癸'.split('');
   var ZHI = '子丑寅卯辰巳午未申酉戌亥'.split('');
   /* 天干五行色: 木绿 火红 土棕 金橙 水蓝 */
-  var GAN_COLOR = ['#43ab18', '#43ab18', '#e40b06', '#e40b06', '#964607',
-                   '#964607', '#f4a600', '#f4a600', '#006aff', '#006aff'];
-  var ZHI_COLOR = ['#006aff', '#964607', '#43ab18', '#43ab18', '#964607', '#e40b06',
-                   '#e40b06', '#964607', '#f4a600', '#f4a600', '#964607', '#006aff'];
+  var GAN_COLOR = ['var(--wx-mu)', 'var(--wx-mu)', 'var(--wx-huo)', 'var(--wx-huo)', 'var(--wx-tu)',
+                   'var(--wx-tu)', 'var(--wx-jin)', 'var(--wx-jin)', 'var(--wx-shui)', 'var(--wx-shui)'];
+  var ZHI_COLOR = ['var(--wx-shui)', 'var(--wx-tu)', 'var(--wx-mu)', 'var(--wx-mu)', 'var(--wx-tu)', 'var(--wx-huo)',
+                   'var(--wx-huo)', 'var(--wx-tu)', 'var(--wx-jin)', 'var(--wx-jin)', 'var(--wx-tu)', 'var(--wx-shui)'];
   var ZODIAC = '鼠牛虎兔龙蛇马羊猴鸡狗猪'.split('');
   /* 十神全称 -> 单字简称 */
   var SHISHEN_ABBR = {
@@ -306,12 +306,12 @@
     var h = '';
     var rc = rowCls ? ' class="' + rowCls + '"' : '';
     /* 十神 */
-    h += '<TR' + rc + ' style="height:25px"><TD style="color:#dead68;line-height:25px">十神</TD>';
+    h += '<TR' + rc + ' style="height:25px"><TD style="color:var(--c-gold);line-height:25px">十神</TD>';
     bz.pillars.forEach(function (p) { h += '<TD class="shiShen">' + p.shiShen + '</TD>'; });
     h += '</TR>';
     /* 干支(命理主盘已自带四柱, 那边传 withGz=false 跳过) */
     if (withGz) {
-      h += '<TR><TD style="color:#dead68">' + bz.zao + '</TD>';
+      h += '<TR><TD style="color:var(--c-gold)">' + bz.zao + '</TD>';
       bz.pillars.forEach(function (p) {
         h += '<TD class="sizhuTd"><font style="color:' + p.ganColor + '">' + p.gan + '</font><br>' +
              '<font style="color:' + p.zhiColor + '">' + p.zhi + '</font></TD>';
@@ -319,7 +319,7 @@
       h += '</TR>';
     }
     /* 藏干 */
-    h += '<TR' + rc + '><TD style="color:#dead68">藏干</TD>';
+    h += '<TR' + rc + '><TD style="color:var(--c-gold)">藏干</TD>';
     bz.pillars.forEach(function (p) {
       h += '<TD class="cangGanTd">';
       p.cang.forEach(function (c, i) {
@@ -331,12 +331,12 @@
     h += '</TR>';
     /* 纳音 / 地势 / 自坐 / 空亡 */
     [['纳音', 'naYin'], ['地势', 'diShi'], ['自坐', 'ziZuo'], ['空亡', 'kong']].forEach(function (row) {
-      h += '<TR' + rc + '><TD style="color:#dead68">' + row[0] + '</TD>';
+      h += '<TR' + rc + '><TD style="color:var(--c-gold)">' + row[0] + '</TD>';
       bz.pillars.forEach(function (p) { h += '<TD>' + p[row[1]] + '</TD>'; });
       h += '</TR>';
     });
     /* 神煞 */
-    h += '<TR' + rc + '><TD style="color:#dead68;line-height:15px">神煞<br></TD>';
+    h += '<TR' + rc + '><TD style="color:var(--c-gold);line-height:15px">神煞<br></TD>';
     bz.pillars.forEach(function (p) {
       h += '<TD class="shenShaTd"><div class="ssDiv shensha">';
       p.sha.forEach(function (s) { h += '<span>' + s + '</span><br>'; });
@@ -344,8 +344,8 @@
     });
     h += '</TR>';
     /* 胎元 命宫 身宫 旺相休囚死 */
-    h += '<TR' + rc + '><TD style="color:#dead68">胎元</TD><TD style="color:#dead68">命宫</TD>' +
-         '<TD style="color:#dead68">身宫</TD><TD colspan="2" style="color:#dead68">旺相休囚死</TD></TR>';
+    h += '<TR' + rc + '><TD style="color:var(--c-gold)">胎元</TD><TD style="color:var(--c-gold)">命宫</TD>' +
+         '<TD style="color:var(--c-gold)">身宫</TD><TD colspan="2" style="color:var(--c-gold)">旺相休囚死</TD></TR>';
     h += '<TR' + rc + '><TD class="gong">' + bz.taiYuan + '<br><font>' + bz.taiYuanNaYin + '</font></TD>' +
          '<TD class="gong">' + bz.mingGong + '<br><font>' + bz.mingGongNaYin + '</font></TD>' +
          '<TD class="gong">' + bz.shenGong + '<br><font>' + bz.shenGongNaYin + '</font></TD>' +
@@ -363,7 +363,7 @@
     var d = bz.jiaoYun;
     var dur = d.y + '年' + (d.m ? d.m + '个月' : '') + (d.d ? d.d + '日' : '');
     return '<TR' + (rc || '') + '><TD colspan="5" id="jiaoYun">出生后' + dur +
-           '起大运，每逢<font color="#e40b06">' + d.gan + '</font>年' + d.month + '月' +
+           '起大运，每逢<font color="var(--wx-huo)">' + d.gan + '</font>年' + d.month + '月' +
            d.day + '日前后交运。</TD></TR>';
   }
 
@@ -372,7 +372,7 @@
     var d = bz.jiaoYun;
     var dur = d.y + '年' + (d.m ? d.m + '个月' : '') + (d.d ? d.d + '日' : '');
     return '<div class="bz-jy-out">出生后' + dur +
-           '起大运，每逢<font color="#e40b06">' + d.gan + '</font>年' + d.month + '月' +
+           '起大运，每逢<font color="var(--wx-huo)">' + d.gan + '</font>年' + d.month + '月' +
            d.day + '日前后交运。</div>';
   }
 
@@ -382,11 +382,11 @@
     var h = '<div class="panDiv bz-pan">';
     /* ── 主盘 ── */
     h += '<TABLE class="pan"><TR><TD colspan="5" style="line-height:28px">' +
-         '<font style="color:#dead68">名称：</font><font class="name">' + (d.name || '') + '</font>&emsp;' +
-         '<font style="color:#dead68">性别：</font>' + d.gender + '&emsp;' +
-         '<font style="color:#dead68">生肖：</font>' + d.zodiac + '</TD></TR>';
+         '<font style="color:var(--c-gold)">名称：</font><font class="name">' + (d.name || '') + '</font>&emsp;' +
+         '<font style="color:var(--c-gold)">性别：</font>' + d.gender + '&emsp;' +
+         '<font style="color:var(--c-gold)">生肖：</font>' + d.zodiac + '</TD></TR>';
     h += '<TR><TD id="dateTitle">日期</TD><TD colspan="4" id="date">' + d.dateText + '</TD></TR>';
-    h += '<TR id="jieqiTr"><TD style="color:#dead68">节气</TD>' +
+    h += '<TR id="jieqiTr"><TD style="color:var(--c-gold)">节气</TD>' +
          '<TD colspan="4" id="jieqi">' + d.jieQi + '</TD></TR>';
     /* 四柱表头 */
     h += '<TR><TD class="sizhuTitle" style="width:16%">四柱</TD>' +
@@ -397,12 +397,12 @@
     /* ── 大运 ── */
     h += '<TABLE class="pan" id="dayun"><TR><TD class="title" rowspan=2>大<br>运</TD>';
     d.dayun.forEach(function (y2, i) {
-      h += '<TD class="year"' + (i === d.curYun ? ' style="background:#faf8f3;"' : '') +
+      h += '<TD class="year"' + (i === d.curYun ? '' : '') +
            ' id="bz_dayun_year' + i + '">' + y2.year + '</TD>';
     });
     h += '</TR><TR>';
     d.dayun.forEach(function (y2, i) {
-      var st = (i === d.curYun) ? 'font-weight:bold;color:#e40b06;background:#faf8f3' : '';
+      var st = (i === d.curYun) ? 'font-weight:bold;color:var(--c-po)' : '';
       h += '<TD class="gz"' + (st ? ' style="' + st + '"' : '') + ' id="bz_dayun' + i + '">' +
            '<font style="color:' + GAN_COLOR[GAN.indexOf(y2.gan)] + '">' + y2.gan + '</font><br>' +
            '<font style="color:' + ZHI_COLOR[ZHI.indexOf(y2.zhi)] + '">' + y2.zhi + '</font><br>' +
@@ -418,7 +418,7 @@
     h += '</TR><TR>';
     d.curFortune.forEach(function (f, i) {
       var nowY = new Date().getFullYear();
-      var st = (f.year === nowY) ? " style='color:#e40b06;font-weight:bold'" : '';
+      var st = (f.year === nowY) ? " style='color:var(--c-po);font-weight:bold'" : '';
       h += '<TD class="liunian2" id="bz_liunian2_' + i + '"><span' + st + '>' +
            '<font style="color:' + f.ganColor + '">' + f.gan + '</font><br>' +
            '<font style="color:' + f.zhiColor + '">' + f.zhi + '</font></span><br>' +
@@ -429,7 +429,7 @@
     /* ── 流年总表(各步大运对应的十年干支) ── */
     h += '<TABLE class="pan" id="year2"><TR><TD class="title" rowspan=2>流<br>年</TD>';
     d.dayun.forEach(function (y2, i) {
-      h += '<TD class="gz"' + (i === d.curYun ? ' style="background:#faf8f3"' : '') +
+      h += '<TD class="gz"' + (i === d.curYun ? '' : '') +
            ' id="bz_dayun_liunian' + i + '">' +
            (y2.liunian || []).map(function (g) { return g + '<br>'; }).join('') + '</TD>';
     });
@@ -459,7 +459,7 @@
     } catch (e) {
       if (window._logErr) window._logErr('showBaziPan', e && e.message);
       var b2 = document.getElementById('yixinghuandouDIV');
-      if (b2) { b2.style.display = 'block'; b2.innerHTML = '<div style="color:red;padding:8px">八字错误:' + (e && e.message) + '</div>'; }
+      if (b2) { b2.style.display = 'block'; b2.innerHTML = '<div style="color:var(--c-po);padding:8px">八字错误:' + (e && e.message) + '</div>'; }
     }
   }
 

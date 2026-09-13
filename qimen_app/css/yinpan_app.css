@@ -215,7 +215,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .cr-bz-tbl td{border:1px solid var(--c-border);padding:4px 2px}
 .cr-dy-tbl{width:100%;border-collapse:collapse;font-size:12px;text-align:center;margin-top:8px}
 .cr-dy-tbl td{border:1px solid var(--c-border);padding:3px 2px}
-.cr-dy-lbl{background:var(--c-gray-bg);color:var(--c-text-2);font-size:12px;width:40px}
+.cr-dy-lbl{color:var(--c-text-2);font-size:12px;width:40px}
 .cr-dy-lbl-v{writing-mode:vertical-rl}
 .cr-dy-hdr td{background:var(--c-theme-bg);font-weight:bold}
 .cr-dy-cur{color:var(--c-theme);font-weight:bold}
@@ -274,8 +274,8 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .yun1{font-size:11px;color:var(--c-gold);line-height:16px;text-align:center;font-family:Arial,sans-serif}
 .yun2{padding-top:4px;padding-bottom:2px;font-weight:bold;font-size:13px;line-height:17px;text-align:center;cursor:pointer}
 .yun2 .shishen{font-weight:normal;font-size:10px;color:var(--c-text-3)}
-.liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;background:var(--c-gray-bg);font-family:Arial,sans-serif}
-.liunian2{font-size:12px;background:var(--c-gray-bg);line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
+.liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;font-family:Arial,sans-serif}
+.liunian2{font-size:12px;line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
 #btnTable1,#btnTable2{width:100%;margin:8px auto;border-collapse:collapse}
 #btnTable1 .btn,#btnTable2 .btn{background:#0dc2b3;color:#fff;border-radius:4px;text-align:center;padding:6px 4px;font-size:13px;cursor:pointer;margin:2px}
 #Tip{margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
@@ -288,9 +288,9 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .bz-pan #date{font-family:Arial,sans-serif;font-size:14px;line-height:30px}
 .bz-pan #jieqi{font-family:Arial,sans-serif;font-size:14px}
 .bz-pan .sizhuTitle{width:21%;color:var(--c-gold);line-height:25px}
-.bz-pan .shiShen{background:var(--c-gray-bg);line-height:25px}
+.bz-pan .shiShen{line-height:25px}
 .bz-pan .sizhuTd{font-size:20px;line-height:24px;font-weight:bold;padding-top:7px;padding-bottom:7px}
-.bz-pan .cangGanTd{letter-spacing:3px;line-height:15px;padding:5px 3px;background:var(--c-gray-bg)}
+.bz-pan .cangGanTd{letter-spacing:3px;line-height:15px;padding:5px 3px}
 .bz-pan .ganShen{color:var(--c-text-3);font-size:13px;letter-spacing:4px}
 .bz-pan .shenShaTd{font-size:13px;line-height:20px;padding:2px;color:#8c5201;vertical-align:top}
 .bz-pan .ssDiv{text-align:center;font-size:13px;line-height:20px}
@@ -370,8 +370,8 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 #dayun_liunian .pan .yun1{font-size:11px;color:var(--c-gold);line-height:16px;text-align:center;font-family:Arial,sans-serif}
 #dayun_liunian .pan .yun2{padding-top:4px;padding-bottom:2px;font-weight:bold;font-size:13px;line-height:17px;text-align:center;cursor:pointer}
 #dayun_liunian .pan .yun2 .shishen{font-weight:normal;font-size:10px;line-height:13px;color:var(--c-text-3)}
-#dayun_liunian .pan .liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;background:var(--c-gray-bg);font-family:Arial,sans-serif}
-#dayun_liunian .pan .liunian2{font-size:13px;background:var(--c-gray-bg);line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
+#dayun_liunian .pan .liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;font-family:Arial,sans-serif}
+#dayun_liunian .pan .liunian2{font-size:13px;line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
 
 /* ══════ 命理主盘四柱独立档位 ══════
    命理信息量大于时盘, 沿用 mode-shi 的 24px 会让主盘过长;
@@ -411,3 +411,14 @@ body.mode-mingli #panHead #tdTitle td{font-size:12px!important}
 .ml-inner, .ml-dy-wrap, .cr-bz-tbl, .cr-dy-tbl, .cr-grid-wrap, .xj-pan{
   max-width:100%!important;margin-left:auto;margin-right:auto
 }
+
+/* ══════ 盘面统一白底 ══════
+   原先击刑/藏干/流年/大运标签等用 --c-gray-bg 铺底(亮色下 #f5f5f5),
+   与盘面白底形成色块差; 现统一为与盘面同底(随主题变量, 暗色下亦一致),
+   层次改由边框与文字色体现。 */
+#panHead td, #panHead #headTable td, #content td, #content table td,
+#dayun_liunian td, #dayun_liunian .pan td, #btnTable1 td, #btnTable2 td,
+.shiShen, .cangGanTd, .liunian1, .liunian2, .yun1, .yun2, .yunTitle,
+.cr-bz-tbl td, .cr-dy-tbl td, .cr-dy-lbl, .cr-dy-hdr td, .cr-dy-info-row td,
+.cr-card, .gong, .shenShaTd{ background: var(--c-bg) }
+.cr-card{ background: var(--c-bg) }
