@@ -205,21 +205,21 @@
       h += '<TR><TD style="color:#dead68">节气</TD>' +
            '<TD colspan="2">' + qr.jieqi + '&nbsp;&nbsp;&nbsp;月将<B>' + data.yueJiang + '</B></TD>' +
            '<TD colspan="2">' + qr.juLabel.replace(/^(\D+)/, '$1<B>').replace(/(\d+)$/, '$1</B>') + '</TD></TR>';
-      h += '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD><TD>空亡</TD></TR>';
+      /* 旬首/值符/值使/马星/空亡: 小标签内联在值上方, 省掉纯标题行 */
       // 旬首显示为「旬首+遁干」(热卜格式: 甲子戊), 六甲遁于六仪
       var XUN_DUN = { 子: '戊', 戌: '己', 申: '庚', 午: '辛', 辰: '壬', 寅: '癸' };
       var xunShouTxt = dec(qr.xs.gz) + (XUN_DUN[dec(qr.xs.gz)[1]] || '');
-      h += '<TR><TD id="xunShou">' + xunShouTxt + '</TD>' +
-           '<TD>天<font id="zhiFu">' + qr.zf.s + '</font></TD>' +
-           '<TD><font id="zhiShi">' + qr.zs.s + '</font>门</TD>' +
-           '<TD id="maXing">' + qr.ma.z + '</TD>' +
-           '<TD>' + qr.kw.gz + '</TD></TR>';
-      h += '<TR><TD style="color:#dead68" rowspan="2">四柱</TD>' +
-           '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD>' +
-           '<TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD></TR>';
-      h += '<TR id="sizhu">';
-      [sz.nian, sz.yue, sz.ri, sz.shi].forEach(function (gz) {
-        h += '<TD>' + ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
+      h += '<TR class="hd-row"><TD id="xunShou"><span class="hd-lbl">旬首</span>' + xunShouTxt + '</TD>' +
+           '<TD><span class="hd-lbl">值符</span>天<font id="zhiFu">' + qr.zf.s + '</font></TD>' +
+           '<TD><span class="hd-lbl">值使</span><font id="zhiShi">' + qr.zs.s + '</font>门</TD>' +
+           '<TD id="maXing"><span class="hd-lbl">马星</span>' + qr.ma.z + '</TD>' +
+           '<TD><span class="hd-lbl">空亡</span>' + qr.kw.gz + '</TD></TR>';
+      /* 四柱: 柱名内联在干支上方, 省掉纯标题行 */
+      h += '<TR id="sizhu" class="hd-row"><TD class="hd-side">四柱</TD>';
+      ['年柱', '月柱', '日柱', '时柱'].forEach(function (t, i) {
+        var gz = [sz.nian, sz.yue, sz.ri, sz.shi][i] || '';
+        h += '<TD><span class="hd-lbl">' + t + '</span>' +
+             ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
       });
       h += '</TR>';
       /* ── 八字信息(原「八字排盘」主盘, 合并进命理主盘): 十神/藏干/纳音/地势/
@@ -230,7 +230,7 @@
           hour: window.hr, minute: window.mn,
           name: data.name, gender: data.gender
         }) : null;
-        if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false);
+        if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false, 'bz-sec');
       } catch (e) {
         if (window._logErr) window._logErr('mingli.baziRows', e && e.message);
       }

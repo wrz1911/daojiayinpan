@@ -302,3 +302,15 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 @media (prefers-color-scheme: dark){
   .bz-pan .shenShaTd{color:#c9a063}
 }
+
+/* ══════ 命理主盘结构优化: 小标签内联 + 分区底色 ══════ */
+/* 柱名/旬首这类小标签压在值上方, 省掉纯标题行 */
+#headTable .hd-lbl{display:block;font-size:10px;line-height:13px;font-weight:normal;
+  letter-spacing:1px;color:var(--c-gold);opacity:.8}
+/* 首列侧标签(如「四柱」) */
+#headTable td.hd-side{color:var(--c-gold);font-size:12px;letter-spacing:2px;line-height:15px}
+/* 奇门信息行浅底, 与基本信息区分开 */
+#headTable tr.hd-row > td{background:var(--c-gray-bg)}
+/* 八字信息区(十神→交运)整段用另一层底色, 与上方奇门区分 */
+#headTable tr.bz-sec > td{background:var(--c-gray-bg)}
+#headTable tr.bz-sec > td:first-child{color:var(--c-gold)}

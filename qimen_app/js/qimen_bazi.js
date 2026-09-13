@@ -300,10 +300,11 @@
   function hourText(h) { return ZHI[Math.floor(((h + 1) % 24) / 2)]; }
 
   /* 十神/藏干/纳音/地势/自坐/空亡/神煞/胎元命宫身宫/旺相/交运 —— 命理主盘与本模块共用 */
-  function baziMainRows(bz, withGz) {
+  function baziMainRows(bz, withGz, rowCls) {
     var h = '';
+    var rc = rowCls ? ' class="' + rowCls + '"' : '';
     /* 十神 */
-    h += '<TR style="height:25px"><TD style="color:#dead68;line-height:25px">十神</TD>';
+    h += '<TR' + rc + ' style="height:25px"><TD style="color:#dead68;line-height:25px">十神</TD>';
     bz.pillars.forEach(function (p) { h += '<TD class="shiShen">' + p.shiShen + '</TD>'; });
     h += '</TR>';
     /* 干支(命理主盘已自带四柱, 那边传 withGz=false 跳过) */
@@ -316,7 +317,7 @@
       h += '</TR>';
     }
     /* 藏干 */
-    h += '<TR><TD style="color:#dead68">藏干</TD>';
+    h += '<TR' + rc + '><TD style="color:#dead68">藏干</TD>';
     bz.pillars.forEach(function (p) {
       h += '<TD class="cangGanTd">';
       p.cang.forEach(function (c, i) {
@@ -328,12 +329,12 @@
     h += '</TR>';
     /* 纳音 / 地势 / 自坐 / 空亡 */
     [['纳音', 'naYin'], ['地势', 'diShi'], ['自坐', 'ziZuo'], ['空亡', 'kong']].forEach(function (row) {
-      h += '<TR><TD style="color:#dead68">' + row[0] + '</TD>';
+      h += '<TR' + rc + '><TD style="color:#dead68">' + row[0] + '</TD>';
       bz.pillars.forEach(function (p) { h += '<TD>' + p[row[1]] + '</TD>'; });
       h += '</TR>';
     });
     /* 神煞 */
-    h += '<TR><TD style="color:#dead68;line-height:15px">神煞<br></TD>';
+    h += '<TR' + rc + '><TD style="color:#dead68;line-height:15px">神煞<br></TD>';
     bz.pillars.forEach(function (p) {
       h += '<TD class="shenShaTd"><div class="ssDiv shensha">';
       p.sha.forEach(function (s) { h += '<span>' + s + '</span><br>'; });
@@ -341,16 +342,16 @@
     });
     h += '</TR>';
     /* 胎元 命宫 身宫 旺相休囚死 */
-    h += '<TR><TD style="color:#dead68">胎元</TD><TD style="color:#dead68">命宫</TD>' +
+    h += '<TR' + rc + '><TD style="color:#dead68">胎元</TD><TD style="color:#dead68">命宫</TD>' +
          '<TD style="color:#dead68">身宫</TD><TD colspan="2" style="color:#dead68">旺相休囚死</TD></TR>';
-    h += '<TR><TD class="gong">' + bz.taiYuan + '<br><font>' + bz.taiYuanNaYin + '</font></TD>' +
+    h += '<TR' + rc + '><TD class="gong">' + bz.taiYuan + '<br><font>' + bz.taiYuanNaYin + '</font></TD>' +
          '<TD class="gong">' + bz.mingGong + '<br><font>' + bz.mingGongNaYin + '</font></TD>' +
          '<TD class="gong">' + bz.shenGong + '<br><font>' + bz.shenGongNaYin + '</font></TD>' +
          '<TD colspan="2">' + bz.wangXiang + '</TD></TR>';
     /* 交运 */
     var jyDur = bz.jiaoYun.y + '年' + (bz.jiaoYun.m ? bz.jiaoYun.m + '个月' : '') +
                 (bz.jiaoYun.d ? bz.jiaoYun.d + '日' : '');
-    h += '<TR><TD colspan="5" id="jiaoYun">出生后' + jyDur + '起大运，每逢<font color="#e40b06">' +
+    h += '<TR' + rc + '><TD colspan="5" id="jiaoYun">出生后' + jyDur + '起大运，每逢<font color="#e40b06">' +
          bz.jiaoYun.gan + '</font>年' + bz.jiaoYun.month + '月' + bz.jiaoYun.day + '日前后交运。</TD></TR>';
     h += '</TABLE>';
     return h;
