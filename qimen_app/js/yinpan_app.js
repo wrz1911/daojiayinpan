@@ -2578,7 +2578,7 @@ div.innerHTML=ui+parts.join('');
   div.querySelectorAll('input[name="xjuYear"]').forEach(r => { r.onchange = refreshXiangJu; });
   let xd2=div.querySelector('#xjuDeg'); if(xd2) xd2.onchange = function(){let v=parseInt(this.value);if(isNaN(v)||v<0)this.value=0;else if(v>359)this.value=359;refreshXiangJu();};
   let chgBtn=div.querySelector('[onclick*="refreshXiangJu"]'); if(chgBtn) chgBtn.onclick = refreshXiangJu;
-  if(!noScroll)setTimeout(() => {let btn=document.getElementById('btnXiangJu');if(btn){let top=btn.getBoundingClientRect().top+window.pageYOffset;let offset=document.body.classList.contains('is-mobile')?36:0;window.scrollTo({top:top-offset,behavior:'smooth'});}},200);
+  if(!noScroll)setTimeout(() => {let btn=document.getElementById('btnXiangJu');if(btn){let top=btn.getBoundingClientRect().top+window.pageYOffset;let offset=34;/* 顶部模式栏高度 */window.scrollTo({top:top-offset,behavior:'smooth'});}},200);
   // Re-align after display: square gongs, row sync, and yinGan positions
   setTimeout(() => {
     div.querySelectorAll('.xj-pan').forEach(pan => {

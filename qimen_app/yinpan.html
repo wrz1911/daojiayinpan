@@ -16,22 +16,21 @@
 <body>
 
 <script>if(navigator.userAgent.indexOf('Android')>-1||window.Capacitor)document.body.classList.add('is-mobile')</script>
-<div id="topBar"></div>
+<!-- 顶部模式栏: 六个盘型切换常驻于此, 不再占用内容区一整行 -->
+<!-- 点击由 yinpan_app.js 程序化绑定(用 onclick 确保 Tauri/Capacitor 兼容) -->
+<div id="topBar">
+  <label><input type="radio" name="panType" value="1" checked> 时盘</label>
+  <label><input type="radio" name="panType" value="2"> 刻盘</label>
+  <label><input type="radio" name="panType" value="3"> 心盘</label>
+  <label><input type="radio" name="panType" value="4"> 山向</label>
+  <label><input type="radio" name="panType" value="5"> 穿壬</label>
+  <label><input type="radio" name="panType" value="6"> 命理</label>
+</div>
 
 <input type="checkbox" id="tianmendihu" style="display:none">
 <div id="mainDIV">
   <!-- 表单 -->
   <div class="form-card">
-    <div class="form-row">
-      <div style="display:flex;align-items:center;gap:8px;flex:1">
-        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="1" checked onchange="setPanType(1);doPan()"> 时盘</label>
-        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="2" onchange="setPanType(2);doPan()"> 刻盘</label>
-        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="3" onchange="setPanType(3);doPan()"> 心盘</label>
-        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="4" onchange="setPanType(4);doPan()"> 山向</label>
-        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="5" onchange="setPanType(5);doPan()"> 穿壬</label>
-        <label style="cursor:pointer;font-size:14px;color:#333"><input type="radio" name="panType" value="6" onchange="setPanType(6);doPan()"> 命理</label>
-      </div>
-    </div>
     <div class="form-row" id="timeRow">
       <span class="form-label">排盘时间</span>
       <div id="selGroup" style="display:flex;align-items:center;gap:2px;font-size:15px">
