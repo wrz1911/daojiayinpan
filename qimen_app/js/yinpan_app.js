@@ -1081,8 +1081,7 @@ function _jkSet(opt) {
   if (opt.guiren !== undefined) _jkGuiren = opt.guiren;
   if (opt.difenType !== undefined) {
     _jkDfType = opt.difenType;
-    if (_jkDfType === 2) { const v = prompt('请输入报数'); const n = parseInt(v, 10); if (!isNaN(n)) _jkDifen = ((n % 12) + 12) % 12; }
-    else if (_jkDfType === 3) { _jkDifen = Math.floor(Math.random() * 12); }
+    // 报数: 只是把下拉切换成 1~12 的数字表示, 选的仍是同一地支, 无需额外换算
   }
   toggleJinKouJue(true);
 }
@@ -1200,19 +1199,25 @@ function toggleJinKouJue(noScroll) {
           'border:2px solid ' + (on ? 'var(--c-theme)' : 'var(--c-text-4)') + ';background:' + (on ? 'var(--c-theme)' : 'transparent') + '">' +
           (on ? '<b style="position:absolute;left:3px;top:-4px;color:#fff;font-size:14px;font-weight:normal">✓</b>' : '') +
         '</i><span style="margin-left:6px;font-size:15px">' + txt + '</span></span>';
+    const checkbox = (on, txt, click) =>
+      '<span onclick="' + click + '" style="display:inline-flex;align-items:center;cursor:pointer;margin-left:14px">' +
+        '<i style="width:19px;height:19px;border-radius:4px;display:inline-block;position:relative;' +
+          'border:2px solid ' + (on ? 'var(--c-theme)' : 'var(--c-text-4)') + ';background:' + (on ? 'var(--c-theme)' : 'transparent') + '">' +
+          (on ? '<b style="position:absolute;left:3px;top:-4px;color:#fff;font-size:14px;font-weight:normal">✓</b>' : '') +
+        '</i><span style="margin-left:6px;font-size:15px">' + txt + '</span></span>';
     const jkRow = (label, right) =>
       '<div style="display:flex;align-items:center;justify-content:space-between;' +
       'padding:11px 6px;border-bottom:1px solid var(--c-border)">' +
       '<span style="font-size:15px;color:var(--c-text-2)">' + label + '</span>' +
       '<span style="display:flex;align-items:center;white-space:nowrap">' + right + '</span></div>';
-    const dfName = _jkDfType === 1 ? (curIdx >= 0 ? QM.ZHI[curIdx] : '请选择')
-                 : _jkDfType === 2 ? '报数取地分' : ('随机：' + QM.ZHI[curIdx]);
     const inputArea =
       jkRow('选择地分',
-        '<span onclick="_jkSet({difen:((_jkDifen<0?curIdx:_jkDifen)+1)%12})" style="cursor:pointer;border:1px solid var(--c-border);border-radius:4px;' +
-          'padding:3px 10px;font-size:15px;min-width:78px;text-align:center">' + dfName + ' ▾</span>' +
-        radio(_jkDfType === 2, '报数', '_jkSet({difenType:2})') +
-        radio(_jkDfType === 3, '随机', '_jkSet({difenType:3})')) +
+        '<select id="jkDifen" onchange="_jkSet({difen:parseInt(this.value,10)})" style="background:var(--c-btn-gray);color:var(--c-text);' +
+          'border:1px solid var(--c-border);border-radius:4px;padding:4px 8px;font-size:15px;min-width:74px;text-align:center">' +
+          QM.ZHI.map(function(z,i){ return '<option value="' + i + '"' + (i === curIdx ? ' selected' : '') + '>' +
+            (_jkDfType === 2 ? (i + 1) : z) + '</option>'; }).join('') +
+        '</select>' +
+        checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})')) +
       jkRow('换将方式',
         radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})') +
         radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})')) +
