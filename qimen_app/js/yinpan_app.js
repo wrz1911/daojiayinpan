@@ -1209,8 +1209,9 @@ window._jkPick = _jkPick;
 /* 下方信息区：四大空亡 / 人煞 贵煞 将煞 地煞 / 五动 三动 */
 function _jkInfoHtml(chart) {
   const ss = chart.shensha || {};
-  const line = (label, val) => '<div style="display:flex;gap:8px;padding:2px 0;font-size:13px;line-height:1.75">' +
-    '<span style="flex:0 0 66px;color:var(--c-theme);font-weight:bold">' + label + '</span>' +
+  // 标签只两字(人煞/贵煞/将煞/地煞), 列宽收到 36px 即可 —— 原先 66px 让值与标签隔得太远
+  const line = (label, val) => '<div style="display:flex;gap:6px;padding:2px 0;font-size:13px;line-height:1.75">' +
+    '<span style="flex:0 0 36px;color:var(--c-theme);font-weight:bold">' + label + '</span>' +
     '<span style="flex:1;text-align:left;word-break:break-all">' + (val || '—') + '</span></div>';
   // 四大空亡已在信息栏显示, 此处不再重复
   return line('人煞', ss.shensh4 && ss.shensh4[1]) +
