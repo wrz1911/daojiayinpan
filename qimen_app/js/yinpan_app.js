@@ -2597,11 +2597,12 @@ function panChange(dir) {
   selZxj.value = 0;
   let lbl = document.getElementById('zxjLabel');
   if (lbl) lbl.innerHTML = '';
+  // 必须在 doPan 之前取: doPan 会重建 panWrap 并把 _jkShow 重置为 false,
+  // 之后再判断就永远是 false, 联动代码不会执行(这正是"上下局不联动"的原因)
+  const jkWasOpen = !!document.getElementById('jinkoujueDIV');
   doPan();
-  // 上局/下局改了时间, 金口诀面板若开着要跟着重排(noScroll 参数避免跳回顶部)
-  try {
-    if (_jkShow && document.getElementById('jinkoujueDIV')) setTimeout(() => toggleJinKouJue(true), 30);
-  } catch (e) { _logErr('panChange.jk', e && e.message); }
+  // 上局/下局改了时间, 金口诀面板若原先开着就重新排一次(noScroll 避免跳回顶部)
+  if (jkWasOpen) setTimeout(() => { try { toggleJinKouJue(true); } catch (e) { _logErr('panChange.jk', e && e.message); } }, 30);
 }
 
 // === 年月日时神将 ===
