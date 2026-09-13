@@ -950,6 +950,7 @@ const JK_HELP = {
       '<b>月将</b>：讲义原话「道家秘传起课一直用过节选将起课。过节选将比较简单，不用去计算时令，<b>直接选月建的六合</b>」—— 本体系实际用的是<b>交节</b>（月建六合），讲义 19 个课例无一例外；中气法与灵机课法并存，两种都可用，故面板仍可切换。',
       '<b>将神</b>：月将加时 —— 把月将放在时支上顺行，看地分落得何支；代数式 <code>将神 = 月将 + (地分 − 时支)</code>。',
       '<b>贵神</b>：日干起贵人，昼夜分顺逆。口诀「<b>甲戊庚牛羊，乙己鼠猴乡，丙丁猪鸡位，壬癸兔蛇藏，六辛逢马虎</b>」。昼夜以<b>卯至申为昼、酉至寅为夜</b>。贵人所落地盘在<b>亥子丑寅卯辰则顺行，巳午未申酉戌则逆行</b>，从贵人起十二贵神数至地分。',
+      '<b>贵人求法两套口诀之别</b>：分歧只在首句的断法 —— 「<b>甲戊庚牛羊</b>」把甲戊庚三者同作牛羊（昼贵丑、夜贵未）；「<b>甲羊戊庚牛</b>」则把甲日单提出来，甲日昼贵未、夜贵丑（戊庚两日不变）。<br>也就是说<b>只有甲日两法结果不同</b>（昼夜贵人互换），其余乙己、丙丁、壬癸、辛、戊、庚共九种日干，两法完全一致 —— 面板上会按当日日干提示「两法相同」或「甲日互换」。',
       '<b>人元</b>：五子元遁 —— 「<b>甲己还加甲，乙庚丙作初，丙辛从戊起，丁壬庚子居，戊癸起壬子</b>」，即日干定其子时所起天干，顺数到地分。',
       '<b>地分</b>：可报数、可用来人方位、来人属相，亦可随机。',
       '<b>十二贵神本位</b>：贵人丑、螣蛇巳、朱雀午、六合卯、勾陈辰、青龙寅、天空戌、白虎申、太常未、玄武子、太阴酉、天后亥。<br>盘面显示的是<b>本位干支</b>（用五子元遁配干），与起课得到的「乘支」是两回事。',
@@ -1235,6 +1236,9 @@ function toggleJinKouJue(noScroll) {
       QM.ZHI.map(function(z,i){ var cur = (_jkJiangZhi >= 0) ? _jkJiangZhi : chart.yueJiangIdx;
         return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + z + '</option>'; }).join('') + '</select>';
     // 两行: 首行三组用表格列; 次行两组改用 flex 均分, 使标签与选项紧贴(表格列做不到)
+    // 贵人求法两套口诀只在【甲日】有别(甲日昼贵丑/未互换), 其余日干完全相同 —— 不说明会很费解
+    const isJiaDay = (chart.siZhu[2] || '').charAt(0) === '甲';
+    const grHint = isJiaDay ? '（甲日：两法昼夜贵人互换）' : '（本日' + (chart.siZhu[2] || '').charAt(0) + '·两法相同）';
     const inLab = t => '<span style="color:var(--c-gold);white-space:nowrap;margin-right:4px">' + t + '</span>';
     const inputArea = '<table style="width:100%;border:1px solid var(--c-border);border-radius:4px;' +
       'border-collapse:collapse;table-layout:fixed;font-size:14px;margin:8px 0 2px">' +
@@ -1249,7 +1253,8 @@ function toggleJinKouJue(noScroll) {
             radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn') + '</span>' +
           '<span style="display:inline-flex;align-items:center">' + inLab('贵人') +
             radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
-            radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') + '</span>' +
+            radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
+            '<span style="font-size:11px;color:var(--c-text-4);margin-left:6px">' + grHint + '</span></span>' +
         '</div></td></tr>' +
       '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
