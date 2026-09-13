@@ -2497,7 +2497,7 @@ function _showHelpDlg(dlgId, DATA) {
   } catch (e) { _logErr('xnHelp', e && e.message); }
 }
 window.showXuanNvHelp = showXuanNvHelp;
-window.showJinKouHelp = function () { _showHelpDlg('jkHelpDlg', JK_HELP); };
+function showJinKouHelp() { _showHelpDlg('jkHelpDlg', JK_HELP); }
 
 function xuanNv16() {
   if (_xnLongPressed) { _xnLongPressed = false; return; }   // 长按已弹说明, 不再切换外盘
