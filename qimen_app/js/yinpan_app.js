@@ -1102,21 +1102,29 @@ function _jkCenter(chart) {
   const kongOf = z => (z && kong2.indexOf(z) >= 0)
     ? '<span style="color:var(--wx-huo);font-weight:bold">空</span>' : '';
   // 顺序: 标签 | 干支 | 神名 | 旺衰 | 空 | 用
+  // 四大空亡: 该旬的四空是"地支两支 + 天干两干"(如申酉庚辛), 干支都要查
+  const sishStr = (chart.shensha && chart.shensha.sish) || '';
+  const sishMark = gz => {
+    if (!sishStr || !gz) return '';
+    for (let i = 0; i < gz.length; i++) if (sishStr.indexOf(gz.charAt(i)) >= 0)
+      return '<span style="color:var(--wx-huo);font-weight:bold">四空</span>';
+    return '';
+  };
   // 空与用同处一列(依次排列), 不再各占一列
-  const row = (k, a, b, ws, useMark, kongMark) => '<tr style="height:26px">' +
+  const row = (k, a, b, ws, useMark, kongMark, sishM) => '<tr style="height:26px">' +
     '<td style="width:42px;color:var(--c-theme);font-weight:bold;text-align:right;padding-right:5px;white-space:nowrap">' + k + '</td>' +
     '<td style="min-width:50px;text-align:center;white-space:nowrap">' + a + '</td>' +
     '<td style="min-width:56px;text-align:left;white-space:nowrap">' + (b || '') + '</td>' +
     '<td style="width:20px;color:' + (wsc[ws] || 'var(--c-text-3)') + ';text-align:left;padding-left:4px">' + ws + '</td>' +
-    '<td style="width:34px;text-align:left;white-space:nowrap">' + (kongMark || '') + (useMark || '') + '</td></tr>';
+    '<td style="width:56px;text-align:left;white-space:nowrap">' + (kongMark || '') + (useMark || '') + (sishM || '') + '</td></tr>';
   return '<div style="height:100%;display:flex;align-items:center;justify-content:center">' +
     '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' +
-      row('人元', '<span class="' + col(c.renWx) + '">' + c.renYuan + '</span>', '', c.renWs, '', kongOf(c.renYuan)) +
+      row('人元', '<span class="' + col(c.renWx) + '">' + c.renYuan + '</span>', '', c.renWs, '', kongOf(c.renYuan), sishMark(c.renYuan)) +
       row('贵神', '<span class="' + col(c.guiWx) + '">' + c.guiGanZhi + '</span>',
-          '<span style="color:var(--c-gold)">' + c.guiShen + '</span>', c.guiWs, use(2), kongOf(c.guiGanZhi[1])) +
+          '<span style="color:var(--c-gold)">' + c.guiShen + '</span>', c.guiWs, use(2), kongOf(c.guiGanZhi[1]), sishMark(c.guiGanZhi)) +
       row('将神', '<span class="' + col(c.jiangWx) + '">' + c.jiangGanZhi + '</span>',
-          '<span style="color:var(--c-gold)">' + c.jiangShen + '</span>', c.jiangWs, use(3), kongOf(c.jiangGanZhi[1])) +
-      row('地分', '<span class="' + col(JK_ZHI_WX[c.difenIdx]) + '">' + c.difenZhi + '</span>', '', c.difenWs, '', kongOf(c.difenZhi)) +
+          '<span style="color:var(--c-gold)">' + c.jiangShen + '</span>', c.jiangWs, use(3), kongOf(c.jiangGanZhi[1]), sishMark(c.jiangGanZhi)) +
+      row('地分', '<span class="' + col(JK_ZHI_WX[c.difenIdx]) + '">' + c.difenZhi + '</span>', '', c.difenWs, '', kongOf(c.difenZhi), sishMark(c.difenZhi)) +
     '</table></div>';
 }
 
