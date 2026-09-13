@@ -21,3 +21,6 @@ scripts/verify_*.py
 scripts/cdp*.js
 scripts/_*.html
 qimen_app/_*.html
+
+# 教材草稿（未定稿，不入库）
+_textbook_draft/
