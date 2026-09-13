@@ -1090,6 +1090,17 @@ function jinkoujueShenSha(yue, gzDay, gan, zhi, kg, kz, yGan, mGan, dGan, hGan) 
 
   const sish = sk === 5 ? '亥子壬癸' : sk === 4 ? '申酉庚辛' : '';
 
+  // 六甲 / 六丁（讲义课例中反复出现, 如"人元：甲 木+旺 六甲""人元：丁 火-旺 六丁"）
+  //   六甲 = 旬首为甲者(甲子甲戌甲申甲午甲辰甲寅), 六丁 = 丁卯丁丑丁亥丁酉丁未丁巳
+  //   日干支逢之即入课, 落于四位同支之宫
+  const LIUJIA = [0,10,20,30,40,50];            // 甲子/甲戌/甲申/甲午/甲辰/甲寅 的六十甲子序
+  const LIUDING = [3,17,23,29,47,53];           // 丁卯/丁丑/丁亥/丁酉/丁未/丁巳
+  {
+    const g0 = ((gzDay % 60) + 60) % 60;
+    const z0 = ((gzDay % 12) + 12) % 12;          // 日支索引
+    if (LIUJIA.indexOf(g0) >= 0) add(s12, z0, '六甲');
+    if (LIUDING.indexOf(g0) >= 0) add(s12, z0, '六丁');
+  }
   // 三奇（第七课）: 天三奇甲戊庚 / 地三奇乙丙丁 / 人三奇壬癸辛
   //   以年、月、日、时四柱天干及人元、贵神干、将神干同看
   const gset = [yGan, mGan, dGan, hGan, gan, QM.GAN[kg[2] % 10], QM.GAN[kg[3] % 10]];
@@ -2090,8 +2101,19 @@ function jinkoujueChart(opt) {
   const cnt = [0,0,0,0,0,0];
   for (let i = 1; i < 5; i++) cnt[kzx[i]]++;
   const wangWx = _jkWangWx(cnt);
-  // 旺五行 → 等级0, 其后按相生序依次 相1 休2 囚3 死4
-  const wsOf = wxIdx => { for (let j = 0; j < 5; j++) if ((wangWx + j - 1) % 5 + 1 === wxIdx) return ['旺','相','休','囚','死'][j]; return ''; };
+  // 旺五行 → 其余按【传统五行旺衰】定, 而非相生序:
+  //   相 = 我生者 / 休 = 生我者 / 囚 = 克我者 / 死 = 我克者
+  // 讲义课例可证: 木旺时土为"死"(木克土), 若按相生序会误算成"休"。
+  // 编号 1水 2木 3火 4土 5金
+  const WX_SHENG = { 1:2, 2:3, 3:4, 4:5, 5:1 };   // 我生
+  const WX_KE    = { 1:3, 2:4, 3:5, 4:1, 5:2 };   // 我克
+  const WS_BY = {};
+  WS_BY[wangWx] = '旺';
+  WS_BY[WX_SHENG[wangWx]] = '相';
+  for (const k in WX_SHENG) if (WX_SHENG[k] === wangWx) WS_BY[k] = '休';   // 生我者
+  for (const k in WX_KE)    if (WX_KE[k]    === wangWx) WS_BY[k] = '囚';   // 克我者
+  WS_BY[WX_KE[wangWx]] = '死';
+  const wsOf = wxIdx => WS_BY[wxIdx] || '';
   houses.forEach(h => {
     h.renWs = wsOf(kzx[1]);
     h.guiWs = wsOf(kzx[2]);
