@@ -330,8 +330,11 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .mid-row span:nth-of-type(3){float:right}
 .dshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-tu)}
 .rshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-shui)}
-/* 已开启的开关型按钮(如地八神): 描一圈金边表示当前生效 */
+/* 已开启的开关型按钮: 描一圈边表示当前生效。
+   描边取各自的主题色 —— 地八神随土、人八神随水, 与它们的文字和宫内符号一致。 */
 .btn.on{box-shadow:inset 0 0 0 2px var(--c-gold)}
+#btnTable3 #btnDiShen.on{box-shadow:inset 0 0 0 2px var(--wx-tu)}
+#btnTable3 #btnRenShen.on{box-shadow:inset 0 0 0 2px var(--wx-shui)}
 /* 三排功能按钮(移星换斗…/年月日时神将/地八神): 底色改中性灰 —— 深青底
    在素淡的盘面上太抢眼, 灰底与页面的白/浅灰基调更贴, 也把注意力还给盘面。 */
 #btnTable1 .btn,#btnTable2 .btn,#btnTable3 .btn{background:var(--c-btn-gray);color:var(--c-text);border:1px solid var(--c-border);border-radius:4px;text-align:center;padding:3px 4px;font-size:13px;line-height:1.35;cursor:pointer;margin:0;box-sizing:border-box;width:100%;display:block}
