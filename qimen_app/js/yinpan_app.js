@@ -1328,25 +1328,20 @@ function toggleJinKouJue(noScroll) {
     // 两行: 首行三组用表格列; 次行两组改用 flex 均分, 使标签与选项紧贴(表格列做不到)
     // 贵人求法两套口诀只在【甲日】有别(甲日昼贵丑/未互换), 其余日干完全相同 —— 不说明会很费解
     const isJiaDay = (chart.siZhu[2] || '').charAt(0) === '甲';
-    const grHint = isJiaDay ? '（甲日：两法昼夜贵人互换）' : '（本日' + (chart.siZhu[2] || '').charAt(0) + '·两法相同）';
+    const grHint = isJiaDay ? '甲日·两法互换' : '本日' + (chart.siZhu[2] || '').charAt(0) + '·两法同';
     const inLab = t => '<span style="color:var(--c-gold);white-space:nowrap;margin-right:4px">' + t + '</span>';
     const inputArea = '<table style="width:100%;border:1px solid var(--c-border);border-radius:4px;' +
       'border-collapse:collapse;table-layout:fixed;margin:8px 0 2px;' +
       'font-size:var(--jk-if,12px)">' +
-      '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})'), 2) +
-              tdLh('月将') + tdVh(jzSel) +
+      '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})'), 3) + '</tr>' +
+      '<tr>' + tdLh('月将') + tdVh(jzSel) +
               tdLh('换将') + tdVh(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj'), 2) + '</tr>' +
-      '<tr><td colspan="8" style="padding:6px 8px">' +
-        '<div style="display:flex;flex-wrap:wrap;gap:5px 14px;align-items:center">' +
-          '<span style="display:inline-flex;align-items:center">' + inLab('贵神') +
-            radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
-            radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
-            radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn') + '</span>' +
-          '<span style="display:inline-flex;align-items:center">' + inLab('贵人') +
-            radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
-            radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
-            '<span style="font-size:0.9em;color:var(--c-text-4);margin-left:5px">' + grHint + '</span></span>' +
-        '</div></td></tr>' +
+      '<tr>' + tdLh('贵神') + tdVh(radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
+              radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
+              radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn'), 3) + '</tr>' +
+      '<tr>' + tdLh('贵人') + tdVh(radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
+              radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
+              '<span style="font-size:0.9em;color:var(--c-text-4);margin-left:5px">' + grHint + '</span>', 3) + '</tr>' +
       '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
     div.innerHTML = infoTbl + inputArea +
