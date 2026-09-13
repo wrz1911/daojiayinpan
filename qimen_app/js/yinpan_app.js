@@ -2614,7 +2614,7 @@ function refreshXiangJu(){
 }
 
 
-let _mlVals={gender:'男',nianMing:''};
+let _mlVals={gender:'男'};
 function doMingli(){
   try{
     let tip=document.getElementById("tip");if(tip)tip.innerHTML="";
@@ -2632,10 +2632,10 @@ function doMingli(){
     let box=document.getElementById("mlInputs");
     box.style.display="block";
     box.innerHTML=window.renderMingliInputs?window.renderMingliInputs(_mlVals):"";
-    let gEl=document.getElementById("mlGender"),nEl=document.getElementById("mlNianMing");
-    _mlVals={gender:gEl?gEl.value:'男',nianMing:nEl?nEl.value:''};
+    let gEl=document.getElementById("mlGender");
+    _mlVals={gender:gEl?gEl.value:'男'};
     let data=window.mingliChart({year:Y,month:M,day:D,hour:hr,minute:mn,
-      gender:_mlVals.gender,nianMing:_mlVals.nianMing});
+      gender:_mlVals.gender});
     window._mlData=data;   // 供按钮 onclick="mingliBtn(n, window._mlData)" 取用
     document.getElementById("panWrap").innerHTML=window.renderMingli(data,null);
     // 首屏填充当前大运的流年(热卜进入页面即显示当前运对应的 10 个流年)

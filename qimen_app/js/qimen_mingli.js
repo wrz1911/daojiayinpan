@@ -56,7 +56,7 @@
 
   /**
    * 命理奇门排盘。
-   * opts: { year, month, day, hour, minute, gender('男'|'女'), nianMing(地支, 可选), name }
+   * opts: { year, month, day, hour, minute, gender('男'|'女'), name }
    */
   window.mingliChart = function (opts) {
     opts = opts || {};
@@ -89,7 +89,6 @@
     return {
       qr: qr, bz: bz, sizhu: siZhu, gender: gender, shengXiao: shengXiao,
       name: opts.name || '未知',
-      nianMing: opts.nianMing || siZhu.shi[1] || '',
       kong: kong,
       yueJiang: dec(qr.yueJiang),
       juLabel: qr.juLabel,
@@ -164,11 +163,10 @@
 
   /* ───────────────── 输入面板 ───────────────── */
 
-  /** 命理输入面板(姓名 + 性别 + 年命)。出生时间复用页面顶部的年月日时选择器。 */
+  /** 命理输入面板(姓名 + 性别)。出生时间复用页面顶部的年月日时选择器。 */
   window.renderMingliInputs = function (d) {
     d = d || {};
     var gender = d.gender || '男';
-    var nm = d.nianMing || '';
     var name = d.name || '';
     var h = '<div class="ml-input-panel"><table style="width:100%;border-collapse:collapse"><tr>';
     h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">姓名</td>';
@@ -176,11 +174,6 @@
     h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">性别</td>';
     h += '<td><select id="mlGender" class="sel-date" style="width:100%" onchange="doMingli()">';
     ['男', '女'].forEach(function (g) { h += '<option value="' + g + '"' + (g === gender ? ' selected' : '') + '>' + g + '</option>'; });
-    h += '</select></td>';
-    h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">年命</td>';
-    h += '<td><select id="mlNianMing" class="sel-date" style="width:100%" onchange="doMingli()">';
-    h += '<option value=""' + (nm === '' ? ' selected' : '') + '>（按时支）</option>';
-    for (var i = 0; i < 12; i++) h += '<option value="' + ZHI[i] + '"' + (ZHI[i] === nm ? ' selected' : '') + '>' + ZHI[i] + '</option>';
     h += '</select></td>';
     h += '</tr></table></div>';
     return h;
