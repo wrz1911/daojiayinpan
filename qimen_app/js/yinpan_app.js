@@ -990,7 +990,7 @@ const JK_HELP = {
    贵神/将神位干支皆取 —— 即界面上的 人煞 / 贵煞 / 将煞 / 地煞。
    入参: yue=月支索引, gzDay=日干支序(0-59), gan/zhi=四柱干支索引数组(1=年..4=时),
          kg/kz=四位(1人元 2贵神 3将神 4地分)的干/支索引 */
-function jinkoujueShenSha(yue, gzDay, gan, zhi, kg, kz) {
+function jinkoujueShenSha(yue, gzDay, gan, zhi, kg, kz, yGan, mGan, dGan, hGan) {
   const s12 = new Array(12).fill(''), s10 = new Array(10).fill('');
   const add = (arr, i, name) => { if (i >= 0 && i < arr.length) arr[i] += ' ' + name; };
   let T;
@@ -1049,6 +1049,20 @@ function jinkoujueShenSha(yue, gzDay, gan, zhi, kg, kz) {
   add(s12, T[xun], '旬空'); add(s12, T[xun] + 1, '旬空');
 
   // ── 按四位落位 ──
+  // ══ 按讲义增补（漫步者源码无、讲义有明确起例）══
+  const dgz = ((gzDay % 12) + 12) % 12;   // 日支索引(驿马等按日支起)
+  // 驿马（第七课）: 申子辰马在寅 / 亥卯未马在巳 / 巳酉丑马在亥 / 寅午戌马在申
+  T = [2,11,8,5,2,11,8,5,2,11,8,5];      add(s12, T[dgz], '驿马');
+  // 桃花（第四课）: 申子辰见酉 / 亥卯未见子 / 巳酉丑见午 / 寅午戌见卯
+  T = [9,6,3,0,9,6,3,0,9,6,3,0];         add(s12, T[dgz], '桃花');
+  // 六害（第四课）: 子未 丑午 寅巳 卯辰 申亥 酉戌
+  T = [7,6,5,4,3,2,1,0,11,10,9,8];       add(s12, T[dgz], '六害');
+  // 相破（第四课）: 子破酉 午破卯 丑破辰
+  T = [9,-1,-1,6,1,-1,3,-1,-1,0,-1,-1];  if (T[dgz] >= 0) add(s12, T[dgz], '相破');
+  // 四绝（第四课）: 寅酉金绝 / 卯申木绝 / 午亥水绝 / 子巳火绝
+  T = [5,-1,9,-1,-1,0,-1,-1,3,-1,-1,6];  if (T[dgz] >= 0) add(s12, T[dgz], '四绝');
+  // 六冲
+  add(s12, (dgz + 6) % 12, '六冲');
   const shensh4 = ['', '', '', '', ''];
   shensh4[1] = s10[kg[1]] || '';
   shensh4[4] = s12[kz[4]] || '';
@@ -1060,6 +1074,14 @@ function jinkoujueShenSha(yue, gzDay, gan, zhi, kg, kz) {
   for (let i = 1; i <= 4; i++) shensh4[i] = shensh4[i].trim();
 
   const sish = sk === 5 ? '亥子壬癸' : sk === 4 ? '申酉庚辛' : '';
+
+  // 三奇（第七课）: 天三奇甲戊庚 / 地三奇乙丙丁 / 人三奇壬癸辛
+  //   以年、月、日、时四柱天干及人元、贵神干、将神干同看
+  const gset = [yGan, mGan, dGan, hGan, gan, QM.GAN[kg[2] % 10], QM.GAN[kg[3] % 10]];
+  const has = g => gset.indexOf(g) >= 0;
+  if (has('甲') && has('戊') && has('庚')) shensh4[1] = (shensh4[1] || '') + ' 天三奇';
+  if (has('乙') && has('丙') && has('丁')) shensh4[1] = (shensh4[1] || '') + ' 地三奇';
+  if (has('壬') && has('癸') && has('辛')) shensh4[1] = (shensh4[1] || '') + ' 人三奇';
   return { shen10: s10, shen12: s12, shensh4, sish };
 }
 window.jinkoujueShenSha = jinkoujueShenSha;
@@ -2033,7 +2055,8 @@ function jinkoujueChart(opt) {
   // 四位的地支: 人元位不取地支, 贵神位取【本位支】(源码 zhi2 存的就是本位),
   //            将神位取将神所乘支, 地分位取地分支
   const kzIdx = [0, cur.difenIdx, QM.ZHI.indexOf(cur.guiGanZhi[1]), cur.jiangZhiIdx, cur.difenIdx];
-  const ss = jinkoujueShenSha(mZ, dGzO.getIndex(), ganIdx, zhiIdx, kgIdx, kzIdx);
+  const ss = jinkoujueShenSha(mZ, dGzO.getIndex(), ganIdx, zhiIdx, kgIdx, kzIdx,
+    QM.GAN[yGzO.getIndex() % 10], QM.GAN[mGzO.getIndex() % 10], QM.GAN[dGzO.getIndex() % 10], QM.GAN[hGzO.getIndex() % 10]);
 
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
