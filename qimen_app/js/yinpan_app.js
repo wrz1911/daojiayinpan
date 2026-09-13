@@ -1249,9 +1249,9 @@ function toggleJinKouJue(noScroll) {
     const one = (h) => {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
-      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px">' +
-        '<span style="flex:0 0 ' + (wide ? 52 : 29) + 'px;overflow:hidden">' + a + '</span>' +
-        (wide ? '' : '<span style="flex:0 0 23px;overflow:hidden">' + (b || '') + '</span>') +
+      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:3px">' +
+        '<span style="flex:0 0 ' + (wide ? 45 : 25) + 'px;overflow:hidden">' + a + '</span>' +
+        (wide ? '' : '<span style="flex:0 0 22px;overflow:hidden">' + (b || '') + '</span>') +
         '<span style="flex:0 0 11px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
