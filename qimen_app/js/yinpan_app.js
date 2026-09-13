@@ -2012,6 +2012,195 @@ function _jkYongwei(kz4) {
   return 3;                                           // 纯阴、二阴二阳 → 将为用
 }
 window._jkYongwei = _jkYongwei;
+
+/* ══════ 高级起课法 · 遁法（讲义 L949-956）══════
+   讲义原文：「金口诀遁法其实是课内信息量的增加问题……有人元再遁法、日干再遁法、时干再遁法等」
+
+   统一规律(经讲义 4 个例子验算): 以【该柱自己的天干】起五子元遁, 反查某个目标天干
+   落在十二支的哪一位。十天干配十二支必有两位重复, 讲义两例分别取先见(庚→子)与
+   后见(癸→亥), 口径不一; 这里按"取先见"实现, 并同时给出全部落支供核对。
+
+   ① 干合遁    —— 遁到【本干】      例: 癸卯 → 丑  (断环境物象)
+   ② 遁到干合处 —— 遁到【干之合】    例: 癸卯 → 午
+   ③ 遁走失方位 —— 遁到【将干之合】  例: 庚   → 酉
+   ④ 遁工作方位 —— 遁到【贵神本干】  例: 戊申 → 午
+   ⑤ 遁人元    —— 日干再遁到原地分, 取该支天干(地分不变) 例: 课例8 壬 → 戊
+*/
+const JK_GAN_HE = [5,6,7,8,9,0,1,2,3,4];   // 天干五合: 甲己 乙庚 丙辛 丁壬 戊癸
+/* 以天干 gi 起五子元遁, 找出 targetGan 所落之支; 返回 {first, all} */
+function _jkDunLocate(gi, targetGan) {
+  const t = QM.GAN.indexOf(targetGan);
+  const all = [];
+  if (t < 0) return { first: -1, all };
+  for (let z = 0; z < 12; z++) if ((JK_DUN[gi % 5] + z) % 10 === t) all.push(z);
+  return { first: all.length ? all[0] : -1, all };
+}
+/* 五种遁法一次算全; 入参为四位的干支字符 */
+function jinkoujueDun(opt) {
+  const ch = jinkoujueChart(opt);
+  if (!ch) return null;
+  const cur = ch.cur;
+  const dGanIdx = QM.GAN.indexOf(ch.siZhu[2].charAt(0));            // 日干
+  const gGan = cur.guiGanZhi.charAt(0), jGan = cur.jiangGanZhi.charAt(0);
+  const he = g => QM.GAN[JK_GAN_HE[QM.GAN.indexOf(g)]];
+  const one = (gi, target) => { const r = _jkDunLocate(QM.GAN.indexOf(gi), target);
+    return { zhi: r.first >= 0 ? QM.ZHI[r.first] : '', all: r.all.map(i => QM.ZHI[i]) }; };
+  const out = {
+    siZhu: ch.siZhu, renYuan: cur.renYuan, guiGanZhi: cur.guiGanZhi,
+    jiangGanZhi: cur.jiangGanZhi, difenZhi: cur.difenZhi,
+    ganHe: {}, dunRenYuan: {}
+  };
+  // 起点: 讲义原文「如用爻或贵神是癸卯」—— 用爻位与贵神位都可作起点, 故两套并列给出。
+  //   用爻在贵神时两者相同。
+  const useGan = (ch.yongwei === 2) ? gGan : jGan;      // 用爻所在位的天干
+  const useName = (ch.yongwei === 2) ? '用爻(贵神)' : '用爻(将神)';
+  // ① 干合遁: 遁到【本干】所在之支  ——  讲义例 癸卯 → 丑
+  out.ganHe['干合遁·用爻'] = Object.assign({ from: useGan, fromName: useName, target: useGan }, one(useGan, useGan));
+  out.ganHe['干合遁·贵神'] = Object.assign({ from: gGan, fromName: '贵神', target: gGan }, one(gGan, gGan));
+  // ② 遁到干合处: 遁到【本干之合】 ——  讲义例 癸卯 → 午
+  out.ganHe['遁到干合处·用爻'] = Object.assign({ from: useGan, fromName: useName, target: he(useGan) }, one(useGan, he(useGan)));
+  out.ganHe['遁到干合处·贵神'] = Object.assign({ from: gGan, fromName: '贵神', target: he(gGan) }, one(gGan, he(gGan)));
+  // ③ 遁走失方位: 将干之合 —— 讲义例 庚 → 酉
+  out.ganHe['遁走失方位'] = Object.assign({ from: jGan, fromName: '将神', target: he(jGan) }, one(jGan, he(jGan)));
+  // ④ 遁工作方位: 贵神本干 —— 讲义例 戊申 → 午
+  out.ganHe['遁工作方位'] = Object.assign({ from: gGan, fromName: '贵神', target: gGan }, one(gGan, gGan));
+  // ⑤ 遁人元: 地分不变, 以【人元自己的天干】起五子元遁, 取地分支处的天干
+  //   讲义例(课例8): 原人元壬, 地分申 → 丁壬庚子起, 申处得戊 → 新人元戊
+  //   (注: 若用日干遁地分只会得到原人元本身, 无信息量)
+  const dfIdx = cur.difenIdx;
+  out.dunRenYuan = { difen: cur.difenZhi, via: cur.renYuan,
+    newGan: QM.GAN[(JK_DUN[QM.GAN.indexOf(cur.renYuan) % 5] + dfIdx) % 10], oldGan: cur.renYuan };
+  return out;
+}
+window.jinkoujueDun = jinkoujueDun;
+
+/* ══════ 高级起课法 · 地分三式（讲义 L102-103, 课例实证）══════
+   讲义：「一般以其属相起课，再就是报数字，方位法，取外应，抽签，心动法……法无定法」
+   课例反推的量化换算(零反例):
+     属相 → 直接取该属相地支
+     报数 n → 地支 (n-1) mod 12  |  天干 (n-1) mod 10   (7→午/庚, 3→寅, 12→乙, 4→卯)
+     笔画 n → 地支 n mod 12                              («美美»16画→卯)
+*/
+function jinkoujueDifenFrom(kind, n) {
+  const N = parseInt(n, 10);
+  if (kind === 'shengxiao') return { difenIdx: ((N % 12) + 12) % 12, how: '属相' };   // 入参即地支索引(子=0..亥=11)
+  if (kind === 'baoshu')    return { difenIdx: (((N - 1) % 12) + 12) % 12, ganIdx: (((N - 1) % 10) + 10) % 10, how: '报数' };
+  if (kind === 'bihua')     return { difenIdx: (((N - 1) % 12) + 12) % 12, how: '笔画' };   // 16画→卯
+  return null;
+}
+/* 报数化天干(先起人元法用) */
+function _jkNumToGan(n) { return (((parseInt(n, 10) - 1) % 10) + 10) % 10; }
+/* 报数化地支(先起贵神/将神法用) */
+function _jkNumToZhi(n) { return (((parseInt(n, 10) - 1) % 12) + 12) % 12; }
+/* 以某个天干起五子元遁, 反查该天干(自身)落于何支 —— 用于先起人元法 */
+function _jkGanToDifen(ganChar, viaGan) {
+  const t = QM.GAN.indexOf(ganChar), gi = QM.GAN.indexOf(viaGan);
+  for (let z = 0; z < 12; z++) if ((JK_DUN[gi % 5] + z) % 10 === t) return z;
+  return -1;
+}
+
+/* ══════ 高级起课法 · 隐课法 / 课中课（讲义 L353-354）══════
+   原文：「先起出普通一课后以用爻做地分重新起一课。原来的四柱不变。只是增加断课的
+   信息量，找出用爻以外的信息。」 */
+function jinkoujueYinKe(opt) {
+  const ch = jinkoujueChart(opt);
+  if (!ch) return null;
+  const cur = ch.cur;
+  const newDf = (ch.yongwei === 2) ? QM.ZHI.indexOf(cur.guiGanZhi[1]) : cur.jiangZhiIdx;
+  const sub = jinkoujueChart(Object.assign({}, opt, { difen: newDf }));
+  return { base: ch, yongWei: ch.yongwei === 2 ? '贵神' : '将神',
+           yongZhi: QM.ZHI[newDf], newDifenIdx: newDf, yin: sub };
+}
+
+/* ══════ 高级起课法 · 六亲课（讲义 L670-696）══════
+   原文：「六亲课也属于课中课的一种……以用神为我」，按十神取六亲后另取地分重起, 四柱不变。
+   讲义两例可反推取舍规则:
+     用神亥(阴水) 求妻 → 我克者为财 → 水克火 → 取【午】(阳火, 与亥异性 → 正财=妻)
+     用神亥(阴水) 求母 → 生我者为印 → 金生水 → 取【申】(阳金, 与亥异性 → 正印=母)
+   即: 先定六亲所属五行(生我=父母/同我=兄弟/我生=子孙/我克=妻财/克我=官鬼),
+       再在该五行的两支中按【与用神地支异性】取正亲(正财/正印/正官…), 同性取偏。
+*/
+const JK_LIUQIN = {
+  fumu:  { name: '父母', rel: 'shengWo' }, xiongdi: { name: '兄弟', rel: 'tongWo' },
+  zisun: { name: '子孙', rel: 'woSheng' }, qicai: { name: '妻财', rel: 'woKe' },
+  guangui:{ name: '官鬼', rel: 'keWo' }
+};
+function jinkoujueLiuQin(opt, qinKey) {
+  const ch = jinkoujueChart(opt);
+  if (!ch) return null;
+  const cur = ch.cur;
+  const myIdx = (ch.yongwei === 2) ? QM.ZHI.indexOf(cur.guiGanZhi[1]) : cur.jiangZhiIdx;
+  const myIdxGan = (ch.yongwei === 2) ? QM.GAN.indexOf(cur.guiGanZhi[0]) : QM.GAN.indexOf(cur.jiangGanZhi[0]);
+  const myWx = JK_ZHI_WX[myIdx];
+  const q = JK_LIUQIN[qinKey]; if (!q) return null;
+  const rel = q.rel;
+  // 找目标五行编号
+  let target = 0;
+  for (let w = 1; w <= 5; w++) {
+    if (rel === 'shengWo' && _jkSheng(w, myWx)) target = w;
+    if (rel === 'woSheng' && _jkSheng(myWx, w)) target = w;
+    if (rel === 'woKe'    && _jkKe(myWx, w))    target = w;
+    if (rel === 'keWo'    && _jkKe(w, myWx))    target = w;
+    if (rel === 'tongWo'  && w === myWx)        target = w;
+  }
+  const cands = [];
+  for (let z = 0; z < 12; z++) if (JK_ZHI_WX[z] === target) cands.push(z);
+  // 与用神地支异性者优先(正亲), 同性为偏亲
+  const myYin = myIdx % 2 === 1;                      // 索引奇=阴支
+  const pick = cands.find(z => (z % 2 === 1) !== myYin) != null
+    ? cands.find(z => (z % 2 === 1) !== myYin) : cands[0];
+  const sub = jinkoujueChart(Object.assign({}, opt, { difen: pick }));
+  return { base: ch, qin: q.name, myZhi: QM.ZHI[myIdx], myWx: JK_WX_NAME[myWx],
+           targetWx: JK_WX_NAME[target], cands: cands.map(z => QM.ZHI[z]), difen: QM.ZHI[pick],
+           difenIdx: pick, sub: sub };
+}
+
+/* ══════ 高级起课法 · 先起人元法 / 先起贵神法（讲义 L1103-1117）══════
+   先起人元法: 报数 → 天干(报数-1 mod 10) → 以【日干】五子元遁反查该干落支 → 该支为地分
+     讲义例: 丁日报数7(庚) → 丁壬庚子居 → 庚在子 → 地分子
+             丁日报数5(戊) → 数到戊得申     → 地分申
+   先起贵神法: 报数 → 地支(报数-1 mod 12)作贵神 → 日干起贵人分昼夜, 从贵人位按
+     「贵腾朱六勾青空白常玄阴后」找到该神 → 落处即地分
+     讲义例: 丁亥日庚戌时(夜) 报数7(午=朱雀) → 夜贵酉 → 酉起贵人逆行: 申腾蛇 未朱雀 → 地分未
+*/
+function jinkoujueXianQiRenYuan(opt, num) {
+  const ch = jinkoujueChart(opt);
+  if (!ch) return null;
+  const dGan = ch.siZhu[2].charAt(0);
+  const ganChar = QM.GAN[_jkNumToGan(num)];
+  const df = _jkGanToDifen(ganChar, dGan);
+  const sub = df >= 0 ? jinkoujueChart(Object.assign({}, opt, { difen: df })) : null;
+  return { base: ch, num: num, gan: ganChar, viaGan: dGan, difen: df >= 0 ? QM.ZHI[df] : '',
+           difenIdx: df, sub: sub };
+}
+function jinkoujueXianQiGuiShen(opt, num) {
+  const ch = jinkoujueChart(opt);
+  if (!ch) return null;
+  const dGan = ch.siZhu[2].charAt(0);
+  const hZ = QM.ZHI.indexOf(ch.siZhu[3].charAt(1));
+  const zhi = _jkNumToZhi(num);
+  const shenIdx = JK_GR_ZHI.indexOf(zhi);              // 本位支→该贵神序号
+  const isDay = (hZ >= 3 && hZ <= 9);
+  const grPair = QM.GR_TAB[dGan] || [1, 7];
+  const grZ = grPair[isDay ? 0 : 1];
+  const dir = [11,0,1,2,3,4].indexOf(grZ) >= 0 ? 1 : -1;
+  // 从贵人位按顺序数, 找到 shenIdx 号贵神所落之支
+  // 顺行: 神序递增、地支递增; 逆行: 神序递增、地支递减。
+  // 故落支 = 贵人支 + dir * 神序号。讲义例: 丁日庚戌时 夜贵酉(9), 报数7=午=朱雀(序2),
+  // 逆行 → 9 - 2 = 7 = 未 ✓
+  const df = ((grZ + dir * shenIdx) % 12 + 12) % 12;
+  const sub = df >= 0 ? jinkoujueChart(Object.assign({}, opt, { difen: df })) : null;
+  return { base: ch, num: num, wantShen: JK_GUISHEN[shenIdx], wantZhi: QM.ZHI[zhi],
+           guiRenZhi: QM.ZHI[grZ], dayNight: isDay ? '昼' : '夜', dir: dir === 1 ? '顺行' : '逆行',
+           difen: df >= 0 ? QM.ZHI[df] : '', difenIdx: df, sub: sub };
+}
+window.jinkoujueDifenFrom = jinkoujueDifenFrom;
+window.jinkoujueYinKe = jinkoujueYinKe;
+window.jinkoujueLiuQin = jinkoujueLiuQin;
+window.jinkoujueXianQiRenYuan = jinkoujueXianQiRenYuan;
+window.jinkoujueXianQiGuiShen = jinkoujueXianQiGuiShen;
+
+
 /* 刷新前若记录了待切换的盘型, 这里自动切过去, 用户不必再点一次 */
 function _jkResumePan() {
   let t = 0;
