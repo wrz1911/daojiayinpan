@@ -1727,11 +1727,8 @@ function renderXinpan(useBg) {
     '<TD><div class="btn" id="btn3" onclick="tianmenDihu()">天门地户</div></TD>' +
     '<TD><div class="btn" id="btn2" onclick="showState()">长生状态</div></TD>' +
     '</TR></TABLE>' +
-    // 心盘同样提供金口诀
+    // 心盘只在"长生状态"右边加一个金口诀按钮(地八神/人八神/玄女16诀是时盘专用, 不加)
     '<TABLE id="btnTable3"><TR>' +
-    '<TD><div class="btn" id="btnDiShen" onclick="toggleDiBaShen()">地八神</div></TD>' +
-    '<TD><div class="btn" id="btnRenShen" onclick="toggleRenBaShen()">人八神</div></TD>' +
-    '<TD><div class="btn" id="btnXuanNv" onclick="xuanNv16()">玄女16诀</div></TD>' +
     '<TD><div class="btn" id="btnJinKou" onclick="toggleJinKouJue()">金口诀</div></TD>' +
     '</TR></TABLE>' +
     '<div id="yixinghuandouDIV"></div>';
