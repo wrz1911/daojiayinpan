@@ -1097,18 +1097,20 @@ function _jkCenter(chart) {
   const col = n => wx[JK_WX_NAME[n]] || '';
   const use = n => chart.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold;margin-left:3px">用</span>' : '';
   const wsc = { '旺':'var(--wx-huo)', '相':'var(--wx-mu)', '休':'var(--c-text-3)', '囚':'var(--c-text-3)', '死':'var(--c-text-4)' };
-  const row = (k, a, b, ws) => '<tr style="height:26px">' +
+  // 用爻标记排在"旺相休囚死"之后
+  const row = (k, a, b, ws, useMark) => '<tr style="height:26px">' +
     '<td style="width:42px;color:var(--c-theme);font-weight:bold;text-align:right;padding-right:5px;white-space:nowrap">' + k + '</td>' +
     '<td style="min-width:50px;text-align:center;white-space:nowrap">' + a + '</td>' +
     '<td style="min-width:56px;text-align:left;white-space:nowrap">' + (b || '') + '</td>' +
-    '<td style="width:22px;color:' + (wsc[ws] || 'var(--c-text-3)') + ';text-align:left;padding-left:4px">' + ws + '</td></tr>';
+    '<td style="width:20px;color:' + (wsc[ws] || 'var(--c-text-3)') + ';text-align:left;padding-left:4px">' + ws + '</td>' +
+    '<td style="width:20px;text-align:left">' + (useMark || '') + '</td></tr>';
   return '<div style="height:100%;display:flex;align-items:center;justify-content:center">' +
     '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' +
       row('人元', '<span class="' + col(c.renWx) + '">' + c.renYuan + '</span>', '', c.renWs) +
       row('贵神', '<span class="' + col(c.guiWx) + '">' + c.guiGanZhi + '</span>',
-          '<span style="color:var(--c-gold)">' + c.guiShen + '</span>' + use(2), c.guiWs) +
+          '<span style="color:var(--c-gold)">' + c.guiShen + '</span>', c.guiWs, use(2)) +
       row('将神', '<span class="' + col(c.jiangWx) + '">' + c.jiangGanZhi + '</span>',
-          '<span style="color:var(--c-gold)">' + c.jiangShen + '</span>' + use(3), c.jiangWs) +
+          '<span style="color:var(--c-gold)">' + c.jiangShen + '</span>', c.jiangWs, use(3)) +
       row('地分', '<span class="' + col(JK_ZHI_WX[c.difenIdx]) + '">' + c.difenZhi + '</span>', '', c.difenWs) +
     '</table></div>';
 }
@@ -1123,9 +1125,11 @@ function _jkPick(idx) {
     if (ctr) ctr.innerHTML = _jkCenter(chart);
     const info = document.getElementById('jkInfo');
     if (info) info.innerHTML = _jkInfoHtml(chart);
-    document.querySelectorAll('#jinkoujueDIV [data-jk]').forEach(el => {
-      el.style.background = (+el.getAttribute('data-jk') === idx) ? 'var(--c-gray-bg)' : '';
-    });
+    // 先清掉全部高亮, 再标记当前宫 —— 用 class 而非 inline style,
+    // 避免切换后宫位残留底色与内容叠在一起
+    document.querySelectorAll('#jinkoujueDIV [data-jk]').forEach(el => el.classList.remove('jk-sel'));
+    const selEl = document.querySelector('#jinkoujueDIV [data-jk="' + idx + '"]');
+    if (selEl) selEl.classList.add('jk-sel');
     const sel = document.getElementById('jkDifen');
     if (sel) sel.value = String(idx);
   } catch (e) { _logErr('jkPick', e && e.message); }
@@ -1192,8 +1196,12 @@ function toggleJinKouJue(noScroll) {
     let cells = '';
     for (const k of order) {
       if (k < 0) {
-        cells += '<div id="jkCenter" style="grid-row:2/4;grid-column:2/4;overflow:hidden;' +
-          'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' + _jkCenter(chart) + '</div>';
+        // -1 生成中宫(跨 2x2); -2 只是占位标记, 不生成元素
+        // —— 早先两个负值都进了这个分支, 页面上出现两个 #jkCenter 叠在一起
+        if (k === -1) {
+          cells += '<div id="jkCenter" style="grid-row:2/4;grid-column:2/4;overflow:hidden;' +
+            'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' + _jkCenter(chart) + '</div>';
+        }
       } else { cells += one(byIdx[k]); }
     }
     // ── 辅助：原生选项控件(同顶栏) / 表格单元格 / 下拉样式 / 信息栏 ──
