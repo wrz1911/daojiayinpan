@@ -148,13 +148,19 @@ window.chuanRenChart= opts => {
     juNum=((yI%12+1)+lM2+ld.getDay()+(hI%12+1))%9;if(juNum===0)juNum=9;
     juLabel=(isY2?'阴遁':'阳遁')+juNum+'局';
     let GAN9='戊己庚辛壬癸丁丙乙';
-    let juMap={};for(let i=0;i<9;i++){let g=isY2?juNum-i:juNum+i;if(g>9)g-=9;if(g<1)g+=9;if(g!==5)juMap[g]=GAN9[i];}
+    let juMap={};for(let i=0;i<9;i++){let g=isY2?juNum-i:juNum+i;if(g>9)g-=9;if(g<1)g+=9;juMap[g]=GAN9[i];}
     // 值符/值使用已计算的时柱旬首(六甲遁于六仪)
     let hiddenGan=['戊','己','庚','辛','壬','癸'][xsIdxH/10%6]; // 六甲所遁之干
     _xunShou='甲'+Z[xsIdxH%12]+hiddenGan; // 格式: 甲申庚
-    let dgGong=0;for(let g2=1;g2<=9;g2++){if(g2===5)continue;if(juMap[g2]===hiddenGan){dgGong=g2;break;}}
+    // 旬首仪落宫 —— **中宫(5)必须参与匹配**: 六仪飞布时中宫同样有一干; 若跳过宫5,
+    // 旬首仪在中宫时 dgGong 恒为 0, 下面的 dgGong===5 分支永不执行, 退化成
+    // FZ2[1] 得到值符"蓬"/值使"休"(错)。参照实现 chuanrenPan.js 的写法:
+    //   var zhiShiGong = 5==zhiFuGong ? 2 : zhiFuGong;
+    //   $("#zhiFu").html(jiuXing[zhiFuGong]);   // jiuXing[5]='禽', 值符不做替换
+    //   $("#zhiShi").html(baMen[zhiShiGong]);   // 值使寄坤2 → '死'
+    let dgGong=0;for(let g2=1;g2<=9;g2++){if(juMap[g2]===hiddenGan){dgGong=g2;break;}}
     let XN2=' 蓬任冲辅英芮柱心',MN2=' 休生伤杜景死惊开',FZ2=[0,1,6,3,4,6,8,7,2,5];
-    if(dgGong===5){zfVal='天禽星';zsVal=MN2[5]+'门';}
+    if(dgGong===5){zfVal='天禽星';zsVal='死门';} // 宫5: 值符取本位星「禽」, 值使寄坤2取「死」
     else{let zfI=dgGong===0?1:FZ2[dgGong];zfVal='天'+XN2[zfI]+'星';zsVal=MN2[zfI]+'门';}
   }catch(e){juLabel=''}
 
