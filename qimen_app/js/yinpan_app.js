@@ -1194,13 +1194,13 @@ function toggleJinKouJue(noScroll) {
     }
     // ── 输入区：多行单选（照热卜版式） ──
     const radio = (on, txt, click) =>
-      '<span onclick="' + click + '" style="display:inline-flex;align-items:center;cursor:pointer;margin-left:14px">' +
+      '<span onclick="' + click + '" style="display:inline-flex;align-items:center;cursor:pointer;margin-left:10px">' +
         '<i style="width:19px;height:19px;border-radius:50%;display:inline-block;position:relative;' +
           'border:2px solid ' + (on ? 'var(--c-theme)' : 'var(--c-text-4)') + ';background:' + (on ? 'var(--c-theme)' : 'transparent') + '">' +
           (on ? '<b style="position:absolute;left:3px;top:-4px;color:#fff;font-size:14px;font-weight:normal">✓</b>' : '') +
         '</i><span style="margin-left:6px;font-size:15px">' + txt + '</span></span>';
     const checkbox = (on, txt, click) =>
-      '<span onclick="' + click + '" style="display:inline-flex;align-items:center;cursor:pointer;margin-left:14px">' +
+      '<span onclick="' + click + '" style="display:inline-flex;align-items:center;cursor:pointer;margin-left:10px">' +
         '<i style="width:19px;height:19px;border-radius:4px;display:inline-block;position:relative;' +
           'border:2px solid ' + (on ? 'var(--c-theme)' : 'var(--c-text-4)') + ';background:' + (on ? 'var(--c-theme)' : 'transparent') + '">' +
           (on ? '<b style="position:absolute;left:3px;top:-4px;color:#fff;font-size:14px;font-weight:normal">✓</b>' : '') +
@@ -1211,16 +1211,24 @@ function toggleJinKouJue(noScroll) {
       '<span style="font-size:15px;color:var(--c-text-2)">' + label + '</span>' +
       '<span style="display:flex;align-items:center;white-space:nowrap">' + right + '</span></div>';
     const inputArea =
-      jkRow('选择地分',
-        '<select id="jkDifen" onchange="_jkSet({difen:parseInt(this.value,10)})" style="background:var(--c-btn-gray);color:var(--c-text);' +
-          'border:1px solid var(--c-border);border-radius:4px;padding:4px 8px;font-size:15px;min-width:74px;text-align:center">' +
-          QM.ZHI.map(function(z,i){ return '<option value="' + i + '"' + (i === curIdx ? ' selected' : '') + '>' +
-            (_jkDfType === 2 ? (i + 1) : z) + '</option>'; }).join('') +
-        '</select>' +
-        checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})')) +
-      jkRow('换将方式',
-        radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})') +
-        radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})')) +
+      // 选择地分 与 换将方式 合并为一行
+      '<div style="display:flex;align-items:center;flex-wrap:wrap;row-gap:6px;justify-content:space-between;' +
+      'padding:11px 6px;border-bottom:1px solid var(--c-border)">' +
+        '<span style="display:flex;align-items:center">' +
+          '<span style="font-size:15px;color:var(--c-text-2)">选择地分</span>' +
+          '<select id="jkDifen" onchange="_jkSet({difen:parseInt(this.value,10)})" style="margin-left:8px;background:var(--c-btn-gray);color:var(--c-text);' +
+            'border:1px solid var(--c-border);border-radius:4px;padding:4px 6px;font-size:15px;min-width:62px;text-align:center">' +
+            QM.ZHI.map(function(z,i){ return '<option value="' + i + '"' + (i === curIdx ? ' selected' : '') + '>' +
+              (_jkDfType === 2 ? (i + 1) : z) + '</option>'; }).join('') +
+          '</select>' +
+          checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})') +
+        '</span>' +
+        '<span style="display:flex;align-items:center">' +
+          '<span style="font-size:15px;color:var(--c-text-2)">换将方式</span>' +
+          radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})') +
+          radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})') +
+        '</span>' +
+      '</div>' +
       jkRow('贵人求法',
         radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})') +
         radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})')) +
