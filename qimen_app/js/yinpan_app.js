@@ -376,7 +376,7 @@ function doPan() {
   window.Y=Y; window.M=M; window.D=D; window.hr=hr; window.mn=mn;
   /* 切盘时清掉三个开关的残留状态: 下面各盘型分支会提前 return, 不在这里清的话
      (比如)时盘开过"年神将"→切命理→切回时盘, 按钮要点两次才生效。 */
-  _tmdhShow=false; _shenShow=0; _stateShowing=false; _diShenShow=false; _renShenShow=false; _xnShow=false;
+  _tmdhShow=false; _shenShow=0; _stateShowing=false; _diShenShow=false; _renShenShow=false; _xnShow=false; _jkShow=false;
 
 
         // 山向模式: 24山角度→局数/阴阳/黄泉→地盘星门神全算法
@@ -785,7 +785,7 @@ function renderPan(raw, engineData) {
     '<TD><div class="btn" id="btnDiShen" onclick="toggleDiBaShen()">地八神</div></TD>' +
     '<TD><div class="btn" id="btnRenShen" onclick="toggleRenBaShen()">人八神</div></TD>' +
     '<TD><div class="btn" id="btnXuanNv" onclick="xuanNv16()">玄女16诀</div></TD>' +
-    '<TD></TD>' +
+    '<TD><div class="btn" id="btnJinKou" onclick="toggleJinKouJue()">金口诀</div></TD>' +
     '</TR></TABLE>' : '') +
     '<div id="yixinghuandouDIV"></div>';
 
@@ -896,10 +896,92 @@ function _syncToggleBtns() {
     btn2: !!_stateShowing,
     btn3: !!_tmdhShow,
     btn4: _shenShow === 1, btn5: _shenShow === 2, btn6: _shenShow === 3, btn7: _shenShow === 4,
-    btnXuanNv: !!_xnShow
+    btnXuanNv: !!_xnShow,
+    btnJinKou: !!_jkShow
   };
   for (const id in on) { const el = document.getElementById(id); if (el) el.classList.toggle('on', on[id]); }
 }
+
+/* ══════ 金口诀 · 面板（仿"向角度选局"，内嵌在 #result 里） ══════ */
+let _jkShow = false, _jkDifen = null, _jkDayNight = 0, _jkJiang = 0;
+function _jkSet(opt) {
+  if (opt.difen !== undefined) _jkDifen = opt.difen;
+  if (opt.dayNight !== undefined) _jkDayNight = opt.dayNight;
+  if (opt.jiang !== undefined) _jkJiang = opt.jiang;
+  toggleJinKouJue(true);
+}
+function toggleJinKouJue(noScroll) {
+  let div = document.getElementById('jinkoujueDIV');
+  if (!div) {
+    div = document.createElement('div');
+    div.id = 'jinkoujueDIV';
+    div.style.cssText = 'margin-top:12px';
+    const result = document.getElementById('result');
+    if (result) result.appendChild(div);
+  }
+  if (!noScroll && div.style.display === 'block') {
+    div.style.display = 'none'; div.innerHTML = ''; _jkShow = false; _syncToggleBtns(); return;
+  }
+  _jkShow = true; _syncToggleBtns();
+  try {
+    const chart = jinkoujueChart({
+      year: window.Y, month: window.M, day: window.D, hour: window.hr, minute: window.mn,
+      difen: _jkDifen, dayNight: _jkDayNight, jiang: _jkJiang
+    });
+    if (!chart) throw new Error('起课失败');
+    const wxCls = { 水:'wx-shui', 木:'wx-mu', 火:'wx-huo', 土:'wx-tu', 金:'wx-jin' };
+    const wsColor = { '旺':'var(--wx-huo)', '相':'var(--wx-mu)', '休':'var(--c-text-3)', '囚':'var(--c-text-3)', '死':'var(--c-text-4)' };
+    const one = h => {
+      const w = n => wxCls[JK_WX_NAME[n]] || '';
+      return '<div style="border:1px solid var(--c-border);padding:3px 5px;line-height:1.62;font-size:13px">' +
+        '<div><span class="' + w(h.renWx) + '">' + h.renYuan + '</span>' +
+          '<span style="float:right;color:' + wsColor[h.renWs] + '">' + h.renWs + '</span></div>' +
+        '<div><span class="' + w(h.guiWx) + '">' + h.guiGanZhi + '</span>' +
+          '<span style="float:right;color:var(--c-gold)">' + h.guiShen + '</span></div>' +
+        '<div><span class="' + w(h.jiangWx) + '">' + h.jiangGanZhi + '</span>' +
+          '<span style="float:right;color:var(--c-gold)">' + h.jiangShen + '</span></div>' +
+        '<div><span class="' + w(h.difenWx) + '">' + h.difenZhi + '</span>' +
+          '<span style="float:right;color:' + wsColor[h.difenWs] + '">' + h.difenWs + '</span></div>' +
+        '</div>';
+    };
+    // 十二宫围成 4x4，中宫占中间 2x2
+    // 十二宫按地支方位摆放(上南下北·左东右西): 巳午未申 / 辰…酉 / 卯…戌 / 寅丑子亥
+    const order = [5,6,7,8, 4,-1,9, 3,-2,10, 2,1,0,11];
+    let cells = '';
+    for (const k of order) {
+      if (k < 0) { cells += '<div style="grid-row:2/4;grid-column:2/4;border:1px solid var(--c-border);padding:8px 10px;display:flex;flex-direction:column;justify-content:center;line-height:2;font-size:14px">' +
+        '<div><b style="color:var(--c-theme)">人元</b>　<span class="' + (wxCls[JK_WX_NAME[chart.cur.renWx]]||'') + '">' + chart.cur.renYuan + '</span>　<span style="color:' + wsColor[chart.cur.renWs] + '">' + chart.cur.renWs + '</span></div>' +
+        '<div><b style="color:var(--c-theme)">贵神</b>　' + chart.cur.guiGanZhi + '　<span style="color:var(--c-gold)">' + chart.cur.guiShen + '</span>　<span style="color:' + wsColor[chart.cur.guiWs] + '">' + chart.cur.guiWs + '</span></div>' +
+        '<div><b style="color:var(--c-theme)">将神</b>　' + chart.cur.jiangGanZhi + '　<span style="color:var(--c-gold)">' + chart.cur.jiangShen + '</span>　<span style="color:' + wsColor[chart.cur.jiangWs] + '">' + chart.cur.jiangWs + '</span></div>' +
+        '<div><b style="color:var(--c-theme)">地分</b>　<span class="' + (wxCls[JK_WX_NAME[JK_ZHI_WX[chart.cur.difenIdx]]]||'') + '">' + chart.cur.difenZhi + '</span>　<span style="color:' + wsColor[chart.cur.difenWs] + '">' + chart.cur.difenWs + '</span></div>' +
+        '<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--c-border);font-size:13px"><b style="color:var(--c-theme)">五动</b>　' +
+          (chart.dongs.length ? chart.dongs.join('　') : '—') +
+          '<br><b style="color:var(--c-theme)">三动</b>　' + (chart.sandong.length ? chart.sandong.join('　') : '—') + '</div>' +
+        '</div>';
+      } else { cells += one(chart.houses[k]); }
+    }
+    // 输入区
+    const sel = (id, cur, list, fn) => '<select id="' + id + '" onchange="' + fn + '" style="background:var(--c-btn-gray);color:var(--c-text);border:1px solid var(--c-border);border-radius:4px;padding:2px 6px;font-size:13px">' +
+      list.map(o => '<option value="' + o[0] + '"' + (String(o[0]) === String(cur) ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
+    const head = '<div style="padding:8px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px">' +
+      '<b style="color:var(--c-theme)">金口诀</b>' +
+      '<span style="color:var(--c-text-3)">' + chart.siZhu.join(' ') + '</span>' +
+      '<span>月将 <b style="color:var(--c-gold)">' + chart.yueJiang + chart.yueJiangName + '</b></span>' +
+      '<span>贵神起于 <b>' + chart.guiRenZhi + '</b>（' + chart.guiRenDir + '行·' + chart.dayNight + '贵）</span>' +
+      '<span>地分 ' + sel('jkDifen', chart.cur.difenIdx, QM.ZHI.map((z,i)=>[i,z]), '_jkSet({difen:parseInt(this.value)})') + '</span>' +
+      '<span>昼夜 ' + sel('jkDay', _jkDayNight, [[0,'自动'],[1,'昼'],[2,'夜']], '_jkSet({dayNight:parseInt(this.value)})') + '</span>' +
+      '<span>换将 ' + sel('jkJiang', _jkJiang, [[0,'中气'],[1,'交节']], '_jkSet({jiang:parseInt(this.value)})') + '</span>' +
+      '</div>';
+    div.innerHTML = head + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px">' + cells + '</div>';
+    div.style.display = 'block';
+    if (!noScroll) setTimeout(() => { const r = document.getElementById('jinkoujueDIV'); if (r) r.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
+  } catch (e) {
+    div.innerHTML = '<div style="color:red;padding:8px">金口诀错误: ' + (e && e.message) + '</div>';
+    div.style.display = 'block';
+  }
+}
+window.toggleJinKouJue = toggleJinKouJue;
+window._jkSet = _jkSet;
 
 function toggleDiBaShen() {
   _diShenShow = !_diShenShow;
@@ -1418,6 +1500,125 @@ function tianmenDihu() {
   }, 600);
   }catch(e){tip.innerHTML='<span style=color:red>天门地户错误:'+e.message+'</span>';}
 }
+
+/* ══════════════════ 金口诀（大金口） ══════════════════
+   把六壬的四课三传压成"四位"：人元（日干遁干）、贵神、将神、地分。
+   这里的做法对齐易瑞笔记的呈现 —— 十二个地分全部起课，外围十二宫，
+   中宫列四位本体（当前地分那一课）。
+
+   起例（已用实盘反推核对）：
+     月将  按【中气】过宫：节气序 0=冬至，中气序 = floor(序/2)，月将 = 六合[中气序]
+     将神  月将加时 —— 从时支起月将，顺数到地分
+     贵神  日干起贵人（昼贵/夜贵），贵人落地盘亥子丑寅卯辰者顺行、巳午未申酉戌者逆行，
+           从贵人起十二贵神数到地分
+     人元  五子元遁：日干 → 该日干"子时"的天干，顺数到地分
+     干支  将神、贵神所乘的天干，同样走五子元遁（与其地支相配）
+     旺衰  按当令五行判旺相休囚死 */
+const JK_GUISHEN = ['贵人','螣蛇','朱雀','六合','勾陈','青龙','天空','白虎','太常','玄武','太阴','天后'];
+/* 十二贵神本位支(丑巳午卯辰寅戌申未子酉亥)。起课得的是"贵人顺逆数至地分"的神名,
+   而各神另有固定本位 —— 盘面显示本位干支, 与乘支是两回事。 */
+const JK_GR_ZHI = [1,5,6,3,4,2,10,8,7,0,9,11];
+const JK_JIANG   = ['神后','大吉','功曹','太冲','天罡','太乙','胜光','小吉','传送','从魁','河魁','登明'];
+const JK_WX_NAME = { 1:'水', 2:'木', 3:'火', 4:'土', 5:'金' };
+const JK_ZHI_WX  = [1,4,2,2,4,3,3,4,5,5,4,1];   // 子丑寅卯辰巳午未申酉戌亥 → 水土木木土火火土金金土水
+
+/* 当令五行：春木、夏火、秋金、冬水、四季末(辰未戌丑月)土 → 返回 [旺,相,休,囚,死] */
+function _jkSeasonWx(monthZhiIdx) {
+  if (monthZhiIdx >= 2 && monthZhiIdx <= 4) return [2,3,1,5,4];    // 寅卯辰 春
+  if (monthZhiIdx >= 5 && monthZhiIdx <= 7) return [3,4,2,1,5];    // 巳午未 夏
+  if (monthZhiIdx >= 8 && monthZhiIdx <= 10) return [5,1,4,3,2];   // 申酉戌 秋
+  return [1,2,5,4,3];                                              // 亥子丑 冬
+}
+function _jkWangShuai(wx, monthZhiIdx) {
+  const t = _jkSeasonWx(monthZhiIdx);
+  if (wx === t[0]) return '旺';
+  if (wx === t[1]) return '相';
+  if (wx === t[2]) return '休';
+  if (wx === t[3]) return '囚';
+  return '死';
+}
+/* 五行生克：a 是否克 b */
+function _jkKe(a, b) { return (a === 2 && b === 4) || (a === 4 && b === 1) || (a === 1 && b === 3) || (a === 3 && b === 5) || (a === 5 && b === 2); }
+function _jkSheng(a, b) { return (a === 2 && b === 3) || (a === 3 && b === 4) || (a === 4 && b === 5) || (a === 5 && b === 1) || (a === 1 && b === 2); }
+
+/* 五子元遁：日干索引 → 子时所起天干 */
+const JK_DUN = [0, 2, 4, 6, 8];
+function _jkDun(dGanIdx, zhiIdx) { return (JK_DUN[dGanIdx % 5] + zhiIdx) % 10; }
+
+/* 排一课。opt = {year,month,day,hour,minute, dayNight:0自动/1昼/2夜, jiang:0中气(标准)/1交节} */
+function jinkoujueChart(opt) {
+  const tyme = window.tyme || {};
+  if (!tyme.SolarTime) return null;
+  const st = tyme.SolarTime.fromYmdHms(opt.year, opt.month, opt.day, opt.hour, opt.minute, 0);
+  const sch = st.getSixtyCycleHour();
+  const yGzO = sch.getYear(), mGzO = sch.getMonth(), dGzO = sch.getDay(), hGzO = sch.getSixtyCycle();
+  const dG = dGzO.getHeavenStem().getIndex();
+  const hZ = hGzO.getEarthBranch().getIndex();
+  const mZ = mGzO.getEarthBranch().getIndex();
+
+  // 月将。中气换将(标准): 节气序 0=冬至, 中气序 = floor(序/2) → 月将 = 六合[中气序]
+  //        交节换将(简法): 月将 = 月建的六合, 月建 = (序-3)/2+2
+  const tt = st.getTerm();
+  const ti = ((tt.getIndex() % 24) + 24) % 24;
+  const yueJian = Math.floor((ti - 3) / 2) + 2;
+  const jiangZ = opt.jiang === 1 ? QM.HE[((yueJian % 12) + 12) % 12] : QM.HE[Math.floor(ti / 2)];
+  // 昼夜：卯(3)~酉(9) 为昼
+  const isDay = opt.dayNight === 1 ? true : opt.dayNight === 2 ? false : (hZ >= 3 && hZ <= 9);
+  // 贵人：QM.GR_TAB[日干] = [昼贵, 夜贵]
+  const grPair = QM.GR_TAB[QM.GAN[dG]] || [1, 7];
+  const grZ = grPair[isDay ? 0 : 1];
+  // 顺逆：贵人落地盘 亥子丑寅卯辰 顺行，巳午未申酉戌 逆行
+  const dir = [11, 0, 1, 2, 3, 4].indexOf(grZ) >= 0 ? 1 : -1;
+
+  const houses = [];
+  for (let df = 0; df < 12; df++) {
+    const jsZ = ((jiangZ + df - hZ) % 12 + 12) % 12;                  // 将神地支
+    const steps = ((df - grZ) % 12 + 12) % 12;
+    const gsIdx = dir === 1 ? steps : (12 - steps) % 12;              // 贵神序号
+    const gsZ = ((grZ + dir * gsIdx) % 12 + 12) % 12;                // 贵神所乘之支(神在地盘上的落点)
+    const rgIdx = (JK_DUN[dG % 5] + df) % 10;                         // 人元
+    const jsGan = QM.GAN[_jkDun(dG, jsZ)];
+    const gsGan = QM.GAN[_jkDun(dG, gsZ)];
+    const rgGan = QM.GAN[rgIdx];
+    houses.push({
+      difenIdx: df, difenZhi: QM.ZHI[df],
+      renYuan: rgGan, renWx: QM.WX_MAP[rgGan],
+      renWs: _jkWangShuai(QM.WX_MAP[rgGan], mZ),
+      guiShen: JK_GUISHEN[gsIdx],
+      guiGanZhi: QM.GAN[_jkDun(dG, JK_GR_ZHI[gsIdx])] + QM.ZHI[JK_GR_ZHI[gsIdx]],  // 本位干支
+      guiWx: JK_ZHI_WX[JK_GR_ZHI[gsIdx]], guiWs: _jkWangShuai(JK_ZHI_WX[JK_GR_ZHI[gsIdx]], mZ),
+      guiChengZhi: QM.ZHI[gsZ], guiZhiIdx: gsZ,
+      jiangShen: JK_JIANG[jsZ], jiangGanZhi: jsGan + QM.ZHI[jsZ],
+      jiangWx: JK_ZHI_WX[jsZ], jiangWs: _jkWangShuai(JK_ZHI_WX[jsZ], mZ),
+      difenWs: _jkWangShuai(JK_ZHI_WX[df], mZ),
+    });
+  }
+
+  // 中宫：当前地分那一课（默认取时支所在地分）
+  const cur = houses[opt.difen != null ? opt.difen : hZ];
+
+  // 五动（按四位生克，取常见口径）
+  // 五动/三动按【乘支】的五行判(起课结果), 与本位干支无关
+  const rWx = cur.renWx, gWx = JK_ZHI_WX[cur.guiZhiIdx], jWx = cur.jiangWx, dWx = JK_ZHI_WX[cur.difenIdx];
+  const dongs = [], sandong = [];
+  if (_jkKe(gWx, rWx)) dongs.push('鬼动');     // 神克人元
+  if (_jkKe(rWx, gWx)) dongs.push('财动');     // 人元克神
+  if (_jkKe(jWx, rWx)) dongs.push('官动');     // 将克人元
+  if (_jkSheng(gWx, rWx)) dongs.push('父动');  // 神生人元
+  if (_jkSheng(rWx, gWx)) dongs.push('子动');  // 人元生神
+  if (_jkKe(dWx, jWx)) sandong.push('妻动');   // 地分克将
+  if (_jkKe(jWx, dWx)) sandong.push('贼动');   // 将克地分
+  if (gWx === jWx) sandong.push('兄弟动');     // 神将同旺
+
+  return {
+    siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
+    yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ],
+    dayNight: isDay ? '昼' : '夜',
+    guiRenZhi: QM.ZHI[grZ], guiRenDir: dir === 1 ? '顺' : '逆',
+    houses, cur, dongs, sandong,
+  };
+}
+window.jinkoujueChart = jinkoujueChart;
 
 /* ══════════════ 玄女十六字诀 · 文字资料 ══════════════
    长按"玄女16诀"按钮弹出。据《玄女十六字诀》两天讲课记录整理, 尽量不丢细节:
