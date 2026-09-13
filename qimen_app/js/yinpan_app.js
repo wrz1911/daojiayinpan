@@ -1256,13 +1256,15 @@ function toggleJinKouJue(noScroll) {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
       // 干支右对齐 —— 单字与双字末字对齐(人元的"癸"与贵神的"卯"同尾), 仿易瑞
-      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:6px">' +
-        '<span style="flex:0 0 32px;overflow:hidden;text-align:right">' + a + '</span>' +
-        '<span style="flex:0 0 13px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+      // 行高按字号自适应(格子随网格收窄后, 写死 23px 会竖溢)
+      // 列宽留出"用"标记的位置: 52% + 20% 之后余下约 28% 给标记, 不再挤爆
+      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:1.42em;gap:3px">' +
+        '<span style="flex:0 0 52%;overflow:hidden;text-align:right">' + a + '</span>' +
+        '<span style="flex:0 0 20%;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
         ' class="jk-cell' + (isCur ? ' jk-sel' : '') + '"' +
-        ' style="cursor:pointer;padding:7px 2px 3px;font-size:11px;line-height:1.7;overflow:hidden;' +
+        ' style="cursor:pointer;box-sizing:border-box;padding:3px 2px 2px;font-size:var(--jk-cf,11px);line-height:1.25;overflow:hidden;' +
         'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' +
         line('<span class="' + col(h.renWx) + '">' + h.renYuan + '</span>', h.renWs, '') +
         line(wxSpan(h.guiGanZhi), h.guiWs, u(2)) +
@@ -1346,7 +1348,11 @@ function toggleJinKouJue(noScroll) {
       '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
     div.innerHTML = infoTbl + inputArea +
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;' +
+      // 外圈(第1/4列行)收窄, 中间(第2/3列行)放宽 —— 十二宫变小, 中宫随之变大
+      // min-height 按字号给足 —— 否则窄屏下网格被压扁, 十二宫四行放不下
+      '<div style="display:grid;gap:0;' +
+      'grid-template-columns:0.82fr 1.18fr 1.18fr 0.82fr;' +
+      'grid-template-rows:repeat(4,minmax(calc(var(--jk-cf,11px) * 6.4),auto));' +
       'border-top:1px solid var(--c-border);border-left:1px solid var(--c-border)">' + cells + '</div>' +
       '<div id="jkInfo" style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
       _jkInfoHtml(chart) + '</div>';
@@ -1962,6 +1968,8 @@ function _jkFitFont() {
     const cl = (lo, hi, v) => Math.max(lo, Math.min(hi, v));
     document.documentElement.style.setProperty('--jk-fs', cl(9.5, 13.5, w * 0.0335).toFixed(1) + 'px');   // 中宫
     document.documentElement.style.setProperty('--jk-if', cl(9.5, 13, w * 0.0305).toFixed(1) + 'px');     // 输入区
+    // 十二宫: 格子宽约为视口的 0.82/4, 字号随格子宽度缩放
+    document.documentElement.style.setProperty('--jk-cf', cl(8, 12, w * 0.205 * 0.135).toFixed(1) + 'px');
   } catch (e) { _logErr('jkFitFont', e && e.message); }
 }
 window._jkFitFont = _jkFitFont;
