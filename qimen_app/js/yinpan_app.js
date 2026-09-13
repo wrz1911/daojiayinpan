@@ -1150,9 +1150,11 @@ function _jkCenter(chart) {
     const ms = marks.filter(Boolean);
     // 各列固定宽度 —— 点击 12 宫切换内容时, 四位/干支/旺衰的横向位置不跟着漂移。
     // 标记区 nowrap + 略小字号: 避免"四空·干"换行撑高行距, 各行间距才均匀。
-    return '<div style="display:flex;align-items:baseline;height:23px;gap:6px">' +
+    // 干支右对齐(末字对齐), 列宽仅容两字 —— 单字行的右侧空档因此只有一字之宽,
+    // 标签不会被推远; 相当于用一段不可见的占位框线撑住右对齐
+    return '<div style="display:flex;align-items:baseline;height:23px;gap:4px">' +
       '<span style="flex:0 0 40px;font-weight:bold;text-align:right">' + k + '</span>' +
-      '<span style="flex:0 0 46px;text-align:left">' + a + '</span>' +
+      '<span style="flex:0 0 32px;text-align:right">' + a + '</span>' +
       '<span style="flex:0 0 18px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
       (ms.length ? '<span style="flex:1 1 auto;font-size:11.5px;white-space:nowrap;overflow:hidden;' +
         'text-overflow:ellipsis">' + ms.join(' ') + '</span>' : '') +
