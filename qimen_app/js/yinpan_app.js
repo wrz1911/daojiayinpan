@@ -184,6 +184,11 @@ function clearXinpan() {
   renderXinpan(true);
 }
 function setPanType(t) {
+  // 金口诀只在时盘(1)与心盘(3)可用。切到其它盘型时若金口诀面板还开着, 直接刷新
+  // 页面, 避免残留面板与新盘型混在一起(setPanType 先于 doPan 执行, 故守卫放这里)
+  if (t !== 1 && t !== 3 && (document.getElementById('jinkoujueDIV') || _jkShow)) {
+    location.reload(); return;
+  }
   panType = t;
   _saveMode = t===1?'shi':t===2?'ke':t===3?'xin':t===4?'shanxiang':t===5?'chuanren':'mingli';
   _renderBottomBar();
@@ -364,6 +369,12 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
 
 function doNewPan(zxjus) { let o={year:Y,month:M,day:D,hour:hr,minute:mn,panType:panType}; if(zxjus){let i=parseInt(selZxj.value)||0;if(i>0){let t=i-1;o.customJu=t<9?{yinYang:"阴",number:9-t}:{yinYang:"阳",number:t-8};}} return window.qimenChart(o); }
 function doPan() {
+  // 金口诀只在时盘(1)与心盘(3)可用; 切到其它盘型时直接刷新页面,
+  // 避免残留的金口诀面板与新盘型混在一起
+  if (typeof panType !== 'undefined' && panType !== 1 && panType !== 3) {
+    if (document.getElementById('jinkoujueDIV') || _jkShow) { location.reload(); return; }
+  }
+
   // 从DOM下拉框读取用户选择的年月日时分
   Y = parseInt(selY.value) || now.getFullYear();
   M = parseInt(selM.value) || 6;
@@ -780,7 +791,7 @@ function renderPan(raw, engineData) {
     '<TD><div class="btn" id="btn7" onclick="shen12(4)">时神将</div></TD>' +
     '</TR></TABLE>') +
     // 地八神: 时盘专用, 排在年神将下方
-    (panType===1 ?
+    ((panType===1 || panType===3) ?
     '<TABLE id="btnTable3"><TR>' +
     '<TD><div class="btn" id="btnDiShen" onclick="toggleDiBaShen()">地八神</div></TD>' +
     '<TD><div class="btn" id="btnRenShen" onclick="toggleRenBaShen()">人八神</div></TD>' +
@@ -1715,6 +1726,13 @@ function renderXinpan(useBg) {
     '<TD><div class="btn" id="btn1" onclick="showYixing()">移星换斗</div></TD>' +
     '<TD><div class="btn" id="btn3" onclick="tianmenDihu()">天门地户</div></TD>' +
     '<TD><div class="btn" id="btn2" onclick="showState()">长生状态</div></TD>' +
+    '</TR></TABLE>' +
+    // 心盘同样提供金口诀
+    '<TABLE id="btnTable3"><TR>' +
+    '<TD><div class="btn" id="btnDiShen" onclick="toggleDiBaShen()">地八神</div></TD>' +
+    '<TD><div class="btn" id="btnRenShen" onclick="toggleRenBaShen()">人八神</div></TD>' +
+    '<TD><div class="btn" id="btnXuanNv" onclick="xuanNv16()">玄女16诀</div></TD>' +
+    '<TD><div class="btn" id="btnJinKou" onclick="toggleJinKouJue()">金口诀</div></TD>' +
     '</TR></TABLE>' +
     '<div id="yixinghuandouDIV"></div>';
 
