@@ -177,6 +177,12 @@
   - GitHub Secrets **两个都要改**: `KEYSTORE_PASSWORD`(新口令) **和 `KEYSTORE_BASE64`** —— 因为 `keytool -storepasswd` 会**重新写入 keystore 文件**, base64 内容随之变化, 只改口令会让 CI 拿到"新口令 + 旧文件"而必然失败。
   - 改 Secrets 时遇到 GitHub API 连续返回 502/500, 属临时故障, **重试即成功**(务必检查 `gh secret set` 的退出码, 别用无条件的 `echo done` 掩盖失败)。
   **⑤ 纪律**: 口令**只**写在 `android/gradle.properties` 与 GitHub Secrets, **绝不进任何入库文件** —— 包括 AGENTS.md 这类"记忆文件"(本次泄露正是记进 AGENTS.md 造成的)。AGENTS.md 只记录"已轮换"这一事实, 不记录口令值。
+- 2026-09-13(十六)**补全 MIT 许可声明**(用户要求"补充 mit 许可 tyme 补全")。核查出**三处缺失**:
+  ① **`tyme4j/` 被 `.gitignore` 忽略 ⇒ `tyme4j/LICENSE` 从未入库** —— 也就是分发产物里**没有任何 tyme4ts 的许可文本**。而上游 tyme4ts 虽在 `package.json` 标了 `"license": "MIT"`,其 **dist 产物自身不含版权头**(`tyme4j/dist/index.js` 以 `"use strict";` 开头),所以不能指望它自带。→ 复制为 **`licenses/tyme4ts-LICENSE`** 入库(该路径不被忽略)。
+  ② `qimen_app/js/tyme4j-browser.js`(tyme4ts 的浏览器构建产物,300749 字节)顶部无任何版权声明 → 补 **390 字节 MIT banner**(含库名/版本/仓库地址/`Copyright (c) 2024 6tail`/许可指引)。
+  ③ `qimen_app/js/qimen_bundle.min.js` 无版权头 → `scripts/build_bundle.sh` 增加 banner 拼接,**同时含本项目与 tyme4ts 双方声明**。踩坑: **esbuild 会把 legal comment 挪到文件末尾**, 且 **stdin 管道模式不支持 `--banner:js`**, 故改为**压缩完成后再把 banner 前置拼接**;banner 里的版本号从 `yinpan_app.js` 的 `APP_VERSION` 自动抽取。
+  另补 `package.json` 的 `"license": "MIT"`;README「开源声明」段补充 `licenses/` 目录指引与产物版权说明。
+  ⚠️ **注意**: 本次补全是在 v1.3.11 的 CI 构建**已触发之后**推送的, 所以 **v1.3.11 的构建产物里不含这些 banner**, 下次发布(v1.3.12 起)才会带上。bundle 146868 → 147225 字节, 功能与版本号验证正常。
 - 2026-09-13(九续附)**与热卜对照时的通用注意事项**(踩过多次, 汇总):
   ⓐ 结果页元素 id 与列含义**错位** —— 山向页 `id="nianzhu"` 实为月柱、`yuezhu`→日柱、`rizhu`→时柱(刻盘时 `shizhu` 为刻柱); 勿按字面理解。
   ⓑ 阴盘页只有 `#ma1`~`#ma4` 四个马星位, 其 `maXingPos∈1..4` 是**四角编号**(1=巽4左上 2=坤2右上 3=艮8左下 4=乾6右下), 我们给宫位编号, 换算表 `{4:1,2:2,8:3,6:4}`。
