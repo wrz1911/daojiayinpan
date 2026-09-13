@@ -278,3 +278,27 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 #Tip{max-width:520px;margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
 #yixinghuandouDIV{max-width:520px;margin:6px auto}
 .ml-inner{max-width:520px;margin:0 auto}
+
+/* ══════ 八字盘(照搬热卜 baziPan.css, 配色映射到主题变量) ══════ */
+.bz-pan{overflow:auto;padding:6px 0}
+.bz-pan #dateTitle{color:var(--c-gold);line-height:26px}
+.bz-pan #date{font-family:Arial,sans-serif;font-size:14px;line-height:30px}
+.bz-pan #jieqi{font-family:Arial,sans-serif;font-size:14px}
+.bz-pan .sizhuTitle{width:21%;color:var(--c-gold);line-height:25px}
+.bz-pan .shiShen{background:var(--c-gray-bg);line-height:25px}
+.bz-pan .sizhuTd{font-size:20px;line-height:24px;font-weight:bold;padding-top:7px;padding-bottom:7px}
+.bz-pan .cangGanTd{letter-spacing:3px;line-height:15px;padding:5px 3px;background:var(--c-gray-bg)}
+.bz-pan .ganShen{color:var(--c-text-3);font-size:13px;letter-spacing:4px}
+.bz-pan .shenShaTd{font-size:13px;line-height:20px;padding:2px;color:#8c5201;vertical-align:top}
+.bz-pan .ssDiv{text-align:center;font-size:13px;line-height:20px}
+.bz-pan .gong{line-height:15px;padding-top:5px;padding-bottom:3px}
+.bz-pan .gong font{font-size:12px;color:var(--c-text-3)}
+.bz-pan #jiaoYun{font-size:13px;color:var(--c-text-2);text-align:left;line-height:20px;padding:5px;font-family:Arial,sans-serif}
+.bz-pan #dayun,.bz-pan #year1,.bz-pan #year2{margin-top:-1px;table-layout:fixed}
+.bz-pan #dayun .title,.bz-pan #year1 .title,.bz-pan #year2 .title{color:var(--c-gold);width:8%;vertical-align:middle}
+.bz-pan .year{font-size:11px;color:var(--c-gold);line-height:16px;font-family:Arial,sans-serif}
+.bz-pan .gz{padding-top:4px;padding-bottom:2px;font-weight:bold;font-size:13px;line-height:17px}
+.bz-pan .gz font{color:var(--c-text-3);font-weight:normal;font-size:12px}
+@media (prefers-color-scheme: dark){
+  .bz-pan .shenShaTd{color:#c9a063}
+}

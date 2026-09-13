@@ -1,7 +1,7 @@
 #!/bin/sh
-# 打包 5 个自有 JS 为单一压缩 bundle
-# 顺序: constants → engine → chuanren → mingli → app(与 standalone.html 原加载顺序一致)
-# 四个文件均为 IIFE 包裹, 顺序拼接无作用域冲突, engine 的 'use strict' 指令随 IIFE 保留
+# 打包 6 个自有 JS 为单一压缩 bundle
+# 顺序: constants → engine → chuanren → mingli → bazi → app(与 standalone.html 原加载顺序一致)
+# 各文件均为 IIFE 包裹, 顺序拼接无作用域冲突, engine 的 'use strict' 指令随 IIFE 保留
 # 注意: esbuild 的 stdin 管道模式走 transform API(不支持 --outfile 构建 flag), 结果须重定向 stdout
 set -e
 cd "$(dirname "$0")/../qimen_app/js"
@@ -19,7 +19,7 @@ cat > "$BANNER" <<EOF
  * 完整许可文本见仓库根目录 LICENSE 与 licenses/tyme4ts-LICENSE。
  */
 EOF
-{ cat qimen_constants.js qimen_engine_min.js qimen_chuanren.js qimen_mingli.js yinpan_app.js; } \
+{ cat qimen_constants.js qimen_engine_min.js qimen_chuanren.js qimen_mingli.js qimen_bazi.js yinpan_app.js; } \
   | npx esbuild --minify --target=es2017 --loader=js > "$BANNER.body"
 # banner 在压缩**之后**前置: esbuild 会把 legal comment 挪到文件末尾, 且 stdin 模式
 # 不支持 --banner:js, 所以自行拼接以保证版权声明稳定出现在产物开头。

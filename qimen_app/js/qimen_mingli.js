@@ -104,6 +104,10 @@
   /** 按钮高亮: 3..7 互斥, 再点同一个则取消并清空外圈 */
   window.mingliBtn = function (b, data) {
     var isRing = (b >= 3 && b <= 7);
+    var bz = document.getElementById('yixinghuandouDIV');   // 切神将时收起八字盘
+    if (bz && bz.getAttribute('data-mode') === 'bazi') {
+      bz.innerHTML = ''; bz.removeAttribute('data-mode'); bz.style.display = 'none';
+    }
     if (isRing && data && data.ringKind === b) {          // 再点一次 → 取消
       data.ringKind = 'none';
       if (window.clearWaipan) { try { window.clearWaipan(); } catch (e) { if (window._logErr) window._logErr('clearWaipan', e && e.message); } }
@@ -277,6 +281,7 @@
       h += '<TD><div class="btn" id="btn1" onclick="showMingliYixing();mingliBtn(1,window._mlData);">移星换斗</div></TD>';
       h += '<TD><div class="btn" id="btn3" onclick="mingliBtn(3,window._mlData);">天门地户</div></TD>';
       h += '<TD><div class="btn" id="btn2" onclick="mingliState();mingliBtn(2,window._mlData);">长生状态</div></TD>';
+      h += '<TD><div class="btn" id="btnBazi" onclick="showBaziPan();">八字排盘</div></TD>';
       h += '</TR></TABLE>';
 
       /* ── ⑤ #btnTable2 ── */
@@ -308,6 +313,9 @@
   window.showMingliYixing = function () {
     var d = document.getElementById('yixinghuandouDIV');
     if (!d) return;
+    if (d.getAttribute('data-mode') === 'bazi') {   // 八字盘占着容器时先让位
+      d.innerHTML = ''; d.removeAttribute('data-mode'); d.style.display = 'none';
+    }
     d.style.display = (d.style.display === 'block') ? 'none' : 'block';
     if (d.style.display === 'block' && !d.innerHTML) {
       d.innerHTML = '<div style="text-align:center;color:var(--c-text-3);font-size:12px;padding:8px">' +
