@@ -5,7 +5,7 @@
 :root{
   /* 主题 */
   --c-theme:#0dc2b3;      /* 主题青(寄宫/按钮/高亮) */
-  --c-theme-2:#0aa89a;    /* 主题青深端(topBar 渐变) */
+  --c-theme-2:#0aa89a;    /* 主题青深端(渐变备用, 顶部条已改素色) */
   --c-theme-bg:#f0fdfa;   /* 主题淡底 */
   --c-gold:#dead68;       /* 标题金(节气/类型/四柱等表头) */
   --c-sizhu:#c00000;      /* 日柱红 */
@@ -117,7 +117,7 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .right td{text-align:right}
 #Tip{line-height:30px;font-size:13px;color:var(--c-text-3);text-align:center}
 #btnTable1,#btnTable2{width:100%;table-layout:fixed;border-collapse:collapse}
-#btnTable1 td,#btnTable2 td{text-align:center;padding:2px 3px;box-sizing:border-box}
+#btnTable1 td,#btnTable2 td{text-align:center;padding:1px 2px;box-sizing:border-box;line-height:1}
 #btnTable1 td:first-child,#btnTable2 td:first-child{padding-left:0px}
 #btnTable1 td:last-child,#btnTable2 td:last-child{padding-right:0px}
 .btn{line-height:30px;width:100%;box-sizing:border-box;border-radius:3px;text-align:center;background:var(--c-theme);color:#fff;font-size:14px}
@@ -136,9 +136,14 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 
 /* ===== 3. 应用覆盖样式 (yinpan_app.css) ===== */
 body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;background:var(--c-bg);margin:0;padding-bottom:calc(44px + env(safe-area-inset-bottom, 24px))}
-body.is-mobile{padding-top:36px}
-#topBar{display:none;position:fixed;top:0;left:0;right:0;height:36px;background:linear-gradient(180deg,var(--c-theme-2),var(--c-theme));z-index:1000}
-body.is-mobile #topBar{display:block}
+body{padding-top:34px}
+/* 顶部模式栏: 六个盘型切换常驻顶部, 高度压到 34px 以免占地方。
+   背景与底部栏同一片色、同样 600px 居中; 下沿加一条分隔线, 与底部栏的
+   上沿边框上下对称 —— 不画线时顶栏和盘头都是白底, 会糊成一片分不出层次。
+   (原先这里是一条 36px 的空装饰条, 切换器另占内容区一整行) */
+#topBar{position:fixed;top:0;left:0;right:0;height:34px;background:var(--c-bg);border-bottom:1px solid var(--c-border);z-index:1000;max-width:600px;margin:0 auto;display:flex;align-items:center;justify-content:space-around;padding:0 2px;box-sizing:border-box}
+#topBar label{display:flex;align-items:center;gap:2px;font-size:13px;line-height:1;color:var(--c-text);cursor:pointer;white-space:nowrap}
+#topBar input[type=radio]{margin:0;width:13px;height:13px;flex:none;accent-color:var(--c-theme)}
 #mainDIV{max-width:600px;margin:0 auto;padding:0}
 #mainDIV,#mainDIV *{user-select:text!important;-webkit-user-select:text!important}
 .form-card{background:var(--c-bg);border-radius:0;padding:4px 0;margin:0;box-shadow:none}
@@ -216,12 +221,24 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
    这里给盘体两侧各留出卡片宽度, 使卡片落在容器内。 */
 .cr-grid-wrap{position:relative;display:block;width:100%;overflow:visible}
 .cr-content{position:relative;z-index:1;width:calc(100% - 144px);margin:0 auto}
-@media (max-width:480px){
-  /* 窄屏卡片字号更小, 留白相应收窄, 避免宫格过窄 */
-  .cr-content{width:calc(100% - 108px)}
+@media (max-width:500px){
+  /* 窄屏下穿壬最吃紧: 外圈 12 张卡片 + 九宫要挤进 400px。
+     九宫两侧各有一张"外盘表"占位(每侧 55px 列宽, 穿壬下内容为空却照样占位),
+     原先又额外留 108px 给卡片, 九宫只剩 182px(每格 60px), 而格内三行文字需要
+     88~116px —— 宫格被内容顶成竖长方形(实测宽高比 0.44)。
+     这里改为"补偿式": 容器宽度只扣掉卡片实际所需, 把被空表吃掉的 110px 补回来,
+     九宫回到 264px(每格 88px), 与格内内容高度相当, 正方形才立得住。
+     max-width 防止在 500px 附近九宫被拉得过大、格内留白过多。 */
+  /* 扣除值是实测值: 卡片内容随系统字体缩放变化(本机 fontScale 1.25 下四层标签
+     放大到 16.25px/字, 左右卡片达 80px), 留 58px/侧 即空档 84px, 尚有 4px 余量。 */
+  .cr-content{width:calc(100% - 58px);max-width:380px}
 }
 .cr-inner{width:100%;max-width:none!important}
 .cr-pan{width:100%!important;max-width:none!important;table-layout:fixed!important}
+/* 宫格正方形是穿壬的硬要求: 外圈 12 张卡片按宫格实际边界定位, 宫格一旦被内容
+   顶高, 卡片位置随之错位。aspect-ratio 给出的高度只是"首选值", 内容更高时仍会
+   把容器撑开, 故补 overflow:hidden 让自动最小尺寸归零, 高度锁定为 1:1。 */
+#pan.cr-pan .pan-cell{overflow:hidden}
 .cr-card{position:absolute;z-index:2;white-space:nowrap;font-size:12px;line-height:16px;text-align:center;pointer-events:none}
 .cr-ctg,.cr-ctj,.cr-czhi,.cr-cdu,.cr-cgw{display:inline-block}
 .cr-hrow{display:flex;flex-direction:column;align-items:center}
@@ -290,10 +307,10 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .yun2 .shishen{font-weight:normal;font-size:10px;color:var(--c-text-3)}
 .liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;font-family:Arial,sans-serif}
 .liunian2{font-size:12px;line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
-#btnTable1,#btnTable2{width:100%;margin:8px auto;border-collapse:collapse}
+#btnTable1,#btnTable2{width:100%;margin:3px auto 1px;border-collapse:collapse}
 /* .btn 原为 width:100% 且 margin:2px, 两者相加超出单元格宽度(首尾按钮顶出
    左右边界)。改为零外边距 + border-box, 间距统一交给 td 的 padding。 */
-#btnTable1 .btn,#btnTable2 .btn{background:var(--c-theme);color:#fff;border-radius:4px;text-align:center;padding:6px 4px;font-size:13px;cursor:pointer;margin:0;box-sizing:border-box;width:100%;display:block}
+#btnTable1 .btn,#btnTable2 .btn{background:var(--c-theme);color:#fff;border-radius:4px;text-align:center;padding:3px 4px;font-size:13px;line-height:1.35;cursor:pointer;margin:0;box-sizing:border-box;width:100%;display:block}
 #Tip{margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
 #yixinghuandouDIV{margin:6px auto}
 .ml-inner{margin:0 auto}
