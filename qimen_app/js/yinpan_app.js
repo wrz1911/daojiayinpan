@@ -1480,9 +1480,11 @@ function xuanNv16() {
         el.style.fontSize = '15px';
         el.style.lineHeight = '18px';
         el.style.whiteSpace = 'nowrap';
+        el.style.color = 'var(--wx-jin)';   // 十六字诀整体随五行金
       } else {
         el.textContent = '';
         el.style.fontSize = ''; el.style.lineHeight = ''; el.style.whiteSpace = '';
+        el.style.color = '';
       }
     }
   } catch (e) { tip.innerHTML = '<span style=color:red>玄女16诀错误:' + e.message + '</span>'; }
