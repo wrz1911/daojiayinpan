@@ -158,20 +158,22 @@ body.is-mobile #topBar{display:block}
 #panHead #tdTitle td{color:var(--c-gold)!important;font-size:13px!important}
 #panHead .sizhu{font-size:20px!important;line-height:28px!important;font-weight:bold!important;text-align:center}
 #pan{table-layout:fixed!important}
-#pan td{vertical-align:top!important;padding-left:14px!important;padding-right:14px!important;padding-top:8px!important}
-#pan .panItem{line-height:40px!important;font-size:26px!important}
+#pan td{vertical-align:top!important;padding-left:var(--pan-pad)!important;padding-right:var(--pan-pad)!important;padding-top:var(--pan-pad)!important}
+#pan .panItem{line-height:var(--pan-lh-sm)!important;font-size:var(--pan-fs-sm)!important}
 .yiXingPan{width:100%!important;table-layout:fixed!important}
 #yixinghuandouDIV{border:none!important;padding:0!important}
 #yixinghuandouDIV #content{margin-top:0!important}
 #content table{max-width:none!important}
 .tempTable{max-width:none!important;width:100%!important}
 .yiXingPan td{width:33.3%!important;vertical-align:top!important;padding:14px!important;padding-top:8px!important;line-height:40px!important;font-size:26px!important}
-#panHead #headTable td{padding:3px 6px!important;font-size:15px!important;line-height:28px!important}
-#panHead .sizhu{font-size:22px!important;line-height:26px!important}
-body.mode-shi #panHead .sizhu,body.mode-xin #panHead .sizhu{font-size:24px!important;line-height:28px!important}
-#panHead .sizhuTitle{font-size:12px!important}
-#panHead #tdTitle td{font-size:12px!important}
-.yinGan{font-size:22px!important;line-height:30px!important;white-space:nowrap!important}
+#panHead #headTable td{padding:var(--pan-pad) 6px!important;font-size:var(--pan-fs)!important;line-height:var(--pan-lh)!important}
+#panHead .sizhu{font-size:var(--pan-fs-sz)!important;line-height:var(--pan-lh-sz)!important}
+#panHead .sizhuTitle{font-size:calc(var(--pan-fs) - 4px)!important}
+#panHead #tdTitle td{font-size:calc(var(--pan-fs) - 4px)!important}
+.yinGan{font-size:calc(var(--pan-fs-sm) + 6px)!important;line-height:calc(var(--pan-lh-sm) + 6px)!important}
+
+
+.yinGan{white-space:nowrap!important}
 span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(--c-text)!important;position:relative!important;top:-2px!important}
 @media (max-width:500px) {
   #mainDIV{padding:0!important}
@@ -181,27 +183,27 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
   .form-label{font-size:11px!important;min-width:44px!important}
   .sel-date{font-size:12px!important;padding:3px 3px!important;min-width:38px!important;border-radius:4px!important;background:var(--c-bg)!important}
   .sel-zxj{font-size:12px!important;padding:3px 6px!important}
-  #pan td{padding-left:4px!important;padding-right:4px!important;padding-top:2px!important}
-  #pan .panItem{line-height:22px!important;font-size:14px!important}
+  #pan td{padding-top:2px!important}
+
   .yiXingPan td{padding-left:4px!important;padding-right:4px!important;padding-top:2px!important;line-height:22px!important;font-size:14px!important}
-  .yinGan{font-size:14px!important;line-height:22px!important;white-space:nowrap!important}
+  .yinGan{white-space:nowrap!important}
   span[id^="kong"]{font-size:16px!important;font-weight:bold!important;color:var(--c-text)!important;position:relative!important;top:-1px!important}
-  #panHead #headTable td{padding:2px 3px!important;font-size:12px!important;line-height:22px!important}
-  #panHead .sizhu{font-size:14px!important;line-height:20px!important}
-  body.mode-shi #panHead .sizhu,body.mode-xin #panHead .sizhu{font-size:16px!important;line-height:22px!important}
-  #panHead .sizhuTitle{font-size:10px!important}
-  #panHead #tdTitle td{font-size:10px!important}
+  #panHead #headTable td{padding-left:3px!important;padding-right:3px!important}
+
+
+
+
 }
 @media (min-width:1025px) {
-  #pan .panItem{font-size:24px!important;line-height:36px!important}
-  .yinGan{font-size:20px!important;line-height:30px!important}
+
+
   .yiXingPan td{font-size:24px!important;line-height:36px!important}
-  #panHead #headTable td{font-size:19px!important;line-height:36px!important}
-  #pan td{padding-left:20px!important;padding-right:20px!important;padding-top:12px!important}
-  #panHead .sizhu{font-size:30px!important;line-height:36px!important}
-  body.mode-shi #panHead .sizhu,body.mode-xin #panHead .sizhu{font-size:34px!important;line-height:40px!important}
-  #panHead .sizhuTitle{font-size:16px!important}
-  #panHead #tdTitle td{font-size:16px!important}
+
+
+
+
+
+
 }
 /* ===== 穿壬样式 ===== */
 /* 穿壬盘: 十二地支卡片绝对定位在宫格左右两侧之外(左列向左侧延伸、右列向右侧
@@ -480,3 +482,57 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
 @supports not (aspect-ratio: 1 / 1){
   .pan-cell{ min-height:0 }
 }
+
+/* ══════ 盘面尺寸阶梯(单一事实来源) ══════
+   此前字号/行高/内边距散落在多组媒体查询里、各自带 !important 抢优先级,
+   改一处要改多处且容易静默失效。现集中为变量: 媒体查询只覆盖变量值,
+   规则本身写一次即可。后续新增盘型直接引用变量。 */
+:root{
+  --pan-fs:16px;      /* 盘面正文字号 */
+  --pan-lh:25px;      /* 盘面正文行高 */
+  --pan-fs-sm:14px;   /* 宫格内字号 */
+  --pan-lh-sm:22px;   /* 宫格内行高 */
+  --pan-pad:5px;      /* 单元格内边距 */
+  --pan-fs-sz:17px;   /* 四柱干支 */
+  --pan-lh-sz:20px;
+}
+@media (max-width:500px){
+  :root{
+    --pan-fs:13px; --pan-lh:22px;
+    --pan-fs-sm:14px; --pan-lh-sm:22px;
+    --pan-pad:3px;
+    --pan-fs-sz:14px; --pan-lh-sz:20px;
+  }
+}
+@media (min-width:1025px){
+  :root{
+    --pan-fs:17px; --pan-lh:28px;
+    --pan-fs-sm:16px; --pan-lh-sm:26px;
+    --pan-pad:6px;
+    --pan-fs-sz:20px; --pan-lh-sz:24px;
+  }
+}
+/* 盘面正文与宫格统一引用变量(不带 !important, 由变量决定各断点取值) */
+#panHead #headTable td{ font-size:var(--pan-fs); line-height:var(--pan-lh); padding:var(--pan-pad) 6px }
+#pan .panItem{ font-size:var(--pan-fs-sm); line-height:var(--pan-lh-sm) }
+#pan td{ padding-left:var(--pan-pad); padding-right:var(--pan-pad) }
+#panHead .sizhu{ font-size:var(--pan-fs-sz); line-height:var(--pan-lh-sz) }
+#pan.ml-pan td, #pan.cr-pan td{ padding-left:var(--pan-pad); padding-right:var(--pan-pad) }
+
+/* 四柱字号按盘型微调: 用变量特例表达, 不再各写一条 !important */
+body.mode-shi, body.mode-ke, body.mode-xin{ --pan-fs-sz:22px; --pan-lh-sz:26px }
+body.mode-shi #panHead .sizhu, body.mode-xin #panHead .sizhu{ --pan-fs-sz:24px; --pan-lh-sz:28px }
+body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
+@media (max-width:500px){
+  body.mode-shi, body.mode-ke, body.mode-xin{ --pan-fs-sz:14px; --pan-lh-sz:20px }
+  body.mode-shi #panHead .sizhu, body.mode-xin #panHead .sizhu{ --pan-fs-sz:16px; --pan-lh-sz:22px }
+  body.mode-mingli{ --pan-fs-sz:15px; --pan-lh-sz:20px }
+}
+@media (min-width:1025px){
+  body.mode-shi, body.mode-ke, body.mode-xin{ --pan-fs-sz:30px; --pan-lh-sz:36px }
+  body.mode-shi #panHead .sizhu, body.mode-xin #panHead .sizhu{ --pan-fs-sz:34px; --pan-lh-sz:40px }
+  body.mode-mingli{ --pan-fs-sz:26px; --pan-lh-sz:32px }
+}
+/* 易星盘/穿壬宫格同样走变量 */
+.yiXingPan td{ font-size:var(--pan-fs-sm)!important; line-height:var(--pan-lh-sm)!important }
+#pan.ml-pan .panItem, #pan.cr-pan .panItem{ font-size:var(--pan-fs-sm)!important; line-height:var(--pan-lh-sm)!important }
