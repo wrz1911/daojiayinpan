@@ -1150,7 +1150,7 @@ function _jkCenter(chart) {
     const ms = marks.filter(Boolean);
     // 各列固定宽度 —— 点击 12 宫切换内容时, 四位/干支/旺衰的横向位置不跟着漂移。
     // 标记区 nowrap + 略小字号: 避免"四空·干"换行撑高行距, 各行间距才均匀。
-    return '<div style="display:flex;align-items:baseline">' +
+    return '<div style="display:flex;align-items:baseline;height:23px">' +
       '<span style="flex:0 0 42px;font-weight:bold">' + k + '</span>' +
       '<span style="flex:0 0 48px">' + a + '</span>' +
       '<span style="flex:0 0 18px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
@@ -1160,8 +1160,8 @@ function _jkCenter(chart) {
   };
   // 外层 flex 负责把整个中宫块在 2x2 格内居中; 内层列容器让各行左边缘对齐(行内左起)
   // 外层纵向居中; 内层占满整格宽度, 行内各列用固定宽度定位 —— 位置稳定不漂移
-  return '<div style="height:100%;display:flex;align-items:center;overflow:hidden">' +
-    '<div style="width:100%;display:flex;flex-direction:column;gap:7px;padding:2px 5px;' +
+  return '<div style="height:100%;display:flex;align-items:flex-start;overflow:hidden">' +
+    '<div style="width:100%;display:flex;flex-direction:column;gap:0;padding:7px 2px 3px;' +
     'font-size:14px;line-height:1.35;box-sizing:border-box">' +
     row('<span class="' + wxCls(c.renYuan) + '">人元</span>',
         '<span class="' + wxCls(c.renYuan) + '">' + c.renYuan + '</span>', c.renWs,
@@ -1174,7 +1174,7 @@ function _jkCenter(chart) {
         '<span class="' + wxCls(c.difenZhi) + '">' + c.difenZhi + '</span>', c.difenWs,
         [kongMark(c.difenZhi)].concat(sishMarks(c.difenZhi))) +
     // 横杠分隔, 下方接五动三动
-    '<div style="border-top:1px solid var(--c-border);margin:4px 0 3px"></div>' +
+    '<div style="border-top:1px solid var(--c-border);margin:2px 0"></div>' +
     row('<span style="font-weight:bold;color:var(--c-text)">五动</span>',
         '<span style="white-space:nowrap">' + ((chart.wudong && chart.wudong.length) ? chart.wudong.join(' ') : '—') + '</span>', '', []) +
     row('<span style="font-weight:bold;color:var(--c-text)">三动</span>',
@@ -1249,14 +1249,14 @@ function toggleJinKouJue(noScroll) {
     const one = (h) => {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
-      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap">' +
+      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px">' +
         '<span style="flex:0 0 ' + (wide ? 52 : 29) + 'px;overflow:hidden">' + a + '</span>' +
         (wide ? '' : '<span style="flex:0 0 23px;overflow:hidden">' + (b || '') + '</span>') +
         '<span style="flex:0 0 11px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
         ' class="jk-cell' + (isCur ? ' jk-sel' : '') + '"' +
-        ' style="cursor:pointer;padding:3px 2px;font-size:11px;line-height:1.7;overflow:hidden;' +
+        ' style="cursor:pointer;padding:7px 2px 3px;font-size:11px;line-height:1.7;overflow:hidden;' +
         'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' +
         line('<span class="' + col(h.renWx) + '">' + h.renYuan + '</span>', '', h.renWs, '', true) +
         line(wxSpan(h.guiGanZhi), shenSpan(h.guiShen, QM.ZHI.indexOf(h.guiGanZhi[1])), h.guiWs, u(2)) +
