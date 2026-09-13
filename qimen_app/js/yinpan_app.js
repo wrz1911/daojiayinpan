@@ -66,6 +66,14 @@ function _logErr(src, msg) {
     }
   } catch(e) {}
 }
+/* HTML 转义: 用于把用户/导入数据拼进 innerHTML 的场合(历史记录标题、姓名等)。
+   排盘历史是设计成可以互相分享备份文件的, 导入内容属于不可信输入。 */
+function escHtml(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+window._esc = escHtml;   // 供 qimen_mingli.js / qimen_bazi.js 引用
 window.addEventListener('error', ev => { _logErr('error', (ev.message||'') + ' @' + (ev.filename||'').split('/').pop() + ':' + ev.lineno); });
 window.addEventListener('unhandledrejection', ev => { _logErr('rejection', String((ev.reason && ev.reason.message) || ev.reason)); });
 // 共享常量: 由 qimen_constants.js 的 window.QM 派生, 避免重复定义
@@ -324,7 +332,7 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   if(!window._anGanColor){window._anGanColor=(gs,gong)=>{if(!gs)return'';let muR={2:['癸'],6:['戊','丙','乙'],8:['庚','丁','己'],4:['辛','壬']};let xingR={3:['戊'],2:['己'],8:['庚'],9:['辛'],4:['壬','癸']};let r='';for(let ai=0;ai<gs.length;ai++){let ch=gs[ai];let isX=xingR[gong]&&xingR[gong].indexOf(ch)>=0;let isM=muR[gong]&&muR[gong].indexOf(ch)>=0;r+=window._siHaiSpan(ch,isX,isM);}return r;};}
   let agColor= g => {let ag=palaces['gong'+g]?palaces['gong'+g].anGan:'';return ag?window._anGanColor(ag,g):'';};
   let colorSpan=window._colorSpan|| (v => {return v||'';});
-  let gridHTML=buildPaipanGrid(palaces,kongGongs,maPosId,agColor,{colorSpan:colorSpan});
+  let gridHTML=buildPaipanGrid(palaces,kongGongs,maPosId,agColor,{colorSpan:colorSpan, noClick:true});
   let juLabel=(isYin?'阴遁':'阳遁')+ju+'局';
   let degStart=Math.floor(deg/5)*5,degEnd=degStart+4;
   let shiZhuParts=shiZhu.split(' ');
@@ -350,7 +358,7 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   document.getElementById('result').style.display='block';
   window._palaces=palaces;
   _renderBottomBar();
-  addColorStyles();setTimeout(_bindActionButtons,50);setTimeout(fixYinGanAlign,50);
+  setTimeout(_bindActionButtons,50);setTimeout(fixYinGanAlign,50);
   }catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>山向错误:'+e.message+'</span>';}
 }
 
@@ -362,6 +370,13 @@ function doPan() {
   D = parseInt(selD.value) || 27;
   hr = parseInt(selH.value) || 0;
   mn = parseInt(selI.value) || 0;
+  /* 命理盘的八字区块(qimen_mingli.js / qimen_bazi.js)读的是 window.Y 等, 而这里
+     改的是 IIFE 闭包变量 —— 不同步的话, 用户改完时间后四柱行会更新, 而同屏的
+     十神/藏干/神煞/胎元/大运仍按"打开页面的那一刻"计算, 两处自相矛盾。 */
+  window.Y=Y; window.M=M; window.D=D; window.hr=hr; window.mn=mn;
+  /* 切盘时清掉三个开关的残留状态: 下面各盘型分支会提前 return, 不在这里清的话
+     (比如)时盘开过"年神将"→切命理→切回时盘, 按钮要点两次才生效。 */
+  _tmdhShow=false; _shenShow=0; _stateShowing=false;
 
 
         // 山向模式: 24山角度→局数/阴阳/黄泉→地盘星门神全算法
@@ -769,20 +784,12 @@ function renderPan(raw, engineData) {
     let el = document.getElementById('waipan'+wp);
     if (el) { el.innerHTML = ''; el.style.fontSize = ''; el.style.lineHeight = ''; }
   }
-  addColorStyles();
   setTimeout(_bindActionButtons, 10);
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
 }
 
 // ============ 颜色标记 + 阴干对齐 ============
-function addColorStyles() {
-  let fonts = document.querySelectorAll('#pan font[color]');
-  fonts.forEach(f => {
-    if (f.getAttribute('color') === 'red') f.style.fontWeight = 'bold';
-  });
-}
-
 function fixYinGanAlign() {
   // 主盘 + 移星换斗统一处理
   let containers = [document];
@@ -941,7 +948,11 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; return window._siHaiSpan(ch, isX||isXM, isM||isXM); }
     function charColor(str) { if(!str)return''; let r=''; for(let ci=0;ci<str.length;ci++)r+=spanGan(str[ci]); return r; }
     let hlt = (xpEditGong === g) ? 'box-shadow:0 0 0 2px var(--c-theme) inset;' : '';
-    return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
+    // noClick: 副盘(移星换斗的 7 个旋转盘、向角度选局的 13 个盘)不挂宫位点击 ——
+    // 它们复用同一份宫位 id, 点击会被 showPalace 按"主盘"的数据解释(心盘模式下
+    // 更会打开主盘宫位的编辑器并写回 _xpData)。原先靠在渲染后逐个清 onclick,
+    // 漏一处就出错, 改为生成时就不挂。
+    return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'"'+(opts.noClick?'':' onclick="showPalace('+g+')"')+'>' +
       '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
@@ -1083,7 +1094,6 @@ function renderXinpan(useBg) {
   tip.innerHTML = '';
   _renderBottomBar();
   _bindActionButtons();
-  addColorStyles();
   setTimeout(_bindActionButtons, 50);
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
@@ -1154,7 +1164,7 @@ function showYixing() {
       };
     });
     let yxAgFn = g => { let a=cur['gong'+g]?cur['gong'+g].anGan||'':''; return a?(window._anGanColor|| (v => {return v||'';}))(a,g):''; };
-    let gridHTML = buildPaipanGrid(rotPalaces, kg, maPosId, yxAgFn, {colorSpan:cs});
+    let gridHTML = buildPaipanGrid(rotPalaces, kg, maPosId, yxAgFn, {colorSpan:cs, noClick:true});
     html += '<div class="tableTitle"><B>【顺转'+t+'宫】</B></div>' + gridHTML;
   }
   div.style.display = 'block';
@@ -1541,6 +1551,10 @@ function _doSave() {
     record._xpBgKongWang = _xpBgKongWang;
     record._xpBgMaXing = _xpBgMaXing;
     record._xpBgXunShou = _xpBgXunShou;
+    /* 这两个漏存过: _xpBgNongli 用于渲染农历, _xpBgIsYin 决定"以此宫推算全盘"的
+       阴阳遁 — 后者初值恒为 true, 于是阳遁盘的历史记录会被整盘按阴遁重算。 */
+    record._xpBgNongli = _xpBgNongli;
+    record._xpBgIsYin = _xpBgIsYin;
   }
   try {
     let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -1592,7 +1606,7 @@ function _renderHistorySheet() {
         let dStr = d ? (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')) : '';
         h += '<div style="padding:10px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--c-border);font-size:14px">' +
           '<span style="font-size:10px;color:#fff;background:var(--c-theme);padding:1px 5px;border-radius:3px;flex-shrink:0">'+modeLabel+'</span>' +
-          '<span class="sheetLoadBtn" data-idx="'+origIdx+'" style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.title+'</span>' +
+          '<span class="sheetLoadBtn" data-idx="'+origIdx+'" style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(r.title)+'</span>' +
           '<span style="font-size:10px;color:var(--c-text-5);flex-shrink:0">'+dStr+'</span>' +
           '<span class="sheetDelBtn" data-idx="'+origIdx+'" style="color:var(--c-text-6);cursor:pointer;font-size:18px;flex-shrink:0;padding:0 4px" title="删除">&times;</span></div>';
       });
@@ -1686,6 +1700,9 @@ function loadSaved(i) {
       _xpBgKongWang = r._xpBgKongWang || '';
       _xpBgMaXing = r._xpBgMaXing || '';
       _xpBgXunShou = r._xpBgXunShou || '';
+      /* 老记录没有这两个字段: 用 undefined 判断, 缺省时保留当前值而不是硬置 false */
+      if (r._xpBgNongli !== undefined) _xpBgNongli = r._xpBgNongli;
+      if (r._xpBgIsYin !== undefined) _xpBgIsYin = r._xpBgIsYin;
       document.getElementById('xinpanPanel').style.display = '';
     }
     if (r.mode) _saveMode = r.mode;
@@ -1790,6 +1807,19 @@ function _importJSON() {
       try {
         let d = JSON.parse(reader.result);
         if (!Array.isArray(d)) throw new Error('格式错误');
+        /* 备份文件是设计成可以互相分享的, 导入内容因此不可信:
+           html 字段会被整段回填进 innerHTML, 夹带 <script>/onerror 即可执行脚本。
+           这里按白名单字段 + 长度做校验, 并丢弃夹带脚本的记录。 */
+        d = d.filter(r => r && typeof r === 'object' && !Array.isArray(r));
+        d.forEach(r => {
+          if (typeof r.title === 'string') r.title = r.title.slice(0, 80);
+          ['mode', 'time', 'date'].forEach(k => { if (typeof r[k] !== 'string') r[k] = ''; });
+          if (typeof r.html === 'string') {
+            if (r.html.length > 600000) r.html = '';
+            else if (/<\s*script|onerror\s*=|onload\s*=|javascript:/i.test(r.html)) r.html = '';
+          }
+          if (r.params && typeof r.params !== 'object') r.params = null;
+        });
         let existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         let merged = d.concat(existing);
         if (merged.length > 200) merged = merged.slice(0, 200);
@@ -2542,7 +2572,7 @@ function toggleXiangJu(noScroll){
 
     let agFn= g => {let a=palsT['gong'+g];return a&&a.anGan?window._anGanColor?window._anGanColor(a.anGan,g):a.anGan:'';};
     let csFn=window._colorSpan|| (v => {return v||'';});
-    let gridHTML=buildPaipanGrid(palsT,kongGongsT,maPosId,agFn,{colorSpan:csFn});
+    let gridHTML=buildPaipanGrid(palsT,kongGongsT,maPosId,agFn,{colorSpan:csFn, noClick:true});
     let html='<style>.xj-head #tdTitle td{color:var(--c-gold)}.xj-head #itemTitle{color:var(--c-gold);line-height:30px}.xj-head #dTitle{width:16%;color:var(--c-gold)}</style>'+
       '<div id="panHead"><TABLE class="pan xj-head" id="headTable">'+
       '<TR><TD id="itemTitle">度数</TD><TD colspan="3">'+sxName+' '+degStart+'～'+degEnd+'°</TD><TD>'+sxYear+'年</TD></TR>'+

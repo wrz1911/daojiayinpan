@@ -1,9 +1,13 @@
 // 奇门遁甲排盘引擎  作者: 地天泰  微信/手机: 18626256203
-var QM=window.QM||{};
 // 项目地址: https://github.com/wrz1911/daojiayinpan
 // 开源依赖: tyme4ts (MIT) https://github.com/6tail/tyme4ts
 // 开源依赖: Tauri (MIT) https://github.com/tauri-apps/tauri
 (function(){
+'use strict';
+// 共享常量(见 qimen_constants.js): 原先写在 IIFE 外的顶层 var, 是全局声明,
+// 且本文件是五个自有模块里唯一没有 'use strict' 的 —— 该文件内任何笔误赋值
+// 都会静默创建全局变量(项目历史上正因此踩过坑)。现移入 IIFE 并开启严格模式。
+let QM=window.QM||{};
 let T=typeof tyme4j!=='undefined'?tyme4j:(typeof tyme!=='undefined'?tyme:{});
 let G='甲乙丙丁戊己庚辛壬癸',Z='子丑寅卯辰巳午未申酉戌亥';
 let Z12=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
@@ -145,7 +149,14 @@ window.chuanRenChart= opts => {
   let juNum=0,juLabel='',zfVal='',zsVal='',_xunShou='';
   try{
     let isY2=ti>=12;let lM2=Math.abs(ld.getLunarMonth().getMonthWithLeap());if(lM2===0)lM2=12;
-    juNum=((yI%12+1)+lM2+ld.getDay()+(hI%12+1))%9;if(juNum===0)juNum=9;
+    /* 局数必须与九宫同源。九宫由 qimenChart({panType:刻家?2:1}) 排, 而刻家的引擎公式
+       比时家多一项时柱 —— v+lD+(hCyl%12+1)+(cMin%12+1)+(yI%12+1); 这里原先自算成
+       (yI%12+1)+lM2+day+(hI%12+1)(刻家分支下 hI 已被换成刻柱), 于是盘头显示的局数
+       与九宫实际排布对不上, 只在个别时柱下偶然相等。改为直接取引擎结果。 */
+    let qrJu=null;
+    try{ qrJu=window.qimenChart?window.qimenChart({year:opts.year,month:opts.month,day:opts.day,hour:opts.hour,minute:opts.minute,panType:opts.shiKe==='刻家'?2:1,customJu:customJu||undefined}):null; }catch(e3){}
+    if(qrJu&&qrJu.juNum){ juNum=qrJu.juNum; isY2=(qrJu.yinYang==='阴'); }
+    else { juNum=((yI%12+1)+lM2+ld.getDay()+(hI%12+1))%9;if(juNum===0)juNum=9; }
     juLabel=(isY2?'阴遁':'阳遁')+juNum+'局';
     let GAN9='戊己庚辛壬癸丁丙乙';
     let juMap={};for(let i=0;i<9;i++){let g=isY2?juNum-i:juNum+i;if(g>9)g-=9;if(g<1)g+=9;juMap[g]=GAN9[i];}
@@ -445,7 +456,7 @@ window.renderChuanRen=(data,containerId) => {
         // 穿壬外圈: 绝对定位标签 (left/right/top/bottom)
         let csFn=window._colorSpan|| (v => v||'');
         qimenGridHTML='<div class="cr-grid-wrap"><div class="cr-content">'+
-          window.buildPaipanGrid(qimenPalaces,kongG,maPosId,function(g){return g===5?'':(qr.pals[g]?(qr.pals[g].anGan||''):'');},{colorSpan:csFn,wrapperClass:'cr-inner',panClass:'cr-pan'})+
+          window.buildPaipanGrid(qimenPalaces,kongG,maPosId,function(g){return g===5?'':(qr.pals[g]?(qr.pals[g].anGan||''):'');},{colorSpan:csFn,wrapperClass:'cr-inner',panClass:'cr-pan',noClick:true})+
           '</div>';
         // 穿壬12地支外圈卡片
         let ringOrder=['巳','午','未','辰','卯','寅','申','酉','戌','亥','子','丑'];

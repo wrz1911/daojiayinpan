@@ -193,7 +193,7 @@
       /* ── ① #panHead 头部表 ── */
       h += '<div id="panHead" class="bz-pan"><TABLE class="pan" id="headTable">';
       h += '<TR><TD colspan="5" style="line-height:30px">' +
-           '<font style="color:var(--c-gold)">名称：</font><font id="name">' + data.name + '</font>&emsp;' +
+           '<font style="color:var(--c-gold)">名称：</font><font id="name">' + (window._esc ? window._esc(data.name) : data.name) + '</font>&emsp;' +
            '<font style="color:var(--c-gold)">性别：</font><font id="gender">' + data.gender + '</font>&emsp;' +
            '<font style="color:var(--c-gold)">生肖：</font>' + data.shengXiao + '</TD></TR>';
       // 日期格式: 1986-12-11(农历十一月初十)
