@@ -376,7 +376,7 @@ function doPan() {
   window.Y=Y; window.M=M; window.D=D; window.hr=hr; window.mn=mn;
   /* 切盘时清掉三个开关的残留状态: 下面各盘型分支会提前 return, 不在这里清的话
      (比如)时盘开过"年神将"→切命理→切回时盘, 按钮要点两次才生效。 */
-  _tmdhShow=false; _shenShow=0; _stateShowing=false; _diShenShow=false;
+  _tmdhShow=false; _shenShow=0; _stateShowing=false; _diShenShow=false; _renShenShow=false;
 
 
         // 山向模式: 24山角度→局数/阴阳/黄泉→地盘星门神全算法
@@ -782,12 +782,18 @@ function renderPan(raw, engineData) {
     (panType===1 ?
     '<TABLE id="btnTable3"><TR>' +
     '<TD><div class="btn" id="btnDiShen" onclick="toggleDiBaShen()">地八神</div></TD>' +
+    '<TD><div class="btn" id="btnRenShen" onclick="toggleRenBaShen()">人八神</div></TD>' +
+    '<TD></TD><TD></TD>' +
     '</TR></TABLE>' : '') +
     '<div id="yixinghuandouDIV"></div>';
 
   document.getElementById('panWrap').innerHTML = html;
   // 地八神符号先算好放着(默认不显示), 点按钮才写到宫格里
-  if (panType === 1) { _diShenMap = buildDiBaShenMap(palaces, isYin); paintDiBaShen(_diShenShow); }
+  if (panType === 1) {
+    _diShenMap  = buildDiBaShenMap(palaces, isYin);
+    _renShenMap = buildRenBaShenMap(palaces, isYin, zhiShiShort);
+    paintDiBaShen(_diShenShow); paintRenBaShen(_renShenShow);
+  }
 
   // 清空waipan(新排盘后天门地户需重新点击)
   for(let wp = 1; wp <= 12; wp++) {
@@ -811,6 +817,24 @@ function renderPan(raw, engineData) {
    两个特例按文档口径处理: 天盘干取首字(第二字是中宫寄干, 不作依据)。 */
 let _diShenShow = false;
 let _diShenMap = null;
+let _renShenShow = false;
+let _renShenMap = null;
+
+/* 给定起宫, 沿环把八个神铺到八宫 —— 地八神与人八神只有"起宫"不同, 排布共用这里。
+   中宫没有环位, 起宫落在中宫时寄坤二。 */
+function _layBaShen(startG, isYin) {
+  const HUAN = QM.ZHUAN, FZ = QM.FZHUAN, SO = isYin ? QM.SHEN_Y : QM.SHEN_A;
+  if (!HUAN || !FZ || !SO || !startG) return null;
+  if (startG === 5) startG = 2;
+  const vSh = FZ[startG] - 1, map = {};
+  for (let i = 1; i < 9; i++) {
+    let j = i - vSh;
+    if (j < 1) j += 8;
+    if (j > 8) j -= 8;
+    map[HUAN[i]] = SO[j];
+  }
+  return map;
+}
 
 function buildDiBaShenMap(palaces, isYin) {
   try {
@@ -834,17 +858,24 @@ function buildDiBaShenMap(palaces, isYin) {
       if (d && d.indexOf(tg) >= 0) { startG = g; break; }
     }
     if (!startG) return null;
-    if (startG === 5) startG = 2;          // 中宫寄坤二
     // 4) 起符, 阳顺阴逆
-    const vSh = FZ[startG] - 1, map = {};
-    for (let i = 1; i < 9; i++) {
-      let j = i - vSh;
-      if (j < 1) j += 8;
-      if (j > 8) j -= 8;
-      map[HUAN[i]] = SO[j];
-    }
-    return map;
+    return _layBaShen(startG, isYin);
   } catch (e) { _logErr('diBaShen', e && e.message); return null; }
+}
+
+/* 人八神: 起宫换成【值使门落宫】, 其余与地八神完全一致 */
+function buildRenBaShenMap(palaces, isYin, zhiShiMen) {
+  try {
+    if (!palaces || !zhiShiMen) return null;
+    const abbr = window.MEN_ABBR || {};
+    let startG = 0;
+    for (let g = 1; g <= 9; g++) {
+      const m = palaces['gong' + g] ? palaces['gong' + g].men : '';
+      if (m && ((abbr[m] || m) === zhiShiMen || m === zhiShiMen)) { startG = g; break; }
+    }
+    if (!startG) return null;
+    return _layBaShen(startG, isYin);
+  } catch (e) { _logErr('renBaShen', e && e.message); return null; }
 }
 
 function paintDiBaShen(show) {
@@ -860,8 +891,24 @@ function toggleDiBaShen() {
   const b = document.getElementById('btnDiShen');
   if (b) b.classList.toggle('on', _diShenShow);
 }
+
+function paintRenBaShen(show) {
+  for (let g = 1; g <= 9; g++) {
+    const el = document.getElementById('rshen' + g);
+    if (el) el.textContent = (show && _renShenMap && _renShenMap[g]) ? _renShenMap[g] : '';
+  }
+}
+
+function toggleRenBaShen() {
+  _renShenShow = !_renShenShow;
+  paintRenBaShen(_renShenShow);
+  const b = document.getElementById('btnRenShen');
+  if (b) b.classList.toggle('on', _renShenShow);
+}
 window.toggleDiBaShen = toggleDiBaShen;
 window.buildDiBaShenMap = buildDiBaShenMap;   // 导出便于单独验证排法
+window.buildRenBaShenMap = buildRenBaShenMap;
+window.toggleRenBaShen = toggleRenBaShen;
 
 // ============ 颜色标记 + 阴干对齐 ============
 function fixYinGanAlign() {
@@ -1029,8 +1076,8 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'"'+(opts.noClick?'':' onclick="showPalace('+g+')"')+'>' +
       '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
-      '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
-      '<div class="panItem di-row" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span>'+(opts.diShen?'<span class="dshen" id="dshen'+g+'"></span>':'')+'<span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
+      '<div class="panItem mid-row" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span>'+(opts.diShen?'<span class="rshen" id="rshen'+g+'"></span>':'')+'<span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
+      '<div class="panItem mid-row" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span>'+(opts.diShen?'<span class="dshen" id="dshen'+g+'"></span>':'')+'<span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
       '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
       '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
       '</div></TD>';
