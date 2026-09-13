@@ -164,6 +164,19 @@
   - **★ 修掉的真错别字**: 本项目 `SHENJIANG_NAMES` 第 11 位写作「**司令**」, 参照实现是「**司命**」(十二神将标准名 青龙·明堂·天刑·朱雀·金匮·天德·白虎·玉堂·天牢·玄武·**司命**·勾陈, 司命主寿夭)。已改 `qimen_constants.js:69` 与 `yinpan_app.js:1336` **两处**, bundle 重建并校验(含「司命」、不含「司令」)。因两字等长, bundle 字节数不变(146868)。
   - API: `doMingli` → `{id}` → `mingliPan`; **有重名检测**(status "2" = 该客户姓名已存在, 弹「前往查看/重新排盘」)—— 命理模块以"客户"为单位建档, 这是占卜类模块没有的。
   - 回归: 时盘/刻盘 1713600 项、穿壬 17568 项均仍 0 不一致(该表只影响外圈十二神将显示, 不进排盘算法)。
+- 2026-09-13(十五)**发布 v1.3.11 + 轮换 keystore 口令(安全事件处置)**。
+  **① 发布**: `bash release.sh 1.3.11` —— 版本号 7 处同步(`tauri.conf.json`/`package.json`/`package-lock.json` 两处/`Cargo.toml`/`Cargo.lock`/`yinpan_app.js` 的 `APP_VERSION`/`android build.gradle` → versionName 1.3.11 + versionCode **10311**), 推送 `c7ab20c..346cd9a`(18 个提交)+ tag `v1.3.11`。**注意 release.sh 只 sed 源码不重建 bundle, 所以 `APP_VERSION` 要本地先重建进包**(本次已做), 否则直接用仓库内 bundle 的场景会显示旧版本号。lint job 14s 通过; android job 2m58s 成功。
+  **② 安全事件**: 发布前扫描待推送内容, 发现 **keystore 明文口令曾进公开仓库历史** —— 引入于 `1eb8509`("更新项目记忆"), 清除于 `75d88d7`。仓库为 **PUBLIC**, 故该口令已泄露。本次推送**清除了最新版中的它**(`origin/main:AGENTS.md` 已无), 但**历史提交仍可被翻出**。
+  **③ 处置: 轮换口令**(keystore 为 **PKCS12** 类型 ⇒ store 口令与 key 口令**必须相同**, 只需改一次):
+  ```bash
+  keytool -storepasswd -keystore android/qimen-release.keystore -storepass '<旧>' -new '<新>'
+  ```
+  ⚠️ 选项是 `-new` **不是** `-newpass`(JDK 26 的 keytool 会报"非法选项")。改后用 `keytool -list -v` 验证 **SHA-256 指纹不变**(`53:76:AE:5F:…:E8:A9`), 因此**老用户可覆盖安装, 无需卸载**。
+  **④ 配套更新**(缺一不可):
+  - `android/gradle.properties` 的 `QIMEN_STORE_PASSWORD`/`QIMEN_KEY_PASSWORD`(该文件被 `.gitignore` 的 `android/` 覆盖, 不入库)
+  - GitHub Secrets **两个都要改**: `KEYSTORE_PASSWORD`(新口令) **和 `KEYSTORE_BASE64`** —— 因为 `keytool -storepasswd` 会**重新写入 keystore 文件**, base64 内容随之变化, 只改口令会让 CI 拿到"新口令 + 旧文件"而必然失败。
+  - 改 Secrets 时遇到 GitHub API 连续返回 502/500, 属临时故障, **重试即成功**(务必检查 `gh secret set` 的退出码, 别用无条件的 `echo done` 掩盖失败)。
+  **⑤ 纪律**: 口令**只**写在 `android/gradle.properties` 与 GitHub Secrets, **绝不进任何入库文件** —— 包括 AGENTS.md 这类"记忆文件"(本次泄露正是记进 AGENTS.md 造成的)。AGENTS.md 只记录"已轮换"这一事实, 不记录口令值。
 - 2026-09-13(九续附)**与热卜对照时的通用注意事项**(踩过多次, 汇总):
   ⓐ 结果页元素 id 与列含义**错位** —— 山向页 `id="nianzhu"` 实为月柱、`yuezhu`→日柱、`rizhu`→时柱(刻盘时 `shizhu` 为刻柱); 勿按字面理解。
   ⓑ 阴盘页只有 `#ma1`~`#ma4` 四个马星位, 其 `maXingPos∈1..4` 是**四角编号**(1=巽4左上 2=坤2右上 3=艮8左下 4=乾6右下), 我们给宫位编号, 换算表 `{4:1,2:2,8:3,6:4}`。
