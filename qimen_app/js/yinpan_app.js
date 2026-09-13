@@ -1142,8 +1142,8 @@ function _jkInfoHtml(chart) {
   const line = (label, val) => '<div style="display:flex;gap:8px;padding:2px 0;font-size:13px;line-height:1.75">' +
     '<span style="flex:0 0 66px;color:var(--c-theme);font-weight:bold">' + label + '</span>' +
     '<span style="flex:1;word-break:break-all">' + (val || '—') + '</span></div>';
-  return line('四大空亡', ss.sish ? ss.sish + '（此旬空）' : '') +
-    line('人煞', ss.shensh4 && ss.shensh4[1]) +
+  // 四大空亡已在信息栏显示, 此处不再重复
+  return line('人煞', ss.shensh4 && ss.shensh4[1]) +
     line('贵煞', ss.shensh4 && ss.shensh4[2]) +
     line('将煞', ss.shensh4 && ss.shensh4[3]) +
     line('地煞', ss.shensh4 && ss.shensh4[4]) +
