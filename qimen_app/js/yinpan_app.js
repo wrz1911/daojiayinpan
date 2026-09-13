@@ -1283,10 +1283,10 @@ function toggleJinKouJue(noScroll) {
       } else { cells += one(byIdx[k]); }
     }
     // ── 辅助：原生选项控件(同顶栏) / 表格单元格 / 下拉样式 / 信息栏 ──
-    const optStyle = 'margin:0 0 0 4px;width:13px;height:13px;flex:none;accent-color:var(--c-theme);vertical-align:middle';
-    const labStyle = 'display:inline-flex;align-items:center;gap:1px;font-size:12px;color:var(--c-text);cursor:pointer;white-space:nowrap';
-    const selStyle = 'margin-left:6px;border:1px solid var(--c-border);border-radius:6px;padding:2px 4px;font-size:13px;color:var(--c-text);' +
-      'background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:52px';
+    const optStyle = 'margin:0 0 0 2px;width:12px;height:12px;flex:none;accent-color:var(--c-theme);vertical-align:middle';
+    const labStyle = 'display:inline-flex;align-items:center;gap:1px;font-size:inherit;color:var(--c-text);cursor:pointer;white-space:nowrap';
+    const selStyle = 'margin-left:6px;border:1px solid var(--c-border);border-radius:6px;padding:2px 4px;font-size:inherit;color:var(--c-text);' +
+      'background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:44px';
     const radio = (on, txt, click, name) =>
       '<label style="' + labStyle + '"><input type="radio" name="' + (name || 'jkr') + '"' + (on ? ' checked' : '') +
       ' onchange="' + click + '" style="' + optStyle + '">' + txt + '</label>';
@@ -1330,23 +1330,21 @@ function toggleJinKouJue(noScroll) {
     const grHint = isJiaDay ? '（甲日：两法昼夜贵人互换）' : '（本日' + (chart.siZhu[2] || '').charAt(0) + '·两法相同）';
     const inLab = t => '<span style="color:var(--c-gold);white-space:nowrap;margin-right:4px">' + t + '</span>';
     const inputArea = '<table style="width:100%;border:1px solid var(--c-border);border-radius:4px;' +
-      'border-collapse:collapse;table-layout:fixed;font-size:14px;margin:8px 0 2px">' +
-      '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})')) + '</tr>' +
-      '<tr>' + tdLh('月将') + tdVh(jzSel) +
-              tdLh('换将') + tdVh(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj')) + '</tr>' +
-      '<tr><td colspan="4" style="padding:7px 8px">' +
-        '<div style="display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center">' +
-          inLab('贵神') +
-          radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
-          radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
-          radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn') +
-        '</div></td></tr>' +
-      '<tr><td colspan="4" style="padding:7px 8px">' +
-        '<div style="display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center">' +
-          inLab('贵人') +
-          radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
-          radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
-          '<span style="font-size:11px;color:var(--c-text-4);margin-left:6px">' + grHint + '</span>' +
+      'border-collapse:collapse;table-layout:fixed;margin:8px 0 2px;' +
+      'font-size:clamp(9.5px,3.05vw,13px)">' +
+      '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})'), 2) +
+              tdLh('月将') + tdVh(jzSel) +
+              tdLh('换将') + tdVh(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj'), 2) + '</tr>' +
+      '<tr><td colspan="8" style="padding:6px 8px">' +
+        '<div style="display:flex;flex-wrap:wrap;gap:5px 14px;align-items:center">' +
+          '<span style="display:inline-flex;align-items:center">' + inLab('贵神') +
+            radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
+            radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
+            radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn') + '</span>' +
+          '<span style="display:inline-flex;align-items:center">' + inLab('贵人') +
+            radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
+            radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
+            '<span style="font-size:0.9em;color:var(--c-text-4);margin-left:5px">' + grHint + '</span></span>' +
         '</div></td></tr>' +
       '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
