@@ -14,3 +14,7 @@ qimen-yinpan.desktop
 src-tauri/target/
 code-sign-*.pem
 setup-desktop.sh
+
+# 本地验证/调试脚本 —— 仅本地运行, 不入库不进 CI
+scripts/verify_*.js
+scripts/verify_*.py
