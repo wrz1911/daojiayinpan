@@ -371,6 +371,13 @@ window.renderChuanRen=(data,containerId) => {
   let isKe=d.shiKe==='刻家';
   let keGan=d.keGzStr?d.keGzStr[0]:'',keZhi=d.keGzStr?d.keGzStr[1]:'';
   let cols=isKe?5:4;
+    let bzdy=window.computeBaZiDaYun({
+      year:d.opts.year||2026, month:d.opts.month||7, day:d.opts.day||5,
+      hour:d.opts.hour||12, gender:d.opts.gender||'男'
+    });
+    let ssg=bzdy.shishen||[], cg=bzdy.cangGan||[], cgS=bzdy.cgSS||[];
+    let dishi=bzdy.dishi||[], zizuo=bzdy.zizuo||[], xk=bzdy.xunKong||[];
+    let ws=bzdy.wxSpanBZ|| (c => c);
   h+='<div id="panHead"><TABLE class="pan" id="headTable">';
   h+='<TR><TD id="dTitle">日期</TD><TD colspan="'+cols+'" id="dateTime">'+d.gongli+' ('+d.nongli+')</TD></TR>';
   let juTitle=d.juLabel+(d.customJu?'<b>自选</b>':'')+(isKe?' <b>刻家</b>':'');
@@ -387,6 +394,29 @@ window.renderChuanRen=(data,containerId) => {
     h+='<TD class="sizhu" id="rizhu">'+wxSpan(riGz[0]||'')+'<br>'+wxSpan(riGz[1]||'')+'</TD>';
     h+='<TD class="sizhu" id="shizhu">'+wxSpan(shiGz[0]||'')+'<br>'+wxSpan(shiGz[1]||'')+'</TD>';
     if(isKe)h+='<TD class="sizhu" id="kezhu">'+wxSpan(keGan)+'<br>'+wxSpan(keZhi)+'</TD>';
+    h+='</TR>';
+    // 八字信息(十神/藏干/纳音/地势/自坐/空亡): 紧接四柱下方, 与四柱同表对齐
+    h+='<TR><TD>十神</TD>';
+    bzdy.bz.forEach((b, i) => {h+='<TD>'+(i===2?'日元':ssg[i])+'</TD>';});
+    h+='</TR>';
+    // 干支已在盘头「四柱」处显示, 此处不再重复(表头保留供十神/藏干等行对齐)
+    h+='<TR><TD>藏干</TD>';
+    bzdy.bz.forEach((b, i) => {
+      let c0=cg[i][0]||'',c1=cg[i][1]||'',c2=cg[i][2]||'';
+      h+='<TD>'+ws(c2)+ws(c0)+ws(c1)+'<br><span class="cr-bz-cgss">'+cgS[i*3]+' '+cgS[i*3+1]+' '+cgS[i*3+2]+'</span></TD>';
+    });
+    h+='</TR>';
+    h+='<TR><TD>纳音</TD>';
+    bzdy.nayin.forEach(n => {h+='<TD>'+n+'</TD>';});
+    h+='</TR>';
+    h+='<TR><TD>地势</TD>';
+    dishi.forEach(d => {h+='<TD>'+d+'</TD>';});
+    h+='</TR>';
+    h+='<TR><TD>自坐</TD>';
+    zizuo.forEach(d => {h+='<TD>'+d+'</TD>';});
+    h+='</TR>';
+    h+='<TR><TD>空亡</TD>';
+    xk.forEach(k => {h+='<TD>'+k+'</TD>';});
     h+='</TR>';
   // 四柱: 此处不再重复列出 —— 下方 .cr-bz-tbl 已给出完整四柱(十神/乾造/藏干/
   //       纳音/地势/自坐/空亡/神煞), 盘头再列一遍干支属冗余; 去掉后盘头更紧凑
@@ -475,39 +505,6 @@ window.renderChuanRen=(data,containerId) => {
 
   // ====== 八字大运区 ======
   try{
-    let bzdy=window.computeBaZiDaYun({
-      year:d.opts.year||2026, month:d.opts.month||7, day:d.opts.day||5,
-      hour:d.opts.hour||12, gender:d.opts.gender||'男'
-    });
-
-    // 四柱表格
-    let ssg=bzdy.shishen||[], cg=bzdy.cangGan||[], cgS=bzdy.cgSS||[];
-    let dishi=bzdy.dishi||[], zizuo=bzdy.zizuo||[], xk=bzdy.xunKong||[];
-    let ws=bzdy.wxSpanBZ|| (c => c);
-
-    h+='<table class="cr-bz-tbl"><tr><td>四柱</td><td>年柱</td><td>月柱</td><td>日柱</td><td>时柱</td></tr>';
-    h+='<tr><td>十神</td>';
-    bzdy.bz.forEach((b, i) => {h+='<td>'+(i===2?'日元':ssg[i])+'</td>';});
-    h+='</tr>';
-    // 干支已在盘头「四柱」处显示, 此处不再重复(表头保留供十神/藏干等行对齐)
-    h+='<tr class="cr-bz-cg"><td>藏干</td>';
-    bzdy.bz.forEach((b, i) => {
-      let c0=cg[i][0]||'',c1=cg[i][1]||'',c2=cg[i][2]||'';
-      h+='<td>'+ws(c2)+ws(c0)+ws(c1)+'<br><span class="cr-bz-cgss">'+cgS[i*3]+' '+cgS[i*3+1]+' '+cgS[i*3+2]+'</span></td>';
-    });
-    h+='</tr>';
-    h+='<tr><td>纳音</td>';
-    bzdy.nayin.forEach(n => {h+='<td>'+n+'</td>';});
-    h+='</tr>';
-    h+='<tr><td>地势</td>';
-    dishi.forEach(d => {h+='<td>'+d+'</td>';});
-    h+='</tr>';
-    h+='<tr><td>自坐</td>';
-    zizuo.forEach(d => {h+='<td>'+d+'</td>';});
-    h+='</tr>';
-    h+='<tr><td>空亡</td>';
-    xk.forEach(k => {h+='<td>'+k+'</td>';});
-    h+='</tr></table>';
 
     // 大运流年 (独立表格, 无边距)
     h+='<table class="cr-dy-tbl">';
