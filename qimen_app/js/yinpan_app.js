@@ -1194,78 +1194,49 @@ function toggleJinKouJue(noScroll) {
           'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' + _jkCenter(chart) + '</div>';
       } else { cells += one(byIdx[k]); }
     }
-    // ── 输入区：多行单选（照热卜版式） ──
-    // 选项控件统一用原生 input + accent-color, 与顶栏六个模式选择器一致
+    // ── 辅助：原生选项控件(同顶栏) / 表格单元格 / 下拉样式 / 信息栏 ──
     const optStyle = 'margin:0 0 0 6px;width:14px;height:14px;flex:none;accent-color:var(--c-theme);vertical-align:middle';
     const labStyle = 'display:inline-flex;align-items:center;gap:2px;font-size:13px;color:var(--c-text);cursor:pointer;white-space:nowrap';
+    const selStyle = 'margin-left:6px;border:1px solid var(--c-border);border-radius:6px;padding:2px 4px;font-size:13px;color:var(--c-text);' +
+      'background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:52px';
     const radio = (on, txt, click, name) =>
       '<label style="' + labStyle + '"><input type="radio" name="' + (name || 'jkr') + '"' + (on ? ' checked' : '') +
       ' onchange="' + click + '" style="' + optStyle + '">' + txt + '</label>';
     const checkbox = (on, txt, click) =>
       '<label style="' + labStyle + '"><input type="checkbox"' + (on ? ' checked' : '') +
       ' onchange="' + click + '" style="' + optStyle + '">' + txt + '</label>';
-    const jkRow = (label, right) =>
-      '<div style="display:flex;align-items:center;justify-content:space-between;' +
-      'padding:11px 6px;border-bottom:1px solid var(--c-border)">' +
-      '<span style="font-size:15px;color:var(--c-text-2)">' + label + '</span>' +
-      '<span style="display:flex;align-items:center;white-space:nowrap">' + right + '</span></div>';
-    const inputArea =
-      // 选择地分 与 换将方式 合并为一行
-      '<div style="display:flex;align-items:center;flex-wrap:wrap;row-gap:6px;justify-content:space-between;' +
-      'padding:9px 4px;border-bottom:1px solid var(--c-border)">' +
-        '<span style="display:flex;align-items:center">' +
-          '<span style="font-size:13px;color:var(--c-text-2)">地分</span>' +
-          '<select id="jkDifen" onchange="_jkSet({difen:parseInt(this.value,10)})" style="' + 'margin-left:8px;border:1px solid var(--c-border);border-radius:6px;padding:3px 6px;font-size:14px;color:var(--c-text);background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:52px' + '">' +
-            QM.ZHI.map(function(z,i){ return '<option value="' + i + '"' + (i === curIdx ? ' selected' : '') + '>' +
-              (_jkDfType === 2 ? (i + 1) : z) + '</option>'; }).join('') +
-          '</select>' +
-          checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})') +
-        '</span>' +
-        '<span style="display:flex;align-items:center">' +
-          '<span style="font-size:13px;color:var(--c-text-2)">月将</span>' +
-          '<select id="jkJiangZhi" onchange="_jkSet({jiangZhi:parseInt(this.value,10)})" style="' + 'margin-left:8px;border:1px solid var(--c-border);border-radius:6px;padding:3px 6px;font-size:14px;color:var(--c-text);background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:52px' + '">' +
-            QM.ZHI.map(function(z,i){ var cur = (_jkJiangZhi >= 0) ? _jkJiangZhi : chart.yueJiangIdx;
-              return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + z + '</option>'; }).join('') +
-          '</select>' +
-        '</span>' +
-        '<span style="display:flex;align-items:center">' +
-          '<span style="font-size:13px;color:var(--c-text-2)">换将</span>' +
-          radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') +
-          radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj') +
-        '</span>' +
-      '</div>' +
-      // 贵人求法 与 贵神类型 合并为一行（各自独立 radio 组，故需不同 name）
-      '<div style="display:flex;align-items:center;flex-wrap:wrap;row-gap:6px;justify-content:space-between;' +
-      'padding:11px 6px;border-bottom:1px solid var(--c-border)">' +
-        '<span style="display:flex;align-items:center">' +
-          '<span style="font-size:13px;color:var(--c-text-2)">贵人</span>' +
-          radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
-          radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
-        '</span>' +
-        '<span style="display:flex;align-items:center">' +
-          '<span style="font-size:13px;color:var(--c-text-2)">贵神</span>' +
-          radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
-          radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
-          radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn') +
-        '</span>' +
-      '</div>';
-    // ── 信息栏：照漫步者版式的表格 ──
-    const wxOf = z => (QM.WX_OF && QM.WX_OF[z]) || '';
-    const tdL = (t, span) => '<td' + (span ? ' colspan="' + span + '"' : '') + ' style="border:1px solid var(--c-border);padding:4px 6px;' +
-      'color:var(--c-gold);text-align:center;white-space:nowrap">' + t + '</td>';
+    const tdL = (t, span, rowspan) => '<td' + (span ? ' colspan="' + span + '"' : '') + (rowspan ? ' rowspan="' + rowspan + '"' : '') +
+      ' style="border:1px solid var(--c-border);padding:4px 6px;color:var(--c-gold);text-align:center;white-space:nowrap;width:52px">' + t + '</td>';
     const tdV = (t, span, align) => '<td' + (span ? ' colspan="' + span + '"' : '') + ' style="border:1px solid var(--c-border);padding:4px 6px;' +
       'text-align:' + (align || 'center') + ';white-space:nowrap">' + t + '</td>';
     const sp = window._wxSpan || (x => x);
     const jiangLabel = chart.yueJiang + (_jkJiangZhi >= 0 ? '(自定义)' : (_jkJiang === 1 ? '(交节)' : '(中气)'));
     const dfLabel = chart.cur.difenZhi + (_jkDfType === 2 ? '(报数)' : '(手动)');
     const infoTbl = '<table style="width:100%;border-collapse:collapse;font-size:14px;margin:2px 0">' +
-      '<tr>' + tdL('日期', 1) + tdV(chart.dateFull || '', 3) + '</tr>' +
-      '<tr>' + tdL('节气', 1) + tdV(chart.termStr || '', 3) + '</tr>' +
-      '<tr>' + tdL('四柱', 1) + tdV('年柱') + tdV('月柱') + tdV('日柱') + tdV('时柱') + '</tr>' +
-      '<tr>' + tdL('', 1) + chart.siZhu.map(g => tdV(sp(g[0]) + sp(g[1]))).join('') + '</tr>' +
-      '<tr>' + tdL('空亡', 1) + (chart.kong4 || []).slice(0, 3).map(k => tdV(sp(k))).join('') + tdV(sp((chart.kong4 || [])[3] || '')) + '</tr>' +
-      '<tr>' + tdL('月将', 1) + tdV(jiangLabel) + tdL('地分', 1) + tdV(dfLabel) + '</tr>' +
-      '<tr>' + tdL('日空', 1) + tdV(sp(chart.kong4 ? chart.kong4[2] : '')) + tdL('四大空亡', 1) + tdV(chart.shensha && chart.shensha.sish ? sp(chart.shensha.sish) : '无') + '</tr>' +
+      '<tr>' + tdL('日期') + tdV(chart.dateFull || '', 3) + '</tr>' +
+      '<tr>' + tdL('节气') + tdV(chart.termStr || '', 3) + '</tr>' +
+      '<tr>' + tdL('四柱', 0, 2) + tdV('年柱') + tdV('月柱') + tdV('日柱') + tdV('时柱') + '</tr>' +
+      '<tr>' + (chart.siZhu || []).map(g => tdV(sp(g[0]) + sp(g[1]))).join('') + '</tr>' +
+      '<tr>' + tdL('空亡') + (chart.kong4 || []).map(k => tdV(sp(k))).join('') + '</tr>' +
+      '<tr>' + tdL('月将') + tdV(jiangLabel) + tdL('地分') + tdV(dfLabel) + '</tr>' +
+      '<tr>' + tdL('日空') + tdV(sp(chart.kong4 ? chart.kong4[2] : '')) + tdL('四大空亡') +
+        tdV(chart.shensha && chart.shensha.sish ? sp(chart.shensha.sish) : '无') + '</tr>' +
+      '</table>';
+
+    // ── 输入区：与信息栏同一套表格样式 ──
+    const tdIn = t => '<td style="border:1px solid var(--c-border);padding:4px 6px;text-align:center;white-space:nowrap">' + t + '</td>';
+    const dfSel = '<select id="jkDifen" onchange="_jkSet({difen:parseInt(this.value,10)})" style="' + selStyle + '">' +
+      QM.ZHI.map(function(z,i){ return '<option value="' + i + '"' + (i === curIdx ? ' selected' : '') + '>' +
+        (_jkDfType === 2 ? (i + 1) : z) + '</option>'; }).join('') + '</select>';
+    const jzSel = '<select id="jkJiangZhi" onchange="_jkSet({jiangZhi:parseInt(this.value,10)})" style="' + selStyle + '">' +
+      QM.ZHI.map(function(z,i){ var cur = (_jkJiangZhi >= 0) ? _jkJiangZhi : chart.yueJiangIdx;
+        return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + z + '</option>'; }).join('') + '</select>';
+    const inputArea = '<table style="width:100%;border-collapse:collapse;font-size:14px;margin:0 0 2px">' +
+      '<tr>' + tdL('地分') + tdIn(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})')) +
+              tdL('月将') + tdIn(jzSel) + '</tr>' +
+      '<tr>' + tdL('换将') + tdIn(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj')) +
+              tdL('贵神') + tdIn(radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') + radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') + radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn')) + '</tr>' +
+      '<tr>' + tdL('贵人') + tdV(radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') + radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr'), 3) + '</tr>' +
       '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
     div.innerHTML = infoTbl + inputArea +
