@@ -214,12 +214,11 @@
            '<TD><span class="hd-lbl">值使</span><font id="zhiShi">' + qr.zs.s + '</font>门</TD>' +
            '<TD id="maXing"><span class="hd-lbl">马星</span>' + qr.ma.z + '</TD>' +
            '<TD><span class="hd-lbl">空亡</span>' + qr.kw.gz + '</TD></TR>';
-      /* 四柱: 柱名内联在干支上方, 省掉纯标题行 */
+      /* 四柱: 只显示干支本身, 字号加大加粗(不标注年柱/月柱/日柱/时柱) */
       h += '<TR id="sizhu" class="hd-row"><TD class="hd-side">四柱</TD>';
-      ['年柱', '月柱', '日柱', '时柱'].forEach(function (t, i) {
-        var gz = [sz.nian, sz.yue, sz.ri, sz.shi][i] || '';
-        h += '<TD><span class="hd-lbl">' + t + '</span>' +
-             ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
+      [sz.nian, sz.yue, sz.ri, sz.shi].forEach(function (gz) {
+        gz = gz || '';
+        h += '<TD class="sizhuTd">' + ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
       });
       h += '</TR>';
       /* ── 八字信息(原「八字排盘」主盘, 合并进命理主盘): 十神/藏干/纳音/地势/
