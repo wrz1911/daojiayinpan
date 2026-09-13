@@ -2637,6 +2637,16 @@ function doMingli(){
     let data=window.mingliChart({year:Y,month:M,day:D,hour:hr,minute:mn,
       gender:_mlVals.gender,nianMing:_mlVals.nianMing});
     document.getElementById("panWrap").innerHTML=window.renderMingli(data,null);
+    // 外圈切换按钮(参照热卜: 十二神将四选一 / 天门地户 / 长生), 已按下的高亮
+    let mlBtns=document.querySelectorAll('#panWrap .ml-btn');
+    mlBtns.forEach(function(b){
+      b.onclick=function(){
+        let k=b.getAttribute('data-ml');
+        let kind=(k==='tmdh'||k==='state')?k:parseInt(k);
+        data.ringKind=window.mingliRing(kind,data);
+        mlBtns.forEach(function(x){ x.classList.toggle('on', x===b && data.ringKind!=='none'); });
+      };
+    });
     _renderBottomBar();
     setTimeout(_bindActionButtons,50);
   }catch(e){
