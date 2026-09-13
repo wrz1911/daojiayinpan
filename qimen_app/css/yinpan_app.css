@@ -358,3 +358,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 @media (max-width:520px){
   #headTable .bz-tip{font-size:12px;line-height:20px;padding:3px 4px}
 }
+
+/* 交运说明(九宫下方, 即原颜色说明的位置): 与颜色说明同为居中说明行 */
+.bz-jy-out{text-align:center;font-size:13px;line-height:20px;color:var(--c-text-2);padding:6px 8px}
+@media (max-width:520px){ .bz-jy-out{font-size:12px;line-height:19px;padding:5px 6px} }

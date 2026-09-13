@@ -226,7 +226,7 @@
         }) : null;
         var tipHtml = '颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、' +
                       '<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span>';
-        if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false, 'bz-sec', tipHtml);
+        if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false, 'bz-sec', tipHtml, true);
       } catch (e) {
         if (window._logErr) window._logErr('mingli.baziRows', e && e.message);
       }
@@ -257,9 +257,11 @@
         // <div id="content"> 与 <TABLE id="pan">
         h += window.buildPaipanGrid(pals, kongGongs, (qr.ma && qr.ma.p) || 'ma2', agFn,
                { colorSpan: csFn });
-        // 颜色说明(与穿壬/时盘同一行文案, 用共用 .cx-* 类, 随主题变量走)
-        /* 颜色说明已上移到主盘内(交运之前), 见 baziMainRows 调用处 */
+        /* 颜色说明已上移到主盘内, 见上方 baziMainRows 调用处 */
       }
+
+      /* 交运说明: 置于九宫下方 —— 即原来颜色说明所在的位置 */
+      if (bzInfo && window.baziJiaoYunBlock) h += window.baziJiaoYunBlock(bzInfo);
 
       /* ── ③ #dayun_liunian 大运 + 流年(两个独立 TABLE, 照搬热卜) ── */
       if (bz && bz.dayun && bz.dayun.length) {

@@ -300,7 +300,7 @@
   function hourText(h) { return ZHI[Math.floor(((h + 1) % 24) / 2)]; }
 
   /* 十神/藏干/纳音/地势/自坐/空亡/神煞/胎元命宫身宫/旺相/交运 —— 命理主盘与本模块共用 */
-  function baziMainRows(bz, withGz, rowCls, tipHtml) {
+  function baziMainRows(bz, withGz, rowCls, tipHtml, skipJy) {
     var h = '';
     var rc = rowCls ? ' class="' + rowCls + '"' : '';
     /* 十神 */
@@ -350,13 +350,28 @@
          '<TD colspan="2">' + bz.wangXiang + '</TD></TR>';
     /* 颜色说明(命理主盘把它插在交运之前, 八字盘不传则无此行) */
     if (tipHtml) h += '<TR' + rc + '><TD colspan="5" class="bz-tip">' + tipHtml + '</TD></TR>';
-    /* 交运 */
-    var jyDur = bz.jiaoYun.y + '年' + (bz.jiaoYun.m ? bz.jiaoYun.m + '个月' : '') +
-                (bz.jiaoYun.d ? bz.jiaoYun.d + '日' : '');
-    h += '<TR' + rc + '><TD colspan="5" id="jiaoYun">出生后' + jyDur + '起大运，每逢<font color="#e40b06">' +
-         bz.jiaoYun.gan + '</font>年' + bz.jiaoYun.month + '月' + bz.jiaoYun.day + '日前后交运。</TD></TR>';
+    /* 交运: 命理主盘把它移到九宫下方(skipJy=true), 八字盘留在主盘内 */
+    if (!skipJy) h += baziJiaoYunRow(bz, rc);
     h += '</TABLE>';
     return h;
+  }
+
+  /** 交运说明行/块(主盘内用 <TR>, 主盘外用 <div class="bz-jy-out">) */
+  function baziJiaoYunRow(bz, rc) {
+    var d = bz.jiaoYun;
+    var dur = d.y + '年' + (d.m ? d.m + '个月' : '') + (d.d ? d.d + '日' : '');
+    return '<TR' + (rc || '') + '><TD colspan="5" id="jiaoYun">出生后' + dur +
+           '起大运，每逢<font color="#e40b06">' + d.gan + '</font>年' + d.month + '月' +
+           d.day + '日前后交运。</TD></TR>';
+  }
+
+  /** 主盘外版本(命理把交运放在九宫下面, 沿用原来颜色说明的位置) */
+  function baziJiaoYunBlock(bz) {
+    var d = bz.jiaoYun;
+    var dur = d.y + '年' + (d.m ? d.m + '个月' : '') + (d.d ? d.d + '日' : '');
+    return '<div class="bz-jy-out">出生后' + dur +
+           '起大运，每逢<font color="#e40b06">' + d.gan + '</font>年' + d.month + '月' +
+           d.day + '日前后交运。</div>';
   }
 
   /* ══════════════ 渲染(照搬热卜传统模式) ══════════════ */
@@ -448,6 +463,7 @@
 
   window.baziChart = baziChart;
   window.baziMainRows = baziMainRows;
+  window.baziJiaoYunBlock = baziJiaoYunBlock;
   window.renderBazi = renderBazi;
   window.showBaziPan = showBaziPan;
 })();
