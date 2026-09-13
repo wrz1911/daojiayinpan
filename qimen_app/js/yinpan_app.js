@@ -1176,10 +1176,13 @@ function toggleJinKouJue(noScroll) {
     // 单宫：四行(人元 / 干支+贵神 / 干支+将神 / 地分)，触按选中
     const one = (h, first) => {
       const sel = h.difenIdx === curIdx;
+      // 选中态一律用 class(.jk-sel), 不再用 inline style ——
+      // 否则初始那一格的 inline 背景不会被 _jkPick 的清 class 逻辑清掉,
+      // 表现为"切换后宫位仍残留灰色背景"
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
+        ' class="jk-cell' + (sel ? ' jk-sel' : '') + '"' +
         ' style="cursor:pointer;padding:3px 5px;line-height:1.6;font-size:13px;' +
-        'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border);' +
-        (sel ? 'background:var(--c-gray-bg);' : '') + '">' +
+        'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' +
         '<div><span class="' + col(h.renWx) + '">' + h.renYuan + '</span>' +
           '<span style="float:right;color:' + wsc[h.renWs] + '">' + h.renWs + '</span></div>' +
         '<div><span class="' + col(h.guiWx) + '">' + h.guiGanZhi + '</span>' +
