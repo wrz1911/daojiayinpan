@@ -38,7 +38,9 @@ function qimenChart(opts) {
   const lM = Math.abs(lMr), lD = ld.getDay(), isLeap = lMr < 0;
   const tt = st.getTerm(), ti = (tt.getIndex() % 24 + 24) % 24;
   let isY = ti >= 12;
-  const yueZhi = (lM + 1) % 12;
+  // 月将按"中气"取, 与农历月无关: 节气序号 0=冬至(也是中气), 偶数皆中气 → 中气序 = floor(ti/2)
+  // 原实现 (lM+1)%12 以农历月为索引, 逢节气偏移/闰月即错(1986-12-11 曾给出"丑", 正解为"寅")
+  const yueZhi = Math.floor(ti / 2);
   const jiang = HE[yueZhi];
   const jz = ZHI[jiang];
   let v = lM;
