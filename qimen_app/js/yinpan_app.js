@@ -1234,14 +1234,23 @@ function toggleJinKouJue(noScroll) {
     const jzSel = '<select id="jkJiangZhi" onchange="_jkSet({jiangZhi:parseInt(this.value,10)})" style="' + selStyle + '">' +
       QM.ZHI.map(function(z,i){ var cur = (_jkJiangZhi >= 0) ? _jkJiangZhi : chart.yueJiangIdx;
         return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + z + '</option>'; }).join('') + '</select>';
-    // 三行变两行: 地分/月将/换将 一行, 贵神/贵人 一行 (6 列均分)
+    // 两行: 首行三组用表格列; 次行两组改用 flex 均分, 使标签与选项紧贴(表格列做不到)
+    const inLab = t => '<span style="color:var(--c-gold);white-space:nowrap;margin-right:4px">' + t + '</span>';
     const inputArea = '<table style="width:100%;border:1px solid var(--c-border);border-radius:4px;' +
       'border-collapse:collapse;table-layout:fixed;font-size:14px;margin:8px 0 2px">' +
       '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})')) +
               tdLh('月将') + tdVh(jzSel) +
               tdLh('换将') + tdVh(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj')) + '</tr>' +
-      '<tr>' + tdLh('贵神', 1) + tdVh(radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') + radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') + radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn'), 2, 1, 'center') +
-              tdLh('贵人', 1) + tdVh(radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') + radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr'), 2, 1, 'center') + '</tr>' +
+      '<tr><td colspan="6" style="padding:7px 8px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="display:inline-flex;align-items:center">' + inLab('贵神') +
+            radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
+            radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
+            radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn') + '</span>' +
+          '<span style="display:inline-flex;align-items:center">' + inLab('贵人') +
+            radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
+            radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') + '</span>' +
+        '</div></td></tr>' +
       '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
     div.innerHTML = infoTbl + inputArea +
