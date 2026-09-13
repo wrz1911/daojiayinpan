@@ -1244,23 +1244,24 @@ function toggleJinKouJue(noScroll) {
     };
     const curIdx = chart.cur.difenIdx;
 
-    // 单宫(仿易瑞): 干支 + 神名 + 旺衰 + 用。四位名与空亡/四空/五动三动不显示
+    // 单宫(仿易瑞): 干支 + 神名 + 旺衰 + 用。人元与地分没有神名,
+    // 让它们的干支直接跨过神名列, 免得留一大段空白
     const one = (h) => {
       const isCur = h.difenIdx === curIdx;
-      const u = n => chart.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
-      const line = (a, b, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap">' +
-        '<span style="flex:0 0 32px;overflow:hidden">' + a + '</span>' +
-        '<span style="flex:0 0 25px;overflow:hidden">' + (b || '') + '</span>' +
-        '<span style="flex:0 0 12px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+      const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
+      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap">' +
+        '<span style="flex:0 0 ' + (wide ? 52 : 29) + 'px;overflow:hidden">' + a + '</span>' +
+        (wide ? '' : '<span style="flex:0 0 23px;overflow:hidden">' + (b || '') + '</span>') +
+        '<span style="flex:0 0 11px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
         ' class="jk-cell' + (isCur ? ' jk-sel' : '') + '"' +
         ' style="cursor:pointer;padding:3px 2px;font-size:11px;line-height:1.7;overflow:hidden;' +
         'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' +
-        line('<span class="' + col(h.renWx) + '">' + h.renYuan + '</span>', '', h.renWs, '') +
+        line('<span class="' + col(h.renWx) + '">' + h.renYuan + '</span>', '', h.renWs, '', true) +
         line(wxSpan(h.guiGanZhi), shenSpan(h.guiShen, QM.ZHI.indexOf(h.guiGanZhi[1])), h.guiWs, u(2)) +
         line(wxSpan(h.jiangGanZhi), shenSpan(h.jiangShen, h.jiangZhiIdx), h.jiangWs, u(3)) +
-        line('<span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>', '', h.difenWs, '') +
+        line('<span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>', '', h.difenWs, '', true) +
         '</div>';
     };
     // 十二宫按地支方位：上南下北·左东右西
@@ -1933,6 +1934,24 @@ const JK_DUN = [0, 2, 4, 6, 8];
 function _jkDun(dGanIdx, zhiIdx) { return (JK_DUN[dGanIdx % 5] + zhiIdx) % 10; }
 
 /* 排一课。opt = {year,month,day,hour,minute, dayNight:0自动/1昼/2夜, jiang:0中气(标准)/1交节} */
+/* 用位(用爻)：讲义第四课用神歌 ——
+    课体纯阳神为用 / 课体纯阴将为用 / 三阳一阴阴为用 /
+    三阴一阳阳上取 / 二阴二阳将为用
+   且「用神只在贵神将神之间选取」；独阴或独阳若落在人元、地分，
+   则回退（纯阳与三阳一阴取贵神，纯阴与二阴二阳取将神）。
+   入参 kz4 = [0, 人元化支, 贵神支, 将神支, 地分支]，返回 2(贵神) 或 3(将神)。 */
+function _jkYongwei(kz4) {
+  let yyshu = 0, yinPos = 0, yangPos = 0;
+  for (let i = 1; i < 5; i++) {
+    if (kz4[i] % 2 === 0) { yyshu++; yangPos = i; } else { yinPos = i; }
+  }
+  if (yyshu === 4) return 2;                          // 纯阳 → 神为用
+  if (yyshu === 3) return (yinPos === 2) ? 2 : 3;     // 三阳一阴 → 阴为用
+  if (yyshu === 1) return (yangPos === 2) ? 2 : 3;    // 三阴一阳 → 阳上取
+  return 3;                                           // 纯阴、二阴二阳 → 将为用
+}
+window._jkYongwei = _jkYongwei;
+
 function jinkoujueChart(opt) {
   const tyme = window.tyme || {};
   if (!tyme.SolarTime) return null;
@@ -1961,6 +1980,7 @@ function jinkoujueChart(opt) {
   const dir = [11, 0, 1, 2, 3, 4].indexOf(grZ) >= 0 ? 1 : -1;
 
   const houses = [];
+  const G2Z_ = [2,3,6,5,4,7,8,9,0,11];   // 天干化支, 供逐宫算用位
   for (let df = 0; df < 12; df++) {
     const jsZ = ((jiangZ + df - hZ) % 12 + 12) % 12;                  // 将神地支
     const steps = ((df - grZ) % 12 + 12) % 12;
@@ -1970,7 +1990,10 @@ function jinkoujueChart(opt) {
     const jsGan = QM.GAN[_jkDun(dG, jsZ)];
     const gsGan = QM.GAN[_jkDun(dG, gsZ)];
     const rgGan = QM.GAN[rgIdx];
+    // 逐宫算用位 —— 每一宫是独立一课, 用爻不能沿用中宫那一课的
+    const k4h = [0, G2Z_[QM.GAN.indexOf(rgGan)], JK_GR_ZHI[gsIdx], jsZ, df];
     houses.push({
+      yongwei: _jkYongwei(k4h),
       difenIdx: df, difenZhi: QM.ZHI[df], difenGan: QM.GAN[_jkDun(dG, df)], jiangZhiIdx: jsZ,
       renYuan: rgGan, renWx: QM.WX_MAP[rgGan],
       renWs: '',
@@ -2053,14 +2076,7 @@ function jinkoujueChart(opt) {
   //   三阴一阳阳上取 / 二阴二阳将为用
   // 且「用神只在贵神将神之间选取」—— 独阴/独阳若不在贵将(落在人元或地分),
   // 则回退默认(纯阳、三阳一阴取贵神; 纯阴、二阴二阳取将神)
-  let yyshu = 0, yinPos = 0, yangPos = 0;
-  for (let i = 1; i < 5; i++) {
-    if (kz4[i] % 2 === 0) { yyshu++; yangPos = i; } else { yinPos = i; }
-  }
-  let yongwei = 3;                                   // 默认将神: 纯阴、二阴二阳
-  if (yyshu === 4) yongwei = 2;                      // 纯阳 → 神为用
-  else if (yyshu === 3) yongwei = (yinPos === 2) ? 2 : 3;   // 三阳一阴 → 阴为用
-  else if (yyshu === 1) yongwei = (yangPos === 2) ? 2 : 3;  // 三阴一阳 → 阳上取
+  const yongwei = _jkYongwei(kz4);
 
   // 神煞（按四位落位）
   const ganIdx = [0, yGzO.getHeavenStem().getIndex(), mGzO.getHeavenStem().getIndex(),
@@ -2077,7 +2093,7 @@ function jinkoujueChart(opt) {
 
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
-    shensha: ss, yongwei: yongwei, yyshu: yyshu, wangWx: wangWx, wangSrc: '课内', lunar: lunarStr, kong4: kong4, termStr: termStr,
+    shensha: ss, yongwei: yongwei, wangWx: wangWx, wangSrc: '课内', lunar: lunarStr, kong4: kong4, termStr: termStr,
     dateFull: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
     dateStr: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
     yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ], yueJiangIdx: jiangZ, yueJiangAuto: jiangZAuto,
