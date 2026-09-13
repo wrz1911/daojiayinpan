@@ -224,7 +224,9 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
      这里改为"补偿式": 容器宽度只扣掉卡片实际所需, 把被空表吃掉的 110px 补回来,
      九宫回到 264px(每格 88px), 与格内内容高度相当, 正方形才立得住。
      max-width 防止在 500px 附近九宫被拉得过大、格内留白过多。 */
-  .cr-content{width:calc(100% - 26px);max-width:380px}
+  /* 扣除值是实测值: 卡片内容随系统字体缩放变化(本机 fontScale 1.25 下左右卡片
+     达 69px), 留 38px/侧 即空档 74px, 尚有 5px 余量。 */
+  .cr-content{width:calc(100% - 38px);max-width:380px}
 }
 .cr-inner{width:100%;max-width:none!important}
 .cr-pan{width:100%!important;max-width:none!important;table-layout:fixed!important}

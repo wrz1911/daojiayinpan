@@ -557,7 +557,7 @@ window.renderChuanRen=(data,containerId) => {
   '.cr-ctj{color:var(--c-gold);font-size:11px}'+
   '.cr-czhi{color:var(--c-text);font-size:12px}'+
   '.cr-ckw{color:var(--c-po);font-size:10px}'+
-  '.cr-cdu{color:var(--c-text-2);font-size:var(--pan-fs-sm);display:flex;flex-direction:column;line-height:1.1}'+
+  '.cr-cdu{color:var(--c-text-2);font-size:11px;display:flex;flex-direction:column;line-height:1.1}'+
   '.cr-hrow{display:flex;flex-direction:row;align-items:center;gap:3px;white-space:nowrap}'+
   '.cr-sanchuan{display:flex;justify-content:center;margin-top:40px}'+
   '.cr-sc-tbl{border-collapse:collapse;font-size:14px}'+
@@ -590,13 +590,14 @@ window.renderChuanRen=(data,containerId) => {
   //   - 上下内边距与左右取齐(padding:2px), 否则 td 高比宽多 4px, 正方形被破坏
   //   - 字号 13px/行高 20px: 三行共 60px, 放得进 88px 的宫格, 且手机 dpr=3 下可读
   //   - 卡片缩到 10px, 左右卡片各 64px, 正好落在九宫两侧 68px 的空档里
-  // 宫格与"十二建除"共用 --pan-fs-sm: 两处要一样大(建除是格内符号的对应物),
-  // 这里只改一次变量值, 九宫(.panItem)与卡片(.cr-cdu)同时生效。
+  // 宫格与"将神"共用 --pan-fs-sm: 两者要一样大(将神是格内符号的对应物),
+  // 这里只改一次变量值, 九宫(.panItem)与卡片(.cr-ctj)同时生效。
+  // 十二建除反过来回到原来的小号(9px): 它与将神一增一减, 卡片总宽不变。
   '@media(max-width:500px){'+
   '.cr-grid-wrap{--pan-fs-sm:13px;--pan-lh-sm:20px}'+
   '#pan.cr-pan td{padding:2px!important}'+
   '.cr-card{font-size:10px;line-height:13px;padding:1px 2px}'+
-  '.cr-ctg{font-size:11px}.cr-ctj{font-size:9px}.cr-czhi{font-size:10px}.cr-ckw{font-size:8px}'+
+  '.cr-ctg{font-size:11px}.cr-ctj{font-size:var(--pan-fs-sm)}.cr-czhi{font-size:10px}.cr-cdu{font-size:9px}.cr-ckw{font-size:8px}'+
   '}'+
   // 500~700px 的窄窗口: 卡片可回到稍大字号, 宫格仍有富余
   '@media(min-width:501px) and (max-width:700px){#pan.cr-pan .panItem{font-size:14px!important;line-height:22px!important}}'+
