@@ -502,7 +502,9 @@ window.renderChuanRen=(data,containerId) => {
         qimenGridHTML+='<div class="cr-sanchuan"><table class="cr-sc-tbl">';
         for(let i=4;i>=1;i--){
           let lb=scLabels[i]||'', ex=scExtra[i]||'', exv=scExtraVal[i]||'';
-          qimenGridHTML+='<tr><td class="cr-sc-lb">'+lb+'</td><td class="cr-sc-tg">'+d.tgsz[i]+'</td><td class="cr-sc-dz">'+d.dzsz[i]+'</td><td class="cr-sc-ex">'+exv+'</td></tr>';
+          // 三传/四课三列同样按五行着色: 天干列在"四课"行落的是地支, 统一走
+          // wxSpanX 的单字表, 干支都能取到色, 不必按列区分干支
+          qimenGridHTML+='<tr><td class="cr-sc-lb">'+lb+'</td><td class="cr-sc-tg">'+wxSpanX(d.tgsz[i])+'</td><td class="cr-sc-dz">'+wxSpanX(d.dzsz[i])+'</td><td class="cr-sc-ex">'+wxSpanX(exv)+'</td></tr>';
         }
         qimenGridHTML+='</table></div>';
         qimenGridHTML+='</div></div>';
@@ -582,9 +584,8 @@ window.renderChuanRen=(data,containerId) => {
   '.cr-sc-tbl{border-collapse:collapse;font-size:14px}'+
   '.cr-sc-tbl td{padding:2px 10px;text-align:center}'+
   '.cr-sc-lb{color:var(--c-theme);font-size:12px;text-align:right!important}'+
-  '.cr-sc-tg{color:var(--c-po);font-size:14px;font-weight:bold}'+
-  '.cr-sc-dz{color:var(--c-text);font-size:14px;font-weight:bold}'+
-  '.cr-sc-ex{color:var(--c-text);font-size:14px;font-weight:bold}'+
+  // 三列颜色一律由 JS 按五行写在内层 <font> 上(原先天干列写死红色, 与五行色打架)
+  '.cr-sc-tg,.cr-sc-dz,.cr-sc-ex{font-size:14px;font-weight:bold}'+
   '.cr-bz-tbl{width:100%;margin:0 auto;border-collapse:collapse;font-size:12px}'+
   '.cr-bz-tbl td{border:1px solid var(--c-border);text-align:center;vertical-align:middle;padding:4px 2px;line-height:1.3}'+
   '.cr-bz-tbl tr td:first-child{color:var(--c-gold);font-weight:500;font-size:11px}'+
