@@ -376,7 +376,7 @@ function doPan() {
   window.Y=Y; window.M=M; window.D=D; window.hr=hr; window.mn=mn;
   /* 切盘时清掉三个开关的残留状态: 下面各盘型分支会提前 return, 不在这里清的话
      (比如)时盘开过"年神将"→切命理→切回时盘, 按钮要点两次才生效。 */
-  _tmdhShow=false; _shenShow=0; _stateShowing=false;
+  _tmdhShow=false; _shenShow=0; _stateShowing=false; _diShenShow=false;
 
 
         // 山向模式: 24山角度→局数/阴阳/黄泉→地盘星门神全算法
@@ -734,7 +734,8 @@ function renderPan(raw, engineData) {
     return ag ? window._anGanColor(ag, g) : '';
   };
   let wxSpan = window._wxSpan;
-  let gridHTML = buildPaipanGrid(palaces, kongGongs, maPosId, agColor, {colorSpan: window._colorSpan});
+  // diShen: 只有时盘需要地八神占位(其余盘型不输出该 span, 布局完全不受影响)
+  let gridHTML = buildPaipanGrid(palaces, kongGongs, maPosId, agColor, {colorSpan: window._colorSpan, diShen: panType===1});
 
   let dStr = Y+'-'+String(M).padStart(2,'0')+'-'+String(D).padStart(2,'0')+' '+
              String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0')+':00';
@@ -777,9 +778,16 @@ function renderPan(raw, engineData) {
     '<TD><div class="btn" id="btn6" onclick="shen12(3)">日神将</div></TD>' +
     '<TD><div class="btn" id="btn7" onclick="shen12(4)">时神将</div></TD>' +
     '</TR></TABLE>') +
+    // 地八神: 时盘专用, 排在年神将下方
+    (panType===1 ?
+    '<TABLE id="btnTable3"><TR>' +
+    '<TD><div class="btn" id="btnDiShen" onclick="toggleDiBaShen()">地八神</div></TD>' +
+    '</TR></TABLE>' : '') +
     '<div id="yixinghuandouDIV"></div>';
 
   document.getElementById('panWrap').innerHTML = html;
+  // 地八神符号先算好放着(默认不显示), 点按钮才写到宫格里
+  if (panType === 1) { _diShenMap = buildDiBaShenMap(palaces, isYin); paintDiBaShen(_diShenShow); }
 
   // 清空waipan(新排盘后天门地户需重新点击)
   for(let wp = 1; wp <= 12; wp++) {
@@ -790,6 +798,70 @@ function renderPan(raw, engineData) {
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
 }
+
+/* ══════════════════ 地八神 (时盘) ══════════════════
+   天八神是盘面自带的那一圈; 地八神不显示在盘上, 需另排:
+
+     起宫: 值符落宫的【天盘干】→ 该干在【地盘】上的落宫, 从该宫起"符"
+     排布: 沿绕宫环 ZHUAN=[坎1,艮8,震3,巽4,离9,坤2,兑7,乾6] 阳遁顺行、阴遁逆序,
+           顺序固定为 符 蛇 阴 六 白 玄 地 天
+
+   这里刻意复用引擎排天八神用的同一个环与同一组顺序表(QM.ZHUAN / QM.SHEN_A / QM.SHEN_Y),
+   免得两处口径走岔。中宫没有环位, 起宫落在中宫时寄坤二。
+   两个特例按文档口径处理: 天盘干取首字(第二字是中宫寄干, 不作依据)。 */
+let _diShenShow = false;
+let _diShenMap = null;
+
+function buildDiBaShenMap(palaces, isYin) {
+  try {
+    if (!palaces || !window.QM) return null;
+    const HUAN = QM.ZHUAN, FZ = QM.FZHUAN, SO = isYin ? QM.SHEN_Y : QM.SHEN_A;
+    if (!HUAN || !FZ || !SO) return null;
+    // 1) 值符落宫
+    let zfG = 0;
+    for (let g = 1; g <= 9; g++) {
+      const p = palaces['gong' + g];
+      if (p && p.shen && (window.SHEN_ABBR || {})[p.shen] === '符') { zfG = g; break; }
+    }
+    if (!zfG) return null;
+    // 2) 该宫的天盘干
+    const tg = (palaces['gong' + zfG].tian || '')[0];
+    if (!tg) return null;
+    // 3) 这个干在地盘上的落宫
+    let startG = 0;
+    for (let g = 1; g <= 9; g++) {
+      const d = palaces['gong' + g] ? palaces['gong' + g].di : '';
+      if (d && d.indexOf(tg) >= 0) { startG = g; break; }
+    }
+    if (!startG) return null;
+    if (startG === 5) startG = 2;          // 中宫寄坤二
+    // 4) 起符, 阳顺阴逆
+    const vSh = FZ[startG] - 1, map = {};
+    for (let i = 1; i < 9; i++) {
+      let j = i - vSh;
+      if (j < 1) j += 8;
+      if (j > 8) j -= 8;
+      map[HUAN[i]] = SO[j];
+    }
+    return map;
+  } catch (e) { _logErr('diBaShen', e && e.message); return null; }
+}
+
+function paintDiBaShen(show) {
+  for (let g = 1; g <= 9; g++) {
+    const el = document.getElementById('dshen' + g);
+    if (el) el.textContent = (show && _diShenMap && _diShenMap[g]) ? _diShenMap[g] : '';
+  }
+}
+
+function toggleDiBaShen() {
+  _diShenShow = !_diShenShow;
+  paintDiBaShen(_diShenShow);
+  const b = document.getElementById('btnDiShen');
+  if (b) b.classList.toggle('on', _diShenShow);
+}
+window.toggleDiBaShen = toggleDiBaShen;
+window.buildDiBaShenMap = buildDiBaShenMap;   // 导出便于单独验证排法
 
 // ============ 颜色标记 + 阴干对齐 ============
 function fixYinGanAlign() {
@@ -958,7 +1030,7 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
       '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
       '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
-      '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span><span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
+      '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span>'+(opts.diShen?'<span class="dshen" id="dshen'+g+'"></span>':'')+'<span id="men'+g+'">'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
       '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
       '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
       '</div></TD>';
