@@ -1102,13 +1102,13 @@ function _jkCenter(chart) {
   const kongOf = z => (z && kong2.indexOf(z) >= 0)
     ? '<span style="color:var(--wx-huo);font-weight:bold">空</span>' : '';
   // 顺序: 标签 | 干支 | 神名 | 旺衰 | 空 | 用
+  // 空与用同处一列(依次排列), 不再各占一列
   const row = (k, a, b, ws, useMark, kongMark) => '<tr style="height:26px">' +
     '<td style="width:42px;color:var(--c-theme);font-weight:bold;text-align:right;padding-right:5px;white-space:nowrap">' + k + '</td>' +
     '<td style="min-width:50px;text-align:center;white-space:nowrap">' + a + '</td>' +
     '<td style="min-width:56px;text-align:left;white-space:nowrap">' + (b || '') + '</td>' +
     '<td style="width:20px;color:' + (wsc[ws] || 'var(--c-text-3)') + ';text-align:left;padding-left:4px">' + ws + '</td>' +
-    '<td style="width:18px;text-align:left">' + (kongMark || '') + '</td>' +
-    '<td style="width:18px;text-align:left">' + (useMark || '') + '</td></tr>';
+    '<td style="width:34px;text-align:left;white-space:nowrap">' + (kongMark || '') + (useMark || '') + '</td></tr>';
   return '<div style="height:100%;display:flex;align-items:center;justify-content:center">' +
     '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' +
       row('人元', '<span class="' + col(c.renWx) + '">' + c.renYuan + '</span>', '', c.renWs, '', kongOf(c.renYuan)) +
