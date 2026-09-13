@@ -191,6 +191,8 @@ function setPanType(t) {
   if(tr)tr.style.display=(t===4)?'none':'flex';
   document.body.className = document.body.className.replace(/mode-\w+/g,'');
   document.body.classList.add(t===2?'mode-ke':t===3?'mode-xin':'mode-shi');
+  /* 命理另挂一个专属标识, 便于给它独立配色/尺寸, 不影响时盘/山向/穿壬 */
+  document.body.classList.toggle('mode-mingli', t===6);
   let isXin = (t === 3);
   document.getElementById('selGroup').style.display = '';
   if (isXin) {

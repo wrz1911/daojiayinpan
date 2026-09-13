@@ -318,8 +318,9 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
              #datetime{font-family:Arial;font-size:14px}
              #headTable .sizhuTitle{width:21%;color:#dead68;font-size:14px;line-height:22px}
    颜色一律走主题变量(--c-text/--c-gold/--c-border/--c-gray-bg), 亮色下与热卜一致 */
-/* 注: 主盘 td 的字号由既有规则 #panHead #headTable td{!important} 统一控制,
-   四柱走 .sizhu 类(见 #panHead .sizhu 的多档尺寸), 此处不再重复定义 */
+/* 主盘 td 字号由既有 #panHead #headTable td{!important} 统一控制。
+   四柱走 .sizhu 类; 命理因信息量比时盘大(多十神/藏干/神煞等 9 行),
+   独立一档, 不套用时盘的 24px —— 见下方 mode-mingli 规则 */
 /* 小标签(热卜无此层, 按正文 16px 折半档取 11px) */
 #headTable .hd-lbl{font-size:11px;line-height:15px;letter-spacing:.5px;opacity:.75}
 /* 侧标签 */
@@ -368,3 +369,20 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 #dayun_liunian .pan .yun2 .shishen{font-weight:normal;font-size:10px;line-height:13px;color:var(--c-text-3)}
 #dayun_liunian .pan .liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;background:var(--c-gray-bg);font-family:Arial,sans-serif}
 #dayun_liunian .pan .liunian2{font-size:13px;background:var(--c-gray-bg);line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
+
+/* ══════ 命理主盘四柱独立档位 ══════
+   命理信息量大于时盘, 沿用 mode-shi 的 24px 会让主盘过长;
+   这里给三档自适应尺寸, 选择器多一个 body 类, 稳定压过通用规则 */
+body.mode-mingli #panHead .sizhu{font-size:20px!important;line-height:24px!important}
+body.mode-mingli #panHead .sizhuTitle{font-size:12px!important}
+body.mode-mingli #panHead #tdTitle td{font-size:12px!important}
+@media (max-width:500px){
+  body.mode-mingli #panHead .sizhu{font-size:15px!important;line-height:20px!important}
+  body.mode-mingli #panHead .sizhuTitle{font-size:10px!important}
+  body.mode-mingli #panHead #tdTitle td{font-size:10px!important}
+}
+@media (min-width:1025px){
+  body.mode-mingli #panHead .sizhu{font-size:26px!important;line-height:32px!important}
+  body.mode-mingli #panHead .sizhuTitle{font-size:15px!important}
+  body.mode-mingli #panHead #tdTitle td{font-size:15px!important}
+}
