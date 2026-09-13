@@ -1066,12 +1066,13 @@ window.jinkoujueShenSha = jinkoujueShenSha;
 /* ══════ 金口诀 · 面板（仿主盘：宫格连体；点周围十二宫更新中宫） ══════ */
 let _jkShow = false, _jkDifen = -1, _jkDayNight = 0, _jkJiang = 1;   // 默认交节(月建六合)
 let _jkGuiren = 1;   // 贵人求法: 1=甲戊庚牛羊(传统) 2=甲羊戊庚牛
+let _jkJiangZhi = -1;   // 自定义月将: -1=按换将方式自动, >=0=手工指定地支
 let _jkDfType = 1;   // 地分取法: 1=下拉 2=报数 3=随机
 let _jkRand = -1;    // 随机到的地分
 function _jkDifenType() { return _jkDfType; }
 function _jkOpts() {
   return { year: window.Y, month: window.M, day: window.D, hour: window.hr, minute: window.mn,
-           difen: _jkDifen >= 0 ? _jkDifen : null, dayNight: _jkDayNight, jiang: _jkJiang,
+           difen: _jkDifen >= 0 ? _jkDifen : null, dayNight: _jkDayNight, jiang: _jkJiang, jiangZhi: _jkJiangZhi,
            guiren: _jkGuiren, difenType: _jkDifenType && _jkDifenType() };
 }
 function _jkSet(opt) {
@@ -1079,6 +1080,7 @@ function _jkSet(opt) {
   if (opt.dayNight !== undefined) _jkDayNight = opt.dayNight;
   if (opt.jiang !== undefined) _jkJiang = opt.jiang;
   if (opt.guiren !== undefined) _jkGuiren = opt.guiren;
+  if (opt.jiangZhi !== undefined) _jkJiangZhi = opt.jiangZhi;
   if (opt.difenType !== undefined) {
     _jkDfType = opt.difenType;
     // 报数: 只是把下拉切换成 1~12 的数字表示, 选的仍是同一地支, 无需额外换算
@@ -1224,6 +1226,14 @@ function toggleJinKouJue(noScroll) {
           checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})') +
         '</span>' +
         '<span style="display:flex;align-items:center">' +
+          '<span style="font-size:15px;color:var(--c-text-2)">自定义月将</span>' +
+          '<select id="jkJiangZhi" onchange="_jkSet({jiangZhi:parseInt(this.value,10)})" style="margin-left:8px;background:var(--c-btn-gray);color:var(--c-text);' +
+            'border:1px solid var(--c-border);border-radius:4px;padding:4px 6px;font-size:15px;min-width:56px;text-align:center">' +
+            QM.ZHI.map(function(z,i){ var cur = (_jkJiangZhi >= 0) ? _jkJiangZhi : chart.yueJiangIdx;
+              return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + z + '</option>'; }).join('') +
+          '</select>' +
+        '</span>' +
+        '<span style="display:flex;align-items:center">' +
           '<span style="font-size:15px;color:var(--c-text-2)">换将方式</span>' +
           radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})') +
           radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})') +
@@ -1238,7 +1248,7 @@ function toggleJinKouJue(noScroll) {
         radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})'));
     const infoLine = '<div style="display:flex;flex-wrap:wrap;gap:4px 12px;padding:8px 6px;font-size:13px;color:var(--c-text-3)">' +
       '<span>' + chart.siZhu.join(' ') + '</span>' +
-      '<span>月将 <b style="color:var(--c-gold)">' + chart.yueJiang + chart.yueJiangName + '</b></span>' +
+      '<span>月将 <b style="color:var(--c-gold)">' + chart.yueJiang + chart.yueJiangName + '</b>' + (_jkJiangZhi >= 0 ? '（自定义）' : '') + '</span>' +
       '<span>贵神起于 <b>' + chart.guiRenZhi + '</b>（' + chart.guiRenDir + '行·' + chart.dayNight + '贵）</span></div>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
     div.innerHTML = inputArea + infoLine +
@@ -1835,7 +1845,8 @@ function jinkoujueChart(opt) {
   const tt = st.getTerm();
   const ti = ((tt.getIndex() % 24) + 24) % 24;
   const yueJian = Math.floor((ti - 3) / 2) + 2;
-  const jiangZ = opt.jiang === 1 ? QM.HE[((yueJian % 12) + 12) % 12] : QM.HE[Math.floor(ti / 2)];
+  const jiangZAuto = opt.jiang === 1 ? QM.HE[((yueJian % 12) + 12) % 12] : QM.HE[Math.floor(ti / 2)];
+  const jiangZ = (opt.jiangZhi >= 0) ? opt.jiangZhi : jiangZAuto;   // 自定义月将优先
   // 昼夜：白天/夜晚可手选; 自动时按"卯酉区分"(卯~酉为昼, 热卜口径)
   const isDay = opt.dayNight === 1 ? true : opt.dayNight === 2 ? false : (hZ >= 3 && hZ <= 9);
   // 贵人：QM.GR_TAB[日干] = [昼贵, 夜贵]
@@ -1905,7 +1916,7 @@ function jinkoujueChart(opt) {
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
     shensha: ss,
-    yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ],
+    yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ], yueJiangIdx: jiangZ, yueJiangAuto: jiangZAuto,
     dayNight: isDay ? '昼' : '夜',
     guiRenZhi: QM.ZHI[grZ], guiRenDir: dir === 1 ? '顺' : '逆',
     houses, cur, wudong, sandong,
