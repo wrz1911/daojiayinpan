@@ -1127,6 +1127,7 @@ window.jinkoujueShenSha = jinkoujueShenSha;
 /* ══════ 金口诀 · 面板（仿主盘：宫格连体；点周围十二宫更新中宫） ══════ */
 let _jkShow = false, _jkDifen = -1, _jkDayNight = 0, _jkJiang = 1;   // 默认交节(月建六合)
 let _jkGuiren = 1;   // 贵人求法: 1=甲戊庚牛羊(传统) 2=甲羊戊庚牛
+let _jkNum = 0;      // 先起法用的报数(0=未输入)
 let _jkJiangZhi = -1;   // 自定义月将: -1=按换将方式自动, >=0=手工指定地支
 let _jkDfType = 1;   // 地分取法: 1=下拉 2=报数 3=随机
 let _jkRand = -1;    // 随机到的地分
@@ -1396,8 +1397,11 @@ function toggleJinKouJue(noScroll) {
       'grid-template-columns:0.82fr 1.18fr 1.18fr 0.82fr;' +
       'grid-template-rows:repeat(4,minmax(calc(var(--jk-cf,11px) * 6.4),auto));' +
       'border-top:1px solid var(--c-border);border-left:1px solid var(--c-border)">' + cells + '</div>' +
-      '<div id="jkInfo" style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
-      _jkInfoHtml(chart) + '</div>';
+      '<div id="jkInfo" style="margin-top:7px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
+      _jkInfoHtml(chart) +
+      _jkAdvHtml(_jkOpts(), chart) +
+      _jkAdvNumHtml(_jkOpts()) +
+      '</div>';
     div.style.display = 'block';
     if (!noScroll) setTimeout(() => { const r = document.getElementById('jinkoujueDIV'); if (r) r.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
   } catch (e) {
@@ -1406,6 +1410,18 @@ function toggleJinKouJue(noScroll) {
   }
 }
 window.toggleJinKouJue = toggleJinKouJue;
+/* 报数输入: 只重绘起法区, 避免整盘重排导致输入框失焦 */
+function _jkSetNum(v) {
+  const n = parseInt(v, 10);
+  _jkNum = (isNaN(n) || n < 1) ? 0 : n;
+  const el = document.getElementById('jkAdvNum');
+  if (el) {
+    try { el.innerHTML = _jkAdvNumHtml(_jkOpts()); } catch (e) { _logErr('jkSetNum', e && e.message); }
+    const inp = document.getElementById('jkNumInp');
+    if (inp) { inp.focus(); try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e2) {} }
+  }
+}
+window._jkSetNum = _jkSetNum;
 window._jkSet = _jkSet;
 
 function toggleDiBaShen() {
@@ -2199,6 +2215,111 @@ window.jinkoujueYinKe = jinkoujueYinKe;
 window.jinkoujueLiuQin = jinkoujueLiuQin;
 window.jinkoujueXianQiRenYuan = jinkoujueXianQiRenYuan;
 window.jinkoujueXianQiGuiShen = jinkoujueXianQiGuiShen;
+
+/* ══════ 起法区渲染（神煞表下方）══════
+   把各类「起法」的结果直接列出, 点任一条即把中宫切到该地分(与点十二宫同一交互)。 */
+function _jkAdvHtml(opt, chart) {
+  const WXO = QM.WX_OF || {};
+  const sel = chart.cur.difenIdx;
+  // 一条结果: 标签 + 值 + 可选落到某地分(可点)
+  const cell = (label, val, dfIdx, note) => {
+    const clickable = (typeof dfIdx === 'number' && dfIdx >= 0);
+    const isSel = clickable && dfIdx === sel;
+    return '<span' + (clickable ? ' data-jkadv="' + dfIdx + '" onclick="_jkPick(' + dfIdx + ')"' : '') +
+      ' style="display:inline-flex;align-items:baseline;gap:3px;padding:3px 7px;border-radius:5px;' +
+      'border:1px solid var(--c-border);' + (clickable ? 'cursor:pointer;' : '') +
+      (isSel ? 'background:var(--c-gray-bg);border-color:var(--c-theme);' : '') + '">' +
+      '<span style="color:var(--c-text-3)">' + label + '</span>' +
+      '<b class="' + (WXO[val] ? 'wx-' + WXO[val] : '') + '">' + (val || '—') + '</b>' +
+      (note ? '<span style="color:var(--c-text-4);font-size:.85em">' + note + '</span>' : '') +
+      '</span>';
+  };
+  const sect = (title, hint, body) =>
+    '<div style="margin-top:7px">' +
+      '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">' +
+        '<b style="color:var(--c-gold);font-size:.95em">' + title + '</b>' +
+        (hint ? '<span style="color:var(--c-text-4);font-size:.8em">' + hint + '</span>' : '') +
+      '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:4px">' + body + '</div></div>';
+
+  let h = '';
+  // ── 遁法 ──
+  try {
+    const d = jinkoujueDun(opt);
+    if (d) {
+      const rows = [];
+      const push = (name, o, note) => { if (o && o.zhi) rows.push(cell(name, o.zhi, QM.ZHI.indexOf(o.zhi),
+        (o.all && o.all.length > 1) ? '(另有' + o.all.filter(z => z !== o.zhi).join('') + ')' : note)); };
+      push('干合遁', d.ganHe['干合遁·用爻'], '环境物象');
+      push('干合处', d.ganHe['遁到干合处·用爻']);
+      push('走失方', d.ganHe['遁走失方位']);
+      push('工作方', d.ganHe['遁工作方位']);
+      rows.push(cell('遁人元', d.dunRenYuan.newGan, -1, '(' + d.dunRenYuan.oldGan + '→' + d.dunRenYuan.newGan + ')'));
+      h += sect('遁法', '点地支可切中宫', rows.join(''));
+    }
+  } catch (e) { _logErr('jkAdv.dun', e && e.message); }
+  // ── 六亲课 ──
+  try {
+    const qins = [['fumu', '父母'], ['xiongdi', '兄弟'], ['zisun', '子孙'], ['qicai', '妻财'], ['guangui', '官鬼']];
+    const rows = [];
+    for (const [k, nm] of qins) {
+      const r = jinkoujueLiuQin(opt, k);
+      if (r) rows.push(cell(nm, r.difen, r.difenIdx, '(' + r.targetWx + ')'));
+    }
+    h += sect('六亲课', '以用神为我 · 点地支以此起课', rows.join(''));
+  } catch (e) { _logErr('jkAdv.lq', e && e.message); }
+  // ── 隐课法 ──
+  try {
+    const y = jinkoujueYinKe(opt);
+    if (y) {
+      const c = y.yin.cur;
+      h += sect('隐课法', '以用爻为地分重起 · 四柱不变',
+        cell('用爻', y.yongZhi, y.newDifenIdx, '(' + y.yongWei + ')') +
+        cell('新课', c.renYuan + ' ' + c.guiGanZhi + ' ' + c.jiangGanZhi + ' ' + c.difenZhi, -1));
+    }
+  } catch (e) { _logErr('jkAdv.yk', e && e.message); }
+  return h;
+}
+window._jkAdvHtml = _jkAdvHtml;
+
+/* 先起人元法 / 先起贵神法: 由报数反推地分, 需即时输入, 故单独渲染(带输入框) */
+function _jkAdvNumHtml(opt) {
+  const WXO = QM.WX_OF || {};
+  const n = (typeof _jkNum === 'number' && _jkNum > 0) ? _jkNum : 0;
+  const cell = (label, val, dfIdx, note) => {
+    const clickable = (typeof dfIdx === 'number' && dfIdx >= 0 && val);
+    return '<span' + (clickable ? ' data-jkadv="' + dfIdx + '" onclick="_jkPick(' + dfIdx + ')"' : '') +
+      ' style="display:inline-flex;align-items:baseline;gap:3px;padding:3px 7px;border-radius:5px;' +
+      'border:1px solid var(--c-border);' + (clickable ? 'cursor:pointer;' : '') + '">' +
+      '<span style="color:var(--c-text-3)">' + label + '</span>' +
+      '<b class="' + (WXO[val] ? 'wx-' + WXO[val] : '') + '">' + (val || '—') + '</b>' +
+      (note ? '<span style="color:var(--c-text-4);font-size:.85em">' + note + '</span>' : '') +
+      '</span>';
+  };
+  let rows = '';
+  if (n > 0) {
+    try {
+      const a = jinkoujueXianQiRenYuan(opt, n);
+      if (a && a.difen) rows += cell('人元法', a.difen, a.difenIdx, '(' + a.gan + '→' + a.difen + ')');
+    } catch (e) { _logErr('jkAdv.xq1', e && e.message); }
+    try {
+      const b = jinkoujueXianQiGuiShen(opt, n);
+      if (b && b.difen) rows += cell('贵神法', b.difen, b.difenIdx, '(' + b.wantZhi + b.wantShen + '→' + b.difen + ')');
+    } catch (e) { _logErr('jkAdv.xq2', e && e.message); }
+  }
+  const inp = '<input id="jkNumInp" type="number" min="1" max="60" inputmode="numeric" ' +
+    (n ? 'value="' + n + '" ' : '') + 'placeholder="报数" oninput="_jkSetNum(this.value)" ' +
+    'style="width:62px;background:var(--c-btn-gray);color:var(--c-text);border:1px solid var(--c-border);' +
+    'border-radius:5px;padding:2px 6px;font-size:.95em;text-align:center">';
+  return '<div id="jkAdvNum" style="margin-top:7px">' +
+    '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">' +
+      '<b style="color:var(--c-gold);font-size:.95em">先起法</b>' +
+      '<span style="color:var(--c-text-4);font-size:.8em">报数反推地分（1 子 / 2 丑 …）</span>' + inp +
+    '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:4px">' + (rows || '<span style="color:var(--c-text-4);font-size:.85em">输入报数后显示结果</span>') + '</div></div>';
+}
+window._jkAdvNumHtml = _jkAdvNumHtml;
+
 
 
 /* 刷新前若记录了待切换的盘型, 这里自动切过去, 用户不必再点一次 */
