@@ -142,14 +142,14 @@
       if (el) {
         el.style.color = on ? 'var(--wx-huo)' : '';
         el.style.fontWeight = on ? 'bold' : '';
-        /* 选中态: 主题淡底 + 内描边, 清楚标示当前查看的是哪一步大运
+        /* 选中态: 灰底 + 内描边, 清楚标示当前查看的是哪一步大运
            (此前只有文字变色, 在密集的干支格里不够醒目) */
-        el.style.background = on ? 'var(--c-theme-bg)' : '';
-        el.style.boxShadow = on ? 'inset 0 0 0 2px var(--c-theme)' : '';
+        el.style.background = on ? 'var(--c-gray-bg)' : '';
+        el.style.boxShadow = on ? 'inset 0 0 0 2px var(--c-border)' : '';
       }
       if (yr) {
-        yr.style.background = on ? 'var(--c-theme-bg)' : '';
-        yr.style.color = on ? 'var(--c-theme)' : '';
+        yr.style.background = on ? 'var(--c-gray-bg)' : '';
+        yr.style.color = on ? 'var(--c-text)' : '';
         yr.style.fontWeight = on ? 'bold' : '';
       }
     }
