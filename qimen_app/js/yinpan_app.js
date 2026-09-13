@@ -902,6 +902,89 @@ function _syncToggleBtns() {
   for (const id in on) { const el = document.getElementById(id); if (el) el.classList.toggle('on', on[id]); }
 }
 
+/* ══════════════ 金口诀 · 文字资料 ══════════════
+   长按"金口诀"按钮弹出。据《漫步者金口诀》特训班/提高班讲义整理,
+   起例部分与配套排盘软件(玄宗金口诀 jkj.js / shsha.js)源码核对过。 */
+const JK_HELP = {
+  title: '金口诀',
+  head: '人元 · 贵神 · 将神 · 地分　（大金口 · 四位断课）',
+  blocks: [
+    { t: '四位', rows: [
+      '<b>人元（干）</b>——天干，主【象】：像一个人的脸面、形象。心由象生，什么样的天干在人元，就能大致体现这个课的性质。甲木积极；乙木弯曲，主事不一气呵成；<b>壬癸水主难行、障碍、疑虑</b>（壬癸难行）。<br>人元也代表事物正在进行的开始部分，位置最外，为客、为天、为君、为祖。',
+      '<b>贵神（神）</b>——主【官、工作、学习】。为外中内、为尊上、为宰相、为臣、为父、为官禄。<br>贵神为外克内，动则多牵涉公务、官方。',
+      '<b>将神（将）</b>——主【财、己身、妻子、亲戚、家人】。为内、为内财。<br>将神克外（贵神）为内财博外财，适合投资做生意，且有出外求财之意。',
+      '<b>地分（方）</b>——主【固定不变的部分】：存款、房子、腿脚、孩子、奴仆、田宅、鞍马、六畜。是最原始、最早、过去式的部分，为内中内、最隐秘处。<br>古人讲财不外漏，财物藏在最隐秘安全之处，所以<b>地分也是存款</b>。地分被冲，多主搬家挪地方、动用存款、孩子受惊等变动。',
+    ]},
+    { t: '四象所属图', rows: [
+      '<div style="line-height:1.9;font-size:13px">' +
+        '<table style="width:100%;border-collapse:collapse;text-align:center">' +
+        '<tr><td style="border:1px solid var(--c-border);padding:3px"><b>地分</b></td>' +
+            '<td style="border:1px solid var(--c-border);padding:3px"><b>月将</b></td>' +
+            '<td style="border:1px solid var(--c-border);padding:3px"><b>贵神</b></td>' +
+            '<td style="border:1px solid var(--c-border);padding:3px"><b>人元</b></td></tr>' +
+        '<tr><td style="border:1px solid var(--c-border);padding:3px">田宅</td><td style="border:1px solid var(--c-border);padding:3px">己身</td><td style="border:1px solid var(--c-border);padding:3px">主</td><td style="border:1px solid var(--c-border);padding:3px">客</td></tr>' +
+        '<tr><td style="border:1px solid var(--c-border);padding:3px">子孙</td><td style="border:1px solid var(--c-border);padding:3px">妻</td><td style="border:1px solid var(--c-border);padding:3px">宰相</td><td style="border:1px solid var(--c-border);padding:3px">天</td></tr>' +
+        '<tr><td style="border:1px solid var(--c-border);padding:3px">奴仆</td><td style="border:1px solid var(--c-border);padding:3px">财</td><td style="border:1px solid var(--c-border);padding:3px">臣</td><td style="border:1px solid var(--c-border);padding:3px">君</td></tr>' +
+        '<tr><td style="border:1px solid var(--c-border);padding:3px">鞍马</td><td style="border:1px solid var(--c-border);padding:3px">亲戚</td><td style="border:1px solid var(--c-border);padding:3px">父</td><td style="border:1px solid var(--c-border);padding:3px">祖</td></tr>' +
+        '<tr><td style="border:1px solid var(--c-border);padding:3px">六畜</td><td style="border:1px solid var(--c-border);padding:3px">内</td><td style="border:1px solid var(--c-border);padding:3px">官禄</td><td style="border:1px solid var(--c-border);padding:3px">外</td></tr>' +
+        '</table></div>',
+      '<b>上下结构</b>：人元为上（男）、地分为下（女）。故人元克地分为「妻动」，古义为男嫌女。地分又是器物底部，被克者为损。',
+      '<b>内外结构</b>：人元为最外，贵神为外中内，将神为内，地分为内中内。归纳起来<b>人元与贵神为外，将神与地分为内</b>。（此分法相对于断人事；若占宅居，有以地分为外者，因旧宅多有后门。）',
+      '四象所属图为断课提供了快捷法门，但也制约了四位的灵活变化 —— 可一语中的，也可辗转其中灵活运用。变者为易。',
+    ]},
+    { t: '三动五动（断课杀手锏）★', rows: [
+      '<div style="background:var(--c-gray-bg);border-radius:6px;padding:8px 10px;margin-bottom:8px;line-height:1.95">' +
+        '<b>妻动</b>　干克方（人元克地分）<br>' +
+        '<b>官动</b>　神克干（贵神克人元）<br>' +
+        '<b>贼动</b>　神克将（贵神克将神）<br>' +
+        '<b>财动</b>　将克神（将神克贵神）<br>' +
+        '<b>鬼动</b>　方克干（地分克人元）<br>' +
+        '<b>父母动</b>　方生干（地分生人元）</div>',
+      '三动五动是金口诀的速断法门 —— 课体一出，据其出现即可立判事情性质与吉凶。所谓高层不用看三动五动，实则是熟练到不必刻意去找，如同会奔跑便不再注意怎么迈第一步。',
+      '<b>妻动</b>　「妻动于妻妾。官财防损折，占人人在家，访人人不悦，外旁来索取，卑下有口舌。论物多翻正，下旁或有缺。」<br>主事在妻妾；问婚姻多不成（男方有意见）。问财不成，因<b>地分是副财爻</b>，故有失田宅、失财物之说。上隔克下，贵神官必牵涉其中。上克下，寻人在家（地分受克无力逃脱）；行必有阻，人虽在家而主人不悦。',
+      '<b>官动</b>　「官动利求官，相逢禄位迁，常人官府事，有官望财难，合得官中物，休从外处求，得财防暗损，问病在头部。」<br>官禄爻动，有官之人大利；<b>若逢驿马，必然迁官升职</b>。方生干主父母动，又主印在手、有职有权。官动逢冲，主帮别人打官司或虚假官职。',
+      '<b>贼动</b>　「贼动内贼生，勾连诈不明，损财卑幼病，谋望必无成，架媾奸私意，偷攘宛转名，内爻终暗昧，病恐亦非轻。」<br>贵神为外克内将神，将神为财爻为己身、为妻子，财受克必损财、女子身体受损。二神为课内，又有内线或家人偷窃失财。贼动不适合做生意。',
+      '<b>财动</b>　「财动利求财，占官定不谐，家中人出外，身灾非妻妾，疾病忧难愈，营求喜自来，财物终有损，职位恐多乖。」<br>内克外谓之财动，求财必得，且主靠自己劳动所得、有出外求财之想。神受克，贵神为外财、将神为内财，也主损失财物。',
+      '<b>鬼动</b>　「鬼动忧灾怪，官亨人出外，争讼带他人，乖戾因间外，口舌共喧争，冤仇皆损害，痊病物仰合，家宅未安泰。」<br>占事有灾怪及人有异举；占病常有阴性病症，或家中不宁忧愁。下克上，人欲出外求名，或找官家诉讼。',
+      '<b>力量权衡</b>：妻动是隔克，期间还有二神的作用关系 —— 若同时官动，妻动力量减小；若再将神克人元，二力抵一力，妻动几乎没有了，只体现在形式阶段（雷声大雨点小）。若二神支持人元，妻动力度加强。「观其大意，后面的五行之内细推元」，这个「元」就是人元。',
+    ]},
+    { t: '起课法', rows: [
+      '<b>月将</b>：按【中气】过宫（标准）。另有按【交节】的简法，即月将取月建的六合。本面板两种可选。',
+      '<b>将神</b>：月将加时 —— 把月将放在时支上顺行，看地分落得何支；代数式 <code>将神 = 月将 + (地分 − 时支)</code>。',
+      '<b>贵神</b>：日干起贵人，昼夜分顺逆。口诀「<b>甲戊庚牛羊，乙己鼠猴乡，丙丁猪鸡位，壬癸兔蛇藏，六辛逢马虎</b>」。昼夜以<b>卯至申为昼、酉至寅为夜</b>。贵人所落地盘在<b>亥子丑寅卯辰则顺行，巳午未申酉戌则逆行</b>，从贵人起十二贵神数至地分。',
+      '<b>人元</b>：五子元遁 —— 「<b>甲己还加甲，乙庚丙作初，丙辛从戊起，丁壬庚子居，戊癸起壬子</b>」，即日干定其子时所起天干，顺数到地分。',
+      '<b>地分</b>：可报数、可用来人方位、来人属相，亦可随机。',
+      '<b>十二贵神本位</b>：贵人丑、螣蛇巳、朱雀午、六合卯、勾陈辰、青龙寅、天空戌、白虎申、太常未、玄武子、太阴酉、天后亥。<br>盘面显示的是<b>本位干支</b>（用五子元遁配干），与起课得到的「乘支」是两回事。',
+      '<b>四大空亡</b>：按日干支所在旬取 —— 甲子旬等见亥子壬癸、或见申酉庚辛，即为四空。',
+    ]},
+    { t: '神煞', rows: [
+      '神煞按来源分五类（据配套软件 <code>shsha.js</code>）：',
+      '<b>月令</b>：天德、天德合、月德、月德合、往亡、飞廉、生气、死气、天医、地医、天马、灭门',
+      '<b>季节</b>：天喜、丧车、三丘、四墓、天鬼、天赦',
+      '<b>年支</b>：吊客、丧门、病符、被头、禄倒、马倒',
+      '<b>日支</b>：劫煞、地煞、望门、日马、天罗、地网、五鬼、截命、截路、飞符',
+      '<b>旬</b>：四大空亡、旬空',
+      '<b>落位</b>：神煞按四位分 —— 人元位只取天干神煞，地分位只取地支神煞，贵神/将神位干支皆取。',
+      '<b>用法举例</b>：卯木临天医为平安之意；天马带局克人元会有路途死伤；鬼动见空则冤魂已去；库逢冲必开，午火克金成局而课内无土相救，金必死，丧门加鬼动必定有伤灾死伤。',
+      '<b>活用</b>：神煞没有固定规律，属于象的直读，是对五行知识的综合运用。',
+    ]},
+    { t: '断课要诀', rows: [
+      '金口诀是<b>纯五行生克</b>体系。五行之外又有刑、冲、害、绝、空亡、驿马神煞等因素，多种因素结合才多面反映事物真相。',
+      '<b>旺衰</b>：按当令五行判旺相休囚死。旺克而内不敌外力则我必有失；休死空来克则损失减小或无。',
+      '<b>全息</b>：断流年流月时，课内任何信息都是自身的信息 —— 贵神受克主工作受阻，将神受克主财运与人身损害，地分受克主固定不动那部分出问题。哪个地支出问题，就代表哪里出了问题。',
+      '<b>占来意</b>：以将神为主，看将神与人元的关系（生克合）。人元克将是外来侵入；将神克外是我索取，主有所得（我克者为财）。',
+      '<b>用爻</b>：课内有「用」标记者为用爻。',
+      '<b>合冲刑害</b>：寅木旺，逢申年月日时皆不利（破财、伤灾、罢官）。',
+      '口诀是至高的，但不是万能的 —— 「二土比和迟晚看」有时不晚，「二金刑克都不顺」有时很顺，须结合旺衰与干支作用关系具体分析。',
+    ]},
+    { t: '常见口诀', rows: [
+      '二木为爻求难得　二水皆为大吉象　二土比和迟晚看　二金刑克都不顺　二火为灾百事残',
+      '壬癸难行（人元见壬癸主受阻难行）',
+      '遁干取象例：丁壬寅卯一场空 —— 遁壬寅得壬水、遁丁卯得癸，落的都是壬癸水，故人元见壬癸主受阻。',
+    ]},
+  ]
+};
+
 /* ══════ 金口诀 · 面板（仿"向角度选局"，内嵌在 #result 里） ══════ */
 let _jkShow = false, _jkDifen = null, _jkDayNight = 0, _jkJiang = 0;
 function _jkSet(opt) {
@@ -911,6 +994,7 @@ function _jkSet(opt) {
   toggleJinKouJue(true);
 }
 function toggleJinKouJue(noScroll) {
+  if (_xnLongPressed) { _xnLongPressed = false; return; }   // 长按已弹说明, 不再切换
   let div = document.getElementById('jinkoujueDIV');
   if (!div) {
     div = document.createElement('div');
@@ -1562,8 +1646,8 @@ function jinkoujueChart(opt) {
   const ti = ((tt.getIndex() % 24) + 24) % 24;
   const yueJian = Math.floor((ti - 3) / 2) + 2;
   const jiangZ = opt.jiang === 1 ? QM.HE[((yueJian % 12) + 12) % 12] : QM.HE[Math.floor(ti / 2)];
-  // 昼夜：卯(3)~酉(9) 为昼
-  const isDay = opt.dayNight === 1 ? true : opt.dayNight === 2 ? false : (hZ >= 3 && hZ <= 9);
+  // 昼夜：卯至申为昼、酉至寅为夜(漫步者源码口径 zhi>2 && zhi<9), 与口诀一致
+  const isDay = opt.dayNight === 1 ? true : opt.dayNight === 2 ? false : (hZ > 2 && hZ < 9);
   // 贵人：QM.GR_TAB[日干] = [昼贵, 夜贵]
   const grPair = QM.GR_TAB[QM.GAN[dG]] || [1, 7];
   const grZ = grPair[isDay ? 0 : 1];
@@ -1599,23 +1683,24 @@ function jinkoujueChart(opt) {
 
   // 五动（按四位生克，取常见口径）
   // 五动/三动按【乘支】的五行判(起课结果), 与本位干支无关
-  const rWx = cur.renWx, gWx = JK_ZHI_WX[cur.guiZhiIdx], jWx = cur.jiangWx, dWx = JK_ZHI_WX[cur.difenIdx];
-  const dongs = [], sandong = [];
-  if (_jkKe(gWx, rWx)) dongs.push('鬼动');     // 神克人元
-  if (_jkKe(rWx, gWx)) dongs.push('财动');     // 人元克神
-  if (_jkKe(jWx, rWx)) dongs.push('官动');     // 将克人元
-  if (_jkSheng(gWx, rWx)) dongs.push('父动');  // 神生人元
-  if (_jkSheng(rWx, gWx)) dongs.push('子动');  // 人元生神
-  if (_jkKe(dWx, jWx)) sandong.push('妻动');   // 地分克将
-  if (_jkKe(jWx, dWx)) sandong.push('贼动');   // 将克地分
-  if (gWx === jWx) sandong.push('兄弟动');     // 神将同旺
+  const rWx = cur.renWx, gWx = cur.guiWx, jWx = cur.jiangWx, dWx = JK_ZHI_WX[cur.difenIdx];
+  // 五动三动: 干=人元 神=贵神 将=将神 方=地分
+  //   妻动 干克方 / 官动 神克干 / 贼动 神克将 / 财动 将克神 / 鬼动 方克干
+  //   父母动 方生干 (讲义提高班第七课"三动五动")
+  const dongs = [];
+  if (_jkKe(rWx, dWx)) dongs.push('妻动');
+  if (_jkKe(gWx, rWx)) dongs.push('官动');
+  if (_jkKe(gWx, jWx)) dongs.push('贼动');
+  if (_jkKe(jWx, gWx)) dongs.push('财动');
+  if (_jkKe(dWx, rWx)) dongs.push('鬼动');
+  if (_jkSheng(dWx, rWx)) dongs.push('父母动');
 
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
     yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ],
     dayNight: isDay ? '昼' : '夜',
     guiRenZhi: QM.ZHI[grZ], guiRenDir: dir === 1 ? '顺' : '逆',
-    houses, cur, dongs, sandong,
+    houses, cur, dongs, sandong: [],
   };
 }
 window.jinkoujueChart = jinkoujueChart;
@@ -1625,6 +1710,7 @@ window.jinkoujueChart = jinkoujueChart;
    排法、十六字逐条的断法与布局、布局通用法、两个凶格、符咒化解、喝水疗法。
    材料中的应验案例属讲课人个人经验叙述, 此处只作转述。 */
 const XN_HELP = {
+  title: '玄女十六字诀',
   head: '进 曲 狱 丰 空 泣 欹 劫 散 破 灵 吾　＋　雷 火 风 豹',
   blocks: [
     { t: '排法', rows: [
@@ -1883,17 +1969,21 @@ function buildXuanNv4Map(palaces, isYin) {
   } catch (e) { _logErr('xuanNv4', e && e.message); return null; }
 }
 
-/* 长按"玄女16诀"按钮弹出说明(与宫位解释同款弹窗)。
+/* 长按按钮弹出说明(与宫位解释同款弹窗); 玄女16诀与金口诀共用这套机制。
    触屏与鼠标都绑; 长按触发后要抑制随后的 click, 否则会顺带把外盘切换掉。 */
 let _xnPressTimer = null, _xnLongPressed = false;
 function _bindXnLongPress() {
-  const b = document.getElementById('btnXuanNv');
+  _bindLongPress('btnXuanNv', showXuanNvHelp);
+  _bindLongPress('btnJinKou', showJinKouHelp);
+}
+function _bindLongPress(id, fn) {
+  const b = document.getElementById(id);
   if (!b || b._lpBound) return;
   b._lpBound = true;
   const begin = () => {
     _xnLongPressed = false;
     clearTimeout(_xnPressTimer);
-    _xnPressTimer = setTimeout(() => { _xnPressTimer = null; _xnLongPressed = true; showXuanNvHelp(); }, 550);
+    _xnPressTimer = setTimeout(() => { _xnPressTimer = null; _xnLongPressed = true; fn(); }, 550);
   };
   const end = () => { clearTimeout(_xnPressTimer); _xnPressTimer = null; };
   b.addEventListener('touchstart', begin, { passive: true });
@@ -1905,9 +1995,10 @@ function _bindXnLongPress() {
   b.addEventListener('mouseleave', end);
 }
 
-function showXuanNvHelp() {
+function showXuanNvHelp() { _showHelpDlg('xnHelpDlg', XN_HELP); }
+function _showHelpDlg(dlgId, DATA) {
   try {
-    const old = document.getElementById('xnHelpDlg');
+    const old = document.getElementById(dlgId);
     if (old) old.remove();
     const item = o => {
       const rows = [];
@@ -1921,20 +2012,20 @@ function showXuanNvHelp() {
         + '<span style="font-size:11px;font-weight:normal;color:var(--c-text-4);margin-left:8px">' + o.wx + '</span></div>'
         + rows.join('') + '</div>';
     };
-    const body = XN_HELP.blocks.map((b, bi) => {
+    const body = DATA.blocks.map((b, bi) => {
       const inner = b.items
         ? b.items.map(item).join('')
         : b.rows.map(x => '<div style="margin:3px 0 3px 11px;text-indent:-11px">· ' + x + '</div>').join('');
-      return '<div style="margin-bottom:' + (bi === XN_HELP.blocks.length - 1 ? '8' : '22') + 'px">'
+      return '<div style="margin-bottom:' + (bi === DATA.blocks.length - 1 ? '8' : '22') + 'px">'
         + '<div style="font-size:16px;font-weight:bold;color:var(--c-text);border-left:3px solid var(--wx-jin);padding-left:8px;margin-bottom:10px">' + b.t + '</div>'
         + inner + '</div>';
     }).join('');
     const head = '<div style="text-align:center;margin-bottom:16px">'
-        + '<div style="font-size:18px;font-weight:bold;color:var(--wx-jin)">玄女十六字诀</div>'
-        + '<div style="font-size:12px;color:var(--c-text-4);margin-top:4px;line-height:1.7">' + XN_HELP.head + '</div></div>';
-    const h = '<div id="xnHelpDlg" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
+        + '<div style="font-size:18px;font-weight:bold;color:var(--wx-jin)">' + (DATA.title || '') + '</div>'
+        + '<div style="font-size:12px;color:var(--c-text-4);margin-top:4px;line-height:1.7">' + DATA.head + '</div></div>';
+    const h = '<div id="' + dlgId + '" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
       + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
-      + '<span onclick="event.stopPropagation();document.getElementById(\'xnHelpDlg\').remove()" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
+      + '<span onclick="event.stopPropagation();document.getElementById(\'' + dlgId + '\').remove()" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
       + head + body
       + '</div></div>';
     const holder = document.createElement('div');
@@ -1943,6 +2034,7 @@ function showXuanNvHelp() {
   } catch (e) { _logErr('xnHelp', e && e.message); }
 }
 window.showXuanNvHelp = showXuanNvHelp;
+window.showJinKouHelp = function () { _showHelpDlg('jkHelpDlg', JK_HELP); };
 
 function xuanNv16() {
   if (_xnLongPressed) { _xnLongPressed = false; return; }   // 长按已弹说明, 不再切换外盘
