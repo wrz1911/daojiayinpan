@@ -5,8 +5,11 @@
 :root{
   /* 主题 */
   --c-theme:#0dc2b3;      /* 主题青(寄宫/按钮/高亮) */
-  /* 主题色底上的文字: 白字压在 #0dc2b3 上仅 2.24:1 不达标, 用同色系深色达 6.45:1 */
-  --c-on-theme:#04332f;
+  /* 按钮配色: 主题色 #0dc2b3 太亮, 白字压上去只有 2.24:1 不达标; 而把字改成
+     近黑的青(#04332f)虽然对比度够了, 观感上不像按钮。这里改成"主题色深一档
+     + 白字"——最常见的按钮形态, 4.87:1 达标, 也仍与主题同色系。 */
+  --c-btn-bg:#0b7f76;
+  --c-btn-fg:#ffffff;
   --c-theme-bg:#f0fdfa;   /* 主题淡底 */
   --c-gold:#dead68;       /* 标题金(节气/类型/四柱等表头) */
   /* 文字灰阶 */
@@ -120,7 +123,7 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 #btnTable1 td,#btnTable2 td{text-align:center;padding:1px 2px;box-sizing:border-box;line-height:1}
 #btnTable1 td:first-child,#btnTable2 td:first-child{padding-left:0px}
 #btnTable1 td:last-child,#btnTable2 td:last-child{padding-right:0px}
-.btn{line-height:30px;width:100%;box-sizing:border-box;border-radius:3px;text-align:center;background:var(--c-theme);color:var(--c-on-theme);font-size:14px}
+.btn{line-height:30px;width:100%;box-sizing:border-box;border-radius:3px;text-align:center;background:var(--c-btn-bg);color:var(--c-btn-fg);font-size:14px}
 #preBtn{float:left;margin-left:10px;}
 #nextBtn{float:right;margin-right:10px;}
 .xiang{border-bottom:solid 1px var(--c-border);line-height:25px;font-size:14px;text-align:justify;padding-top:5px;padding-bottom:5px}
@@ -262,6 +265,9 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
   :root{
     /* 主题 */
     --c-theme:#17c9b8;      /* 提亮 */
+    /* 暗色下主题色已是亮青: 用它做底配深字(6.63:1), 深底按钮在暗背景上不显眼 */
+    --c-btn-bg:var(--c-theme);
+    --c-btn-fg:#04332f;
     --c-theme-bg:#123138;   /* 青暗底 */
     --c-gold:#e6c07a;
     /* 文字灰阶 */
@@ -308,7 +314,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 #btnTable1,#btnTable2{width:100%;margin:3px auto 1px;border-collapse:collapse}
 /* .btn 原为 width:100% 且 margin:2px, 两者相加超出单元格宽度(首尾按钮顶出
    左右边界)。改为零外边距 + border-box, 间距统一交给 td 的 padding。 */
-#btnTable1 .btn,#btnTable2 .btn{background:var(--c-theme);color:var(--c-on-theme);border-radius:4px;text-align:center;padding:3px 4px;font-size:13px;line-height:1.35;cursor:pointer;margin:0;box-sizing:border-box;width:100%;display:block}
+#btnTable1 .btn,#btnTable2 .btn{background:var(--c-btn-bg);color:var(--c-btn-fg);border-radius:4px;text-align:center;padding:3px 4px;font-size:13px;line-height:1.35;cursor:pointer;margin:0;box-sizing:border-box;width:100%;display:block}
 #Tip{margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
 #yixinghuandouDIV{margin:6px auto}
 .ml-inner{margin:0 auto}
