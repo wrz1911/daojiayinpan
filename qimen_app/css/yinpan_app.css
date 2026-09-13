@@ -138,9 +138,10 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;background:var(--c-bg);margin:0;padding-bottom:calc(44px + env(safe-area-inset-bottom, 24px))}
 body{padding-top:34px}
 /* 顶部模式栏: 六个盘型切换常驻顶部, 高度压到 34px 以免占地方。
-   背景与底部栏同一片色、同样 600px 居中, 不加分隔线, 上下呼应。
+   背景与底部栏同一片色、同样 600px 居中; 下沿加一条分隔线, 与底部栏的
+   上沿边框上下对称 —— 不画线时顶栏和盘头都是白底, 会糊成一片分不出层次。
    (原先这里是一条 36px 的空装饰条, 切换器另占内容区一整行) */
-#topBar{position:fixed;top:0;left:0;right:0;height:34px;background:var(--c-bg);z-index:1000;max-width:600px;margin:0 auto;display:flex;align-items:center;justify-content:space-around;padding:0 2px;box-sizing:border-box}
+#topBar{position:fixed;top:0;left:0;right:0;height:34px;background:var(--c-bg);border-bottom:1px solid var(--c-border);z-index:1000;max-width:600px;margin:0 auto;display:flex;align-items:center;justify-content:space-around;padding:0 2px;box-sizing:border-box}
 #topBar label{display:flex;align-items:center;gap:2px;font-size:13px;line-height:1;color:var(--c-text);cursor:pointer;white-space:nowrap}
 #topBar input[type=radio]{margin:0;width:13px;height:13px;flex:none;accent-color:var(--c-theme)}
 #mainDIV{max-width:600px;margin:0 auto;padding:0}
