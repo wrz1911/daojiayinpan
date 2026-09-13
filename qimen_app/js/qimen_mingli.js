@@ -191,7 +191,7 @@
       var qr = data.qr, bz = data.bz, sz = data.sizhu;
 
       /* ── ① #panHead 头部表 ── */
-      h += '<div id="panHead"><TABLE class="pan" id="headTable">';
+      h += '<div id="panHead" class="bz-pan"><TABLE class="pan" id="headTable">';
       h += '<TR><TD colspan="5" style="line-height:30px">' +
            '<font style="color:#dead68">名称：</font><font id="name">' + data.name + '</font>&emsp;' +
            '<font style="color:#dead68">性别：</font><font id="gender">' + data.gender + '</font>&emsp;' +
@@ -221,7 +221,20 @@
       [sz.nian, sz.yue, sz.ri, sz.shi].forEach(function (gz) {
         h += '<TD>' + ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
       });
-      h += '</TR></TABLE></div>';
+      h += '</TR>';
+      /* ── 八字信息(原「八字排盘」主盘, 合并进命理主盘): 十神/藏干/纳音/地势/
+            自坐/空亡/神煞/胎元·命宫·身宫/旺相休囚死/交运; 四柱行主盘已有, 不重复 ── */
+      try {
+        var bzInfo = window.baziChart ? window.baziChart({
+          year: window.Y, month: window.M, day: window.D,
+          hour: window.hr, minute: window.mn,
+          name: data.name, gender: data.gender
+        }) : null;
+        if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false);
+      } catch (e) {
+        if (window._logErr) window._logErr('mingli.baziRows', e && e.message);
+      }
+      h += '</TABLE></div>';
 
       /* ── ② #content 盘体 + 外圈 ── */
       if (window.buildPaipanGrid && qr.pals) {
@@ -286,7 +299,6 @@
       h += '<TD><div class="btn" id="btn1" onclick="showMingliYixing();mingliBtn(1,window._mlData);">移星换斗</div></TD>';
       h += '<TD><div class="btn" id="btn3" onclick="mingliBtn(3,window._mlData);">天门地户</div></TD>';
       h += '<TD><div class="btn" id="btn2" onclick="mingliState();mingliBtn(2,window._mlData);">长生状态</div></TD>';
-      h += '<TD><div class="btn" id="btnBazi" onclick="showBaziPan();">八字排盘</div></TD>';
       h += '</TR></TABLE>';
 
       /* ── ⑤ #btnTable2 ── */

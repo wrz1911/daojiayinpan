@@ -299,6 +299,63 @@
 
   function hourText(h) { return ZHI[Math.floor(((h + 1) % 24) / 2)]; }
 
+  /* 十神/藏干/纳音/地势/自坐/空亡/神煞/胎元命宫身宫/旺相/交运 —— 命理主盘与本模块共用 */
+  function baziMainRows(bz, withGz) {
+    var h = '';
+    /* 十神 */
+    h += '<TR style="height:25px"><TD style="color:#dead68;line-height:25px">十神</TD>';
+    bz.pillars.forEach(function (p) { h += '<TD class="shiShen">' + p.shiShen + '</TD>'; });
+    h += '</TR>';
+    /* 干支(命理主盘已自带四柱, 那边传 withGz=false 跳过) */
+    if (withGz) {
+      h += '<TR><TD style="color:#dead68">' + bz.zao + '</TD>';
+      bz.pillars.forEach(function (p) {
+        h += '<TD class="sizhuTd"><font style="color:' + p.ganColor + '">' + p.gan + '</font><br>' +
+             '<font style="color:' + p.zhiColor + '">' + p.zhi + '</font></TD>';
+      });
+      h += '</TR>';
+    }
+    /* 藏干 */
+    h += '<TR><TD style="color:#dead68">藏干</TD>';
+    bz.pillars.forEach(function (p) {
+      h += '<TD class="cangGanTd">';
+      p.cang.forEach(function (c, i) {
+        h += '<font color=' + GAN_COLOR[GAN.indexOf(c.gan)] + '>' + c.gan + '</font>' +
+             (i === p.cang.length - 1 ? '<br>' : '');
+      });
+      h += '<font class="ganShen">' + p.cang.map(function (c) { return c.shen; }).join('') + '</font></TD>';
+    });
+    h += '</TR>';
+    /* 纳音 / 地势 / 自坐 / 空亡 */
+    [['纳音', 'naYin'], ['地势', 'diShi'], ['自坐', 'ziZuo'], ['空亡', 'kong']].forEach(function (row) {
+      h += '<TR><TD style="color:#dead68">' + row[0] + '</TD>';
+      bz.pillars.forEach(function (p) { h += '<TD>' + p[row[1]] + '</TD>'; });
+      h += '</TR>';
+    });
+    /* 神煞 */
+    h += '<TR><TD style="color:#dead68;line-height:15px">神煞<br></TD>';
+    bz.pillars.forEach(function (p) {
+      h += '<TD class="shenShaTd"><div class="ssDiv shensha">';
+      p.sha.forEach(function (s) { h += '<span>' + s + '</span><br>'; });
+      h += '</div></TD>';
+    });
+    h += '</TR>';
+    /* 胎元 命宫 身宫 旺相休囚死 */
+    h += '<TR><TD style="color:#dead68">胎元</TD><TD style="color:#dead68">命宫</TD>' +
+         '<TD style="color:#dead68">身宫</TD><TD colspan="2" style="color:#dead68">旺相休囚死</TD></TR>';
+    h += '<TR><TD class="gong">' + bz.taiYuan + '<br><font>' + bz.taiYuanNaYin + '</font></TD>' +
+         '<TD class="gong">' + bz.mingGong + '<br><font>' + bz.mingGongNaYin + '</font></TD>' +
+         '<TD class="gong">' + bz.shenGong + '<br><font>' + bz.shenGongNaYin + '</font></TD>' +
+         '<TD colspan="2">' + bz.wangXiang + '</TD></TR>';
+    /* 交运 */
+    var jyDur = bz.jiaoYun.y + '年' + (bz.jiaoYun.m ? bz.jiaoYun.m + '个月' : '') +
+                (bz.jiaoYun.d ? bz.jiaoYun.d + '日' : '');
+    h += '<TR><TD colspan="5" id="jiaoYun">出生后' + jyDur + '起大运，每逢<font color="#e40b06">' +
+         bz.jiaoYun.gan + '</font>年' + bz.jiaoYun.month + '月' + bz.jiaoYun.day + '日前后交运。</TD></TR>';
+    h += '</TABLE>';
+    return h;
+  }
+
   /* ══════════════ 渲染(照搬热卜传统模式) ══════════════ */
   function renderBazi(d) {
     if (!d) return '';
@@ -315,55 +372,7 @@
     h += '<TR><TD class="sizhuTitle" style="width:16%">四柱</TD>' +
          '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD>' +
          '<TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD></TR>';
-    /* 十神 */
-    h += '<TR style="height:25px"><TD style="color:#dead68;line-height:25px">十神</TD>';
-    d.pillars.forEach(function (p) { h += '<TD class="shiShen">' + p.shiShen + '</TD>'; });
-    h += '</TR>';
-    /* 干支 */
-    h += '<TR><TD style="color:#dead68">' + d.zao + '</TD>';
-    d.pillars.forEach(function (p) {
-      h += '<TD class="sizhuTd"><font style="color:' + p.ganColor + '">' + p.gan + '</font><br>' +
-           '<font style="color:' + p.zhiColor + '">' + p.zhi + '</font></TD>';
-    });
-    h += '</TR>';
-    /* 藏干 */
-    h += '<TR><TD style="color:#dead68">藏干</TD>';
-    d.pillars.forEach(function (p) {
-      h += '<TD class="cangGanTd">';
-      p.cang.forEach(function (c, i) {
-        h += '<font color=' + GAN_COLOR[GAN.indexOf(c.gan)] + '>' + c.gan + '</font>' +
-             (i === p.cang.length - 1 ? '<br>' : '');
-      });
-      h += '<font class="ganShen">' + p.cang.map(function (c) { return c.shen; }).join('') + '</font></TD>';
-    });
-    h += '</TR>';
-    /* 纳音 / 地势 / 自坐 / 空亡 */
-    [['纳音', 'naYin'], ['地势', 'diShi'], ['自坐', 'ziZuo'], ['空亡', 'kong']].forEach(function (row) {
-      h += '<TR><TD style="color:#dead68">' + row[0] + '</TD>';
-      d.pillars.forEach(function (p) { h += '<TD>' + p[row[1]] + '</TD>'; });
-      h += '</TR>';
-    });
-    /* 神煞 */
-    h += '<TR><TD style="color:#dead68;line-height:15px">神煞<br></TD>';
-    d.pillars.forEach(function (p) {
-      h += '<TD class="shenShaTd"><div class="ssDiv shensha">';
-      p.sha.forEach(function (s) { h += '<span>' + s + '</span><br>'; });
-      h += '</div></TD>';
-    });
-    h += '</TR>';
-    /* 胎元 命宫 身宫 旺相休囚死 */
-    h += '<TR><TD style="color:#dead68">胎元</TD><TD style="color:#dead68">命宫</TD>' +
-         '<TD style="color:#dead68">身宫</TD><TD colspan="2" style="color:#dead68">旺相休囚死</TD></TR>';
-    h += '<TR><TD class="gong">' + d.taiYuan + '<br><font>' + d.taiYuanNaYin + '</font></TD>' +
-         '<TD class="gong">' + d.mingGong + '<br><font>' + d.mingGongNaYin + '</font></TD>' +
-         '<TD class="gong">' + d.shenGong + '<br><font>' + d.shenGongNaYin + '</font></TD>' +
-         '<TD colspan="2">' + d.wangXiang + '</TD></TR>';
-    /* 交运 */
-    var jyDur = d.jiaoYun.y + '年' + (d.jiaoYun.m ? d.jiaoYun.m + '个月' : '') +
-                (d.jiaoYun.d ? d.jiaoYun.d + '日' : '');
-    h += '<TR><TD colspan="5" id="jiaoYun">出生后' + jyDur + '起大运，每逢<font color="#e40b06">' +
-         d.jiaoYun.gan + '</font>年' + d.jiaoYun.month + '月' + d.jiaoYun.day + '日前后交运。</TD></TR>';
-    h += '</TABLE>';
+    h += baziMainRows(d, true);
 
     /* ── 大运 ── */
     h += '<TABLE class="pan" id="dayun"><TR><TD class="title" rowspan=2>大<br>运</TD>';
@@ -435,6 +444,7 @@
   }
 
   window.baziChart = baziChart;
+  window.baziMainRows = baziMainRows;
   window.renderBazi = renderBazi;
   window.showBaziPan = showBaziPan;
 })();
