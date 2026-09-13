@@ -242,7 +242,7 @@ function qimenChart(opts) {
     yinYang: isY ? '阴' : '阳', juNum: ju,
     juLabel: `${isY ? '阴遁' : '阳遁'}${ju}局`,
     customJu: customJu || false,
-    jieqi: `${STN[ti === 0 ? 23 : ti - 1]}～${STN[ti]}`,
+    jieqi: `${STN[ti]}～${STN[(ti + 1) % 24]}`,
     yueJiang: jz,
     sizhu: {
       y: { ganZhi: yGz.getName() }, m: { ganZhi: mGz.getName() },
