@@ -969,7 +969,7 @@ const JK_HELP = {
     ]},
     { t: '断课要诀', rows: [
       '金口诀是<b>纯五行生克</b>体系。五行之外又有刑、冲、害、绝、空亡、驿马神煞等因素，多种因素结合才多面反映事物真相。',
-      '<b>旺衰</b>：按当令五行判旺相休囚死。旺克而内不敌外力则我必有失；休死空来克则损失减小或无。',
+      '<b>旺衰</b>：<b>课内定旺衰，不按月令</b>。讲义原话「课内定旺衰。有克先找克，<b>克者为旺</b>，不以四柱为主」、「判断旺衰必须以课内五行生克为主，与四柱没有关系」。<br>算法：取四位（人元化支 / 贵神本位支 / 将神支 / 地分支）的五行计数 —— ① 某五行出现 3 次即直接为旺；② 否则取「我克者不存在」的五行，一个即旺，两个则优先生我者、次取我克者。其余三位按<b>相生序</b>依次为 相 休 囚 死（如土旺则金相、水休、木囚、火死）。<br>四柱不参与课内旺衰，只在断应期时作为「外环境是否支持」的参考。',
       '<b>全息</b>：断流年流月时，课内任何信息都是自身的信息 —— 贵神受克主工作受阻，将神受克主财运与人身损害，地分受克主固定不动那部分出问题。哪个地支出问题，就代表哪里出了问题。',
       '<b>占来意</b>：以将神为主，看将神与人元的关系（生克合）。人元克将是外来侵入；将神克外是我索取，主有所得（我克者为财）。',
       '<b>用爻</b>：课内有「用」标记者为用爻。',
@@ -1870,21 +1870,34 @@ const JK_JIANG   = ['神后','大吉','功曹','太冲','天罡','太乙','胜�
 const JK_WX_NAME = { 1:'水', 2:'木', 3:'火', 4:'土', 5:'金' };
 const JK_ZHI_WX  = [1,4,2,2,4,3,3,4,5,5,4,1];   // 子丑寅卯辰巳午未申酉戌亥 → 水土木木土火火土金金土水
 
-/* 当令五行：春木、夏火、秋金、冬水、四季末(辰未戌丑月)土 → 返回 [旺,相,休,囚,死] */
-function _jkSeasonWx(monthZhiIdx) {
-  if (monthZhiIdx >= 2 && monthZhiIdx <= 4) return [2,3,1,5,4];    // 寅卯辰 春
-  if (monthZhiIdx >= 5 && monthZhiIdx <= 7) return [3,4,2,1,5];    // 巳午未 夏
-  if (monthZhiIdx >= 8 && monthZhiIdx <= 10) return [5,1,4,3,2];   // 申酉戌 秋
-  return [1,2,5,4,3];                                              // 亥子丑 冬
+/* ══ 旺衰（课内定，非按月令）══
+   讲义：「课内定旺衰。有克先找克，克者为旺，不以四柱为主」，
+        「判断旺衰必须以课内五行生克为主，与四柱没有关系」。
+   算法照漫步者 use_func.js 的 wangshui()：
+     五行编号 1水 2木 3火 4土 5金（相生为序）
+     1) 某五行在四位中出现 3 次 → 直接为旺
+     2) 否则取「我克者不存在」的五行作候选；一个候选即为旺，
+        两个候选时优先「生我者存在」的，其次「我克者存在」的
+     3) 其余三位按相生序依次为 相 休 囚 死
+   入参 cnt = 五行计数数组（下标 1..5）。返回旺的五行编号。 */
+function _jkWangWx(cnt) {
+  const ws = [1,1,1,1,1,1];
+  let tag = 0, zd = 0;
+  for (let w = 1; w < 6; w++) {
+    if (cnt[w] === 3) return w;                       // 多者旺
+    if (cnt[w] > 0) {
+      if (cnt[(w + 2) % 5 + 1] === 0) { ws[w] = 0; tag++; zd = w; }
+      else ws[w] = 1;
+    }
+  }
+  if (tag === 3) return zd;
+  if (tag === 2) {
+    for (let w = 1; w < 6; w++) if (ws[w] === 0 && cnt[(w + 3) % 5 + 1] > 0) zd = w;
+    for (let w = 1; w < 6; w++) if (ws[w] === 0 && cnt[(w + 1) % 5 + 1] > 0) { zd = w; break; }
+  }
+  return zd;
 }
-function _jkWangShuai(wx, monthZhiIdx) {
-  const t = _jkSeasonWx(monthZhiIdx);
-  if (wx === t[0]) return '旺';
-  if (wx === t[1]) return '相';
-  if (wx === t[2]) return '休';
-  if (wx === t[3]) return '囚';
-  return '死';
-}
+
 /* 五行生克：a 是否克 b */
 function _jkKe(a, b) { return (a === 2 && b === 4) || (a === 4 && b === 1) || (a === 1 && b === 3) || (a === 3 && b === 5) || (a === 5 && b === 2); }
 function _jkSheng(a, b) { return (a === 2 && b === 3) || (a === 3 && b === 4) || (a === 4 && b === 5) || (a === 5 && b === 1) || (a === 1 && b === 2); }
@@ -1934,14 +1947,14 @@ function jinkoujueChart(opt) {
     houses.push({
       difenIdx: df, difenZhi: QM.ZHI[df], difenGan: QM.GAN[_jkDun(dG, df)], jiangZhiIdx: jsZ,
       renYuan: rgGan, renWx: QM.WX_MAP[rgGan],
-      renWs: _jkWangShuai(QM.WX_MAP[rgGan], mZ),
+      renWs: '',
       guiShen: JK_GUISHEN[gsIdx],
       guiGanZhi: QM.GAN[_jkDun(dG, JK_GR_ZHI[gsIdx])] + QM.ZHI[JK_GR_ZHI[gsIdx]],  // 本位干支
-      guiWx: JK_ZHI_WX[JK_GR_ZHI[gsIdx]], guiWs: _jkWangShuai(JK_ZHI_WX[JK_GR_ZHI[gsIdx]], mZ),
+      guiWx: JK_ZHI_WX[JK_GR_ZHI[gsIdx]], guiWs: '',
       guiChengZhi: QM.ZHI[gsZ], guiZhiIdx: gsZ,
       jiangShen: JK_JIANG[jsZ], jiangGanZhi: jsGan + QM.ZHI[jsZ],
-      jiangWx: JK_ZHI_WX[jsZ], jiangWs: _jkWangShuai(JK_ZHI_WX[jsZ], mZ),
-      difenWs: _jkWangShuai(JK_ZHI_WX[df], mZ),
+      jiangWx: JK_ZHI_WX[jsZ], jiangWs: '',
+      difenWs: '',
     });
   }
 
@@ -1949,6 +1962,24 @@ function jinkoujueChart(opt) {
   const cur = houses[opt.difen != null ? opt.difen : hZ];
 
   // 五动（按四位生克，取常见口径）
+  const G2Z = [2,3,6,5,4,7,8,9,0,11];   // 天干化支: 甲寅 乙卯 丙巳 丁午 戊辰 己未 庚申 辛酉 壬子 癸亥
+  const kz4 = [0, G2Z[QM.GAN.indexOf(cur.renYuan)], QM.ZHI.indexOf(cur.guiGanZhi[1]), cur.jiangZhiIdx, cur.difenIdx];
+
+  // ── 旺衰: 课内定(四位五行的计数 → 旺的五行 → 依相生序 旺相休囚死) ──
+  const WXN = { 水:1, 木:2, 火:3, 土:4, 金:5 };
+  const kzx = [0, JK_ZHI_WX[kz4[1]], JK_ZHI_WX[kz4[2]], JK_ZHI_WX[kz4[3]], JK_ZHI_WX[kz4[4]]];
+  const cnt = [0,0,0,0,0,0];
+  for (let i = 1; i < 5; i++) cnt[kzx[i]]++;
+  const wangWx = _jkWangWx(cnt);
+  // 旺五行 → 等级0, 其后按相生序依次 相1 休2 囚3 死4
+  const wsOf = wxIdx => { for (let j = 0; j < 5; j++) if ((wangWx + j - 1) % 5 + 1 === wxIdx) return ['旺','相','休','囚','死'][j]; return ''; };
+  houses.forEach(h => {
+    h.renWs = wsOf(JK_ZHI_WX[kz4[1]]);
+    h.guiWs = wsOf(JK_ZHI_WX[kz4[2]]);
+    h.jiangWs = wsOf(JK_ZHI_WX[kz4[3]]);
+    h.difenWs = wsOf(JK_ZHI_WX[kz4[4]]);
+  });
+
   // 五动/三动按【乘支】的五行判(起课结果), 与本位干支无关
   const rWx = cur.renWx, gWx = cur.guiWx, jWx = cur.jiangWx, dWx = JK_ZHI_WX[cur.difenIdx];
   // 五动三动(干=人元 神=贵神 将=将神 方=地分), 据讲义"五动包括妻官财贼鬼,
@@ -1985,8 +2016,6 @@ function jinkoujueChart(opt) {
 
   // 用爻(用位): 默认取将神(3); 四课阳支数满足条件时改取贵神(2)
   //   据漫步者 use_func.js: yyshu=四课中地支索引为偶(阳支)的个数
-  const G2Z = [2,3,6,5,4,7,8,9,0,11];   // 天干化支: 甲寅 乙卯 丙巳 丁午 戊辰 己未 庚申 辛酉 壬子 癸亥
-  const kz4 = [0, G2Z[QM.GAN.indexOf(cur.renYuan)], QM.ZHI.indexOf(cur.guiGanZhi[1]), cur.jiangZhiIdx, cur.difenIdx];
   let yyshu = 0;
   for (let i = 1; i < 5; i++) if (kz4[i] % 2 === 0) yyshu++;
   let yongwei = 3;
@@ -2008,7 +2037,7 @@ function jinkoujueChart(opt) {
 
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
-    shensha: ss, yongwei: yongwei, yyshu: yyshu, lunar: lunarStr, kong4: kong4, termStr: termStr,
+    shensha: ss, yongwei: yongwei, yyshu: yyshu, wangWx: wangWx, wangSrc: '课内', lunar: lunarStr, kong4: kong4, termStr: termStr,
     dateFull: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
     dateStr: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
     yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ], yueJiangIdx: jiangZ, yueJiangAuto: jiangZAuto,
