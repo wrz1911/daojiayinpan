@@ -248,15 +248,9 @@ window._colorSpan = (val, isXing, isMu, isPo, isKong) => {
   if (isKong) return '<span class="cx-kong">'+val+'</span>';
   return window._siHaiSpan(val, isXing, isMu);
 };
-// 五行着色: 木绿/火红/土棕/金橙/水蓝, CSS 类驱动
-window._wxSpan = (s) => {
-  if (!s) return '';
-  let c = s[0];
-  let cls = '甲乙寅卯'.indexOf(c) >= 0 ? 'wx-mu' : '丙丁巳午'.indexOf(c) >= 0 ? 'wx-huo'
-    : '戊己辰戌丑未'.indexOf(c) >= 0 ? 'wx-tu' : '庚辛申酉'.indexOf(c) >= 0 ? 'wx-jin'
-    : '壬癸亥子'.indexOf(c) >= 0 ? 'wx-shui' : '';
-  return cls ? '<span class="'+cls+'">'+s+'</span>' : s;
-};
+// 五行着色: 木绿/火红/土棕/金橙/水蓝 —— 统一委托给 QM.wxSpan(见 qimen_constants.js),
+// 全项目一张单字表, 盘头/三传/大运/八字各处同字同色
+window._wxSpan = (s) => (window.QM && QM.wxSpan) ? QM.wxSpan(s) : (s || '');
 
 // 十天干与十二地支列表, 用于干支转换与查找
 let GAN_LIST = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
@@ -338,9 +332,9 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   let html='<style>.xj-head #tdTitle td{color:var(--c-gold)}.xj-head #itemTitle{color:var(--c-gold);line-height:30px}.xj-head #dTitle{width:16%;color:var(--c-gold)}</style>'+
     '<div id="panHead"><TABLE class="pan xj-head" id="headTable">'+
     '<TR><TD id="itemTitle">山向</TD><TD colspan="3">'+name+' '+degStart+'～'+degEnd+'°</TD><TD>'+sxY+'年</TD></TR>'+
-    '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+shiZhuParts[0]+'</TD><TD class="sizhu" style="color:var(--c-sizhu);font-weight:bold">'+shiZhuParts[1]+'</TD><TD>黄泉<b>'+hq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
+    '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+window._wxSpan(shiZhuParts[0])+'</TD><TD class="sizhu" style="font-weight:bold">'+window._wxSpan(shiZhuParts[1])+'</TD><TD>黄泉<b>'+hq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>空亡</TD><TD>马星</TD></TR>'+
-    '<TR><TD>'+(sxData.xunShou||'—')+'</TD><TD>天'+sxData.zfStar+'</TD><TD>'+sxData.zsMen+'门</TD><TD>'+(sxData.kongWang||'—')+'</TD><TD>'+(sxData.maXing||'—')+'</TD></TR>'+
+    '<TR><TD>'+window._wxSpan(sxData.xunShou||'—')+'</TD><TD>天'+sxData.zfStar+'</TD><TD>'+sxData.zsMen+'门</TD><TD>'+window._wxSpan(sxData.kongWang||'—')+'</TD><TD>'+window._wxSpan(sxData.maXing||'—')+'</TD></TR>'+
     '</TABLE></div>'+gridHTML+
     '<TABLE id="btnTable1"><TR>'+
     '<TD><div class="btn" id="btnXiangJu" onclick="toggleXiangJu()">向角度选局</div></TD>'+
@@ -737,11 +731,11 @@ function renderPan(raw, engineData) {
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongli+')</TD></TR>' +
     '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'" id="jieqi">'+(jieqi||'节气')+'</TD></TR>' +
     '<TR><TD style="color:var(--c-gold)">类型</TD><TD colspan="'+keCols+'">' +
-    (panType===2?'刻盘':'时盘')+'·			'+ziXuanMark+'<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+yueJiang+'</B>】</TD></TR>' +
+    (panType===2?'刻盘':'时盘')+'·			'+ziXuanMark+'<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD>'+(panType===2?'<TD colspan=2>空亡</TD>':'<TD>空亡</TD>')+'</TR>' +
-    '<TR><TD id="xunShou">'+xunShou+'</TD><TD>天<font id="zhiFu">'+zhiFuShort+'</font></TD>' +
+    '<TR><TD id="xunShou">'+wxSpan(xunShou)+'</TD><TD>天<font id="zhiFu">'+zhiFuShort+'</font></TD>' +
     '<TD><font id="zhiShi">'+zhiShiShort+'</font>门</TD>' +
-    '<TD id="maXing">'+maXing+'</TD>'+(panType===2?'<TD colspan=2 id="kongWang">'+kongWang+'</TD>':'<TD id="kongWang">'+kongWang+'</TD>')+'</TR>' +
+    '<TD id="maXing">'+wxSpan(maXing)+'</TD>'+(panType===2?'<TD colspan=2 id="kongWang">'+wxSpan(kongWang)+'</TD>':'<TD id="kongWang">'+wxSpan(kongWang)+'</TD>')+'</TR>' +
     '<TR><TD style="color:var(--c-gold)" rowspan=2>'+(panType===2?'五柱':'四柱')+'</TD>' +
     '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD>' +
     '<TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD>' +
@@ -1070,7 +1064,7 @@ function renderXinpan(useBg) {
     '<TR><TD id="dTitle">日期</TD><TD colspan="4">'+dStr+(nongliStr?' ('+nongliStr+')':'')+'</TD></TR>' +
     '<TR><TD>局数</TD><TD colspan="4">'+(_xpCalcJu||_xpBgJu||'心盘')+'</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD><TD>空亡</TD></TR>' +
-    '<TR><TD>' + (_xpBgXunShou||'—') + '</TD><TD>' + zhiFuVal + '</TD><TD>' + zhiShiVal + '</TD><TD>' + (_xpBgMaXing||(maGong?'马[宫'+maGong+']':'—')) + '</TD><TD>' + (_xpBgKongWang||'—') + '</TD></TR>' +
+    '<TR><TD>' + (_xpBgXunShou?wxSpanBg(_xpBgXunShou):'—') + '</TD><TD>' + zhiFuVal + '</TD><TD>' + zhiShiVal + '</TD><TD>' + (_xpBgMaXing?wxSpanBg(_xpBgMaXing):(maGong?'马[宫'+maGong+']':'—')) + '</TD><TD>' + (_xpBgKongWang?wxSpanBg(_xpBgKongWang):'—') + '</TD></TR>' +
     '<TR><TD rowspan=2 style="color:var(--c-gold)">四柱</TD>' +
     '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD><TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD></TR>' +
     '<TR>' + (sizhuParts.length>=4 ? sizhuColorHTML : sizhuHTML) + '</TR>' +
@@ -1967,8 +1961,8 @@ function showPalace(g) {
   let me = MEN_INFO[p.men] || {};
   let ag = p.anGan || '无';
 
-  // 五行配色
-  let WX_CLR = {'金':'#f9a825','木':'#2e7d32','水':'#0d47a1','火':'#d50000','土':'#795548'};
+  // 五行徽章配色: 引用主题变量, 暗色模式自动跟随(原先写死十六进制)
+  let WX_CLR = {'金':'var(--wx-jin)','木':'var(--wx-mu)','水':'var(--wx-shui)','火':'var(--wx-huo)','土':'var(--wx-tu)'};
   function wxBadge(wx) { return wx ? '<span style="display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;color:#fff;background:'+(WX_CLR[wx]||'#999')+'">'+wx+'</span>' : ''; }
 
   // 统一格式化：标签自动加粗，自动分行排版
@@ -2033,7 +2027,7 @@ function showPalace(g) {
     + makeTab(tabId+'_xing', '九星·'+(window.XING_ABBR||{})[p.xing]||p.xing, false)
     + makeTab(tabId+'_men', '八门·'+(window.MEN_ABBR||{})[p.men]||p.men, false)
     + makeTab(tabId+'_gan', '干支', false)
-    + makeTab(tabId+'_geju', '格局·'+(p.tian[0]||'')+(p.di[0]||''), false);
+    + makeTab(tabId+'_geju', '格局·'+window._wxSpan((p.tian[0]||'')+(p.di[0]||'')), false);
 
   function contentGong() {
     let s = '<div style="font-size:20px;font-weight:bold">第'+g+'宫 '+gi.name+' '+wxBadge(gi.wx)+'</div>';
@@ -2073,13 +2067,13 @@ function showPalace(g) {
   function contentGan() {
     let s = '<div style="font-size:18px;font-weight:bold">天干</div>';
     let tg0 = p.tian[0]||'', dg0 = p.di[0]||'';
-    s += '<div style="margin:8px 0"><span style="font-weight:bold">天盘：</span>'+p.tian;
+    s += '<div style="margin:8px 0"><span style="font-weight:bold">天盘：</span>'+window._wxSpan(p.tian);
     if (window.GAN_FULL&&tg0&&window.GAN_FULL[tg0]) s += ' '+wxBadge(window.GAN_FULL[tg0].wx);
     s += '</div>';
-    s += '<div style="margin:8px 0"><span style="font-weight:bold">地盘：</span>'+p.di;
+    s += '<div style="margin:8px 0"><span style="font-weight:bold">地盘：</span>'+window._wxSpan(p.di);
     if (window.GAN_FULL&&dg0&&window.GAN_FULL[dg0]) s += ' '+wxBadge(window.GAN_FULL[dg0].wx);
     s += '</div>';
-    s += '<div style="margin:8px 0"><span style="font-weight:bold">暗干：</span>'+ag+'</div>';
+    s += '<div style="margin:8px 0"><span style="font-weight:bold">暗干：</span>'+window._wxSpan(ag)+'</div>';
     if (window.GAN_FULL&&tg0&&window.GAN_FULL[tg0]) s += '<details style="margin-top:8px"><summary style="font-weight:bold;cursor:pointer">天盘干详解('+p.tian[0]+')</summary>'+fmtText(window.GAN_FULL[tg0].text)+'</details>';
     if (window.GAN_FULL&&dg0&&dg0!==tg0&&window.GAN_FULL[dg0]) s += '<details style="margin-top:4px"><summary style="font-weight:bold;cursor:pointer">地盘干详解('+p.di[0]+')</summary>'+fmtText(window.GAN_FULL[dg0].text)+'</details>';
     if (window.WUCHENG_SANQI&&tg0&&window.WUCHENG_SANQI[tg0]) s += '<details style="margin-top:4px"><summary style="font-weight:bold;cursor:pointer;color:var(--c-theme)">三奇六仪('+p.tian[0]+')</summary>'+fmtText(window.WUCHENG_SANQI[tg0].text)+'</details>';
@@ -2552,9 +2546,9 @@ function toggleXiangJu(noScroll){
     let html='<style>.xj-head #tdTitle td{color:var(--c-gold)}.xj-head #itemTitle{color:var(--c-gold);line-height:30px}.xj-head #dTitle{width:16%;color:var(--c-gold)}</style>'+
       '<div id="panHead"><TABLE class="pan xj-head" id="headTable">'+
       '<TR><TD id="itemTitle">度数</TD><TD colspan="3">'+sxName+' '+degStart+'～'+degEnd+'°</TD><TD>'+sxYear+'年</TD></TR>'+
-      '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+sxShiZhuParts[0]+'</TD><TD class="sizhu" style="color:var(--c-sizhu);font-weight:bold">'+sxShiZhuParts[1]+'</TD><TD>黄泉<b>'+sxHq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
+      '<TR><TD id="dTitle">干支</TD><TD class="sizhu">'+window._wxSpan(sxShiZhuParts[0])+'</TD><TD class="sizhu" style="font-weight:bold">'+window._wxSpan(sxShiZhuParts[1])+'</TD><TD>黄泉<b>'+sxHq+'</b></TD><TD>'+juLabel+'</TD></TR>'+
       '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>空亡</TD><TD>马星</TD></TR>'+
-      '<TR><TD>'+xunShouGZ+'</TD><TD>天'+zhiFu+'星</TD><TD>'+zhiShi+'门</TD><TD>'+kongWangStr+'</TD><TD>'+maStr+'</TD></TR>'+
+      '<TR><TD>'+window._wxSpan(xunShouGZ)+'</TD><TD>天'+zhiFu+'星</TD><TD>'+zhiShi+'门</TD><TD>'+window._wxSpan(kongWangStr)+'</TD><TD>'+window._wxSpan(maStr)+'</TD></TR>'+
       '</TABLE></div>'+gridHTML;
     html=html.replace(/<TABLE[^>]*id="btnTable1"[^>]*>[\s\S]*?<\/TABLE>/gi,'');
     html=html.replace(/<div[^>]*id="yixinghuandouDIV"[^>]*><\/div>/gi,'');

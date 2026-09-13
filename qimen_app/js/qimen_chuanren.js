@@ -292,12 +292,8 @@ window.computeBaZiDaYun= opts => {
     return p[0]+p[1];
   });
 
-  // 五行色
-  let wxColor={甲:'var(--wx-mu)',乙:'var(--wx-mu)',丙:'var(--wx-huo)',丁:'var(--wx-huo)',戊:'var(--wx-tu)',己:'var(--wx-tu)',庚:'var(--wx-jin)',辛:'var(--wx-jin)',壬:'var(--wx-shui)',癸:'var(--wx-shui)',
-    寅:'var(--wx-mu)',卯:'var(--wx-mu)',巳:'var(--wx-huo)',午:'var(--wx-huo)',辰:'var(--wx-tu)',戌:'var(--wx-tu)',丑:'var(--wx-tu)',未:'var(--wx-tu)',申:'var(--wx-jin)',酉:'var(--wx-jin)',亥:'var(--wx-shui)',子:'var(--wx-shui)'};
-  function wxSpanBZ(ch){let c=wxColor[ch]||'var(--c-text)';return '<span style="color:'+c+'">'+ch+'</span>';}
-  function wxClass(ch){let m={甲:'绿',乙:'绿',丙:'红',丁:'红',戊:'褐',己:'褐',庚:'金',辛:'金',壬:'蓝',癸:'蓝',
-    寅:'绿',卯:'绿',巳:'红',午:'红',辰:'褐',戌:'褐',丑:'褐',未:'褐',申:'金',酉:'金',亥:'蓝',子:'蓝'};return m[ch]||'';}
+  // 五行色统一走 QM.wxSpan(qimen_constants.js 的单字表), 不再自备色表
+  function wxSpanBZ(ch){return QM.wxSpan?QM.wxSpan(ch):ch;}
 
   // 大运十神
   let dayunSS=dayun.map(dy => {
@@ -327,8 +323,7 @@ window.computeBaZiDaYun= opts => {
 
   // 交运信息: 起运年的天干
   let jiaoYunGan=G2[(qiYunYear-4)%10]; // 起运年的年干
-  let jyGanColor=wxColor[jiaoYunGan]||'var(--c-text)';
-  let qiYunDesc='出生后'+qiYunMonth+'个月起大运，每逢<span style="color:'+jyGanColor+'">'+jiaoYunGan+'</span>年交运';
+  let qiYunDesc='出生后'+qiYunMonth+'个月起大运，每逢'+wxSpanBZ(jiaoYunGan)+'年交运';
 
   // 藏干十神
   let cgSS=[];
@@ -354,7 +349,7 @@ window.computeBaZiDaYun= opts => {
     dishi:dishi, zizuo:zizuo, xunKong:xunKong,
     qiYunSui:qiYunSui, qiYunMonth:qiYunMonth, qiYunYear:qiYunYear,
     dayun:dayun, dayunSS:dayunSS, liuNian:liuNian, curDY:curDY, curYear:curYear,
-    qiYunDesc:qiYunDesc, wxSpanBZ:wxSpanBZ, wxClass:wxClass, wxColor:wxColor
+    qiYunDesc:qiYunDesc, wxSpanBZ:wxSpanBZ
   };
 };
 
@@ -363,21 +358,11 @@ window.renderChuanRen=(data,containerId) => {
   let d=data;
   let szParts=d.sizhu.split(' ');
   let nianGz=szParts[0]||'',yueGz=szParts[1]||'',riGz=szParts[2]||'',shiGz=szParts[3]||'';
-  function wxSpan(s){let c='#333';if('甲乙寅卯'.indexOf(s)>=0)c='var(--wx-mu)';else if('丙丁巳午'.indexOf(s)>=0)c='var(--wx-huo)';else if('戊己辰戌丑未'.indexOf(s)>=0)c='var(--wx-tu)';else if('庚辛申酉'.indexOf(s)>=0)c='var(--wx-jin)';else if('壬癸亥子'.indexOf(s)>=0)c='var(--wx-shui)';return '<font style="color:'+c+'">'+(s||'')+'</font>';}
-  /* 外圈四层(天干/将神/贵神/十二建除)的五行着色。
-     干支按本气取五行; 十二将神(贵神)与建除十二神本身不带五行, 各按其所配之支取:
-       将神 —— 贵人己丑土 腾蛇丁巳火 朱雀丙午火 六合乙卯木 勾陈戊辰土 青龙甲寅木
-               天空戊戌土 白虎庚申金 太常己未土 玄武壬子水 太阴辛酉金 天后癸亥水
-       建除 —— 建寅木 除卯木 满辰土 平巳火 定午火 执未土 破申金 危酉金 成戌土
-               收亥水 开子水 闭丑土
-     合成一张单字表, 天干地支与二者共用一次查表, 避免多套 if 链走岔。 */
-  const WX_OF=(function(){let m={};const put=(k,s)=>{for(let i=0;i<s.length;i++)m[s[i]]=k;};
-    put('mu','甲乙寅卯'); put('huo','丙丁巳午'); put('tu','戊己辰戌丑未');
-    put('jin','庚辛申酉'); put('shui','壬癸亥子');
-    put('tu','贵勾空常'); put('huo','腾蛇朱'); put('mu','六青'); put('jin','白阴'); put('shui','玄后');
-    put('mu','建除'); put('tu','满执成闭'); put('huo','平定'); put('jin','破危'); put('shui','收开');
-    return m;})();
-  function wxSpanX(s){let k=WX_OF[s];return k?('<font style="color:var(--wx-'+k+')">'+s+'</font>'):(s||'');}
+  /* 五行着色统一走 QM.wxSpan / QM.WX_OF(qimen_constants.js 的单字表)。
+     该表涵盖天干/地支/十二将神/建除十二神: 干支按本气, 将神与建除各按其配支,
+     全项目一张表, 盘头/外圈/三传/大运各处同字同色。 */
+  function wxSpan(s){return QM.wxSpan?QM.wxSpan(s):(s||'');}
+  function wxSpanX(s){return wxSpan(s);}
 
   let h='';
 

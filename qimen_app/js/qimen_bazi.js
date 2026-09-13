@@ -26,11 +26,16 @@
 
   var GAN = '甲乙丙丁戊己庚辛壬癸'.split('');
   var ZHI = '子丑寅卯辰巳午未申酉戌亥'.split('');
-  /* 天干五行色: 木绿 火红 土棕 金橙 水蓝 */
-  var GAN_COLOR = ['var(--wx-mu)', 'var(--wx-mu)', 'var(--wx-huo)', 'var(--wx-huo)', 'var(--wx-tu)',
-                   'var(--wx-tu)', 'var(--wx-jin)', 'var(--wx-jin)', 'var(--wx-shui)', 'var(--wx-shui)'];
-  var ZHI_COLOR = ['var(--wx-shui)', 'var(--wx-tu)', 'var(--wx-mu)', 'var(--wx-mu)', 'var(--wx-tu)', 'var(--wx-huo)',
-                   'var(--wx-huo)', 'var(--wx-tu)', 'var(--wx-jin)', 'var(--wx-jin)', 'var(--wx-tu)', 'var(--wx-shui)'];
+  /* 天干/地支五行色: 由 QM.WX_OF 统一单字表派生(见 qimen_constants.js),
+     这里不再自备一份, 免得与盘头/三传/命理出现同字不同色 */
+  var WX_VAR = { mu: 'var(--wx-mu)', huo: 'var(--wx-huo)', tu: 'var(--wx-tu)',
+                 jin: 'var(--wx-jin)', shui: 'var(--wx-shui)' };
+  var wxColorOf = function (ch) {
+    var of = (window.QM && QM.WX_OF) || {};
+    return WX_VAR[of[ch]] || 'var(--c-text)';
+  };
+  var GAN_COLOR = GAN.map(wxColorOf);
+  var ZHI_COLOR = ZHI.map(wxColorOf);
   var ZODIAC = '鼠牛虎兔龙蛇马羊猴鸡狗猪'.split('');
   /* 十神全称 -> 单字简称 */
   var SHISHEN_ABBR = {

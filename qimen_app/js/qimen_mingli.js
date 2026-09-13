@@ -29,18 +29,11 @@
   var GAN = '甲乙丙丁戊己庚辛壬癸';
   var ZHI = '子丑寅卯辰巳午未申酉戌亥';
   var SX = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
-  /** 天干五行色 */
-  var GAN_COLOR = { 甲: 'var(--wx-mu)', 乙: 'var(--wx-mu)', 丙: 'var(--wx-huo)', 丁: 'var(--wx-huo)',
-                    戊: 'var(--wx-tu)', 己: 'var(--wx-tu)', 庚: 'var(--wx-jin)', 辛: 'var(--wx-jin)',
-                    壬: 'var(--wx-shui)', 癸: 'var(--wx-shui)' };
-  /** 地支五行色 */
-  var ZHI_COLOR = { 子: 'var(--wx-shui)', 丑: 'var(--wx-tu)', 寅: 'var(--wx-mu)', 卯: 'var(--wx-mu)',
-                    辰: 'var(--wx-tu)', 巳: 'var(--wx-huo)', 午: 'var(--wx-huo)', 未: 'var(--wx-tu)',
-                    申: 'var(--wx-jin)', 酉: 'var(--wx-jin)', 戌: 'var(--wx-tu)', 亥: 'var(--wx-shui)' };
-
   var dec = function (s) { return String(s == null ? '' : s); };
-  var ganSpan = function (g) { return '<font style="color:' + (GAN_COLOR[g] || 'var(--c-text)') + '">' + g + '</font>'; };
-  var zhiSpan = function (z) { return '<font style="color:' + (ZHI_COLOR[z] || 'var(--c-text)') + '">' + z + '</font>'; };
+  /* 五行着色统一走 QM.wxSpan(qimen_constants.js 的单字表), 不再各模块自备色表 ——
+     否则同一干支在不同盘里出现色差。保留这两个别名只为调用处读起来清楚。 */
+  var wx = function (s) { return (window.QM && QM.wxSpan) ? QM.wxSpan(s) : dec(s); };
+  var ganSpan = wx, zhiSpan = wx;
 
   /** 某一柱的旬空: 旬空偏移 = 10 - (干序+1), 与地支序相加取模(旬空 = 10-(干序+1) 与地支序相加取模) */
   function xunKongOf(gz) {
@@ -208,17 +201,17 @@
       h += '<TR><TD style="width:16%;color:var(--c-gold)">出生</TD>' +
            '<TD colspan="4" id="datetime">' + birthYmd + '(' + qr.nongli + ')</TD></TR>';
       h += '<TR><TD style="color:var(--c-gold)">节气</TD>' +
-           '<TD colspan="2">' + qr.jieqi + '&nbsp;&nbsp;&nbsp;月将<B>' + data.yueJiang + '</B></TD>' +
+           '<TD colspan="2">' + qr.jieqi + '&nbsp;&nbsp;&nbsp;月将<B>' + wx(data.yueJiang) + '</B></TD>' +
            '<TD colspan="2">' + qr.juLabel.replace(/^(\D+)/, '$1<B>').replace(/(\d+)$/, '$1</B>') + '</TD></TR>';
       /* 旬首/值符/值使/马星/空亡: 小标签内联在值上方, 省掉纯标题行 */
       // 旬首显示为「旬首+遁干」(格式: 甲子戊), 六甲遁于六仪
       var XUN_DUN = { 子: '戊', 戌: '己', 申: '庚', 午: '辛', 辰: '壬', 寅: '癸' };
       var xunShouTxt = dec(qr.xs.gz) + (XUN_DUN[dec(qr.xs.gz)[1]] || '');
-      h += '<TR class="hd-row"><TD id="xunShou"><span class="hd-lbl">旬首</span>' + xunShouTxt + '</TD>' +
+      h += '<TR class="hd-row"><TD id="xunShou"><span class="hd-lbl">旬首</span>' + wx(xunShouTxt) + '</TD>' +
            '<TD><span class="hd-lbl">值符</span>天<font id="zhiFu">' + qr.zf.s + '</font></TD>' +
            '<TD><span class="hd-lbl">值使</span><font id="zhiShi">' + qr.zs.s + '</font>门</TD>' +
-           '<TD id="maXing"><span class="hd-lbl">马星</span>' + qr.ma.z + '</TD>' +
-           '<TD><span class="hd-lbl">空亡</span>' + qr.kw.gz + '</TD></TR>';
+           '<TD id="maXing"><span class="hd-lbl">马星</span>' + wx(qr.ma.z) + '</TD>' +
+           '<TD><span class="hd-lbl">空亡</span>' + wx(qr.kw.gz) + '</TD></TR>';
       /* 四柱: 只显示干支本身, 字号加大加粗(不标注年柱/月柱/日柱/时柱) */
       h += '<TR id="sizhu" class="hd-row"><TD class="hd-side">四柱</TD>';
       [sz.nian, sz.yue, sz.ri, sz.shi].forEach(function (gz) {
