@@ -28,8 +28,8 @@ cat > www/index.html << 'HTMLEOF'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
-<script>window.location.replace('qimen_app/yinpan_standalone.html');</script>
+<meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html">
+<script>window.location.replace('qimen_app/yinpan.html');</script>
 </head>
 <body></body>
 </html>
@@ -40,7 +40,7 @@ cp qimen_app/css/yinpan_app.css www/qimen_app/css/
 cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
 cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
 cp qimen_app/js/qimen_bundle.min.js www/qimen_app/js/
-cp qimen_app/yinpan_standalone.html www/qimen_app/
+cp qimen_app/yinpan.html www/qimen_app/
 
 # 3. 初始化 Android 平台（首次）
 if [ ! -d "android" ]; then

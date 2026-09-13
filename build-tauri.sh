@@ -8,7 +8,7 @@ rm -rf web
 mkdir -p web/qimen_app/css web/qimen_app/js
 
 # qimen_app 文件
-cp qimen_app/yinpan_standalone.html web/qimen_app/
+cp qimen_app/yinpan.html web/qimen_app/
 cp qimen_app/css/yinpan_app.css web/qimen_app/css/
 # 打包 4 个自有 JS 为单一 bundle(与 CI Setup frontend 一致, HTML 只引用 bundle)
 npm run build:bundle
@@ -19,7 +19,7 @@ cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
 
 # 入口页
 cat > web/index.html << 'HTMLEOF'
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html"><script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html"><script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
 HTMLEOF
 
 echo "=== Tauri 编译 ==="

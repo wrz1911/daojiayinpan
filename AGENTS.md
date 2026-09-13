@@ -7,9 +7,9 @@
 
 - 路径 `/home/wrz/文档/奇门排盘`,作者 地天泰,仓库 github.com/wrz1911/daojiayinpan
 - 五种盘型:1=时盘 2=刻盘 3=心盘 4=山向 5=穿壬;纯 HTML+JS 前端,Tauri 2 桌面 + Capacitor Android,当前版本 **1.3.10**(Android versionCode 10310)
-- 前端:qimen_app/yinpan_standalone.html + css/yinpan_app.css + 4 个自有 IIFE JS(qimen_constants.js 112 行 / qimen_engine_min.js 475 行 / qimen_chuanren.js 617 行 / **yinpan_app.js 2800+ 行**)由 scripts/build_bundle.sh(cat 拼接 + esbuild --minify --target=es2017)合成 qimen_bundle.min.js(~149KB);tyme4j-browser.js 日历库;gong_detail_data.js(258KB 宫位详解)懒加载
+- 前端:qimen_app/yinpan.html + css/yinpan_app.css + 4 个自有 IIFE JS(qimen_constants.js 112 行 / qimen_engine_min.js 475 行 / qimen_chuanren.js 617 行 / **yinpan_app.js 2800+ 行**)由 scripts/build_bundle.sh(cat 拼接 + esbuild --minify --target=es2017)合成 qimen_bundle.min.js(~149KB);tyme4j-browser.js 日历库;gong_detail_data.js(258KB 宫位详解)懒加载
 - **yinpan_app IIFE 是 strict 模式——未声明赋值必抛 ReferenceError,历史踩过 4 次同类雷(h/ag/agColor/fw,均被 catch 吞掉表现为功能无反应)。ESLint(eslint.config.js,no-undef/no-redeclare error 级)已设防,0 errors;44 个 no-unused-vars warning 是历史遗留未清理。**注意 `npx eslint .` 会因 tyme4j/ 子目录的 eslint.config.mjs 缺 typescript-eslint 而崩,必须用 `npx eslint qimen_app/js/*.js`**
-- 网页版:gh-pages 部署 https://wrz1911.github.io/daojiayinpan/(CI release job 构建 bundle 后由 peaceiris/actions-gh-pages 部署,与 exe 直链共存;根 index.html 重定向到 qimen_app/yinpan_standalone.html)
+- 网页版:gh-pages 部署 https://wrz1911.github.io/daojiayinpan/(CI release job 构建 bundle 后由 peaceiris/actions-gh-pages 部署,与 exe 直链共存;根 index.html 重定向到 qimen_app/yinpan.html)
 
 ## 构建与发布流程
 

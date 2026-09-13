@@ -40,8 +40,8 @@ jobs:
           mkdir -p web/qimen_app/css web/qimen_app/js
           cat > web/index.html << 'EOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
-          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html">
+          <script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
           EOF
           cp qimen_app/css/yinpan_app.css web/qimen_app/css/
           npm install --legacy-peer-deps >/dev/null 2>&1
@@ -49,7 +49,7 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
-          cp qimen_app/yinpan_standalone.html web/qimen_app/
+          cp qimen_app/yinpan.html web/qimen_app/
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -93,11 +93,11 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
-          cp qimen_app/yinpan_standalone.html web/qimen_app/
+          cp qimen_app/yinpan.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
-          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html">
+          <script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
           HTMLEOF
 
       - uses: dtolnay/rust-toolchain@stable
@@ -142,11 +142,11 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
-          cp qimen_app/yinpan_standalone.html web/qimen_app/
+          cp qimen_app/yinpan.html web/qimen_app/
           cat > web/index.html << 'HTMLEOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
-          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html">
+          <script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
           HTMLEOF
 
       - uses: dtolnay/rust-toolchain@stable
@@ -201,8 +201,8 @@ jobs:
           mkdir -p www/qimen_app/css www/qimen_app/js
           cat > www/index.html << 'EOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
-          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html">
+          <script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
           EOF
           cp qimen_app/css/yinpan_app.css www/qimen_app/css/
           npm install --no-save --legacy-peer-deps esbuild >/dev/null 2>&1
@@ -210,7 +210,7 @@ jobs:
           cp qimen_app/js/qimen_bundle.min.js www/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js www/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
-          cp qimen_app/yinpan_standalone.html www/qimen_app/
+          cp qimen_app/yinpan.html www/qimen_app/
 
       - name: Init Capacitor
         run: |
@@ -372,10 +372,10 @@ jobs:
           # 网页版排盘(零安装): 入口重定向到 standalone 页
           cat > pages/index.html << 'EOF'
           <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan_standalone.html">
-          <script>window.location.replace('qimen_app/yinpan_standalone.html');</script></head><body></body></html>
+          <meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html">
+          <script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
           EOF
-          cp qimen_app/yinpan_standalone.html pages/qimen_app/
+          cp qimen_app/yinpan.html pages/qimen_app/
           cp qimen_app/css/yinpan_app.css pages/qimen_app/css/
           cp qimen_app/js/qimen_bundle.min.js pages/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js pages/qimen_app/js/
