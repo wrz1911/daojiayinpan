@@ -2651,6 +2651,8 @@ function doMingli(){
     if(window.mingliYun) window.mingliYun(data.yunIdx||0, data);
     _renderBottomBar();
     setTimeout(_bindActionButtons,50);
+    // 宫位正方形 + 外圈行高同步 + 阴干对齐(照时盘/山向)
+    setTimeout(function(){ if(window.mingliFixLayout) window.mingliFixLayout(); },60);
   }catch(e){
     let pw=document.getElementById("panWrap");
     if(pw)pw.innerHTML='<span style="color:red">命理错误:'+(e&&e.message)+'</span>';

@@ -238,7 +238,12 @@
         }
         if (window.recalcColors) window.recalcColors(pals);
         var csFn = window._colorSpan || function (v) { return v || ''; };
-        var agFn = function () { return ''; };
+        /* 阴干: 照时盘的做法, 取本宫 anGan 并着色(入墓/击刑用同一套标记) */
+        var agFn = function (g) {
+          var p2 = pals['gong' + g];
+          var ag = p2 ? p2.anGan : '';
+          return ag ? (window._anGanColor ? window._anGanColor(ag, g) : ag) : '';
+        };
         // 不传 wrapperClass/panClass, 让 buildPaipanGrid 生成与热卜一致的
         // <div id="content"> 与 <TABLE id="pan">
         h += window.buildPaipanGrid(pals, kongGongs, (qr.ma && qr.ma.p) || 'ma2', agFn,
@@ -307,6 +312,50 @@
       if (el) el.innerHTML = h;
     }
     return h;
+  };
+
+  /** 命理盘渲染后处理: 宫位正方形 + 左右行高同步 + 阴干对齐(照时盘/山向) */
+  window.mingliFixLayout = function () {
+    var wrap = document.getElementById('panWrap');
+    if (!wrap) return;
+    var box = wrap.querySelector('#content');
+    if (!box) return;
+    /* 宫位正方形 */
+    [4, 9, 2, 3, 7, 8, 1, 6].forEach(function (g) {
+      var el = box.querySelector('#gong' + g);
+      if (el) { var w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
+    });
+    /* 左右外圈行高与中宫对齐 */
+    var pRows = box.querySelectorAll('#pan tr'),
+        lRows = box.querySelectorAll('#leftTable tr'),
+        rRows = box.querySelectorAll('#rightTable tr');
+    for (var i = 0; i < 3 && i < pRows.length; i++) {
+      var rh = pRows[i].getBoundingClientRect().height;
+      if (rh > 0) {
+        if (lRows[i]) lRows[i].style.height = rh + 'px';
+        if (rRows[i]) rRows[i].style.height = rh + 'px';
+      }
+    }
+    /* 阴干对齐: 左列(4/3/8)贴天盘干, 右列(2/7/6)贴九星 */
+    [4, 3, 8].forEach(function (g) {
+      var y = box.querySelector('#yinGan' + g), t = box.querySelector('#tian' + g), go = box.querySelector('#gong' + g);
+      if (y && t && go) {
+        y.style.paddingTop = Math.max(0, t.getBoundingClientRect().top - go.getBoundingClientRect().top) + 'px';
+        y.style.textAlign = 'right';
+      }
+      if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = '15px'; y.style.lineHeight = '25px'; y.style.color = 'var(--c-text)'; }
+    });
+    [2, 7, 6].forEach(function (g) {
+      var y = box.querySelector('#yinGan' + g), x = box.querySelector('#xing' + g), go = box.querySelector('#gong' + g);
+      if (y && x && go) {
+        y.style.paddingTop = Math.max(0, x.getBoundingClientRect().top - go.getBoundingClientRect().top) + 'px';
+        y.style.textAlign = 'left';
+      }
+      if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = '15px'; y.style.lineHeight = '25px'; y.style.color = 'var(--c-text)'; }
+    });
+    var y9 = box.querySelector('#yinGan9'), y1 = box.querySelector('#yinGan1');
+    if (y9) { y9.style.verticalAlign = 'bottom'; y9.style.fontSize = '15px'; y9.style.color = 'var(--c-text)'; }
+    if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = '15px'; y1.style.color = 'var(--c-text)'; }
   };
 
   /** 移星换斗(占位: 保持与热卜一致的按钮结构, 功能待补) */
