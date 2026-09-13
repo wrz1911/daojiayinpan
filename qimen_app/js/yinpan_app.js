@@ -983,6 +983,86 @@ const JK_HELP = {
   ]
 };
 
+/* ══════ 金口诀 · 神煞（移植自漫步者配套软件 shsha.js，起例表照搬） ══════
+   按来源分五类：月令 / 季节 / 年支 / 日支 / 旬。
+   再按四位落位：人元位只取天干神煞(shen10)，地分位只取地支神煞(shen12)，
+   贵神/将神位干支皆取 —— 即界面上的 人煞 / 贵煞 / 将煞 / 地煞。
+   入参: yue=月支索引, gzDay=日干支序(0-59), gan/zhi=四柱干支索引数组(1=年..4=时),
+         kg/kz=四位(1人元 2贵神 3将神 4地分)的干/支索引 */
+function jinkoujueShenSha(yue, gzDay, gan, zhi, kg, kz) {
+  const s12 = new Array(12).fill(''), s10 = new Array(10).fill('');
+  const add = (arr, i, name) => { if (i >= 0 && i < arr.length) arr[i] += ' ' + name; };
+  let T;
+
+  // ── 月令 ──
+  T = [3,6,8,7,8,0,9,0,2,1,2,6];        add(s10, T[yue], '天德');
+  T = [8,1,3,2,3,5,4,5,7,6,7,1];        add(s10, T[yue], '天德合');
+  T = [7,5,3,1,7,5,3,1,7,5,3,1];        add(s10, T[yue], '月德合');
+  T = [2,0,8,6,2,0,8,6,2,0,8,6];        add(s10, T[yue], '月德');
+  T = [11,5,8,11,3,6,9,7,4,7,10,1];     add(s12, T[yue], '往亡');
+  T = [10,5,6,7,8,9,4,11,0,1,2,3];      add(s12, T[yue], '飞廉');
+  add(s12, yue % 6, '生气');
+  add(s12, yue % 6 + 6, '死气');
+  add(s12, (yue + 10) % 12, '天医');
+  add(s12, (yue + 4) % 12, '地医');
+  T = [6,8,10,0,2,4,6,8,10,0,2,4];      add(s12, T[yue], '天马');
+  T = [11,6,1,8,3,10,5,0,7,2,9,4];      add(s12, T[yue], '灭门');
+
+  // ── 季节(以月支定) ──
+  const ji4 = Math.floor(((zhi[2] + 1) % 12) / 3);
+  T = [7,10,1,4];
+  add(s12, T[ji4], '天喜'); add(s12, T[ji4] + 1, '天喜'); add(s12, (T[ji4] + 2) % 12, '天喜');
+  T = [6,9,0,3];   add(s12, T[ji4], '丧车');
+  T = [10,1,4,7];  add(s12, T[ji4], '三丘');
+  T = [4,7,10,1];  add(s12, T[ji4], '四墓');
+  T = [0,9,6,3];   add(s12, T[ji4], '天鬼');
+
+  // ── 年支 ──
+  add(s12, (zhi[1] + 2) % 12, '吊客');
+  add(s12, (zhi[1] + 10) % 12, '丧门');
+  add(s12, (zhi[1] + 1) % 12, '病符');
+  add(s12, (16 - zhi[1]) % 12, '被头');
+  T = [3,4,6,7,6,7,9,10,0,1];           add(s12, T[gan[1]], '禄倒');
+  T = [3,0,9,6,3,0,9,6,3,0,9,6];        add(s12, T[zhi[1]], '马倒');
+
+  // ── 日支 ──
+  T = [5,2,11,8,5,2,11,8,5,2,11,8];     // 劫煞: 申子辰日在巳
+  add(s12, T[zhi[3]], '劫煞');
+  add(s12, T[(zhi[3] + 5) % 12], '地煞');      // 劫煞前五辰
+  add(s12, T[(zhi[3] + 6) % 12], '望门');
+  add(s12, [2,11,8,5][zhi[3] % 4], '日马');
+  add(s12, (zhi[3] + 1) % 12, '天罗');
+  add(s12, (zhi[3] + 7) % 12, '地网');
+  T = [5,2,0,10,8,6,3,1,11,7];          add(s12, T[gan[3]], '五鬼');
+  T = [8,6,4,2,0,8,6,4,2,0];            add(s12, T[gan[3]], '截命');
+  T = [9,7,5,3,1,9,7,5,3,1];
+  add(s12, T[gan[3]] - 1, '截路'); add(s12, T[gan[3]], '截路');
+  T = [5,6,3,2,1,6,7,8,9,10];           add(s12, T[gan[3]], '飞符');
+
+  // ── 旬 ──
+  const xun = Math.floor((gzDay % 60) / 10);
+  const sk = [5,6,4,5,6,4][xun];
+  if (sk === 5) { add(s12,11,'四空'); add(s12,0,'四空'); add(s10,9,'四空'); add(s10,8,'四空'); }
+  if (sk === 4) { add(s12,8,'四空'); add(s12,9,'四空'); add(s10,6,'四空'); add(s10,7,'四空'); }
+  T = [10,8,6,4,2,0];
+  add(s12, T[xun], '旬空'); add(s12, T[xun] + 1, '旬空');
+
+  // ── 按四位落位 ──
+  const shensh4 = ['', '', '', '', ''];
+  shensh4[1] = s10[kg[1]] || '';
+  shensh4[4] = s12[kz[4]] || '';
+  for (let i = 2; i < 4; i++) {
+    shensh4[i] = (s10[kg[i]] || '') + (s12[kz[i]] || '');
+    if (kg[i] === [0,4,0,4][ji4] && kz[i] === [0,4,0,4][ji4 + 4]) shensh4[i] += ' 天赦';
+  }
+  if (kg[1] === [0,4,0,4][ji4] && kz[4] === [0,4,0,4][ji4 + 4]) shensh4[4] += ' 天赦';
+  for (let i = 1; i <= 4; i++) shensh4[i] = shensh4[i].trim();
+
+  const sish = sk === 5 ? '亥子壬癸' : sk === 4 ? '申酉庚辛' : '';
+  return { shen10: s10, shen12: s12, shensh4, sish };
+}
+window.jinkoujueShenSha = jinkoujueShenSha;
+
 /* ══════ 金口诀 · 面板（仿"向角度选局"，内嵌在 #result 里） ══════ */
 let _jkShow = false, _jkDifen = null, _jkDayNight = 0, _jkJiang = 1;   // 默认交节(月建六合), 讲义体系的实际用法
 function _jkSet(opt) {
@@ -1054,7 +1134,20 @@ function toggleJinKouJue(noScroll) {
       '<span>昼夜 ' + sel('jkDay', _jkDayNight, [[0,'自动'],[1,'昼'],[2,'夜']], '_jkSet({dayNight:parseInt(this.value)})') + '</span>' +
       '<span>换将 ' + sel('jkJiang', _jkJiang, [[1,'交节'],[0,'中气']], '_jkSet({jiang:parseInt(this.value)})') + '</span>' +
       '</div>';
-    div.innerHTML = head + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px">' + cells + '</div>';
+    const ss = chart.shensha || {};
+    const line = (label, val) => '<div style="display:flex;gap:8px;padding:2px 0;font-size:13px;line-height:1.75">' +
+      '<span style="flex:0 0 68px;color:var(--c-theme);font-weight:bold">' + label + '</span>' +
+      '<span style="flex:1;word-break:break-all">' + (val || '—') + '</span></div>';
+    const info = '<div style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
+      line('四大空亡', ss.sish ? ss.sish + '（' + (chart.cur && ss.sish ? '此旬' : '') + '空）' : '无') +
+      line('人煞', ss.shensh4 && ss.shensh4[1]) +
+      line('贵煞', ss.shensh4 && ss.shensh4[2]) +
+      line('将煞', ss.shensh4 && ss.shensh4[3]) +
+      line('地煞', ss.shensh4 && ss.shensh4[4]) +
+      line('五动', chart.wudong.length ? chart.wudong.join('　') : '') +
+      line('三动', chart.sandong.length ? chart.sandong.join('　') : '') +
+      '</div>';
+    div.innerHTML = head + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px">' + cells + '</div>' + info;
     div.style.display = 'block';
     if (!noScroll) setTimeout(() => { const r = document.getElementById('jinkoujueDIV'); if (r) r.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
   } catch (e) {
@@ -1663,7 +1756,7 @@ function jinkoujueChart(opt) {
     const gsGan = QM.GAN[_jkDun(dG, gsZ)];
     const rgGan = QM.GAN[rgIdx];
     houses.push({
-      difenIdx: df, difenZhi: QM.ZHI[df],
+      difenIdx: df, difenZhi: QM.ZHI[df], difenGan: QM.GAN[_jkDun(dG, df)], jiangZhiIdx: jsZ,
       renYuan: rgGan, renWx: QM.WX_MAP[rgGan],
       renWs: _jkWangShuai(QM.WX_MAP[rgGan], mZ),
       guiShen: JK_GUISHEN[gsIdx],
@@ -1696,8 +1789,21 @@ function jinkoujueChart(opt) {
   if (_jkSheng(dWx, rWx)) sandong.push('父母动');
   if (rWx === dWx) sandong.push('兄弟动');
 
+  // 神煞（按四位落位）
+  const ganIdx = [0, yGzO.getHeavenStem().getIndex(), mGzO.getHeavenStem().getIndex(),
+                  dGzO.getHeavenStem().getIndex(), hGzO.getHeavenStem().getIndex()];
+  const zhiIdx = [0, yGzO.getEarthBranch().getIndex(), mGzO.getEarthBranch().getIndex(),
+                  dGzO.getEarthBranch().getIndex(), hGzO.getEarthBranch().getIndex()];
+  const kgIdx = [0, QM.GAN.indexOf(cur.renYuan), QM.GAN.indexOf(cur.guiGanZhi[0]),
+                 QM.GAN.indexOf(cur.jiangGanZhi[0]), QM.GAN.indexOf(cur.difenGan)];
+  // 四位的地支: 人元位不取地支, 贵神位取【本位支】(源码 zhi2 存的就是本位),
+  //            将神位取将神所乘支, 地分位取地分支
+  const kzIdx = [0, cur.difenIdx, QM.ZHI.indexOf(cur.guiGanZhi[1]), cur.jiangZhiIdx, cur.difenIdx];
+  const ss = jinkoujueShenSha(mZ, dGzO.getIndex(), ganIdx, zhiIdx, kgIdx, kzIdx);
+
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
+    shensha: ss,
     yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ],
     dayNight: isDay ? '昼' : '夜',
     guiRenZhi: QM.ZHI[grZ], guiRenDir: dir === 1 ? '顺' : '逆',
