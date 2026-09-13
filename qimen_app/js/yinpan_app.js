@@ -1166,7 +1166,7 @@ function _jkCenter(chart) {
   // 上下居中, 不留下方空白
   return '<div style="height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden">' +
     '<div style="width:100%;display:flex;flex-direction:column;gap:0;padding:2px;' +
-    'font-size:clamp(9.5px,3.35vw,13.5px);line-height:1.35;box-sizing:border-box">' +
+    'font-size:var(--jk-fs,13px);line-height:1.35;box-sizing:border-box">' +
     row('<span class="' + wxCls(c.renYuan) + '">人元</span>',
         '<span class="' + wxCls(c.renYuan) + '">' + c.renYuan + '</span>', c.renWs,
         [kongMark(c.renYuan)].concat(sishMarks(c.renYuan))) +
@@ -1234,7 +1234,7 @@ function toggleJinKouJue(noScroll) {
   if (!noScroll && div.style.display === 'block') {
     div.style.display = 'none'; div.innerHTML = ''; _jkShow = false; _syncToggleBtns(); return;
   }
-  _jkShow = true; _syncToggleBtns();
+  _jkShow = true; _syncToggleBtns(); _jkFitFont();
   try {
     const chart = jinkoujueChart(_jkOpts());
     if (!chart) throw new Error('起课失败');
@@ -1332,7 +1332,7 @@ function toggleJinKouJue(noScroll) {
     const inLab = t => '<span style="color:var(--c-gold);white-space:nowrap;margin-right:4px">' + t + '</span>';
     const inputArea = '<table style="width:100%;border:1px solid var(--c-border);border-radius:4px;' +
       'border-collapse:collapse;table-layout:fixed;margin:8px 0 2px;' +
-      'font-size:clamp(9.5px,3.05vw,13px)">' +
+      'font-size:var(--jk-if,12px)">' +
       '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})'), 2) +
               tdLh('月将') + tdVh(jzSel) +
               tdLh('换将') + tdVh(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj'), 2) + '</tr>' +
@@ -1957,6 +1957,22 @@ function _jkYongwei(kz4) {
   return 3;                                           // 纯阴、二阴二阳 → 将为用
 }
 window._jkYongwei = _jkYongwei;
+/* 自适应字号 —— 不用 clamp()/vw: 部分 Android System WebView 版本不支持 clamp,
+   整条声明会失效并退回默认 16px, 导致中宫挤成一团(桌面浏览器正常)。
+   这里用 JS 按视口宽度算出像素值写进 CSS 变量, 所有环境表现一致。 */
+function _jkFitFont() {
+  try {
+    const w = document.documentElement.clientWidth || window.innerWidth || 400;
+    const cl = (lo, hi, v) => Math.max(lo, Math.min(hi, v));
+    document.documentElement.style.setProperty('--jk-fs', cl(9.5, 13.5, w * 0.0335).toFixed(1) + 'px');   // 中宫
+    document.documentElement.style.setProperty('--jk-if', cl(9.5, 13, w * 0.0305).toFixed(1) + 'px');     // 输入区
+  } catch (e) { _logErr('jkFitFont', e && e.message); }
+}
+window._jkFitFont = _jkFitFont;
+_jkFitFont();
+window.addEventListener('resize', _jkFitFont);
+window.addEventListener('orientationchange', _jkFitFont);
+
 
 function jinkoujueChart(opt) {
   const tyme = window.tyme || {};
