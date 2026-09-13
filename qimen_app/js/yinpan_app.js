@@ -1334,19 +1334,24 @@ function toggleJinKouJue(noScroll) {
     const isJiaDay = (chart.siZhu[2] || '').charAt(0) === '甲';
     const grHint = isJiaDay ? '甲日·两法互换' : '本日' + (chart.siZhu[2] || '').charAt(0) + '·两法同';
     const inLab = t => '<span style="color:var(--c-gold);white-space:nowrap;margin-right:4px">' + t + '</span>';
-    const inputArea = '<table style="width:100%;border:1px solid var(--c-border);border-radius:4px;' +
-      'border-collapse:collapse;table-layout:fixed;margin:8px 0 2px;' +
+    // 输入区: 流式布局 —— 每组是独立小块, 浏览器按可用宽度自动排列换行,
+    // 组内标签与控件紧贴, 组间均留统一间距, 窄屏自然折行而不裁切
+    const grp = (label, body) => '<span style="display:inline-flex;align-items:center;gap:4px;' +
+      'white-space:nowrap">' + (label ? inLab(label) : '') + body + '</span>';
+    const inputArea = '<div style="display:flex;flex-wrap:wrap;align-items:center;' +
+      'gap:8px 18px;padding:9px 10px;margin:8px 0 2px;' +
+      'border:1px solid var(--c-border);border-radius:6px;' +
       'font-size:var(--jk-if,12px)">' +
-      '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})'), 3) + '</tr>' +
-      '<tr>' + tdLh('月将') + tdVh(jzSel) +
-              tdLh('换将') + tdVh(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj'), 2) + '</tr>' +
-      '<tr>' + tdLh('贵神') + tdVh(radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
-              radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
-              radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn'), 3) + '</tr>' +
-      '<tr>' + tdLh('贵人') + tdVh(radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
-              radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
-              '<span style="font-size:0.9em;color:var(--c-text-4);margin-left:5px">' + grHint + '</span>', 3) + '</tr>' +
-      '</table>';
+        grp('地分', dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})')) +
+        grp('月将', jzSel) +
+        grp('换将', radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj')) +
+        grp('贵神', radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') +
+                   radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') +
+                   radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn')) +
+        grp('贵人', radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') +
+                   radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr') +
+                   '<span style="font-size:0.9em;color:var(--c-text-4)">' + grHint + '</span>') +
+      '</div>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
     div.innerHTML = infoTbl + inputArea +
       // 外圈(第1/4列行)收窄, 中间(第2/3列行)放宽 —— 十二宫变小, 中宫随之变大
