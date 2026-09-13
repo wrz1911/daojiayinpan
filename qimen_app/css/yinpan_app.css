@@ -351,3 +351,10 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
   #headTable .shenShaTd,#headTable .ssDiv{font-size:12px;line-height:17px}
   #headTable #jiaoYun{font-size:12px;line-height:19px}
 }
+
+/* 颜色说明行(主盘内, 交运之前): 居中; 交运同样居中 —— 两行视觉对齐 */
+#headTable .bz-tip{text-align:center;font-size:13px;line-height:22px;color:var(--c-text-3);padding:4px 6px}
+#headTable #jiaoYun{text-align:center}
+@media (max-width:520px){
+  #headTable .bz-tip{font-size:12px;line-height:20px;padding:3px 4px}
+}

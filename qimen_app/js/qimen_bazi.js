@@ -300,7 +300,7 @@
   function hourText(h) { return ZHI[Math.floor(((h + 1) % 24) / 2)]; }
 
   /* 十神/藏干/纳音/地势/自坐/空亡/神煞/胎元命宫身宫/旺相/交运 —— 命理主盘与本模块共用 */
-  function baziMainRows(bz, withGz, rowCls) {
+  function baziMainRows(bz, withGz, rowCls, tipHtml) {
     var h = '';
     var rc = rowCls ? ' class="' + rowCls + '"' : '';
     /* 十神 */
@@ -348,6 +348,8 @@
          '<TD class="gong">' + bz.mingGong + '<br><font>' + bz.mingGongNaYin + '</font></TD>' +
          '<TD class="gong">' + bz.shenGong + '<br><font>' + bz.shenGongNaYin + '</font></TD>' +
          '<TD colspan="2">' + bz.wangXiang + '</TD></TR>';
+    /* 颜色说明(命理主盘把它插在交运之前, 八字盘不传则无此行) */
+    if (tipHtml) h += '<TR' + rc + '><TD colspan="5" class="bz-tip">' + tipHtml + '</TD></TR>';
     /* 交运 */
     var jyDur = bz.jiaoYun.y + '年' + (bz.jiaoYun.m ? bz.jiaoYun.m + '个月' : '') +
                 (bz.jiaoYun.d ? bz.jiaoYun.d + '日' : '');

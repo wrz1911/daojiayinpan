@@ -229,7 +229,9 @@
           hour: window.hr, minute: window.mn,
           name: data.name, gender: data.gender
         }) : null;
-        if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false, 'bz-sec');
+        var tipHtml = '颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、' +
+                      '<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span>';
+        if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false, 'bz-sec', tipHtml);
       } catch (e) {
         if (window._logErr) window._logErr('mingli.baziRows', e && e.message);
       }
@@ -261,9 +263,7 @@
         h += window.buildPaipanGrid(pals, kongGongs, (qr.ma && qr.ma.p) || 'ma2', agFn,
                { colorSpan: csFn });
         // 颜色说明(与穿壬/时盘同一行文案, 用共用 .cx-* 类, 随主题变量走)
-        h += '<div id="Tip">颜色说明：' +
-             '<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、' +
-             '<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span></div>';
+        /* 颜色说明已上移到主盘内(交运之前), 见 baziMainRows 调用处 */
       }
 
       /* ── ③ #dayun_liunian 大运 + 流年(两个独立 TABLE, 照搬热卜) ── */
