@@ -919,6 +919,7 @@ function _syncToggleBtns() {
    长按"金口诀"按钮弹出。据讲义(特训班/提高班)整理,
    起例部分按讲义原文与课例逐条核对过。 */
 const JK_HELP = {
+  toc: true,
   title: '金口诀',
   head: '人元 · 贵神 · 将神 · 地分　（大金口 · 四位断课）',
   blocks: [
@@ -2831,17 +2832,30 @@ function _showHelpDlg(dlgId, DATA) {
       const inner = b.items
         ? b.items.map(item).join('')
         : b.rows.map(x => '<div style="margin:3px 0 3px 11px;text-indent:-11px">· ' + x + '</div>').join('');
-      return '<div style="margin-bottom:' + (bi === DATA.blocks.length - 1 ? '8' : '22') + 'px">'
+      return '<div id="' + dlgId + '-s' + bi + '" style="margin-bottom:' + (bi === DATA.blocks.length - 1 ? '8' : '22') + 'px">'
         + '<div style="font-size:16px;font-weight:bold;color:var(--c-text);border-left:3px solid var(--wx-jin);padding-left:8px;margin-bottom:10px">' + b.t + '</div>'
         + inner + '</div>';
     }).join('');
+    // 目录: DATA.toc 为真时在正文前插入可点击的章节索引
+    let toc = '';
+    if (DATA.toc) {
+      const links = DATA.blocks.map((b, bi) =>
+        '<span onclick="event.stopPropagation();(function(d){var t=document.getElementById(\'' + dlgId + '-s' + bi + '\');' +
+        'if(t)d.scrollTop=t.offsetTop-8;})(this.closest(\'div[style*=overflow-y]\'))" ' +
+        'style="display:inline-block;margin:2px 4px 2px 0;padding:3px 9px;border:1px solid var(--c-border);' +
+        'border-radius:5px;font-size:12.5px;color:var(--c-text);cursor:pointer;white-space:nowrap">' + b.t + '</span>'
+      ).join('');
+      toc = '<div style="margin-bottom:16px;padding:10px;background:var(--c-gray-bg);border-radius:8px">' +
+        '<div style="font-size:13px;font-weight:bold;color:var(--c-gold);margin-bottom:6px">目录</div>' +
+        '<div style="line-height:2">' + links + '</div></div>';
+    }
     const head = '<div style="text-align:center;margin-bottom:16px">'
         + '<div style="font-size:18px;font-weight:bold;color:var(--wx-jin)">' + (DATA.title || '') + '</div>'
         + '<div style="font-size:12px;color:var(--c-text-4);margin-top:4px;line-height:1.7">' + DATA.head + '</div></div>';
     const h = '<div id="' + dlgId + '" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
       + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
       + '<span onclick="event.stopPropagation();document.getElementById(\'' + dlgId + '\').remove()" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
-      + head + body
+      + head + toc + body
       + '</div></div>';
     const holder = document.createElement('div');
     holder.innerHTML = h;
@@ -2850,6 +2864,9 @@ function _showHelpDlg(dlgId, DATA) {
 }
 window.showXuanNvHelp = showXuanNvHelp;
 function showJinKouHelp() { _showHelpDlg('jkHelpDlg', JK_HELP); }
+/* 必须显式挂到 window: 长按绑定走的可能是内联 onclick, 它在全局作用域求值, 
+   IIFE 内的函数声明不可见(此前为消 eslint no-undef 只留了函数声明, 导致全局找不到) */
+window.showJinKouHelp = showJinKouHelp;
 
 function xuanNv16() {
   if (_xnLongPressed) { _xnLongPressed = false; return; }   // 长按已弹说明, 不再切换外盘
