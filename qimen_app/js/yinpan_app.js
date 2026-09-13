@@ -769,12 +769,14 @@ function renderPan(raw, engineData) {
     '<TD><div class="btn" id="btn2" onclick="showState()">长生状态</div></TD>' +
     '<TD><div class="btn"><span onclick="panChange(-1)" id="preBtn">上局</span>|<span onclick="panChange(1)" id="nextBtn">下局</span></div></TD>' +
     '</TR></TABLE>' +
+    // 刻盘用不到年月日时神将(多了刻柱, 神将只按年月日时四支取, 排出来没有意义)
+    (panType===2 ? '' :
     '<TABLE id="btnTable2"><TR>' +
     '<TD><div class="btn" id="btn4" onclick="shen12(1)">年神将</div></TD>' +
     '<TD><div class="btn" id="btn5" onclick="shen12(2)">月神将</div></TD>' +
     '<TD><div class="btn" id="btn6" onclick="shen12(3)">日神将</div></TD>' +
     '<TD><div class="btn" id="btn7" onclick="shen12(4)">时神将</div></TD>' +
-    '</TR></TABLE>' +
+    '</TR></TABLE>') +
     '<div id="yixinghuandouDIV"></div>';
 
   document.getElementById('panWrap').innerHTML = html;
