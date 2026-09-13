@@ -1065,14 +1065,25 @@ window.jinkoujueShenSha = jinkoujueShenSha;
 
 /* ══════ 金口诀 · 面板（仿主盘：宫格连体；点周围十二宫更新中宫） ══════ */
 let _jkShow = false, _jkDifen = -1, _jkDayNight = 0, _jkJiang = 1;   // 默认交节(月建六合)
+let _jkGuiren = 1;   // 贵人求法: 1=甲戊庚牛羊(传统) 2=甲羊戊庚牛
+let _jkDfType = 1;   // 地分取法: 1=下拉 2=报数 3=随机
+let _jkRand = -1;    // 随机到的地分
+function _jkDifenType() { return _jkDfType; }
 function _jkOpts() {
   return { year: window.Y, month: window.M, day: window.D, hour: window.hr, minute: window.mn,
-           difen: _jkDifen >= 0 ? _jkDifen : null, dayNight: _jkDayNight, jiang: _jkJiang };
+           difen: _jkDifen >= 0 ? _jkDifen : null, dayNight: _jkDayNight, jiang: _jkJiang,
+           guiren: _jkGuiren, difenType: _jkDifenType && _jkDifenType() };
 }
 function _jkSet(opt) {
   if (opt.difen !== undefined) _jkDifen = opt.difen;
   if (opt.dayNight !== undefined) _jkDayNight = opt.dayNight;
   if (opt.jiang !== undefined) _jkJiang = opt.jiang;
+  if (opt.guiren !== undefined) _jkGuiren = opt.guiren;
+  if (opt.difenType !== undefined) {
+    _jkDfType = opt.difenType;
+    if (_jkDfType === 2) { const v = prompt('请输入报数'); const n = parseInt(v, 10); if (!isNaN(n)) _jkDifen = ((n % 12) + 12) % 12; }
+    else if (_jkDfType === 3) { _jkDifen = Math.floor(Math.random() * 12); }
+  }
   toggleJinKouJue(true);
 }
 
@@ -1182,19 +1193,42 @@ function toggleJinKouJue(noScroll) {
           'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' + _jkCenter(chart) + '</div>';
       } else { cells += one(byIdx[k]); }
     }
-    const sel = (id, cur, list, fn) => '<select id="' + id + '" onchange="' + fn + '" style="background:var(--c-btn-gray);color:var(--c-text);border:1px solid var(--c-border);border-radius:4px;padding:2px 6px;font-size:13px">' +
-      list.map(o => '<option value="' + o[0] + '"' + (String(o[0]) === String(cur) ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
-    const head = '<div style="padding:8px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px">' +
-      '<b style="color:var(--c-theme)">金口诀</b>' +
-      '<span style="color:var(--c-text-3)">' + chart.siZhu.join(' ') + '</span>' +
+    // ── 输入区：多行单选（照热卜版式） ──
+    const radio = (on, txt, click) =>
+      '<span onclick="' + click + '" style="display:inline-flex;align-items:center;cursor:pointer;margin-left:14px">' +
+        '<i style="width:19px;height:19px;border-radius:50%;display:inline-block;position:relative;' +
+          'border:2px solid ' + (on ? 'var(--c-theme)' : 'var(--c-text-4)') + ';background:' + (on ? 'var(--c-theme)' : 'transparent') + '">' +
+          (on ? '<b style="position:absolute;left:3px;top:-4px;color:#fff;font-size:14px;font-weight:normal">✓</b>' : '') +
+        '</i><span style="margin-left:6px;font-size:15px">' + txt + '</span></span>';
+    const jkRow = (label, right) =>
+      '<div style="display:flex;align-items:center;justify-content:space-between;' +
+      'padding:11px 6px;border-bottom:1px solid var(--c-border)">' +
+      '<span style="font-size:15px;color:var(--c-text-2)">' + label + '</span>' +
+      '<span style="display:flex;align-items:center;white-space:nowrap">' + right + '</span></div>';
+    const dfName = _jkDfType === 1 ? (curIdx >= 0 ? QM.ZHI[curIdx] : '请选择')
+                 : _jkDfType === 2 ? '报数取地分' : ('随机：' + QM.ZHI[curIdx]);
+    const inputArea =
+      jkRow('选择地分',
+        '<span onclick="_jkSet({difen:((_jkDifen<0?curIdx:_jkDifen)+1)%12})" style="cursor:pointer;border:1px solid var(--c-border);border-radius:4px;' +
+          'padding:3px 10px;font-size:15px;min-width:78px;text-align:center">' + dfName + ' ▾</span>' +
+        radio(_jkDfType === 2, '报数', '_jkSet({difenType:2})') +
+        radio(_jkDfType === 3, '随机', '_jkSet({difenType:3})')) +
+      jkRow('换将方式',
+        radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})') +
+        radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})')) +
+      jkRow('贵人求法',
+        radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})') +
+        radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})')) +
+      jkRow('贵神类型',
+        radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})') +
+        radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})') +
+        radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})'));
+    const infoLine = '<div style="display:flex;flex-wrap:wrap;gap:4px 12px;padding:8px 6px;font-size:13px;color:var(--c-text-3)">' +
+      '<span>' + chart.siZhu.join(' ') + '</span>' +
       '<span>月将 <b style="color:var(--c-gold)">' + chart.yueJiang + chart.yueJiangName + '</b></span>' +
-      '<span>贵神起于 <b>' + chart.guiRenZhi + '</b>（' + chart.guiRenDir + '行·' + chart.dayNight + '贵）</span>' +
-      '<span>地分 ' + sel('jkDifen', curIdx, QM.ZHI.map((z,i)=>[i,z]), '_jkSet({difen:parseInt(this.value)})') + '</span>' +
-      '<span>昼夜 ' + sel('jkDay', _jkDayNight, [[0,'自动'],[1,'昼'],[2,'夜']], '_jkSet({dayNight:parseInt(this.value)})') + '</span>' +
-      '<span>换将 ' + sel('jkJiang', _jkJiang, [[1,'交节'],[0,'中气']], '_jkSet({jiang:parseInt(this.value)})') + '</span>' +
-      '</div>';
+      '<span>贵神起于 <b>' + chart.guiRenZhi + '</b>（' + chart.guiRenDir + '行·' + chart.dayNight + '贵）</span></div>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
-    div.innerHTML = head +
+    div.innerHTML = inputArea + infoLine +
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;' +
       'border-top:1px solid var(--c-border);border-left:1px solid var(--c-border)">' + cells + '</div>' +
       '<div id="jkInfo" style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
@@ -1789,10 +1823,12 @@ function jinkoujueChart(opt) {
   const ti = ((tt.getIndex() % 24) + 24) % 24;
   const yueJian = Math.floor((ti - 3) / 2) + 2;
   const jiangZ = opt.jiang === 1 ? QM.HE[((yueJian % 12) + 12) % 12] : QM.HE[Math.floor(ti / 2)];
-  // 昼夜：卯至申为昼、酉至寅为夜(漫步者源码口径 zhi>2 && zhi<9), 与口诀一致
-  const isDay = opt.dayNight === 1 ? true : opt.dayNight === 2 ? false : (hZ > 2 && hZ < 9);
+  // 昼夜：白天/夜晚可手选; 自动时按"卯酉区分"(卯~酉为昼, 热卜口径)
+  const isDay = opt.dayNight === 1 ? true : opt.dayNight === 2 ? false : (hZ >= 3 && hZ <= 9);
   // 贵人：QM.GR_TAB[日干] = [昼贵, 夜贵]
-  const grPair = QM.GR_TAB[QM.GAN[dG]] || [1, 7];
+  // 贵人求法: 1=甲戊庚牛羊(传统) 2=甲羊戊庚牛(甲日昼未夜丑, 戊庚不变)
+  let grPair = QM.GR_TAB[QM.GAN[dG]] || [1, 7];
+  if (opt.guiren === 2 && QM.GAN[dG] === '甲') grPair = [7, 1];
   const grZ = grPair[isDay ? 0 : 1];
   // 顺逆：贵人落地盘 亥子丑寅卯辰 顺行，巳午未申酉戌 逆行
   const dir = [11, 0, 1, 2, 3, 4].indexOf(grZ) >= 0 ? 1 : -1;
