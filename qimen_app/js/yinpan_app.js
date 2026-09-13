@@ -1237,6 +1237,8 @@ function toggleJinKouJue(noScroll) {
       '<tr>' + tdL('四柱', 0, 2) + tdV('年柱') + tdV('月柱') + tdV('日柱') + tdV('时柱') + '</tr>' +
       '<tr>' + (chart.siZhu || []).map(g => tdV(sp(g[0]) + sp(g[1]))).join('') + '</tr>' +
       '<tr>' + tdL('空亡') + (chart.kong4 || []).map(k => tdV(sp(k))).join('') + '</tr>' +
+      '<tr>' + tdL('日空') + tdV(sp(chart.kong4 ? chart.kong4[2] : '')) +
+              tdL('四大空亡') + tdV(chart.shensha && chart.shensha.sish ? sp(chart.shensha.sish) : '无', 2) + '</tr>' +
       '</table>';
 
     // ── 输入区：与信息栏同一套表格样式 ──
