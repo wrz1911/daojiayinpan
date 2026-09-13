@@ -5,6 +5,23 @@ on:
     tags: ['v*']
 
 jobs:
+  # 静态检查: eslint.config.js 把 no-undef / no-redeclare 设为 error 级,
+  # 用于拦截 strict IIFE 下的未声明赋值(历史上踩过 4 次, 均被 catch 吞掉表现为功能无反应)
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install deps
+        run: npm install --legacy-peer-deps
+
+      - name: ESLint
+        run: npx eslint qimen_app/js/*.js
+
   windows:
     runs-on: windows-latest
     steps:

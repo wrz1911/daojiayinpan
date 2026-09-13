@@ -8,21 +8,11 @@ const _global = typeof globalThis !== 'undefined' ? globalThis : window;
 function _t() { return _global.tyme4j || window.tyme || {}; }
 
 // ====== 引擎常量: 统一引用 qimen_constants.js 的 window.QM ======
-const { GAN, ZHI, GAN6, MEN, XING, SHEN_Y, SHEN_A, ZHUAN, FZHUAN, YIMA, ZHI2G, SG_MAP, HE, STN, MNM, DNM, KE_Y, KE_N, XING_G, MU_G, MEN_PO, MP, TMS, DHS } = window.QM;
+const { GAN, ZHI, GAN6, MEN, XING, SHEN_Y, SHEN_A, ZHUAN, FZHUAN, YIMA, ZHI2G, SG_MAP, HE, STN, MNM, DNM, XING_G, MU_G, MEN_PO, MP, TMS, DHS } = window.QM;
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 const zi = s => ZHI.indexOf(s)
 
-function getKeGan(dayStem, hourBranch, keZhi) {
-  const sgjs0 = SG_MAP[dayStem] || 0;
-  let shiGanI = sgjs0 + ZHI.indexOf(hourBranch) + 1;
-  if (shiGanI > 10) shiGanI -= 10;
-  const shiGanC = GAN[shiGanI - 1];
-  const sgjs = SG_MAP[shiGanC] || 0;
-  let kg = sgjs + keZhi + 1;
-  if (kg > 10) kg -= 10;
-  return kg - 1;
-}
 
 function qimenChart(opts) {
   const { year, month, day, hour, minute = 0, panType = 1, customJu } = opts;

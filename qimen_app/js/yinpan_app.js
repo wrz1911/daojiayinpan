@@ -559,7 +559,6 @@ function renderPan(raw, engineData) {
   // 去掉月将和局数(类型行单独显示)，只保留节气名+时间
   jieqi = jieqi.replace(/\s*月将:\S+/, '').replace(/\s*[阴阳]遁\d+局/, '') + jqTimeStr;
 
-  let jieqiParts = jieqi.split('～');
   let yueJiang = (jieqi.match(/月将:(\S+)/) || ['',''])[1] || (raw.match(/月将:(\S+)/) || ['',''])[1] || '';
   let juStr = (raw.match(/([阴阳])遁(\d+)局/) || ['','','']);
   let isYin = juStr[1] === '阴';
@@ -710,35 +709,6 @@ function renderPan(raw, engineData) {
   if (kongWang.length >= 2) {
     kongGongs[ZHI2G[kongWang[0]]] = true;
     kongGongs[ZHI2G[kongWang[1]]] = true;
-  }
-  function renderPalace(g) {
-    let p = palaces['gong'+g];
-    if (!p) return '<TD></TD>';
-    let w = (g === 9 || g === 1) ? '34%' : '33%';
-    let shenAbbr = SHEN_ABBR[p.shen] || p.shen;
-    let xingAbbr = XING_ABBR[p.xing] || p.xing;
-    let menAbbr = MEN_ABBR[p.men] || p.men;
-    let kongMark = kongGongs[g] ? '○' : '';
-    function spanGan(ch) {
-      // XM_RULES ≡ XING∩MU, 故 isX||isXM / isM||isXM 委托共用函数与原优先级等价
-      let isM = MU_RULES[g] && MU_RULES[g].indexOf(ch) >= 0;
-      let isX = XING_RULES[g] && XING_RULES[g].indexOf(ch) >= 0;
-      let isXM = XM_RULES[g] && XM_RULES[g].indexOf(ch) >= 0;
-      return window._siHaiSpan(ch, isX || isXM, isM || isXM);
-    }
-    function charColor(str) {
-      if (!str) return '';
-      let r = ''; for(let ci = 0; ci < str.length; ci++) r += spanGan(str[ci]);
-      return r;
-    }
-    return '<TD style="width:'+w+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
-      '<div style="display:grid;grid-template-rows:1fr 1fr 1fr;height:100%;position:relative">' +
-      '<div class="panItem top" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span><span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
-      '<div class="panItem" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span><span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
-      '<div class="panItem" style="align-self:end"><span id="di'+g+'">'+charColor(p.di)+'</span><span id="men'+g+'">'+colorSpan(menAbbr, false, false, p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
-      '</div></TD>';
   }
 
   // 如果只有天盘干有标记,同时标记地盘干(两者同干同标记)
@@ -1058,26 +1028,6 @@ function renderXinpan(useBg) {
 
   let colorSpan = window._colorSpan || (v => {return v||'';});
 
-  function renderPalace(g) {
-    let p = palaces['gong'+g];
-    if (!p) return '<TD></TD>';
-    let w = (g === 9 || g === 1) ? '34%' : '33%';
-    let shenAbbr = SHEN_ABBR[p.shen] || p.shen || '';
-    let xingAbbr = XING_ABBR[p.xing] || p.xing || '';
-    let menAbbr = MEN_ABBR[p.men] || p.men || '';
-    let kongMark = kongGongs[g] ? '○' : '';
-    function spanGan(ch) { let isM=MU_RULES[g]&&MU_RULES[g].indexOf(ch)>=0; let isX=XING_RULES[g]&&XING_RULES[g].indexOf(ch)>=0; let isXM=XM_RULES[g]&&XM_RULES[g].indexOf(ch)>=0; return window._siHaiSpan(ch, isX||isXM, isM||isXM); }
-    function charColor(str) { if(!str)return''; let r=''; for(let ci=0;ci<str.length;ci++)r+=spanGan(str[ci]); return r; }
-    let hlt = (window._xpEditGong === g) ? 'box-shadow:0 0 0 2px var(--c-theme) inset;' : '';
-    return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'" onclick="showPalace('+g+')">' +
-      '<div style="display:grid;grid-template-rows:1fr 1fr 1fr;height:100%;position:relative">' +
-      '<div class="panItem top" style="align-self:start"><span>'+shenAbbr+'</span><span>'+kongMark+'</span></div>' +
-      '<div class="panItem" style="align-self:center"><span>'+charColor(p.tian)+'</span><span>'+xingAbbr+'</span></div>' +
-      '<div class="panItem" style="align-self:end"><span>'+charColor(p.di)+'</span><span>'+colorSpan(menAbbr,false,false,p.isMenPo)+'</span></div>' +
-      '<div class="state" id="stateTian'+g+'" style="position:absolute;top:25%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
-      '<div class="state" id="stateDi'+g+'" style="position:absolute;bottom:26%;left:1px;font-size:10px;color:var(--c-text-3)"></div>' +
-      '</div></TD>';
-  }
 
   let mkTag = '<span class="cx-horse" style="font-size:18px">马</span>';
   let sizhuParts = _xpBgSizhu ? _xpBgSizhu.split(/\s+/) : [];
@@ -1407,7 +1357,6 @@ function shen12(type) {
   let startGong = SHENJUE[zhiIdx];
 
   // 12神将按waipan顺序排列(从起始宫位顺时针)
-  let waipanOrder = [1,2,3,4,5,6,7,8,9,10,11,12];
   // 起始宫位对应的waipan起始索引
   let startIdx = (startGong - 1 + 12) % 12;
   for(let i = 0; i < 12; i++) {
@@ -1445,10 +1394,6 @@ function editTitle() {
 }
 
 // === 持久存储: localStorage + Tauri文件(PC) + 导出/导入(Android通用) ===
-function _storagePath() {
-  if (window.__TAURI__) return STORAGE_DIR+'/'+STORAGE_FILE;
-  return STORAGE_FILE;
-}
 
 async function _fsWrite(data) {
   if (!window.__TAURI__) return;
