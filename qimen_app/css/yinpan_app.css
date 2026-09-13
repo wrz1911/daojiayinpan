@@ -339,8 +339,6 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 /* 四维宫那四个字(雷火风豹): 落在八神与空亡之间, 水平居中且不占宽度。
    该行是 align-self:start, 所以用 top 而非 bottom —— 否则行高大于字高时会沉到格子底部,
    跟八神、空亡对不齐。 */
-/* 金口诀选中宫位(切换时先清后标, 避免残留叠加) */
-#jinkoujueDIV [data-jk].jk-sel{background:var(--c-gray-bg)}
 .w4shen{position:absolute;left:50%;transform:translateX(-50%);top:0;float:none;color:var(--wx-jin)}
 /* 开关型按钮的"已开启"状态: 平时不描边(只有浅灰常驻边框), 点开后才描一圈。
    移星换斗/天门地户/长生状态/年月日时神将 一律深灰;
