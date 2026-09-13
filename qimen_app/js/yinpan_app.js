@@ -1152,12 +1152,13 @@ function _jkCenter(chart) {
     // 标记区 nowrap + 略小字号: 避免"四空·干"换行撑高行距, 各行间距才均匀。
     // 干支右对齐(末字对齐)。列宽须略大于两字、且与旺衰之间留足间隙,
     // 否则双字干支会与旺衰贴在一起(看起来像"丁酉旺"连成一串)
-    return '<div style="display:flex;align-items:baseline;height:23px;gap:10px">' +
-      '<span style="flex:0 0 36px;font-weight:bold;text-align:right">' + k + '</span>' +
-      '<span style="flex:0 0 32px;text-align:right">' + a + '</span>' +
-      '<span style="flex:0 0 18px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
-      (ms.length ? '<span style="flex:1 1 auto;font-size:11px;display:inline-flex;flex-wrap:wrap;' +
-        'gap:0 4px;overflow:hidden">' + ms.join('') + '</span>' : '') +
+    // 列宽用 em 单位随字号缩放, 窄屏整体等比缩小, 不会挤在一起
+    return '<div style="display:flex;align-items:baseline;height:1.75em;gap:0.7em">' +
+      '<span style="flex:0 0 2.7em;font-weight:bold;text-align:right">' + k + '</span>' +
+      '<span style="flex:0 0 2.5em;text-align:right">' + a + '</span>' +
+      '<span style="flex:0 0 1.3em;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+      (ms.length ? '<span style="flex:1 1 auto;display:inline-flex;flex-wrap:wrap;gap:0 0.35em;' +
+        'overflow:hidden">' + ms.join('') + '</span>' : '') +
       '</div>';
   };
   // 外层 flex 负责把整个中宫块在 2x2 格内居中; 内层列容器让各行左边缘对齐(行内左起)
@@ -1165,7 +1166,7 @@ function _jkCenter(chart) {
   // 上下居中, 不留下方空白
   return '<div style="height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden">' +
     '<div style="width:100%;display:flex;flex-direction:column;gap:0;padding:2px;' +
-    'font-size:14px;line-height:1.35;box-sizing:border-box">' +
+    'font-size:clamp(9.5px,3.35vw,13.5px);line-height:1.35;box-sizing:border-box">' +
     row('<span class="' + wxCls(c.renYuan) + '">人元</span>',
         '<span class="' + wxCls(c.renYuan) + '">' + c.renYuan + '</span>', c.renWs,
         [kongMark(c.renYuan)].concat(sishMarks(c.renYuan))) +
