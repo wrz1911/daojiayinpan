@@ -264,7 +264,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
   }
 }
 
-/* === 命理奇门(panType 6) —— 样式类名与热卜 mingli.css 对齐 === */
+/* === 命理奇门(panType 6) 样式类 === */
 #dayun_liunian{margin-top:8px}
 #dayun_liunian .pan{width:100%;max-width:520px;margin:0 auto;border-collapse:collapse}
 .yunTitle{color:var(--c-gold);width:8%;vertical-align:middle;text-align:center;font-size:12px;line-height:15px}
@@ -279,7 +279,7 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 #yixinghuandouDIV{max-width:520px;margin:6px auto}
 .ml-inner{max-width:520px;margin:0 auto}
 
-/* ══════ 八字盘(照搬热卜 baziPan.css, 配色映射到主题变量) ══════ */
+/* ══════ 八字盘(配色映射到主题变量, 暗色自动适配) ══════ */
 .bz-pan{overflow:auto;padding:6px 0}
 .bz-pan #dateTitle{color:var(--c-gold);line-height:26px}
 .bz-pan #date{font-family:Arial,sans-serif;font-size:14px;line-height:30px}
@@ -309,34 +309,34 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
   letter-spacing:1px;color:var(--c-gold);opacity:.8}
 /* 首列侧标签(如「四柱」) */
 #headTable td.hd-side{color:var(--c-gold);font-size:12px;letter-spacing:2px;line-height:15px}
-/* 信息区不铺底色(热卜主盘亦为白底), 仅保留首列金色标签 */
+/* 信息区不铺底色(主盘为白底), 仅保留首列金色标签 */
 #headTable tr.bz-sec > td:first-child{color:var(--c-gold)}
 
-/* ══════ 命理主盘颜色/尺寸 —— 对齐热卜 mingli.css ══════
-   热卜原值: #panHead td{line-height:25px;color:#333}
+/* ══════ 命理主盘颜色/尺寸 ══════
+   基准值: 主盘 td line-height:25px, 正文色 #333
              #headTable #sizhu td{font-size:17px;line-height:20px;padding:5px;font-weight:bold}
              #datetime{font-family:Arial;font-size:14px}
              #headTable .sizhuTitle{width:21%;color:#dead68;font-size:14px;line-height:22px}
-   颜色一律走主题变量(--c-text/--c-gold/--c-border/--c-gray-bg), 亮色下与热卜一致 */
+   颜色一律走主题变量(--c-text/--c-gold/--c-border/--c-gray-bg), 亮色下即上述基准色 */
 /* 主盘 td 字号由既有 #panHead #headTable td{!important} 统一控制。
    四柱走 .sizhu 类; 命理因信息量比时盘大(多十神/藏干/神煞等 9 行),
    独立一档, 不套用时盘的 24px —— 见下方 mode-mingli 规则 */
-/* 小标签(热卜无此层, 按正文 16px 折半档取 11px) */
+/* 小标签: 按正文折半档取 11px */
 #headTable .hd-lbl{font-size:11px;line-height:15px;letter-spacing:.5px;opacity:.75}
 /* 侧标签 */
 #headTable td.hd-side{font-size:13px;line-height:17px;letter-spacing:1px}
-/* 日期时间: 热卜用 Arial 14px */
+/* 日期时间: Arial 14px */
 #headTable #datetime{font-family:Arial,sans-serif;font-size:13.5px!important;font-variant-numeric:tabular-nums;letter-spacing:.3px}
-/* 藏干: 正文同号, 字距比热卜的默认略收 */
+/* 藏干: 正文同号, 字距略收 */
 #headTable .cangGanTd{font-size:16px;line-height:1.35;letter-spacing:2px;padding:4px 3px}
 #headTable .ganShen{font-size:12px;line-height:16px;letter-spacing:2px}
 /* 神煞: 条目密集, 比正文小一档 */
 #headTable .shenShaTd,#headTable .ssDiv{font-size:13px;line-height:18px;padding:3px 2px}
 /* 纳音等附属小字 */
 #headTable .gong font{font-size:11px;line-height:15px}
-/* 交运说明: 整句文字, 用热卜 #Tip 同级 13px */
+/* 交运说明: 整句文字, 用说明行同级 13px */
 #headTable #jiaoYun{font-size:13px;line-height:20px;padding:6px}
-/* 窄屏: 正文降到 14px(热卜小屏亦降档), 四柱保持 16px 仍最突出 */
+/* 窄屏: 正文降到 14px, 四柱保持 16px 仍最突出 */
 @media (max-width:520px){
   #headTable td{font-size:14px;line-height:23px}
   #headTable .sizhuTd{font-size:16px;line-height:19px;padding:4px}
@@ -360,9 +360,9 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .bz-jy-out{text-align:center;font-size:13px;line-height:20px;color:var(--c-text-2);padding:6px 8px}
 @media (max-width:520px){ .bz-jy-out{font-size:12px;line-height:19px;padding:5px 6px} }
 
-/* ══════ 大运流年字号 —— 选择器与取值照热卜 mingli.css ══════
+/* ══════ 大运流年字号 ══════
    必须带 #dayun_liunian 前缀: 否则 .yun2(0,1,0) 会被 .pan td(0,1,1)
-   的 15px 盖掉, 数字就会偏大 —— 热卜正是用这组长选择器避开的 */
+   的 15px 盖掉, 数字就会偏大 —— 必须用这组长选择器才压得住 */
 #dayun_liunian .pan .yunTitle{color:var(--c-gold);width:8%;vertical-align:middle;text-align:center;font-size:12px;line-height:15px}
 #dayun_liunian .pan .yun1{font-size:11px;color:var(--c-gold);line-height:16px;text-align:center;font-family:Arial,sans-serif}
 #dayun_liunian .pan .yun2{padding-top:4px;padding-bottom:2px;font-weight:bold;font-size:13px;line-height:17px;text-align:center;cursor:pointer}

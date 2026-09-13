@@ -401,14 +401,14 @@ function shanxiangChart(sxDeg, sxYear) {
       let kw = j + v4; if (kw < 1) kw += 8; if (kw > 8) kw -= 8;
       angan[ZHUAN[j]] = digan[ZHUAN[kw]] || '';
     }
-    // 伏吟局暗干特殊排列。判据与参照实现(热卜 shanxiangAPI.paipanrest)逐字一致:
+    // 伏吟局暗干特殊排列。判据:
     //   if (angan[1]==tiangan[1] && angan[1]==digan[1])
     // 注意是「仅宫1」且拿**已排好的常规暗干宫1**去比, 不是"全部天盘==地盘"。
     // (旧实现用全八宫 tiangan[_g]===digan[_g] 判定, 1728 组对拍中 170 组与参照实现不符)
     let _isFY = (angan[1] == tiangan[1] && angan[1] == digan[1]);
     if (_isFY) {
       // _vj 必须归一到 LIUYI 的下标(1..9 六仪序), 不能直接拿天干索引用。
-      // 热卜此处是无条件归一化: v = 0==hCyl%10 ? liuyi[floor(hCyl/10)+1] : hCyl%10;
+      // 此处是无条件归一化: v = 0==hCyl%10 ? liuyi[floor(hCyl/10)+1] : hCyl%10;
       //   for(j=1;10>j && v!=liuyi[j];j++);
       // 其 liuyi 存的是**天干索引**(戊=4,己=5,...), 我们的 LIUYI 存的是**干字符**,
       // 故先取到干字符再回查下标 —— 等价。旧实现漏了这步查找, hCyl%10!=0 时直接用

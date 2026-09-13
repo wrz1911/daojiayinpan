@@ -3,8 +3,7 @@
  *
  * 与「时盘/刻盘」的区别: 以**出生时间**排盘看命, 而非起局断事。
  *
- * ⚠ 本文件的结构**逐段照搬热卜「命理奇门」(mod=mingli)** 的结果页, 取自其真实
- * 模板(16979 字节), 顺序与 id 完全一致:
+ * ⚠ 结果页版式: 各区块的顺序与 id 约定如下, 渲染函数按此顺序拼装:
  *
  *   #panHead          头部表: 名称/性别/生肖 ｜ 出生(公历+农历) ｜ 节气·月将·局
  *                      ｜ 旬首·值符·值使·马星·空亡 ｜ 四柱(五行着色)
@@ -30,7 +29,7 @@
   var GAN = '甲乙丙丁戊己庚辛壬癸';
   var ZHI = '子丑寅卯辰巳午未申酉戌亥';
   var SX = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
-  /** 天干五行色 — 取自热卜结果页的内联着色 */
+  /** 天干五行色 */
   var GAN_COLOR = { 甲: '#43ab18', 乙: '#43ab18', 丙: '#e40b06', 丁: '#e40b06',
                     戊: '#964607', 己: '#964607', 庚: '#f4a600', 辛: '#f4a600',
                     壬: '#006aff', 癸: '#006aff' };
@@ -43,7 +42,7 @@
   var ganSpan = function (g) { return '<font style="color:' + (GAN_COLOR[g] || '#333') + '">' + g + '</font>'; };
   var zhiSpan = function (z) { return '<font style="color:' + (ZHI_COLOR[z] || '#333') + '">' + z + '</font>'; };
 
-  /** 某一柱的旬空: 旬空偏移 = 10 - (干序+1), 与地支序相加取模(与热卜 kong() 同式) */
+  /** 某一柱的旬空: 旬空偏移 = 10 - (干序+1), 与地支序相加取模(旬空 = 10-(干序+1) 与地支序相加取模) */
   function xunKongOf(gz) {
     gz = dec(gz);
     if (gz.length < 2) return '';
@@ -98,7 +97,7 @@
     };
   };
 
-  /* ───────────────── 外圈 / 状态切换 (照搬热卜 btn() 的按钮行为) ───────────────── */
+  /* ───────────────── 外圈 / 状态切换 (各按钮互斥高亮 / 再点取消) ───────────────── */
 
   /** 按钮高亮: 3..7 互斥, 再点同一个则取消并清空外圈 */
   window.mingliBtn = function (b, data) {
@@ -126,7 +125,7 @@
 
   /**
    * 高亮第 n 步大运, 并把该运的 10 个流年填进 liunian1_{c}/liunian2_{c}。
-   * 照搬热卜 yun(a) 的行为: 一步大运 10 年, 虚岁 = 流年-出生年+1。
+   * 大运切换行为: 一步大运 10 年, 虚岁 = 流年-出生年+1。
    */
   window.mingliYun = function (n, data) {
     var bz = data && data.bz;
@@ -178,7 +177,7 @@
     return h;
   };
 
-  /* ───────────────── 渲染(逐段照搬热卜结果页) ───────────────── */
+  /* ───────────────── 渲染 ───────────────── */
 
   window.renderMingli = function (data, containerId) {
     var h = '';
@@ -191,7 +190,7 @@
            '<font style="color:#dead68">名称：</font><font id="name">' + data.name + '</font>&emsp;' +
            '<font style="color:#dead68">性别：</font><font id="gender">' + data.gender + '</font>&emsp;' +
            '<font style="color:#dead68">生肖：</font>' + data.shengXiao + '</TD></TR>';
-      // 热卜格式: 1986-12-11(农历十一月初十)
+      // 日期格式: 1986-12-11(农历十一月初十)
       var birthYmd = qr.gongli.replace(/^(\d+)年(\d+)月(\d+)日.*$/, function (m, a, b, c) {
         return a + '-' + ('0' + b).slice(-2) + '-' + ('0' + c).slice(-2);
       });
@@ -201,7 +200,7 @@
            '<TD colspan="2">' + qr.jieqi + '&nbsp;&nbsp;&nbsp;月将<B>' + data.yueJiang + '</B></TD>' +
            '<TD colspan="2">' + qr.juLabel.replace(/^(\D+)/, '$1<B>').replace(/(\d+)$/, '$1</B>') + '</TD></TR>';
       /* 旬首/值符/值使/马星/空亡: 小标签内联在值上方, 省掉纯标题行 */
-      // 旬首显示为「旬首+遁干」(热卜格式: 甲子戊), 六甲遁于六仪
+      // 旬首显示为「旬首+遁干」(格式: 甲子戊), 六甲遁于六仪
       var XUN_DUN = { 子: '戊', 戌: '己', 申: '庚', 午: '辛', 辰: '壬', 寅: '癸' };
       var xunShouTxt = dec(qr.xs.gz) + (XUN_DUN[dec(qr.xs.gz)[1]] || '');
       h += '<TR class="hd-row"><TD id="xunShou"><span class="hd-lbl">旬首</span>' + xunShouTxt + '</TD>' +
@@ -254,7 +253,7 @@
           var ag = p2 ? p2.anGan : '';
           return ag ? (window._anGanColor ? window._anGanColor(ag, g) : ag) : '';
         };
-        // 不传 wrapperClass/panClass, 让 buildPaipanGrid 生成与热卜一致的
+        // 不传 wrapperClass/panClass, 让 buildPaipanGrid 生成标准的
         // <div id="content"> 与 <TABLE id="pan">
         h += window.buildPaipanGrid(pals, kongGongs, (qr.ma && qr.ma.p) || 'ma2', agFn,
                { colorSpan: csFn });
@@ -264,7 +263,7 @@
       /* 交运说明: 置于九宫下方 —— 即原来颜色说明所在的位置 */
       if (bzInfo && window.baziJiaoYunBlock) h += window.baziJiaoYunBlock(bzInfo);
 
-      /* ── ③ #dayun_liunian 大运 + 流年(两个独立 TABLE, 照搬热卜) ── */
+      /* ── ③ #dayun_liunian 大运 + 流年(两个独立 TABLE) ── */
       if (bz && bz.dayun && bz.dayun.length) {
         var n = Math.min(bz.dayun.length, 10);
 
@@ -361,7 +360,7 @@
     if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = '15px'; y1.style.color = 'var(--c-text)'; }
   };
 
-  /** 移星换斗(占位: 保持与热卜一致的按钮结构, 功能待补) */
+  /** 移星换斗(占位: 按钮结构已就位, 功能待补) */
   window.showMingliYixing = function () {
     var d = document.getElementById('yixinghuandouDIV');
     if (!d) return;

@@ -1486,7 +1486,7 @@ function savePan() {
   if (!panWrap) return;
   let titleEl = document.getElementById('title');
   let defaultName = (titleEl ? titleEl.innerText : '') || '';
-  // 命理模块(panType 6): 保存时默认用「姓名」框的内容作事项名称(与热卜一致)
+  // 命理模块(panType 6): 保存时默认用「姓名」框的内容作事项名称
   if (panType === 6 && _mlVals && _mlVals.name) defaultName = _mlVals.name;
   let h = '<div style="padding:16px 16px 8px">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
@@ -2649,7 +2649,7 @@ function doMingli(){
       name:_mlVals.name,gender:_mlVals.gender});
     window._mlData=data;   // 供按钮 onclick="mingliBtn(n, window._mlData)" 取用
     document.getElementById("panWrap").innerHTML=window.renderMingli(data,null);
-    // 首屏填充当前大运的流年(热卜进入页面即显示当前运对应的 10 个流年)
+    // 首屏填充当前大运的流年(进入页面即显示当前运对应的 10 个流年)
     if(window.mingliYun) window.mingliYun(data.yunIdx||0, data);
     _renderBottomBar();
     setTimeout(_bindActionButtons,50);
