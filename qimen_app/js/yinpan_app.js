@@ -1212,9 +1212,9 @@ function toggleJinKouJue(noScroll) {
     // 输入区单元格: 外框由 table 提供, 行间只留横向分隔线; 标签与控件左对齐紧贴
     const tdLh = (t, last) => '<td style="' + (last ? '' : 'border-bottom:1px solid var(--c-border);') +
       'padding:7px 2px 7px 8px;color:var(--c-gold);text-align:left;white-space:nowrap;width:38px">' + t + '</td>';
-    const tdVh = (t, span, last) => '<td' + (span ? ' colspan="' + span + '"' : '') + ' style="' +
+    const tdVh = (t, span, last, align) => '<td' + (span ? ' colspan="' + span + '"' : '') + ' style="' +
       (last ? '' : 'border-bottom:1px solid var(--c-border);') +
-      'padding:7px 8px 7px 2px;text-align:left;white-space:nowrap;overflow:hidden">' + t + '</td>';
+      'padding:7px 8px 7px 2px;text-align:' + (align || 'left') + ';white-space:nowrap;overflow:hidden">' + t + '</td>';
     const sp = window._wxSpan || (x => x);
     const jiangLabel = chart.yueJiang + (_jkJiangZhi >= 0 ? '(自定义)' : (_jkJiang === 1 ? '(交节)' : '(中气)'));
     const dfLabel = chart.cur.difenZhi + (_jkDfType === 2 ? '(报数)' : '(手动)');
@@ -1240,8 +1240,8 @@ function toggleJinKouJue(noScroll) {
       '<tr>' + tdLh('地分') + tdVh(dfSel + checkbox(_jkDfType === 2, '报数', '_jkSet({difenType:' + (_jkDfType === 2 ? 1 : 2) + '})')) +
               tdLh('月将') + tdVh(jzSel) +
               tdLh('换将') + tdVh(radio(_jkJiang === 1, '交节', '_jkSet({jiang:1})', 'jkj') + radio(_jkJiang === 0, '中气', '_jkSet({jiang:0})', 'jkj')) + '</tr>' +
-      '<tr>' + tdLh('贵神', 1) + tdVh(radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') + radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') + radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn'), 2, 1) +
-              tdLh('贵人', 1) + tdVh(radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') + radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr'), 2, 1) + '</tr>' +
+      '<tr>' + tdLh('贵神', 1) + tdVh(radio(_jkDayNight === 0, '卯酉区分', '_jkSet({dayNight:0})', 'jkdn') + radio(_jkDayNight === 1, '白天', '_jkSet({dayNight:1})', 'jkdn') + radio(_jkDayNight === 2, '夜晚', '_jkSet({dayNight:2})', 'jkdn'), 2, 1, 'center') +
+              tdLh('贵人', 1) + tdVh(radio(_jkGuiren === 1, '甲戊庚牛羊', '_jkSet({guiren:1})', 'jkgr') + radio(_jkGuiren === 2, '甲羊戊庚牛', '_jkSet({guiren:2})', 'jkgr'), 2, 1, 'center') + '</tr>' +
       '</table>';
     // 连体宫格：容器只补左上两条边，格子各带右下两条边
     div.innerHTML = infoTbl + inputArea +
