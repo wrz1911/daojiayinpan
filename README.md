@@ -66,6 +66,14 @@ cd android && ./gradlew assembleRelease       # 产物: android/app/build/output
 | tyme4ts | MIT | 农历/节气/干支计算 | https://github.com/6tail/tyme4ts |
 | Tauri | MIT | 跨平台桌面框架 | https://github.com/tauri-apps/tauri |
 
+各开源项目的完整许可文本见 [`licenses/`](licenses/) 目录。
+
+本项目分发的 JS 产物顶部均保留版权与许可声明：
+
+- `qimen_app/js/tyme4j-browser.js` —— tyme4ts 的浏览器构建，版权归
+  Copyright (c) 2024 6tail 所有
+- `qimen_app/js/qimen_bundle.min.js` —— 本项目 bundle，含上述第三方组件声明
+
 ## 协议
 
 MIT License

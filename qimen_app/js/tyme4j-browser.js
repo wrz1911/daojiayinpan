@@ -1,3 +1,14 @@
+/*!
+ * tyme4ts v1.5.2 — 农历/节气/干支计算库
+ * https://github.com/6tail/tyme4ts
+ *
+ * Copyright (c) 2024 6tail
+ * Released under the MIT License.
+ * 完整许可文本见仓库根目录 LICENSE 与 tyme4j/LICENSE。
+ *
+ * 本文件为 tyme4ts 的浏览器构建产物(由 tyme4j/dist/index.js 转换而来),
+ * 按 MIT 协议随「道家阴盘奇门遁甲」一同分发。
+ */
 (function(){
 var tyme = window.tyme = {};
 tyme.PlumRain = tyme.DogDay = tyme.Dog = tyme.SixtyCycle = tyme.MinorRen = tyme.SixStar = tyme.TenStar = tyme.PengZu = tyme.PengZuEarthBranch = tyme.PengZuHeavenStem = tyme.HideHeavenStemDay = tyme.HideHeavenStem = tyme.HeavenStem = tyme.EarthBranch = tyme.Zodiac = tyme.Twenty = tyme.Terrain = tyme.Ten = tyme.Taboo = tyme.Sound = tyme.Sixty = tyme.PhaseDay = tyme.Phase = tyme.God = tyme.Element = tyme.Duty = tyme.Constellation = tyme.Luck = tyme.Beast = tyme.Zone = tyme.Direction = tyme.Land = tyme.Week = tyme.SevenStar = tyme.TwentyEightStar = tyme.Animal = tyme.LoopTyme = tyme.AbstractCultureDay = tyme.SecondUnit = tyme.WeekUnit = tyme.DayUnit = tyme.MonthUnit = tyme.YearUnit = tyme.AbstractTyme = tyme.AbstractCulture = tyme.EventType = tyme.HideHeavenStemType = tyme.Gender = tyme.Side = tyme.YinYang = void 0;
