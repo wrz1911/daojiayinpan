@@ -1063,14 +1063,76 @@ function jinkoujueShenSha(yue, gzDay, gan, zhi, kg, kz) {
 }
 window.jinkoujueShenSha = jinkoujueShenSha;
 
-/* ══════ 金口诀 · 面板（仿"向角度选局"，内嵌在 #result 里） ══════ */
-let _jkShow = false, _jkDifen = null, _jkDayNight = 0, _jkJiang = 1;   // 默认交节(月建六合), 讲义体系的实际用法
+/* ══════ 金口诀 · 面板（仿主盘：宫格连体；点周围十二宫更新中宫） ══════ */
+let _jkShow = false, _jkDifen = -1, _jkDayNight = 0, _jkJiang = 1;   // 默认交节(月建六合)
+function _jkOpts() {
+  return { year: window.Y, month: window.M, day: window.D, hour: window.hr, minute: window.mn,
+           difen: _jkDifen >= 0 ? _jkDifen : null, dayNight: _jkDayNight, jiang: _jkJiang };
+}
 function _jkSet(opt) {
   if (opt.difen !== undefined) _jkDifen = opt.difen;
   if (opt.dayNight !== undefined) _jkDayNight = opt.dayNight;
   if (opt.jiang !== undefined) _jkJiang = opt.jiang;
   toggleJinKouJue(true);
 }
+
+/* 中宫：只列四位本体（五动三动与神煞在下方信息区）
+   用表格对齐 —— flex 固定列宽在字段空缺时会错位 */
+function _jkCenter(chart) {
+  const c = chart.cur;
+  const wx = { 水:'wx-shui', 木:'wx-mu', 火:'wx-huo', 土:'wx-tu', 金:'wx-jin' };
+  const col = n => wx[JK_WX_NAME[n]] || '';
+  const cell = (txt, cls, extra) => '<td style="padding:2px 4px;white-space:nowrap;' + (extra||'') + '" class="' + (cls||'') + '">' + (txt||'') + '</td>';
+  const r1 = '<tr>' + cell('人元', '', 'color:var(--c-theme);font-weight:bold') +
+             cell(c.renYuan, col(c.renWx)) + cell('', '') + cell('', '') +
+             cell(c.renWs, '', 'color:var(--c-text-3)') + '</tr>';
+  const r2 = '<tr>' + cell('贵神', '', 'color:var(--c-theme);font-weight:bold') +
+             cell(c.guiGanZhi, col(c.guiWx)) + cell(c.guiShen, '', 'color:var(--c-gold)') + cell('', '') +
+             cell(c.guiWs, '', 'color:var(--c-text-3)') + '</tr>';
+  const r3 = '<tr>' + cell('将神', '', 'color:var(--c-theme);font-weight:bold') +
+             cell(c.jiangGanZhi, col(c.jiangWx)) + cell(c.jiangShen, '', 'color:var(--c-gold)') + cell('', '') +
+             cell(c.jiangWs, '', 'color:var(--c-text-3)') + '</tr>';
+  const r4 = '<tr>' + cell('地分', '', 'color:var(--c-theme);font-weight:bold') +
+             cell(c.difenZhi, col(JK_ZHI_WX[c.difenIdx])) + cell('', '') + cell('', '') +
+             cell(c.difenWs, '', 'color:var(--c-text-3)') + '</tr>';
+  return '<div style="padding:10px 6px;display:flex;align-items:center;justify-content:center">' +
+    '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' + r1 + r2 + r3 + r4 + '</table></div>';
+}
+
+/* 点周围十二宫 → 更新中宫（局部刷新，不重排整盘、不丢滚动位置） */
+function _jkPick(idx) {
+  try {
+    _jkDifen = idx;
+    const chart = jinkoujueChart(_jkOpts());
+    if (!chart) return;
+    const ctr = document.getElementById('jkCenter');
+    if (ctr) ctr.innerHTML = _jkCenter(chart);
+    const info = document.getElementById('jkInfo');
+    if (info) info.innerHTML = _jkInfoHtml(chart);
+    document.querySelectorAll('#jinkoujueDIV [data-jk]').forEach(el => {
+      el.style.background = (+el.getAttribute('data-jk') === idx) ? 'var(--c-gray-bg)' : '';
+    });
+    const sel = document.getElementById('jkDifen');
+    if (sel) sel.value = String(idx);
+  } catch (e) { _logErr('jkPick', e && e.message); }
+}
+window._jkPick = _jkPick;
+
+/* 下方信息区：四大空亡 / 人煞 贵煞 将煞 地煞 / 五动 三动 */
+function _jkInfoHtml(chart) {
+  const ss = chart.shensha || {};
+  const line = (label, val) => '<div style="display:flex;gap:8px;padding:2px 0;font-size:13px;line-height:1.75">' +
+    '<span style="flex:0 0 66px;color:var(--c-theme);font-weight:bold">' + label + '</span>' +
+    '<span style="flex:1;word-break:break-all">' + (val || '—') + '</span></div>';
+  return line('四大空亡', ss.sish ? ss.sish + '（此旬空）' : '') +
+    line('人煞', ss.shensh4 && ss.shensh4[1]) +
+    line('贵煞', ss.shensh4 && ss.shensh4[2]) +
+    line('将煞', ss.shensh4 && ss.shensh4[3]) +
+    line('地煞', ss.shensh4 && ss.shensh4[4]) +
+    line('五动', chart.wudong.length ? chart.wudong.join('　') : '') +
+    line('三动', chart.sandong.length ? chart.sandong.join('　') : '');
+}
+
 function toggleJinKouJue(noScroll) {
   if (_xnLongPressed) { _xnLongPressed = false; return; }   // 长按已弹说明, 不再切换
   let div = document.getElementById('jinkoujueDIV');
@@ -1086,43 +1148,40 @@ function toggleJinKouJue(noScroll) {
   }
   _jkShow = true; _syncToggleBtns();
   try {
-    const chart = jinkoujueChart({
-      year: window.Y, month: window.M, day: window.D, hour: window.hr, minute: window.mn,
-      difen: _jkDifen, dayNight: _jkDayNight, jiang: _jkJiang
-    });
+    const chart = jinkoujueChart(_jkOpts());
     if (!chart) throw new Error('起课失败');
-    const wxCls = { 水:'wx-shui', 木:'wx-mu', 火:'wx-huo', 土:'wx-tu', 金:'wx-jin' };
-    const wsColor = { '旺':'var(--wx-huo)', '相':'var(--wx-mu)', '休':'var(--c-text-3)', '囚':'var(--c-text-3)', '死':'var(--c-text-4)' };
-    const one = h => {
-      const w = n => wxCls[JK_WX_NAME[n]] || '';
-      return '<div style="border:1px solid var(--c-border);padding:3px 5px;line-height:1.62;font-size:13px">' +
-        '<div><span class="' + w(h.renWx) + '">' + h.renYuan + '</span>' +
-          '<span style="float:right;color:' + wsColor[h.renWs] + '">' + h.renWs + '</span></div>' +
-        '<div><span class="' + w(h.guiWx) + '">' + h.guiGanZhi + '</span>' +
+    const wx = { 水:'wx-shui', 木:'wx-mu', 火:'wx-huo', 土:'wx-tu', 金:'wx-jin' };
+    const col = n => wx[JK_WX_NAME[n]] || '';
+    const wsc = { '旺':'var(--wx-huo)', '相':'var(--wx-mu)', '休':'var(--c-text-3)', '囚':'var(--c-text-3)', '死':'var(--c-text-4)' };
+    const curIdx = chart.cur.difenIdx;
+
+    // 单宫：四行(人元 / 干支+贵神 / 干支+将神 / 地分)，触按选中
+    const one = (h, first) => {
+      const sel = h.difenIdx === curIdx;
+      return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
+        ' style="cursor:pointer;padding:3px 5px;line-height:1.6;font-size:13px;' +
+        'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border);' +
+        (sel ? 'background:var(--c-gray-bg);' : '') + '">' +
+        '<div><span class="' + col(h.renWx) + '">' + h.renYuan + '</span>' +
+          '<span style="float:right;color:' + wsc[h.renWs] + '">' + h.renWs + '</span></div>' +
+        '<div><span class="' + col(h.guiWx) + '">' + h.guiGanZhi + '</span>' +
           '<span style="float:right;color:var(--c-gold)">' + h.guiShen + '</span></div>' +
-        '<div><span class="' + w(h.jiangWx) + '">' + h.jiangGanZhi + '</span>' +
+        '<div><span class="' + col(h.jiangWx) + '">' + h.jiangGanZhi + '</span>' +
           '<span style="float:right;color:var(--c-gold)">' + h.jiangShen + '</span></div>' +
-        '<div><span class="' + w(h.difenWx) + '">' + h.difenZhi + '</span>' +
-          '<span style="float:right;color:' + wsColor[h.difenWs] + '">' + h.difenWs + '</span></div>' +
+        '<div><span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>' +
+          '<span style="float:right;color:' + wsc[h.difenWs] + '">' + h.difenWs + '</span></div>' +
         '</div>';
     };
-    // 十二宫围成 4x4，中宫占中间 2x2
-    // 十二宫按地支方位摆放(上南下北·左东右西): 巳午未申 / 辰…酉 / 卯…戌 / 寅丑子亥
+    // 十二宫按地支方位：上南下北·左东右西
     const order = [5,6,7,8, 4,-1,9, 3,-2,10, 2,1,0,11];
+    const byIdx = {}; chart.houses.forEach(h => { byIdx[h.difenIdx] = h; });
     let cells = '';
     for (const k of order) {
-      if (k < 0) { cells += '<div style="grid-row:2/4;grid-column:2/4;border:1px solid var(--c-border);padding:8px 10px;display:flex;flex-direction:column;justify-content:center;line-height:2;font-size:14px">' +
-        '<div><b style="color:var(--c-theme)">人元</b>　<span class="' + (wxCls[JK_WX_NAME[chart.cur.renWx]]||'') + '">' + chart.cur.renYuan + '</span>　<span style="color:' + wsColor[chart.cur.renWs] + '">' + chart.cur.renWs + '</span></div>' +
-        '<div><b style="color:var(--c-theme)">贵神</b>　' + chart.cur.guiGanZhi + '　<span style="color:var(--c-gold)">' + chart.cur.guiShen + '</span>　<span style="color:' + wsColor[chart.cur.guiWs] + '">' + chart.cur.guiWs + '</span></div>' +
-        '<div><b style="color:var(--c-theme)">将神</b>　' + chart.cur.jiangGanZhi + '　<span style="color:var(--c-gold)">' + chart.cur.jiangShen + '</span>　<span style="color:' + wsColor[chart.cur.jiangWs] + '">' + chart.cur.jiangWs + '</span></div>' +
-        '<div><b style="color:var(--c-theme)">地分</b>　<span class="' + (wxCls[JK_WX_NAME[JK_ZHI_WX[chart.cur.difenIdx]]]||'') + '">' + chart.cur.difenZhi + '</span>　<span style="color:' + wsColor[chart.cur.difenWs] + '">' + chart.cur.difenWs + '</span></div>' +
-        '<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--c-border);font-size:13px"><b style="color:var(--c-theme)">五动</b>　' +
-          (chart.wudong.length ? chart.wudong.join('　') : '—') +
-          '<br><b style="color:var(--c-theme)">三动</b>　' + (chart.sandong.length ? chart.sandong.join('　') : '—') + '</div>' +
-        '</div>';
-      } else { cells += one(chart.houses[k]); }
+      if (k < 0) {
+        cells += '<div id="jkCenter" style="grid-row:2/4;grid-column:2/4;' +
+          'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' + _jkCenter(chart) + '</div>';
+      } else { cells += one(byIdx[k]); }
     }
-    // 输入区
     const sel = (id, cur, list, fn) => '<select id="' + id + '" onchange="' + fn + '" style="background:var(--c-btn-gray);color:var(--c-text);border:1px solid var(--c-border);border-radius:4px;padding:2px 6px;font-size:13px">' +
       list.map(o => '<option value="' + o[0] + '"' + (String(o[0]) === String(cur) ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
     const head = '<div style="padding:8px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px">' +
@@ -1130,24 +1189,17 @@ function toggleJinKouJue(noScroll) {
       '<span style="color:var(--c-text-3)">' + chart.siZhu.join(' ') + '</span>' +
       '<span>月将 <b style="color:var(--c-gold)">' + chart.yueJiang + chart.yueJiangName + '</b></span>' +
       '<span>贵神起于 <b>' + chart.guiRenZhi + '</b>（' + chart.guiRenDir + '行·' + chart.dayNight + '贵）</span>' +
-      '<span>地分 ' + sel('jkDifen', chart.cur.difenIdx, QM.ZHI.map((z,i)=>[i,z]), '_jkSet({difen:parseInt(this.value)})') + '</span>' +
+      '<span>地分 ' + sel('jkDifen', curIdx, QM.ZHI.map((z,i)=>[i,z]), '_jkSet({difen:parseInt(this.value)})') + '</span>' +
       '<span>昼夜 ' + sel('jkDay', _jkDayNight, [[0,'自动'],[1,'昼'],[2,'夜']], '_jkSet({dayNight:parseInt(this.value)})') + '</span>' +
       '<span>换将 ' + sel('jkJiang', _jkJiang, [[1,'交节'],[0,'中气']], '_jkSet({jiang:parseInt(this.value)})') + '</span>' +
       '</div>';
-    const ss = chart.shensha || {};
-    const line = (label, val) => '<div style="display:flex;gap:8px;padding:2px 0;font-size:13px;line-height:1.75">' +
-      '<span style="flex:0 0 68px;color:var(--c-theme);font-weight:bold">' + label + '</span>' +
-      '<span style="flex:1;word-break:break-all">' + (val || '—') + '</span></div>';
-    const info = '<div style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
-      line('四大空亡', ss.sish ? ss.sish + '（' + (chart.cur && ss.sish ? '此旬' : '') + '空）' : '无') +
-      line('人煞', ss.shensh4 && ss.shensh4[1]) +
-      line('贵煞', ss.shensh4 && ss.shensh4[2]) +
-      line('将煞', ss.shensh4 && ss.shensh4[3]) +
-      line('地煞', ss.shensh4 && ss.shensh4[4]) +
-      line('五动', chart.wudong.length ? chart.wudong.join('　') : '') +
-      line('三动', chart.sandong.length ? chart.sandong.join('　') : '') +
-      '</div>';
-    div.innerHTML = head + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px">' + cells + '</div>' + info;
+    // 连体宫格：容器只补左上两条边，格子各带右下两条边
+    div.innerHTML = head +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;' +
+      'border-top:1px solid var(--c-border);border-left:1px solid var(--c-border)">' + cells + '</div>' +
+      '<div id="jkInfo" style="margin-top:6px;border:1px solid var(--c-border);border-radius:4px;padding:8px 10px">' +
+      _jkInfoHtml(chart) + '</div>' +
+      '<div style="font-size:12px;color:var(--c-text-4);padding:4px 2px">点周围任一圈宫可切换中宫四位</div>';
     div.style.display = 'block';
     if (!noScroll) setTimeout(() => { const r = document.getElementById('jinkoujueDIV'); if (r) r.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
   } catch (e) {
