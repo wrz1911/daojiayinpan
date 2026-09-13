@@ -1158,8 +1158,9 @@ function _jkCenter(chart) {
       '<span style="flex:0 0 24%;font-weight:bold;text-align:right">' + k + '</span>' +
       '<span style="flex:0 0 22%;text-align:right">' + a + '</span>' +
       '<span style="flex:0 0 12%;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
-      (ms.length ? '<span style="flex:1 1 auto;display:inline-flex;flex-wrap:wrap;gap:0 0.35em;' +
-        'overflow:hidden">' + ms.join('') + '</span>' : '') +
+      // 标记(空/用/四空…)强制单行 —— 不允许换行, 标记之间只留很窄的间隔
+      (ms.length ? '<span style="flex:0 0 auto;display:inline-flex;gap:0 0.12em;' +
+        'white-space:nowrap;overflow:hidden">' + ms.join('') + '</span>' : '') +
       '</div>';
   };
   // 外层 flex 负责把整个中宫块在 2x2 格内居中; 内层列容器让各行左边缘对齐(行内左起)
