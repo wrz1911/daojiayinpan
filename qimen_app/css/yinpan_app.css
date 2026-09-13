@@ -153,7 +153,11 @@ body{padding-top:34px}
 #topBar label{display:flex;align-items:center;justify-content:center;gap:2px;height:100%;padding:0 4px;font-size:13px;line-height:1;color:var(--c-text);cursor:pointer;white-space:nowrap}
 #topBar input[type=radio]{margin:0;width:13px;height:13px;flex:none;accent-color:var(--c-theme)}
 #mainDIV{max-width:600px;margin:0 auto;padding:0}
-#mainDIV,#mainDIV *{user-select:text!important;-webkit-user-select:text!important}
+/* 项目禁用文字复制: 通配符那条(第 64 行)已把全站设为 none, 这里原先又把
+   #mainDIV 整棵子树改回 text 把复制打开了, 现改回 none。
+   输入类控件仍保留可选中, 否则无法输入/编辑。 */
+#mainDIV,#mainDIV *{user-select:none!important;-webkit-user-select:none!important}
+#mainDIV input,#mainDIV textarea,#mainDIV select{user-select:text!important;-webkit-user-select:text!important}
 .form-card{background:var(--c-bg);border-radius:0;padding:4px 0;margin:0;box-shadow:none}
 .form-row{display:flex;align-items:center;border-bottom:1px solid var(--c-border);padding:6px 10px}
 .form-row:last-child{border-bottom:none}

@@ -1419,6 +1419,154 @@ function tianmenDihu() {
   }catch(e){tip.innerHTML='<span style=color:red>天门地户错误:'+e.message+'</span>';}
 }
 
+/* ══════════════ 玄女十六字诀 · 文字资料 ══════════════
+   长按"玄女16诀"按钮弹出。内容据《玄女十六字诀》两天讲课记录整理:
+   十二字挂外圈十二地支, 四维宫另四字(雷火风豹)以天冲星起。
+   每条按「本义 / 组合断法 / 方位取象 / 布局用法」四栏, 某栏无内容则省略。
+   注: 材料里的应验案例属个人经验叙述, 此处只作整理转述。 */
+const XN_HELP = [
+  { z:'进', wx:'外圈十二字',
+    y:'进帐、招财、加官进爵、添人丁；进步，有上进心。',
+    c:['临生门，或宫内见戊（天盘干 / 地盘干 / 遁干均可）→ 进财',
+       '临开门 → 工作有发展、加官进爵；开门也代表店铺，可开分店、门面好',
+       '时干或小孩年命临 → 学习好、有进步',
+       '临丁 → 添丁。催丁可让进字临丁，或临年命的十二长生"胎"地',
+       '临死门＋腾蛇 → 坟中进蛇；临玄武 → 坟进老鼠',
+       '临白虎或伤门 → 此入户门纳的是病灾之气，易有病灾、伤灾、官司口舌'],
+    f:'入户门、人来人往进进出出的地方、关卡、十字路口、红绿灯、热门的地方、连锁店铺',
+    b:'招财局最直接的用法：进字临戊或临生门即可布。写一个"进"字，配合宫内的象义物品放到该方位。' },
+
+  { z:'曲', wx:'外圈十二字',
+    y:'曲折、伤心、分手、弯曲；亦为文曲星。',
+    c:['六合临 → 婚姻感情波折不幸福；六合也代表合作，合作临曲则一波三折',
+       '开门临 → 工作不顺利、有曲折，也可能调动',
+       '值符加 → 高管、管理层处境困难',
+       '时干临 → 事情进展有难度'],
+    f:'弯曲的地方、林荫小道、曲径通幽',
+    b:'曲也代表文曲星，可用来布文昌局。同一个字两面性，看用在什么地方。' },
+
+  { z:'狱', wx:'外圈十二字',
+    y:'牢狱、被困、孤单、自闭、傲慢；也代表收藏。',
+    c:['时干或孩子年命临 → 孩子自闭、内心孤单',
+       '六合临 → 婚姻不好，如身在牢狱',
+       '值符加 → 管理层被困或有被抓之可能，也代表领导管理严格',
+       '生门或戊临 → 资金被套牢',
+       '天辅星临 → 老师对学生严格（校内打骂之类）'],
+    f:'此方位可能比较偏僻',
+    b:'狱主收藏：宫内见乙木＋天英星，有金屋藏娇之象；孩子多动调皮，可让年命临狱使其收敛。' },
+
+  { z:'丰', wx:'外圈十二字',
+    y:'丰满、丰收、收获；人多、人气旺。',
+    c:['临开门＋时干 → 公司员工多、店铺客流大；再依宫内九星定男女（阴星女多、阳星男多），临年干则年长者多',
+       '生门临丰，或戊临丰 → 钱多',
+       '时干临丰 → 客户多',
+       '时干＋天芮星＋丰 → 该医院/诊所病人多；再有年干则老年人居多',
+       '戊＋丰在震宫 → 可作丰胸之局'],
+    f:'超市、电影院、会场等人多之处',
+    b:'聚宝盆、发财树可放丰位；店铺饭店设局常用丰字。择日上可选丰字落宫之日开业、下种。' },
+
+  { z:'空', wx:'外圈十二字',
+    y:'空地、操场；一场空、没有结果；亦宜打坐放空。',
+    c:['临生门或戊 → 财空了',
+       '店铺临空 → 人流少',
+       '六合临空 → 婚姻有名无实，或感情没有结果',
+       '年命临空 → 此人比较佛性'],
+    f:'空荡荡之处，可能有大的空地',
+    b:'打坐、练功可到空位；斩桃花可在空位布局，或把第三者的年命放到空宫。' },
+
+  { z:'泣', wx:'外圈十二字',
+    y:'哭泣、伤心、流泪；胆小、多愁善感、有同情心。',
+    c:['时干或小孩年命临 → 胆小爱哭',
+       '女人年命临 → 多愁善感、有同情心',
+       '天芮星临 → 疾病不好治，有卧床之象',
+       '开门临 → 工作辛苦（开门也代表店铺，即经营辛苦）',
+       '生门加泣 → 生活辛酸；六合临泣 → 婚姻不幸福',
+       '乙木临 → 此花要常浇水；癸水临 → 风流眼，见风流泪'],
+    f:'医院、药店、殡仪馆',
+    b:'临戊者不宜投资，容易受伤害。' },
+
+  { z:'欹', wx:'外圈十二字',
+    y:'第三者、三角恋、烂桃花、小人；也代表不公正。',
+    c:['六合临 → 婚姻有第三者、不幸福，有分手之可能',
+       '学生临 → 早恋'],
+    f:'娱乐场所、歌厅、酒吧' },
+
+  { z:'劫', wx:'外圈十二字',
+    y:'劫财、劫色、抢劫、打劫；脾气不好、打斗；也指不安全的地方。',
+    c:['临戊和生门 → 劫财、破财；生门临劫 → 骗财',
+       '开门临劫 → 忽悠、虚假信息；景门（主信息）临劫 → 信息有误、信息诈骗',
+       '时干或小孩年命临 → 喜武术、跆拳道；也代表保安、城管',
+       '六合临劫 → 劫色、第三者、横刀夺爱；劫字生女方年命或生乙木 → 把女方劫走',
+       '临戊 → 劫财，也指此人小气、爱占便宜',
+       '六合＋伤门 → 婚姻中易动手、家暴；＋惊门 → 吵架；＋白虎 → 有暴力倾向',
+       '临天蓬或天英（天英主桃花）→ 易劫色'],
+    f:'打斗、没收、不安全的地方',
+    b:'斩桃花可用劫字生第三者年命，把第三者劫走；卖房转租可让时干＋劫去生开门（客户劫走店铺）；劫也代表二手房、二手车。' },
+
+  { z:'散', wx:'外圈十二字',
+    y:'散漫好动；散财、破财、大手大脚；也代表分享、付出、传播。',
+    c:['临戊或生门 → 散财破财、爱花钱、零花钱多',
+       '时干临散 → 客户舍得花钱（可让客户临散去生开门）；时干临杜门 → 不舍得花钱',
+       '六合临散 → 感情易离婚分手；也可能是分居、分床',
+       '开门临散 → 店铺分散、开分店、连锁',
+       '临散 → 无上进心；小孩临散 → 注意力不集中'],
+    f:'拆迁、散步、散伙',
+    b:'宣传可用散字设局扩大传播；种庄稼可在散日撒种。' },
+
+  { z:'破', wx:'外圈十二字',
+    y:'破财、破损、破旧；错误的、需要修补的。',
+    c:['六合临 → 婚姻破灭、合作破灭',
+       '＋戊或生门 → 破财；＋开门 → 工作有错误、不完美',
+       '惊门加破 → 骂人',
+       '房子临破 → 破旧、环境不好；小孩临破 → 调皮、爱搞破坏',
+       '开门临破 → 破产',
+       '年命加破 → 死亡'],
+    f:'破损、损坏之处；殡仪馆',
+    b:'可用于破他人的法（在破字或破的方位设局）；斩桃花可让六合临破或临散。' },
+
+  { z:'灵', wx:'外圈十二字',
+    y:'灵性、灵气、灵感、灵活；贵人、老板、神佛、官贵、玄学。',
+    c:['景门加灵 → 有灵性',
+       '小孩临灵 → 聪明、学习灵活'],
+    b:'学习可到灵的方位；做法事可到灵位；打坐除空位外也可到灵位。' },
+
+  { z:'吾', wx:'外圈十二字',
+    y:'求测人自己。',
+    c:['宫内见白虎 → 求测人有灾',
+       '宫内见休门 → 有贵人帮助',
+       '临开门 → 此人比较开朗'],
+    b:'此字须结合宫内信息一起断。' },
+
+  { z:'雷', wx:'四维宫四字',
+    y:'声音、响亮、有名望、一鸣惊人；也代表有声响的吵闹之处。',
+    c:['临开门或时干 → 店铺有名气，或产品众所周知',
+       '六合临 → 婚姻可能有争吵'],
+    b:'雷主一鸣惊人，可布文昌局；修雷法者可到雷的宫位或其生着的宫位修法。' },
+
+  { z:'火', wx:'四维宫四字',
+    y:'文化、传媒、媒体相关的人事物；红红火火；炎上，主事情正在发展进步。',
+    c:['六合临 → 正热恋，干柴烈火',
+       '年命临 → 性子急、风风火火',
+       '测病 → 肝火旺，或炎症、发烧'],
+    f:'厨房',
+    b:'疾病可借火克金：如天芮星落乾宫（金）而临火字，火克此宫，可在此宫调病。' },
+
+  { z:'风', wx:'四维宫四字',
+    y:'传播、宣传、广告；快速；不稳定、不确定、墙头草。',
+    c:['六合临 → 感情来得快、去得也快',
+       '年命临 → 做事风风火火，也易犹豫不决',
+       '测病 → 流行病、感冒、风寒、风湿',
+       '临腾蛇或玄武 → 消息是假的、不真实的'],
+    f:'风扇、空调',
+    b:'做宣传、做销售可到风的宫位布局；风也代表消息、信息。' },
+
+  { z:'豹', wx:'四维宫四字',
+    y:'同白虎，主凶猛、不吉、凶灾、伤灾；也代表黑社会、公检法。',
+    c:['此人性格可能偏凶；六合临 → 有可能家暴',
+       '测穿衣服 → 可能穿豹纹'],
+    b:'' },
+];
+
 /* ══════════════ 玄女十六字诀(盘外盘) ══════════════
    用"排法二": 以【时支的六合】起"进"字, 沿十二地支阳顺阴逆铺开十二字:
      进 曲 狱 丰 空 泣 欹 劫 散 破 灵 吾
@@ -1477,7 +1625,69 @@ function buildXuanNv4Map(palaces, isYin) {
   } catch (e) { _logErr('xuanNv4', e && e.message); return null; }
 }
 
+/* 长按"玄女16诀"按钮弹出说明(与宫位解释同款弹窗)。
+   触屏与鼠标都绑; 长按触发后要抑制随后的 click, 否则会顺带把外盘切换掉。 */
+let _xnPressTimer = null, _xnLongPressed = false;
+function _bindXnLongPress() {
+  const b = document.getElementById('btnXuanNv');
+  if (!b || b._lpBound) return;
+  b._lpBound = true;
+  const begin = () => {
+    _xnLongPressed = false;
+    clearTimeout(_xnPressTimer);
+    _xnPressTimer = setTimeout(() => { _xnPressTimer = null; _xnLongPressed = true; showXuanNvHelp(); }, 550);
+  };
+  const end = () => { clearTimeout(_xnPressTimer); _xnPressTimer = null; };
+  b.addEventListener('touchstart', begin, { passive: true });
+  b.addEventListener('touchend', end);
+  b.addEventListener('touchmove', end);
+  b.addEventListener('touchcancel', end);
+  b.addEventListener('mousedown', begin);
+  b.addEventListener('mouseup', end);
+  b.addEventListener('mouseleave', end);
+}
+
+function showXuanNvHelp() {
+  try {
+    const old = document.getElementById('xnHelpDlg');
+    if (old) old.remove();
+    const sec = o => {
+      const rows = [];
+      if (o.y) rows.push('<div><b style="color:var(--wx-jin)">本义　</b>' + o.y + '</div>');
+      if (o.c && o.c.length) rows.push('<div style="margin:8px 0 3px"><b style="color:var(--wx-jin)">组合断法</b></div>'
+        + o.c.map(x => '<div style="margin:2px 0 2px 11px;text-indent:-11px">· ' + x + '</div>').join(''));
+      if (o.f) rows.push('<div style="margin:8px 0 3px"><b style="color:var(--wx-jin)">方位取象</b></div><div style="margin-left:11px">' + o.f + '</div>');
+      if (o.b) rows.push('<div style="margin:8px 0 3px"><b style="color:var(--wx-jin)">布局用法</b></div><div style="margin-left:11px">' + o.b + '</div>');
+      return '<div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--c-border)">'
+        + '<div style="font-size:19px;font-weight:bold;color:var(--wx-jin);margin-bottom:6px">' + o.z
+        + '<span style="font-size:11px;font-weight:normal;color:var(--c-text-4);margin-left:8px">' + o.wx + '</span></div>'
+        + rows.join('') + '</div>';
+    };
+    const head = '<div style="text-align:center;margin-bottom:14px">'
+        + '<div style="font-size:18px;font-weight:bold;color:var(--wx-jin)">玄女十六字诀</div>'
+        + '<div style="font-size:12px;color:var(--c-text-4);margin-top:4px">进 曲 狱 丰 空 泣 欹 劫 散 破 灵 吾　＋　雷 火 风 豹</div></div>'
+      + '<div style="background:var(--c-gray-bg);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.8;margin-bottom:16px">'
+        + '<b style="color:var(--wx-jin)">排法</b>（阳顺阴逆）<br>'
+        + '· <b>十二字</b>：以<b>时支的六合</b>起"进"，沿十二地支铺开。<br>'
+        + '　（另一法按月：正五九月从寅、二六十月从亥、三七十一从巳、四八十二从辰）<br>'
+        + '· <b>四维宫四字</b>（雷 火 风 豹）：以<b>天冲星</b>起，落在巽、坤、乾、艮四宫。<br>'
+        + '· 与「天门地户」共用外盘位置，两者互斥。'
+      + '</div>';
+    const h = '<div id="xnHelpDlg" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
+      + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
+      + '<span onclick="event.stopPropagation();document.getElementById(\'xnHelpDlg\').remove()" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
+      + head + XN_HELP.map(sec).join('')
+      + '<div style="text-align:center;font-size:11px;color:var(--c-text-5);margin-top:8px">据讲课记录整理</div>'
+      + '</div></div>';
+    const holder = document.createElement('div');
+    holder.innerHTML = h;
+    document.body.appendChild(holder.firstChild);
+  } catch (e) { _logErr('xnHelp', e && e.message); }
+}
+window.showXuanNvHelp = showXuanNvHelp;
+
 function xuanNv16() {
+  if (_xnLongPressed) { _xnLongPressed = false; return; }   // 长按已弹说明, 不再切换外盘
   try {
     if (_tmdhShow) { _tmdhShow = false; clearWaipan(); }   // 与天门地户互斥
     if (_shenShow) { _shenShow = 0; clearWaipan(); }
@@ -2081,6 +2291,7 @@ function _bindActionButtons() {
     let el = document.querySelector(id);
     if (el && !el._bound) { el.onclick = btns[id]; el._bound = true; }
   }
+  _bindXnLongPress();
   // 宫位点击 (山向/穿壬不绑定)
   if (panType !== 4 && panType !== 5) {
     let gongs = document.querySelectorAll('[id^="gong"]');
@@ -3029,7 +3240,7 @@ function doChuanRen(){
     window._crLayoutPrev=layoutCrOuter;
     window.addEventListener('resize',layoutCrOuter,{passive:true});
   }catch(e){
-    document.getElementById("panWrap").innerHTML="<span style=\"color:red;user-select:text;-webkit-user-select:text\">穿壬错误:"+e.message+"</span>";
+    document.getElementById("panWrap").innerHTML="<span style=\"color:red\">穿壬错误:"+e.message+"</span>";
   }
 }
 
