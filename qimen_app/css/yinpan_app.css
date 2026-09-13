@@ -323,10 +323,13 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 /* 地盘干·地八神·八门 这一行: 地盘干靠左、八门靠右, 地八神取两者正中。
    必须是绝对定位 —— .panItem span:nth-of-type(2){float:right} 会把地八神
    当成"该行第二个 span"推到行尾, 八门反被挤到左边。 */
-.di-row{position:relative}
-/* 该行出现第三个 span(八门)后, 原有的 nth-of-type(2) 右浮动够不着它, 需补一条 */
-.di-row span:nth-of-type(3){float:right}
+/* 宫格的中间两行(天盘干+九星 / 地盘干+八门): 两侧内容左右分开,
+   中间留给人八神(第2行)与地八神(第3行), 两者都绝对居中、不占宽度。 */
+.mid-row{position:relative}
+/* 该行出现第三个 span 后, 原有的 nth-of-type(2) 右浮动够不着它, 需补一条 */
+.mid-row span:nth-of-type(3){float:right}
 .dshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-tu)}
+.rshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-shui)}
 /* 已开启的开关型按钮(如地八神): 描一圈金边表示当前生效 */
 .btn.on{box-shadow:inset 0 0 0 2px var(--c-gold)}
 /* 三排功能按钮(移星换斗…/年月日时神将/地八神): 底色改中性灰 —— 深青底
@@ -335,11 +338,15 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 /* 地八神按钮的文字与宫内符号同色(五行土), 一眼能对上。
    必须排在上面那条之后 —— 两者特异性相同, 靠前的会被压掉。 */
 #btnTable3 .btn{color:var(--wx-tu)}
+/* 人八神按钮与宫内符号同色(五行水) */
+#btnTable3 #btnRenShen{color:var(--wx-shui)}
 /* 地八神独占一行: 宽度取上面两排的一格(4 列 → 25%), 左对齐;
    单格既是 first-child 又是 last-child, 内边距取"第一格"的值(左 0 / 右 2px),
    左边缘与宽度才和"移星换斗"那格严格一致。 */
-#btnTable3{width:25%;table-layout:fixed;border-collapse:collapse;margin:3px 0 1px}
-#btnTable3 td{text-align:center;padding:1px 2px 1px 0;box-sizing:border-box;line-height:1}
+/* 地八神 / 人八神 各占一格: 分别落在「年神将」「月神将」正下方 */
+#btnTable3{width:100%;table-layout:fixed;border-collapse:collapse;margin:3px 0 1px}
+#btnTable3 td{text-align:center;padding:1px 2px;box-sizing:border-box;line-height:1}
+#btnTable3 td:first-child{padding-left:0}
 #Tip{margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
 #yixinghuandouDIV{margin:6px auto}
 .ml-inner{margin:0 auto}
