@@ -971,7 +971,10 @@ function fixYinGanAlign() {
         if (rRows[i]) rRows[i].style.height = rh + 'px';
       }
     }
-    // 侧边阴干top对齐: 左=天盘, 右=九星
+    /* 侧边阴干的纵向基准(已确认): 巽4 震3 艮8 对【天盘干】, 坤2 兑7 乾6 对【九星】;
+       坎1 离9 不参与对齐(它们分处上下, 各有 HTML 内联的 padding 定位)。
+       做法是量出基准元素的 top 与宫顶之差写进 paddingTop —— 依赖行高,
+       所以必须等字体就绪后重算, 见 scheduleYinGanAlign。 */
     [4,3,8].forEach(g => {
       let yin = scope.querySelector('#yinGan'+g);
       let tian = scope.querySelector('#tian'+g);
