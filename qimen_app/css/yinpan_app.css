@@ -332,14 +332,17 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .mid-row span:nth-of-type(3){float:right}
 .dshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-tu)}
 .rshen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--wx-shui)}
-/* 四维宫那四个字(雷火风豹): 落在八神与空亡之间, 同样居中不占宽度 */
-.w4shen{position:absolute;left:50%;transform:translateX(-50%);bottom:0;float:none;color:var(--c-text-2)}
+/* 四维宫那四个字(雷火风豹): 落在八神与空亡之间, 水平居中且不占宽度。
+   该行是 align-self:start, 所以用 top 而非 bottom —— 否则行高大于字高时会沉到格子底部,
+   跟八神、空亡对不齐。 */
+.w4shen{position:absolute;left:50%;transform:translateX(-50%);top:0;float:none;color:var(--wx-jin)}
 /* 开关型按钮的"已开启"状态: 平时不描边(只有浅灰常驻边框), 点开后才描一圈。
    移星换斗/天门地户/长生状态/年月日时神将 一律深灰;
    地八神、人八神则各随其五行色, 与它们的文字和宫内符号一致。 */
 .btn.on{box-shadow:inset 0 0 0 2px var(--c-btn-line)}
 #btnTable3 #btnDiShen.on{box-shadow:inset 0 0 0 2px var(--wx-tu)}
 #btnTable3 #btnRenShen.on{box-shadow:inset 0 0 0 2px var(--wx-shui)}
+#btnTable3 #btnXuanNv.on{box-shadow:inset 0 0 0 2px var(--wx-jin)}
 /* 三排功能按钮(移星换斗…/年月日时神将/地八神): 底色改中性灰 —— 深青底
    在素淡的盘面上太抢眼, 灰底与页面的白/浅灰基调更贴, 也把注意力还给盘面。 */
 #btnTable1 .btn,#btnTable2 .btn,#btnTable3 .btn{background:var(--c-btn-gray);color:var(--c-text);border:1px solid var(--c-border);border-radius:4px;text-align:center;padding:3px 4px;font-size:13px;line-height:1.35;cursor:pointer;margin:0;box-sizing:border-box;width:100%;display:block}
@@ -348,6 +351,8 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 #btnTable3 .btn{color:var(--wx-tu)}
 /* 人八神按钮与宫内符号同色(五行水) */
 #btnTable3 #btnRenShen{color:var(--wx-shui)}
+/* 玄女16诀同理, 随五行金; 它的外圈十二字也走这个色 */
+#btnTable3 #btnXuanNv{color:var(--wx-jin)}
 /* 地八神独占一行: 宽度取上面两排的一格(4 列 → 25%), 左对齐;
    单格既是 first-child 又是 last-child, 内边距取"第一格"的值(左 0 / 右 2px),
    左边缘与宽度才和"移星换斗"那格严格一致。 */
