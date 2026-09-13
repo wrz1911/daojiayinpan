@@ -19,6 +19,16 @@ sed -i "0,/^  \"version\": \"[^\"]*\"/s//  \"version\": \"${VER}\"/" package-loc
 sed -i "0,/^      \"version\": \"[^\"]*\"/s//      \"version\": \"${VER}\"/" package-lock.json
 # 同步关于弹窗中的 APP_VERSION 常量
 sed -i "s/const APP_VERSION = '[^']*'/const APP_VERSION = '${VER}'/" qimen_app/js/yinpan_app.js
+# 重建 bundle, 让新的 APP_VERSION 真正进包。
+# (原脚本只 sed 源码不重建: CI 会重建所以线上没问题, 但仓库里提交的
+#  qimen_bundle.min.js 会停留在旧版本号, 直接用仓库产物时会显示旧版本。)
+if [ -f scripts/build_bundle.sh ] && command -v npx >/dev/null 2>&1; then
+  if bash scripts/build_bundle.sh >/dev/null 2>&1; then
+    echo "  (已重建 qimen_bundle.min.js)"
+  else
+    echo "  ⚠️ bundle 重建失败, 请手动执行 scripts/build_bundle.sh"
+  fi
+fi
 # 同步 Tauri 的 Rust 包版本(与 tauri.conf.json 保持一致)及 Cargo.lock 中的 app 条目
 sed -i "s/^version = \"[^\"]*\"/version = \"${VER}\"/" src-tauri/Cargo.toml
 perl -0pi -e "s/(\[\[package\]\]\nname = \"app\"\nversion = \")[^\"]*/\${1}${VER}/" src-tauri/Cargo.lock
@@ -29,7 +39,7 @@ if [ -f android/app/build.gradle ]; then
   sed -i "s/versionName \"[^\"]*\"/versionName \"${VER}\"/" android/app/build.gradle
   echo "  (已同步 android/app/build.gradle → ${VER} / ${VCODE})"
 fi
-git add src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock package.json package-lock.json qimen_app/js/yinpan_app.js
+git add src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock package.json package-lock.json qimen_app/js/yinpan_app.js qimen_app/js/qimen_bundle.min.js
 if git diff --cached --quiet; then
   echo "版本号已是 v${VER}, 跳过同步提交"
 else
