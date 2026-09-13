@@ -314,3 +314,35 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 /* 八字信息区(十神→交运)整段用另一层底色, 与上方奇门区分 */
 #headTable tr.bz-sec > td{background:var(--c-gray-bg)}
 #headTable tr.bz-sec > td:first-child{color:var(--c-gold)}
+
+/* ══════ 命理主盘字号比例(人性化): 层次统一 + 移动端自适应 ══════ */
+/* 基础值 15px / 行高 1.45 —— 中文正文舒适区间 */
+#headTable td{font-size:15px;line-height:1.45}
+/* 小标签: 11px 金色, 看得清但不与主体抢视觉 */
+#headTable .hd-lbl{font-size:11px;line-height:15px;letter-spacing:.5px;opacity:.75}
+/* 侧标签(四柱) */
+#headTable td.hd-side{font-size:12px;line-height:16px;letter-spacing:1px}
+/* 四柱干支: 全盘视觉重心 */
+#headTable .sizhuTd{font-size:21px;line-height:26px;padding-top:6px;padding-bottom:6px}
+/* 藏干: 字距收紧一点, 其十神简称再小一档 */
+#headTable .cangGanTd{font-size:15px;line-height:1.3;letter-spacing:2px;padding:4px 3px}
+#headTable .ganShen{font-size:12px;line-height:16px;letter-spacing:2px}
+/* 神煞信息密集: 略小字号 + 紧凑行高 */
+#headTable .shenShaTd,#headTable .ssDiv{font-size:12.5px;line-height:17px;padding:3px 2px}
+/* 纳音等附属小字 */
+#headTable .gong font{font-size:11px;line-height:15px}
+/* 交运说明(整句文字, 用小一号但保持可读) */
+#headTable #jiaoYun{font-size:12.5px;line-height:19px;padding:6px}
+/* 日期/时间用等宽数字, 扫读时位数对齐 */
+#headTable #datetime{font-variant-numeric:tabular-nums;letter-spacing:.3px}
+/* 窄屏整体收一档, 四柱仍保持突出 */
+@media (max-width:520px){
+  #headTable td{font-size:13.5px}
+  #headTable .hd-lbl{font-size:10.5px;line-height:14px}
+  #headTable td.hd-side{font-size:11.5px}
+  #headTable .sizhuTd{font-size:19px;line-height:24px;padding-top:5px;padding-bottom:5px}
+  #headTable .cangGanTd{font-size:13.5px;letter-spacing:1.5px}
+  #headTable .ganShen{font-size:11px;letter-spacing:1.5px}
+  #headTable .shenShaTd,#headTable .ssDiv{font-size:11.5px;line-height:16px}
+  #headTable #jiaoYun{font-size:11.5px;line-height:18px}
+}
