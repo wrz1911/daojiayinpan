@@ -1095,21 +1095,22 @@ function _jkCenter(chart) {
   const c = chart.cur;
   const wx = { 水:'wx-shui', 木:'wx-mu', 火:'wx-huo', 土:'wx-tu', 金:'wx-jin' };
   const col = n => wx[JK_WX_NAME[n]] || '';
-  const cell = (txt, cls, extra) => '<td style="padding:2px 4px;white-space:nowrap;' + (extra||'') + '" class="' + (cls||'') + '">' + (txt||'') + '</td>';
-  const r1 = '<tr>' + cell('人元', '', 'color:var(--c-theme);font-weight:bold') +
-             cell(c.renYuan, col(c.renWx)) + cell('', '') + cell('', '') +
-             cell(c.renWs, '', 'color:var(--c-text-3)') + '</tr>';
-  const r2 = '<tr>' + cell('贵神', '', 'color:var(--c-theme);font-weight:bold') +
-             cell(c.guiGanZhi, col(c.guiWx)) + cell(c.guiShen, '', 'color:var(--c-gold)') + cell('', '') +
-             cell(c.guiWs, '', 'color:var(--c-text-3)') + '</tr>';
-  const r3 = '<tr>' + cell('将神', '', 'color:var(--c-theme);font-weight:bold') +
-             cell(c.jiangGanZhi, col(c.jiangWx)) + cell(c.jiangShen, '', 'color:var(--c-gold)') + cell('', '') +
-             cell(c.jiangWs, '', 'color:var(--c-text-3)') + '</tr>';
-  const r4 = '<tr>' + cell('地分', '', 'color:var(--c-theme);font-weight:bold') +
-             cell(c.difenZhi, col(JK_ZHI_WX[c.difenIdx])) + cell('', '') + cell('', '') +
-             cell(c.difenWs, '', 'color:var(--c-text-3)') + '</tr>';
-  return '<div style="padding:10px 6px;display:flex;align-items:center;justify-content:center">' +
-    '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' + r1 + r2 + r3 + r4 + '</table></div>';
+  const use = n => chart.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold;margin-left:3px">用</span>' : '';
+  const wsc = { '旺':'var(--wx-huo)', '相':'var(--wx-mu)', '休':'var(--c-text-3)', '囚':'var(--c-text-3)', '死':'var(--c-text-4)' };
+  const row = (k, a, b, ws) => '<tr style="height:26px">' +
+    '<td style="width:42px;color:var(--c-theme);font-weight:bold;text-align:right;padding-right:5px;white-space:nowrap">' + k + '</td>' +
+    '<td style="min-width:50px;text-align:center;white-space:nowrap">' + a + '</td>' +
+    '<td style="min-width:56px;text-align:left;white-space:nowrap">' + (b || '') + '</td>' +
+    '<td style="width:22px;color:' + (wsc[ws] || 'var(--c-text-3)') + ';text-align:left;padding-left:4px">' + ws + '</td></tr>';
+  return '<div style="height:100%;display:flex;align-items:center;justify-content:center">' +
+    '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' +
+      row('人元', '<span class="' + col(c.renWx) + '">' + c.renYuan + '</span>', '', c.renWs) +
+      row('贵神', '<span class="' + col(c.guiWx) + '">' + c.guiGanZhi + '</span>',
+          '<span style="color:var(--c-gold)">' + c.guiShen + '</span>' + use(2), c.guiWs) +
+      row('将神', '<span class="' + col(c.jiangWx) + '">' + c.jiangGanZhi + '</span>',
+          '<span style="color:var(--c-gold)">' + c.jiangShen + '</span>' + use(3), c.jiangWs) +
+      row('地分', '<span class="' + col(JK_ZHI_WX[c.difenIdx]) + '">' + c.difenZhi + '</span>', '', c.difenWs) +
+    '</table></div>';
 }
 
 /* 点周围十二宫 → 更新中宫（局部刷新，不重排整盘、不丢滚动位置） */
@@ -1191,7 +1192,7 @@ function toggleJinKouJue(noScroll) {
     let cells = '';
     for (const k of order) {
       if (k < 0) {
-        cells += '<div id="jkCenter" style="grid-row:2/4;grid-column:2/4;' +
+        cells += '<div id="jkCenter" style="grid-row:2/4;grid-column:2/4;overflow:hidden;' +
           'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' + _jkCenter(chart) + '</div>';
       } else { cells += one(byIdx[k]); }
     }
@@ -1926,6 +1927,17 @@ function jinkoujueChart(opt) {
   const xunKong = gz => { const k = KONG6[Math.floor(((gz % 60) + 60) % 60 / 10)]; return QM.ZHI[k[0]] + QM.ZHI[k[1]]; };
   const kong4 = [xunKong(yGzO.getIndex()), xunKong(mGzO.getIndex()), xunKong(dGzO.getIndex()), xunKong(hGzO.getIndex())];
 
+  // 用爻(用位): 默认取将神(3); 四课阳支数满足条件时改取贵神(2)
+  //   据漫步者 use_func.js: yyshu=四课中地支索引为偶(阳支)的个数
+  const G2Z = [2,3,6,5,4,7,8,9,0,11];   // 天干化支: 甲寅 乙卯 丙巳 丁午 戊辰 己未 庚申 辛酉 壬子 癸亥
+  const kz4 = [0, G2Z[QM.GAN.indexOf(cur.renYuan)], QM.ZHI.indexOf(cur.guiGanZhi[1]), cur.jiangZhiIdx, cur.difenIdx];
+  let yyshu = 0;
+  for (let i = 1; i < 5; i++) if (kz4[i] % 2 === 0) yyshu++;
+  let yongwei = 3;
+  if (yyshu === 1 && kz4[2] % 2 === 0) yongwei = 2;
+  else if (yyshu === 3 && kz4[3] % 2 === 0) yongwei = 2;
+  else if (yyshu === 4) yongwei = 2;
+
   // 神煞（按四位落位）
   const ganIdx = [0, yGzO.getHeavenStem().getIndex(), mGzO.getHeavenStem().getIndex(),
                   dGzO.getHeavenStem().getIndex(), hGzO.getHeavenStem().getIndex()];
@@ -1940,7 +1952,7 @@ function jinkoujueChart(opt) {
 
   return {
     siZhu: [yGzO.getName(), mGzO.getName(), dGzO.getName(), hGzO.getName()],
-    shensha: ss, lunar: lunarStr, kong4: kong4, termStr: termStr,
+    shensha: ss, yongwei: yongwei, yyshu: yyshu, lunar: lunarStr, kong4: kong4, termStr: termStr,
     dateFull: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
     dateStr: opt.year + '年' + pad2(opt.month) + '月' + pad2(opt.day) + '日 ' + pad2(opt.hour) + '时' + pad2(opt.minute) + '分(' + lunarStr + ')',
     yueJiang: QM.ZHI[jiangZ], yueJiangName: JK_JIANG[jiangZ], yueJiangIdx: jiangZ, yueJiangAuto: jiangZAuto,
