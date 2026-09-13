@@ -364,6 +364,20 @@ window.renderChuanRen=(data,containerId) => {
   let szParts=d.sizhu.split(' ');
   let nianGz=szParts[0]||'',yueGz=szParts[1]||'',riGz=szParts[2]||'',shiGz=szParts[3]||'';
   function wxSpan(s){let c='#333';if('甲乙寅卯'.indexOf(s)>=0)c='var(--wx-mu)';else if('丙丁巳午'.indexOf(s)>=0)c='var(--wx-huo)';else if('戊己辰戌丑未'.indexOf(s)>=0)c='var(--wx-tu)';else if('庚辛申酉'.indexOf(s)>=0)c='var(--wx-jin)';else if('壬癸亥子'.indexOf(s)>=0)c='var(--wx-shui)';return '<font style="color:'+c+'">'+(s||'')+'</font>';}
+  /* 外圈四层(天干/将神/贵神/十二建除)的五行着色。
+     干支按本气取五行; 十二将神(贵神)与建除十二神本身不带五行, 各按其所配之支取:
+       将神 —— 贵人己丑土 腾蛇丁巳火 朱雀丙午火 六合乙卯木 勾陈戊辰土 青龙甲寅木
+               天空戊戌土 白虎庚申金 太常己未土 玄武壬子水 太阴辛酉金 天后癸亥水
+       建除 —— 建寅木 除卯木 满辰土 平巳火 定午火 执未土 破申金 危酉金 成戌土
+               收亥水 开子水 闭丑土
+     合成一张单字表, 天干地支与二者共用一次查表, 避免多套 if 链走岔。 */
+  const WX_OF=(function(){let m={};const put=(k,s)=>{for(let i=0;i<s.length;i++)m[s[i]]=k;};
+    put('mu','甲乙寅卯'); put('huo','丙丁巳午'); put('tu','戊己辰戌丑未');
+    put('jin','庚辛申酉'); put('shui','壬癸亥子');
+    put('tu','贵勾空常'); put('huo','腾蛇朱'); put('mu','六青'); put('jin','白阴'); put('shui','玄后');
+    put('mu','建除'); put('tu','满执成闭'); put('huo','平定'); put('jin','破危'); put('shui','收开');
+    return m;})();
+  function wxSpanX(s){let k=WX_OF[s];return k?('<font style="color:var(--wx-'+k+')">'+s+'</font>'):(s||'');}
 
   let h='';
 
@@ -462,14 +476,16 @@ window.renderChuanRen=(data,containerId) => {
           let du=d.dutyMap[zhi]||'';
           let label='<div class="cr-card" data-zhi="'+zhi+'" data-side="'+side+'" data-gref="'+gRef+'" data-ri="'+i+'">';
           // 排版: 建除(近宫)→天盘支→神→干(远宫)
+          // 四层各自按五行着色(天干/将神/贵神/十二建除)
+          let cTg=wxSpanX(tg),cTj=wxSpanX(tj),cZhi=wxSpanX(tpZhi),cDu=wxSpanX(du);
           if(side==='top'){
-            label+='<span class=cr-ctg>'+tg+'</span><span class=cr-ctj>'+tj+'</span><span class=cr-czhi>'+tpZhi+'</span><span class=cr-cdu>'+du+'</span>';
+            label+='<span class=cr-ctg>'+cTg+'</span><span class=cr-ctj>'+cTj+'</span><span class=cr-czhi>'+cZhi+'</span><span class=cr-cdu>'+cDu+'</span>';
           } else if(side==='left'){
-            label+='<span class=cr-hrow><span class=cr-ctg>'+tg+'</span><span class=cr-ctj>'+tj+'</span><span class=cr-czhi>'+tpZhi+'</span><span class=cr-cdu>'+du+'</span></span>';
+            label+='<span class=cr-hrow><span class=cr-ctg>'+cTg+'</span><span class=cr-ctj>'+cTj+'</span><span class=cr-czhi>'+cZhi+'</span><span class=cr-cdu>'+cDu+'</span></span>';
           } else if(side==='right'){
-            label+='<span class=cr-hrow><span class=cr-cdu>'+du+'</span><span class=cr-czhi>'+tpZhi+'</span><span class=cr-ctj>'+tj+'</span><span class=cr-ctg>'+tg+'</span></span>';
+            label+='<span class=cr-hrow><span class=cr-cdu>'+cDu+'</span><span class=cr-czhi>'+cZhi+'</span><span class=cr-ctj>'+cTj+'</span><span class=cr-ctg>'+cTg+'</span></span>';
           } else {
-            label+='<span class=cr-cdu>'+du+'</span><span class=cr-czhi>'+tpZhi+'</span><span class=cr-ctj>'+tj+'</span><span class=cr-ctg>'+tg+'</span>';
+            label+='<span class=cr-cdu>'+cDu+'</span><span class=cr-czhi>'+cZhi+'</span><span class=cr-ctj>'+cTj+'</span><span class=cr-ctg>'+cTg+'</span>';
           }
           label+='</div>';
           ringLabels.push(label);
@@ -552,12 +568,15 @@ window.renderChuanRen=(data,containerId) => {
   '#pan.cr-pan td{vertical-align:top!important;padding-left:4px!important;padding-right:4px!important;padding-top:6px!important;padding-bottom:6px!important}'+
   '#pan.cr-pan .panItem{line-height:22px!important;font-size:14px!important}'+
   // 穿壬外圈标签
-  '.cr-card{position:absolute;display:flex;flex-direction:column;align-items:center;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg);padding:4px 6px;text-align:center;white-space:nowrap;font-size:12px}'+
-  '.cr-ctg{color:var(--c-text);font-size:13px;font-weight:bold}'+
-  '.cr-ctj{color:var(--c-gold);font-size:11px}'+
-  '.cr-czhi{color:var(--c-text);font-size:12px}'+
+  '.cr-card{position:absolute;display:flex;flex-direction:column;align-items:center;background:var(--c-bg);padding:4px 6px;text-align:center;white-space:nowrap;font-size:12px}'+
+  // 外圈四层(天干/将神/贵神/十二建除)尺寸必须一致 —— 它们是并排的一组, 大小不齐
+  // 会显得错落。颜色由 JS 按五行写在内层 <font> 上, 这里只留无着色时的兜底色。
+  '.cr-ctg,.cr-ctj,.cr-czhi,.cr-cdu{font-size:var(--pan-fs-sm);line-height:1.15}'+
+  '.cr-ctg{color:var(--c-text);font-weight:bold}'+
+  '.cr-ctj{color:var(--c-gold)}'+
+  '.cr-czhi{color:var(--c-text)}'+
   '.cr-ckw{color:var(--c-po);font-size:10px}'+
-  '.cr-cdu{color:var(--c-text-2);font-size:11px;display:flex;flex-direction:column;line-height:1.1}'+
+  '.cr-cdu{color:var(--c-text-2);display:flex;flex-direction:column}'+
   '.cr-hrow{display:flex;flex-direction:row;align-items:center;gap:3px;white-space:nowrap}'+
   '.cr-sanchuan{display:flex;justify-content:center;margin-top:40px}'+
   '.cr-sc-tbl{border-collapse:collapse;font-size:14px}'+
@@ -590,14 +609,15 @@ window.renderChuanRen=(data,containerId) => {
   //   - 上下内边距与左右取齐(padding:2px), 否则 td 高比宽多 4px, 正方形被破坏
   //   - 字号 13px/行高 20px: 三行共 60px, 放得进 88px 的宫格, 且手机 dpr=3 下可读
   //   - 卡片缩到 10px, 左右卡片各 64px, 正好落在九宫两侧 68px 的空档里
-  // 宫格与"将神"共用 --pan-fs-sm: 两者要一样大(将神是格内符号的对应物),
-  // 这里只改一次变量值, 九宫(.panItem)与卡片(.cr-ctj)同时生效。
-  // 十二建除反过来回到原来的小号(9px): 它与将神一增一减, 卡片总宽不变。
+  // 宫格与整组外圈标签共用 --pan-fs-sm: 两者同号才整齐。
+  // 注意系统字体缩放(本机 fontScale 1.25)会放大 font-size 但不放大 calc 里的
+  // px, 所以卡片实际宽度比按字号推算的更大, .cr-content 的扣除值是按真机实测
+  // 留的余量, 不能简单写成 calc(100% - 4*var(--pan-fs-sm))。
   '@media(max-width:500px){'+
   '.cr-grid-wrap{--pan-fs-sm:13px;--pan-lh-sm:20px}'+
   '#pan.cr-pan td{padding:2px!important}'+
   '.cr-card{font-size:10px;line-height:13px;padding:1px 2px}'+
-  '.cr-ctg{font-size:11px}.cr-ctj{font-size:var(--pan-fs-sm)}.cr-czhi{font-size:10px}.cr-cdu{font-size:9px}.cr-ckw{font-size:8px}'+
+  '.cr-ckw{font-size:8px}'+
   '}'+
   // 500~700px 的窄窗口: 卡片可回到稍大字号, 宫格仍有富余
   '@media(min-width:501px) and (max-width:700px){#pan.cr-pan .panItem{font-size:14px!important;line-height:22px!important}}'+
