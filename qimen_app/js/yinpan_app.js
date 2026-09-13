@@ -1249,10 +1249,15 @@ function toggleJinKouJue(noScroll) {
     const one = (h) => {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
-      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:3px">' +
-        '<span style="flex:0 0 ' + (wide ? 45 : 25) + 'px;overflow:hidden">' + a + '</span>' +
-        (wide ? '' : '<span style="flex:0 0 22px;overflow:hidden">' + (b || '') + '</span>') +
-        '<span style="flex:0 0 11px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+      // 列宽与间隙: 干支 25 / gap3 / 神名 22 / gap3 / 旺衰 11 / gap3 / 用
+      // 人元与地分没有神名, 其"宽行"须占满 干支+gap+神名+gap = 53px,
+      // 这样它们的旺衰才能与贵神/将神行的旺衰落在同一列(易瑞即如此)
+      const GAP = 3, W1 = 25, W2 = 22, W3 = 11;
+      const wideW = W1 + GAP + W2;   // 占干支+间隙+神名; 其后紧跟的 gap 与正常行一致
+      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:' + GAP + 'px">' +
+        '<span style="flex:0 0 ' + (wide ? wideW : W1) + 'px;overflow:hidden">' + a + '</span>' +
+        (wide ? '' : '<span style="flex:0 0 ' + W2 + 'px;overflow:hidden">' + (b || '') + '</span>') +
+        '<span style="flex:0 0 ' + W3 + 'px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
         ' class="jk-cell' + (isCur ? ' jk-sel' : '') + '"' +
