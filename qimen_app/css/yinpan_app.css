@@ -335,6 +335,11 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 /* 地八神按钮的文字与宫内符号同色(五行土), 一眼能对上。
    必须排在上面那条之后 —— 两者特异性相同, 靠前的会被压掉。 */
 #btnTable3 .btn{color:var(--wx-tu)}
+/* 地八神独占一行: 宽度取上面两排的一格(4 列 → 25%), 左对齐;
+   单格既是 first-child 又是 last-child, 内边距取"第一格"的值(左 0 / 右 2px),
+   左边缘与宽度才和"移星换斗"那格严格一致。 */
+#btnTable3{width:25%;table-layout:fixed;border-collapse:collapse;margin:3px 0 1px}
+#btnTable3 td{text-align:center;padding:1px 2px 1px 0;box-sizing:border-box;line-height:1}
 #Tip{margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
 #yixinghuandouDIV{margin:6px auto}
 .ml-inner{margin:0 auto}
