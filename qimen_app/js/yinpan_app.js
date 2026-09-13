@@ -1104,11 +1104,20 @@ function _jkCenter(chart) {
   // 顺序: 标签 | 干支 | 神名 | 旺衰 | 空 | 用
   // 四大空亡: 该旬的四空是"地支两支 + 天干两干"(如申酉庚辛), 干支都要查
   const sishStr = (chart.shensha && chart.shensha.sish) || '';
+  // 四空区分干/支: 命中天干标"·干", 命中地支标"·支", 两者都中则并列
+  const SISH_GAN = '甲乙丙丁戊己庚辛壬癸', SISH_ZHI = '子丑寅卯辰巳午未申酉戌亥';
   const sishMark = gz => {
     if (!sishStr || !gz) return '';
-    for (let i = 0; i < gz.length; i++) if (sishStr.indexOf(gz.charAt(i)) >= 0)
-      return '<span style="color:var(--wx-huo);font-weight:bold">四空</span>';
-    return '';
+    let g = false, z = false;
+    for (let i = 0; i < gz.length; i++) {
+      const ch = gz.charAt(i);
+      if (sishStr.indexOf(ch) < 0) continue;
+      if (SISH_GAN.indexOf(ch) >= 0) g = true;
+      else if (SISH_ZHI.indexOf(ch) >= 0) z = true;
+    }
+    if (!g && !z) return '';
+    return '<span style="color:var(--wx-huo);font-weight:bold">四空' +
+      (g ? '·干' : '') + (z ? '·支' : '') + '</span>';
   };
   // 空与用同处一列(依次排列), 不再各占一列
   const row = (k, a, b, ws, useMark, kongMark, sishM) => '<tr style="height:26px">' +
@@ -1116,7 +1125,7 @@ function _jkCenter(chart) {
     '<td style="min-width:50px;text-align:center;white-space:nowrap">' + a + '</td>' +
     '<td style="min-width:56px;text-align:left;white-space:nowrap">' + (b || '') + '</td>' +
     '<td style="width:20px;color:' + (wsc[ws] || 'var(--c-text-3)') + ';text-align:left;padding-left:4px">' + ws + '</td>' +
-    '<td style="width:56px;text-align:left;white-space:nowrap">' + (kongMark || '') + (useMark || '') + (sishM || '') + '</td></tr>';
+    '<td style="width:82px;text-align:left;white-space:nowrap">' + (kongMark || '') + (useMark || '') + (sishM || '') + '</td></tr>';
   return '<div style="height:100%;display:flex;align-items:center;justify-content:center">' +
     '<table style="border-collapse:collapse;font-size:14px;line-height:1.9">' +
       row('人元', '<span class="' + col(c.renWx) + '">' + c.renYuan + '</span>', '', c.renWs, '', kongOf(c.renYuan), sishMark(c.renYuan)) +
