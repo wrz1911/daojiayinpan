@@ -471,7 +471,7 @@ function doPan() {
               }
               _xpBgPalaces = bgPalaces;
 	            }
-	          } catch(e) {}
+	          } catch(e){ _logErr('xinpanBg', e && e.message); }
           if (bgResult) window._raw = bgResult.raw || '';
           if (bgResult) _qrData = bgResult; // 缓存结构化数据供tianmenDihu复用
 	          clearXinpan();
@@ -524,7 +524,7 @@ function doPan() {
 // ============ renderPan: 解析引擎HTML → 重建数据结构 → 渲染九宫格 ============
 function renderPan(raw, engineData) {
   let gongli='', nongli='', sizhu='', jieqi='', zhiFuStr='', zhiShiStr='', xunShou='', kongWang='', maXing='';
-  if (engineData && engineData.sizhu) { let d=engineData, sz=d.sizhu;gongli=d.gongli;nongli=d.nongli;sizhu=sz.y.ganZhi+" "+sz.m.ganZhi+" "+sz.d.ganZhi+" "+sz.h.ganZhi;if(sz.minute&&sz.minute.gz)sizhu+=" "+sz.minute.gz;jieqi="";try{if(window.tyme4j&&window.tyme4j.SolarDay){let sd=window.tyme4j.SolarDay.fromYmd(Y,M,D),term=sd.getTerm(),nextTerm=term.next(1),tJD=term.getJulianDay(),tST=tJD.getSolarTime(),tD=tJD.getSolarDay(),nJD=nextTerm.getJulianDay(),nST=nJD.getSolarTime(),nD=nJD.getSolarDay(),pad= v => {return v<10?"0"+v:v};jieqi=term.getName()+" "+tD.getMonth()+"."+tD.getDay()+" "+pad(tST.getHour())+":"+pad(tST.getMinute());jieqi+="~"+nextTerm.getName()+" "+nD.getMonth()+"."+nD.getDay()+" "+pad(nST.getHour())+":"+pad(nST.getMinute())}}catch(e){}zhiFuStr=d.zf.n;zhiShiStr=d.zs.n;xunShou=d.xs.gz;kongWang=d.kw.gz;maXing=d.ma.z;
+  if (engineData && engineData.sizhu) { let d=engineData, sz=d.sizhu;gongli=d.gongli;nongli=d.nongli;sizhu=sz.y.ganZhi+" "+sz.m.ganZhi+" "+sz.d.ganZhi+" "+sz.h.ganZhi;if(sz.minute&&sz.minute.gz)sizhu+=" "+sz.minute.gz;jieqi="";try{if(window.tyme4j&&window.tyme4j.SolarDay){let sd=window.tyme4j.SolarDay.fromYmd(Y,M,D),term=sd.getTerm(),nextTerm=term.next(1),tJD=term.getJulianDay(),tST=tJD.getSolarTime(),tD=tJD.getSolarDay(),nJD=nextTerm.getJulianDay(),nST=nJD.getSolarTime(),nD=nJD.getSolarDay(),pad= v => {return v<10?"0"+v:v};jieqi=term.getName()+" "+tD.getMonth()+"."+tD.getDay()+" "+pad(tST.getHour())+":"+pad(tST.getMinute());jieqi+="~"+nextTerm.getName()+" "+nD.getMonth()+"."+nD.getDay()+" "+pad(nST.getHour())+":"+pad(nST.getMinute())}}catch(e){ _logErr('jieqi', e && e.message); }zhiFuStr=d.zf.n;zhiShiStr=d.zs.n;xunShou=d.xs.gz;kongWang=d.kw.gz;maXing=d.ma.z;
   }
 
   // 优先从引擎结构化数据提取四柱/五柱(更可靠)
@@ -1133,7 +1133,7 @@ function renderXinpan(useBg) {
   setTimeout(_bindActionButtons, 50);
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
-  } catch(e) {}
+  } catch(e){ _logErr('renderXinpan', e && e.message); }
 }
 
 function showYixing() {
@@ -1456,7 +1456,7 @@ async function _fsWrite(data) {
     const dir = await documentDir() + STORAGE_DIR;
     if (!(await exists(dir))) await mkdir(dir, {recursive:true});
     await writeTextFile(dir+'/'+STORAGE_FILE, data);
-  } catch(e) {}
+  } catch(e){ _logErr('fsWrite', e && e.message); }
 }
 
 async function _fsRead() {
@@ -1480,8 +1480,9 @@ async function _syncFromFile() {
   if (txt) {
     try {
       let d = JSON.parse(txt);
-      if (Array.isArray(d)) { localStorage.setItem(STORAGE_KEY, txt); return d; }
-    } catch(e) {}
+      // 仅当文件是"非空数组"才覆盖本地: 备份为空(写入失败/被清空)时覆盖会把主存存档抹掉
+      if (Array.isArray(d) && d.length > 0) { localStorage.setItem(STORAGE_KEY, txt); return d; }
+    } catch(e){ _logErr('syncFromFile', e && e.message); }
   }
   return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 }
@@ -1556,7 +1557,7 @@ function savePan() {
     let inp = document.getElementById('sheetSaveName');
     if (inp) { inp.focus(); inp.select(); }
   }, 350);
-  }catch(e){}
+  }catch(e){ _logErr('doSave', e && e.message); }
 }
 
 function _doSave() {
@@ -1581,13 +1582,14 @@ function _doSave() {
     zhiFu: window._palaces ? (() => {for(let g in window._palaces){let p=window._palaces['gong'+g];if(p&&p.shen&&window.SHEN_ABBR&&window.SHEN_ABBR[p.shen]==='符')return{shen:p.shen,star:p.xing,men:p.men,gong:parseInt(g)};}return null;})() : null
   };
   if (panType === 3) {
-    record._xpData = JSON.parse(JSON.stringify(window._xpData || {}));
-    record._xpBgSizhu = window._xpBgSizhu || '';
-    record._xpBgPalaces = window._xpBgPalaces || {};
-    record._xpCalcJu = window._xpCalcJu || '';
-    record._xpBgKongWang = window._xpBgKongWang || '';
-    record._xpBgMaXing = window._xpBgMaXing || '';
-    record._xpBgXunShou = window._xpBgXunShou || '';
+    // 心盘状态是模块闭包变量(_xpData/_xpBg*), 曾误读 window.* 导致存档恒为空
+    record._xpData = JSON.parse(JSON.stringify(_xpData));
+    record._xpBgSizhu = _xpBgSizhu;
+    record._xpBgPalaces = JSON.parse(JSON.stringify(_xpBgPalaces));
+    record._xpCalcJu = _xpCalcJu;
+    record._xpBgKongWang = _xpBgKongWang;
+    record._xpBgMaXing = _xpBgMaXing;
+    record._xpBgXunShou = _xpBgXunShou;
   }
   try {
     let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -1725,20 +1727,21 @@ function loadSaved(i) {
     let yhd = document.getElementById('yixinghuandouDIV');
     if (yhd) yhd.style.display = 'none';
     if (r.mode === 'xin' && r._xpData) {
-      window._xpData = JSON.parse(JSON.stringify(r._xpData));
-      window._xpBgSizhu = r._xpBgSizhu || '';
-      window._xpBgPalaces = r._xpBgPalaces || {};
-      window._xpCalcJu = r._xpCalcJu || '';
-      window._xpBgKongWang = r._xpBgKongWang || '';
-      window._xpBgMaXing = r._xpBgMaXing || '';
-      window._xpBgXunShou = r._xpBgXunShou || '';
+      // 必须写回闭包变量: renderXinpan 读的是 _xpData, 写 window.* 不会被读取
+      _xpData = JSON.parse(JSON.stringify(r._xpData));
+      _xpBgSizhu = r._xpBgSizhu || '';
+      _xpBgPalaces = r._xpBgPalaces || {};
+      _xpCalcJu = r._xpCalcJu || '';
+      _xpBgKongWang = r._xpBgKongWang || '';
+      _xpBgMaXing = r._xpBgMaXing || '';
+      _xpBgXunShou = r._xpBgXunShou || '';
       document.getElementById('xinpanPanel').style.display = '';
     }
     if (r.mode) _saveMode = r.mode;
     _renderBottomBar();
     _bindActionButtons();
     setTimeout(fixYinGanAlign, 50);
-  } catch(e) {}
+  } catch(e){ _logErr('loadSaved', e && e.message); }
 }
 
 function delChecked() {
@@ -1789,7 +1792,7 @@ async function _shareTextFile(data) {
   let FS = window.Capacitor.Plugins.Filesystem;
   let Share = window.Capacitor.Plugins.Share;
   // 先写缓存目录
-  try { await FS.mkdir({path: '.', directory: 'CACHE', recursive: true}); } catch(e) {}
+  try { await FS.mkdir({path: '.', directory: 'CACHE', recursive: true}); } catch(e){ _logErr('cacheDir', e && e.message); }
   let wr = await FS.writeFile({path: fn, data: data, directory: 'CACHE'});
   // 用Share插件分享文件URI, 用户可选择保存到文件管理器
   if (wr && wr.uri) {
@@ -1912,7 +1915,7 @@ function _renderBottomBar() {
     bar.appendChild(hb);
     bar.appendChild(ab);
     bar.appendChild(sb);
-  } catch(e) {}
+  } catch(e){ _logErr('bottomBar', e && e.message); }
 }
 
 // === 关于弹窗 ===
@@ -1936,7 +1939,7 @@ function showAbout() {
     document.body.appendChild(dlg);
     dlg.addEventListener('click', e => { if (e.target === dlg) dlg.parentNode.removeChild(dlg); });
     document.getElementById('aboutCloseBtn').addEventListener('click', () => { dlg.parentNode.removeChild(dlg); });
-  } catch(e) {}
+  } catch(e){ _logErr('about', e && e.message); }
 }
 
 // Tauri启动时从文件同步记录
@@ -2380,7 +2383,7 @@ function autoFillXinpan(anchorGong) {
   if (ov) ov.style.display = 'none';
   window._xpEditGong = 0;
   renderXinpan(true);
-  } catch(e) {}
+  } catch(e){ _logErr('autoFillXinpan', e && e.message); }
 }
 
 // 地盘/天盘干变更时自动计算寄干
@@ -2764,6 +2767,7 @@ function doChuanRen(){
 
 
 
+window._logErr=_logErr;  // 供 qimen_chuanren.js 等下游模块记录异常(其在 app 之前加载, 运行时才调用)
 window.Y=Y;
 window.M=M;
 window.D=D;

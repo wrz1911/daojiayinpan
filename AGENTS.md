@@ -6,9 +6,9 @@
 ## 项目概况
 
 - 路径 `/home/wrz/文档/奇门排盘`,作者 地天泰,仓库 github.com/wrz1911/daojiayinpan
-- 五种盘型:1=时盘 2=刻盘 3=心盘 4=山向 5=穿壬;纯 HTML+JS 前端,Tauri 2 桌面 + Capacitor Android,当前版本 **1.3.9**(Android versionCode 10309)
+- 五种盘型:1=时盘 2=刻盘 3=心盘 4=山向 5=穿壬;纯 HTML+JS 前端,Tauri 2 桌面 + Capacitor Android,当前版本 **1.3.10**(Android versionCode 10310)
 - 前端:qimen_app/yinpan_standalone.html + css/yinpan_app.css + 4 个自有 IIFE JS(qimen_constants.js 112 行 / qimen_engine_min.js 475 行 / qimen_chuanren.js 617 行 / **yinpan_app.js 2800+ 行**)由 scripts/build_bundle.sh(cat 拼接 + esbuild --minify --target=es2017)合成 qimen_bundle.min.js(~149KB);tyme4j-browser.js 日历库;gong_detail_data.js(258KB 宫位详解)懒加载
-- **yinpan_app IIFE 是 strict 模式——未声明赋值必抛 ReferenceError,历史踩过 4 次同类雷(h/ag/agColor/fw,均被 catch 吞掉表现为功能无反应)。ESLint(eslint.config.js,no-undef/no-redeclare error 级)已设防,0 errors;50 个 no-unused-vars warning 是历史遗留未清理**
+- **yinpan_app IIFE 是 strict 模式——未声明赋值必抛 ReferenceError,历史踩过 4 次同类雷(h/ag/agColor/fw,均被 catch 吞掉表现为功能无反应)。ESLint(eslint.config.js,no-undef/no-redeclare error 级)已设防,0 errors;44 个 no-unused-vars warning 是历史遗留未清理。**注意 `npx eslint .` 会因 tyme4j/ 子目录的 eslint.config.mjs 缺 typescript-eslint 而崩,必须用 `npx eslint qimen_app/js/*.js`**
 - 网页版:gh-pages 部署 https://wrz1911.github.io/daojiayinpan/(CI release job 构建 bundle 后由 peaceiris/actions-gh-pages 部署,与 exe 直链共存;根 index.html 重定向到 qimen_app/yinpan_standalone.html)
 
 ## 构建与发布流程
@@ -23,10 +23,10 @@
 ## Android 签名(2026-08-14 全部理顺)
 
 - **keystore:android/qimen-release.keystore**,DN=`CN=地天泰, OU=道家阴盘奇门遁甲, O=github.com/wrz1911/daojiayinpan, C=CN`,SHA-256 指纹 5376ae5f...e8a9(**2026-08-15 重生成;旧 CN=王润梓 keystore 归档于 ~/qimen-sign-old/,旧签名 App 无法覆盖安装,用户需先卸载再装新版**),RSA2048/SHA384withRSA/10000 天,别名 qimen
-- 密码 qimen123 存 android/gradle.properties(QIMEN_STORE_PASSWORD/QIMEN_KEY_PASSWORD,不入库),build.gradle 用 `project.findProperty()` 读取;**CI:Secrets KEYSTORE_BASE64(keystore 的 base64)+ KEYSTORE_PASSWORD,运行时注入 gradle.properties,仓库零明文密码**;CI APK 与本地签名一致,可覆盖安装升级
+- 签名口令存 android/gradle.properties(QIMEN_STORE_PASSWORD/QIMEN_KEY_PASSWORD,不入库,**口令值只写在该文件,勿再记录到任何入库文件**),build.gradle 用 `project.findProperty()` 读取;**CI:Secrets KEYSTORE_BASE64(keystore 的 base64)+ KEYSTORE_PASSWORD,运行时注入 gradle.properties,仓库零明文密码**;CI APK 与本地签名一致,可覆盖安装升级
 - 历史坑:曾经根目录 qimen-release.keystore 与 android/ 下的 keystore 是两个不同文件(CI 与本地签名不一致,覆盖安装失败);旧签名文件已归档 ~/qimen-sign-old/
 - 验证:`/home/wrz/Android/sdk/build-tools/35.0.0/apksigner verify --print-certs <apk>`
-- 本机 ANDROID_HOME=/opt/android-sdk 已过时,实际 SDK 在 /home/wrz/Android/sdk(local.properties sdk.dir),build-tools 34/35 并存
+- 系统旧 SDK /opt/android-sdk 已于 2026-08-16 删除;唯一 SDK 在 /home/wrz/Android/sdk(local.properties sdk.dir),build-tools 28.0.3/34/35 并存, ANDROID_HOME 已写入 ~/.bashrc 与 fish 配置
 
 ## 无线调试部署(手机 192.168.1.5:46529,设备 5d5c76a6)
 
@@ -54,6 +54,7 @@
 ## 关键教训(必读)
 
 - **沙箱拦截整条 bash 命令**:命令文本/提交信息含敏感词(如 "cargo install")整条不执行(含 git add)→ 后续 commit 报无暂存;务必避开敏感词
+- **bundle 里的中文是 \uXXXX 转义**:esbuild 默认 charset=ascii,qimen_bundle.min.js 内不存在原始中文字面量,用 grep 中文判断"改动是否打进 bundle"会误判;应改用重建比对(cmp)或转义形式(戌=\u620C 亥=\u4EA5 申=\u7533 酉=\u9149)
 - **git commit 勿接管道**:`git commit | tail` 的退出码是 tail 的 0 → && 链继续跑 → 曾导致 release.sh 在 commit 失败后仍 push tag 指向旧提交;必须取消重推
 - cap sync 必须在项目根跑(在 android/ 跑假成功+旧资源)
 - 用户偏好:README 只放面向用户内容(开发者细节、无线调试、签名机制等都不写,写一次被要求删一次);优化建议按用户逐项拍板,不做:SignPath(已废弃)、macOS 公证(README 提示代替)、暗色跟随系统(保持统一界面)、桌面自动更新、结构拆分/存储三轨统一(提出后被否)、Android 文件化持久化(2026-08-15 用户终止)
@@ -75,3 +76,4 @@
 - 2026-08-13:5 步优化完成(引擎去重+use strict / window.QM 常量+山向下沉 / esbuild 打包+懒加载 / CSS 变量+暗色 / 测试+CI),分支 auto-fix-20260803 未 push;第二轮优化评估后用户决定「先到这」
 - 2026-08-13 晚:重编译所有平台(Linux+Android,tauri-cli 改项目内安装 2.11.4;cargo install 被沙箱拦截);deb/rpm 1.3.5 + APK 1.8M
 - 2026-08-14:修复心盘编辑器(h 未声明 strict 抛错被吞,提交 d35b7a5);删测试(e6f0b69);清理诊断(8c31e85,-1943 字节);穿壬阴干显示两次修复(a142517,幂等);v1.3.8 发布(签名密码去明文、穿壬性能、CI 加速、keystore 换新);v1.3.9 当前
+- 2026-09-13:项目自 ~/文档/奇门排盘 迁移至 ~/src/qimen(Android SDK、Gradle 缓存、git/gh 配置一并迁移);随后全量自动化修复:①穿壬八字空亡改用旬映射(原 `gIdx*12+zIdx` 公式在数学上不成立,4 柱错 3,10 组日期对拍已通过)②心盘存档统一回闭包状态(此前保存读 window._xpData、恢复写 window._xpData,而渲染读闭包变量,导致存档恒为空)③14 处空 catch 补 _logErr(仅错误上报机制自身保留静默以免递归)④清除 AGENTS.md/setup-apk.sh 明文签名口令,改由 QIMEN_KEYSTORE_PASSWORD 环境变量传入 ⑤release.sh 补全 package-lock.json(两处)/Cargo.toml/Cargo.lock/android build.gradle 的版本同步 ⑥Cargo.toml 元数据填充并版本对齐 1.3.10 ⑦修正 setup-apk.sh 的 keystore 路径错位(曾生成到项目根,而 build.gradle 指向 android/ 下)⑧清理 .gitignore 重复项与 .desktop 旧路径。bundle 已重建(149625 字节)并验证可逐字节重现

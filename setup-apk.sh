@@ -54,12 +54,21 @@ fi
 echo "[4/6] 同步 web 资源到 Android..."
 npx cap sync
 
-# 5. 生成签名密钥（首次 release）
-if [ "$BUILD_TYPE" = "release" ] && [ ! -f "qimen-release.keystore" ]; then
+# 5. 生成签名密钥（仅首次 release 且 keystore 缺失时）
+#    路径须与 android/app/build.gradle 的 storeFile('../qimen-release.keystore') 一致,
+#    否则会重演"根目录与 android/ 下各一份 keystore、CI 与本地签名不一致"的历史坑
+#    口令从环境变量读取,不得硬编码入库
+if [ "$BUILD_TYPE" = "release" ] && [ ! -f "android/qimen-release.keystore" ]; then
+  if [ -z "$QIMEN_KEYSTORE_PASSWORD" ]; then
+    echo "[5/6] 错误: 需生成新签名密钥, 但未设置 QIMEN_KEYSTORE_PASSWORD" >&2
+    echo "      签名口令不得写入仓库, 请先: export QIMEN_KEYSTORE_PASSWORD=<口令>" >&2
+    echo "      若密钥已存在, 请放置于 android/qimen-release.keystore" >&2
+    exit 1
+  fi
   echo "[5/6] 生成签名密钥..."
-  keytool -genkey -v -keystore qimen-release.keystore -alias qimen \
+  keytool -genkey -v -keystore android/qimen-release.keystore -alias qimen \
     -keyalg RSA -keysize 2048 -validity 10000 \
-    -storepass qimen123 -keypass qimen123 \
+    -storepass "$QIMEN_KEYSTORE_PASSWORD" -keypass "$QIMEN_KEYSTORE_PASSWORD" \
     -dname "CN=qimen, OU=qimen, O=qimen, L=Unknown, ST=Unknown, C=CN"
 else
   echo "[5/6] 签名密钥已存在或非 release 构建，跳过"

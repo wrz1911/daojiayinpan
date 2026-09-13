@@ -14,9 +14,22 @@ fi
 
 echo "=== 同步版本号到 v${VER} ==="
 sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${VER}\"/" src-tauri/tauri.conf.json package.json
+# package-lock.json 的两处 version(顶层 2 空格缩进、packages[""] 6 空格缩进)需分别定位
+sed -i "0,/^  \"version\": \"[^\"]*\"/s//  \"version\": \"${VER}\"/" package-lock.json
+sed -i "0,/^      \"version\": \"[^\"]*\"/s//      \"version\": \"${VER}\"/" package-lock.json
 # 同步关于弹窗中的 APP_VERSION 常量
 sed -i "s/const APP_VERSION = '[^']*'/const APP_VERSION = '${VER}'/" qimen_app/js/yinpan_app.js
-git add src-tauri/tauri.conf.json package.json qimen_app/js/yinpan_app.js
+# 同步 Tauri 的 Rust 包版本(与 tauri.conf.json 保持一致)及 Cargo.lock 中的 app 条目
+sed -i "s/^version = \"[^\"]*\"/version = \"${VER}\"/" src-tauri/Cargo.toml
+perl -0pi -e "s/(\[\[package\]\]\nname = \"app\"\nversion = \")[^\"]*/\${1}${VER}/" src-tauri/Cargo.lock
+# Android 版本(android/ 不入库, 存在时才同步); versionCode = major*10000+minor*100+patch
+VCODE=$(echo "$VER" | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')
+if [ -f android/app/build.gradle ]; then
+  sed -i "s/versionCode [0-9]\+/versionCode ${VCODE}/" android/app/build.gradle
+  sed -i "s/versionName \"[^\"]*\"/versionName \"${VER}\"/" android/app/build.gradle
+  echo "  (已同步 android/app/build.gradle → ${VER} / ${VCODE})"
+fi
+git add src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock package.json package-lock.json qimen_app/js/yinpan_app.js
 if git diff --cached --quiet; then
   echo "版本号已是 v${VER}, 跳过同步提交"
 else

@@ -159,7 +159,7 @@ window.chuanRenChart= opts => {
   }catch(e){juLabel=''}
 
   let nongliStr='';
-  try{nongliStr=ld.getLunarMonth().getLunarYear().getYear()+'年'+ld.getLunarMonth().getName()+ld.getName();}catch(e){}
+  try{nongliStr=ld.getLunarMonth().getLunarYear().getYear()+'年'+ld.getLunarMonth().getName()+ld.getName();}catch(e){ window._logErr && window._logErr('nongli', e && e.message); }
 
 
 
@@ -279,10 +279,11 @@ window.computeBaZiDaYun= opts => {
   // 自坐: 各柱地支对自己天干的长生状态
   let zizuo=bz.map(b => {return getCS(b.g, b.z);});
 
-  // 空亡: 各柱旬空
+  // 空亡: 各柱旬空(旬由"地支索引-天干索引"的差值唯一确定, 与 chuanRenChart 的 kwMap 口径一致)
   let xunKong=bz.map(b => {
-    let xs=Math.floor((b.gIdx*12+b.zIdx)/10)*10;
-    return Z2[(xs+10)%12]+Z2[(xs+11)%12];
+    let kwMap={0:['戌','亥'],2:['子','丑'],4:['寅','卯'],6:['辰','巳'],8:['午','未'],10:['申','酉']};
+    let p=kwMap[((b.zIdx-b.gIdx)%12+12)%12]||['子','丑'];
+    return p[0]+p[1];
   });
 
   // 五行色
@@ -534,7 +535,7 @@ window.renderChuanRen=(data,containerId) => {
       h+='</tr>';
     }
     h+='</table>';
-  }catch(e){}
+  }catch(e){ window._logErr && window._logErr('renderChuanRen', e && e.message); }
 
   // ====== CSS ======
   h+='<style>'+

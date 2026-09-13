@@ -14,4 +14,3 @@ qimen-yinpan.desktop
 src-tauri/target/
 code-sign-*.pem
 setup-desktop.sh
-qimen-yinpan.desktop
