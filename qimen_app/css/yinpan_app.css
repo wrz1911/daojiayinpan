@@ -117,10 +117,10 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .right td{text-align:right}
 #Tip{line-height:30px;font-size:13px;color:var(--c-text-3);text-align:center}
 #btnTable1,#btnTable2{width:100%;table-layout:fixed;border-collapse:collapse}
-#btnTable1 td,#btnTable2 td{text-align:center;padding:2px;}
+#btnTable1 td,#btnTable2 td{text-align:center;padding:2px 3px;box-sizing:border-box}
 #btnTable1 td:first-child,#btnTable2 td:first-child{padding-left:0px}
 #btnTable1 td:last-child,#btnTable2 td:last-child{padding-right:0px}
-.btn{line-height:30px;width:100%;border-radius:3px;text-align:center;background:var(--c-theme);color:#fff;font-size:14px}
+.btn{line-height:30px;width:100%;box-sizing:border-box;border-radius:3px;text-align:center;background:var(--c-theme);color:#fff;font-size:14px}
 #preBtn{float:left;margin-left:10px;}
 #nextBtn{float:right;margin-right:10px;}
 .xiang{border-bottom:solid 1px var(--c-border);line-height:25px;font-size:14px;text-align:justify;padding-top:5px;padding-bottom:5px}
@@ -277,7 +277,9 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 .liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;font-family:Arial,sans-serif}
 .liunian2{font-size:12px;line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
 #btnTable1,#btnTable2{width:100%;margin:8px auto;border-collapse:collapse}
-#btnTable1 .btn,#btnTable2 .btn{background:#0dc2b3;color:#fff;border-radius:4px;text-align:center;padding:6px 4px;font-size:13px;cursor:pointer;margin:2px}
+/* .btn 原为 width:100% 且 margin:2px, 两者相加超出单元格宽度(首尾按钮顶出
+   左右边界)。改为零外边距 + border-box, 间距统一交给 td 的 padding。 */
+#btnTable1 .btn,#btnTable2 .btn{background:var(--c-theme);color:#fff;border-radius:4px;text-align:center;padding:6px 4px;font-size:13px;cursor:pointer;margin:0;box-sizing:border-box;width:100%;display:block}
 #Tip{margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
 #yixinghuandouDIV{margin:6px auto}
 .ml-inner{margin:0 auto}
@@ -447,3 +449,12 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
 
 /* 输入控件: 白底 + 统一边框, 保证改白后仍可辨识 */
 .sel-date, .sel-zxj, #itemInput { border: 1px solid var(--c-border) }
+
+/* ══════ 按钮行与盘体左右边界对齐 ══════
+   盘体(#panHead/#content)自带 1px 边框, 按钮行原本 100% 无边框,
+   两者左右边缘对不齐; 这里让按钮行与其上区块同宽同边界。 */
+#btnTable1, #btnTable2{width:100%;max-width:100%;table-layout:fixed;box-sizing:border-box}
+#btnTable1 td:first-child, #btnTable2 td:first-child{padding-left:0}
+#btnTable1 td:last-child, #btnTable2 td:last-child{padding-right:0}
+/* 翻页按钮同理不越界 */
+#preBtn{margin-left:0} #nextBtn{margin-right:0}
