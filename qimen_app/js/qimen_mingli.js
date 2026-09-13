@@ -239,11 +239,10 @@
         // <div id="content"> 与 <TABLE id="pan">
         h += window.buildPaipanGrid(pals, kongGongs, (qr.ma && qr.ma.p) || 'ma2', agFn,
                { colorSpan: csFn });
-        // 颜色说明(热卜 #Tip)
+        // 颜色说明(与穿壬/时盘同一行文案, 用共用 .cx-* 类, 随主题变量走)
         h += '<div id="Tip">颜色说明：' +
-             '<span style="color:#ca610e">入墓</span>、<span style="color:#b745ce">击刑</span>、' +
-             '<span style="color:red">门迫</span>、<span style="color:#009cef;">刑+墓</span>；' +
-             '<span style="color:#aaa">点击宫位查看信息</span></div>';
+             '<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、' +
+             '<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span></div>';
       }
 
       /* ── ③ #dayun_liunian 大运 + 流年(两个独立 TABLE, 照搬热卜) ── */
