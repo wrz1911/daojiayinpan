@@ -2726,7 +2726,7 @@ function doChuanRen(){
         let old=topRow.querySelector('.cr-anGan');if(old)old.remove();
         let wrap=document.createElement('span');wrap.className='cr-anGan';wrap.style.cssText='float:right;white-space:nowrap;margin-left:4px';
         if(kw&&kw.textContent.replace(/\s/g,'').trim()=='○'){let ks=document.createElement('span');ks.textContent='○';ks.style.cssText='font-weight:bold;color:var(--c-text);margin-right:1px';wrap.appendChild(ks);kw.style.display='none';}
-        let ag=document.createElement('span');ag.textContent=agText;ag.style.cssText='color:var(--c-text-3);font-size:70%';wrap.appendChild(ag);
+        let ag=document.createElement('span');ag.textContent=agText;ag.style.cssText='color:var(--c-text-3);font-size:100%';wrap.appendChild(ag);
         topRow.appendChild(wrap);
       });
       // 3. 12地支卡片: 预读全部宫格 rect 再统一写样式, 消除每卡一次强制布局
