@@ -358,7 +358,7 @@ function renderShanXiangPan2(deg,name,ju,isYin,hq,shiZhu,sxData){
   document.getElementById('result').style.display='block';
   window._palaces=palaces;
   _renderBottomBar();
-  setTimeout(_bindActionButtons,50);setTimeout(fixYinGanAlign,50);
+  setTimeout(_bindActionButtons,50);scheduleYinGanAlign();
   }catch(e){tip.style.display='block';tip.innerHTML='<span style=color:red>山向错误:'+e.message+'</span>';}
 }
 
@@ -804,8 +804,7 @@ function renderPan(raw, engineData) {
     if (el) { el.innerHTML = ''; el.style.fontSize = ''; el.style.lineHeight = ''; }
   }
   setTimeout(_bindActionButtons, 10);
-  setTimeout(fixYinGanAlign, 10);
-  setTimeout(fixYinGanAlign, 50);
+  scheduleYinGanAlign();
 }
 
 /* ══════════════════ 地八神 (时盘) ══════════════════
@@ -928,6 +927,24 @@ window.buildRenBaShenMap = buildRenBaShenMap;
 window.toggleRenBaShen = toggleRenBaShen;
 
 // ============ 颜色标记 + 阴干对齐 ============
+/* 阴干对齐依赖宫内的行高, 而行高受字体影响: 中文首屏字体加载较慢, 原先只在
+   10/50ms 各跑一次, 很可能跑在字体就绪之前 —— 按 fallback 字体算出的 paddingTop
+   就偏了, 表现为侧边阴干与宫内那一行错开。这里补上字体就绪、更晚的延时点
+   以及窗口尺寸变化(手机地址栏伸缩也算)时的重算; 函数本身幂等, 多跑几次无妨。 */
+let _ygaBound = false;
+function scheduleYinGanAlign() {
+  setTimeout(fixYinGanAlign, 10);
+  setTimeout(fixYinGanAlign, 50);
+  setTimeout(fixYinGanAlign, 300);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => fixYinGanAlign()).catch(() => {});
+  }
+  if (!_ygaBound) {
+    _ygaBound = true;
+    window.addEventListener('resize', () => fixYinGanAlign(), { passive: true });
+  }
+}
+
 function fixYinGanAlign() {
   // 主盘 + 移星换斗统一处理
   let containers = [document];
@@ -1233,8 +1250,7 @@ function renderXinpan(useBg) {
   _renderBottomBar();
   _bindActionButtons();
   setTimeout(_bindActionButtons, 50);
-  setTimeout(fixYinGanAlign, 10);
-  setTimeout(fixYinGanAlign, 50);
+  scheduleYinGanAlign();
   } catch(e){ _logErr('renderXinpan', e && e.message); }
 }
 
