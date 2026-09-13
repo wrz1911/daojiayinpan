@@ -126,7 +126,7 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .xiang{border-bottom:solid 1px var(--c-border);line-height:25px;font-size:14px;text-align:justify;padding-top:5px;padding-bottom:5px}
 #yixinghuandouDIV{border:solid 1px var(--c-border);padding-bottom:20px;margin-top:10px;display:none}
 .tableTitle{line-height:30px;text-align:center;border-top:solid 1px var(--c-border);padding-top:10px;margin-top:-1px}
-.tempTable{width:100%;margin-top:10px;margin-bottom:20px;max-width:500px;}
+.tempTable{width:100%;margin-top:10px;margin-bottom:20px;}
 .maGONG1{width:55px;text-align:right;vertical-align:bottom;color:var(--c-horse);line-height:10px}
 .maGONG2{width:55px;text-align:left;vertical-align:bottom;color:var(--c-horse);line-height:10px}
 .maGONG3{width:55px;text-align:right;vertical-align:top;color:var(--c-horse);line-height:10px}
@@ -266,18 +266,21 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
 
 /* === 命理奇门(panType 6) 样式类 === */
 #dayun_liunian{margin-top:8px}
-#dayun_liunian .pan{width:100%;max-width:520px;margin:0 auto;border-collapse:collapse}
+/* table-layout:fixed 必须加: 否则 10 列各自按内容定宽, 年份/干支列宽参差、
+   内容被挤(干支会显示不全); 大运与流年两表都在 #dayun_liunian 内, 一并生效 */
+#dayun_liunian .pan{width:100%;margin:0 auto;border-collapse:collapse;table-layout:fixed;margin-top:-1px}
+#dayun_liunian .pan td{white-space:nowrap;padding-left:1px;padding-right:1px}
 .yunTitle{color:var(--c-gold);width:8%;vertical-align:middle;text-align:center;font-size:12px;line-height:15px}
 .yun1{font-size:11px;color:var(--c-gold);line-height:16px;text-align:center;font-family:Arial,sans-serif}
 .yun2{padding-top:4px;padding-bottom:2px;font-weight:bold;font-size:13px;line-height:17px;text-align:center;cursor:pointer}
 .yun2 .shishen{font-weight:normal;font-size:10px;color:var(--c-text-3)}
 .liunian1{font-size:10px;color:var(--c-gold);line-height:14px;text-align:center;background:var(--c-gray-bg);font-family:Arial,sans-serif}
 .liunian2{font-size:12px;background:var(--c-gray-bg);line-height:17px;color:var(--c-text);padding-top:3px;padding-bottom:2px;text-align:center;font-family:Arial,sans-serif}
-#btnTable1,#btnTable2{width:100%;max-width:520px;margin:8px auto;border-collapse:collapse}
+#btnTable1,#btnTable2{width:100%;margin:8px auto;border-collapse:collapse}
 #btnTable1 .btn,#btnTable2 .btn{background:#0dc2b3;color:#fff;border-radius:4px;text-align:center;padding:6px 4px;font-size:13px;cursor:pointer;margin:2px}
-#Tip{max-width:520px;margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
-#yixinghuandouDIV{max-width:520px;margin:6px auto}
-.ml-inner{max-width:520px;margin:0 auto}
+#Tip{margin:6px auto;font-size:11px;color:var(--c-text-3);text-align:center;line-height:18px}
+#yixinghuandouDIV{margin:6px auto}
+.ml-inner{margin:0 auto}
 
 /* ══════ 八字盘(配色映射到主题变量, 暗色自动适配) ══════ */
 .bz-pan{overflow:auto;padding:6px 0}
@@ -385,4 +388,26 @@ body.mode-mingli #panHead #tdTitle td{font-size:12px!important}
   body.mode-mingli #panHead .sizhu{font-size:26px!important;line-height:32px!important}
   body.mode-mingli #panHead .sizhuTitle{font-size:15px!important}
   body.mode-mingli #panHead #tdTitle td{font-size:15px!important}
+}
+
+/* ══════ 命理宫格正方化 ══════
+   与穿壬同一根因: 全局 #pan td / #pan .panItem 带 !important 且特异性更高,
+   会压掉普通写法, 使宫格沿用 14px 内边距与 26px 字/40px 行高 —— 内容把格子
+   顶高, 宫位失去正方形。故用 #pan.ml-pan 提高特异性后收紧。 */
+#pan.ml-pan td{vertical-align:top!important;padding-left:4px!important;padding-right:4px!important;padding-top:6px!important;padding-bottom:6px!important}
+#pan.ml-pan .panItem{line-height:22px!important;font-size:14px!important}
+#pan.ml-pan .panItem span{white-space:nowrap}
+#pan.ml-pan .state{font-size:10px!important;line-height:11px!important}
+@media (min-width:1025px){
+  #pan.ml-pan td{padding-left:6px!important;padding-right:6px!important}
+  #pan.ml-pan .panItem{line-height:26px!important;font-size:16px!important}
+}
+
+/* ══════ 6 个盘型底部区块与上部同宽 ══════
+   原先 #mainDIV 与主盘/九宫为 600px, 而大运流年/按钮行/说明行/换斗区
+   各自写死 520px(部分 JS 内联为 340/500px), 宽屏下上下宽度不齐。
+   现统一交给 #mainDIV 约束, 各区块一律撑满, 上下一致。 */
+#dayun_liunian, #btnTable1, #btnTable2, #Tip, #yixinghuandouDIV,
+.ml-inner, .ml-dy-wrap, .cr-bz-tbl, .cr-dy-tbl, .cr-grid-wrap, .xj-pan{
+  max-width:100%!important;margin-left:auto;margin-right:auto
 }

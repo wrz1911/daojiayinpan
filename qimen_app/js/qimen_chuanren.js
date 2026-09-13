@@ -545,11 +545,15 @@ window.renderChuanRen=(data,containerId) => {
 
   // ====== CSS ======
   h+='<style>'+
-  '.cr-grid-wrap{position:relative;max-width:340px;margin:0 auto}'+
+  // 宽度交给 #mainDIV 统一约束, 与主盘/九宫等宽
+  '.cr-grid-wrap{position:relative;margin:0 auto;width:100%}'+
   '.cr-content table{width:100%;border-collapse:collapse}'+
   '.cr-pan{border:solid 1px #ddd;width:100%;border-collapse:collapse;table-layout:fixed!important}'+
-  '.cr-pan td{vertical-align:top!important;padding-left:14px!important;padding-right:14px!important;padding-top:8px!important}'+
-  '.cr-pan .panItem{line-height:24px!important;font-size:15px!important}'+
+  // 关键: 这两条必须用 #pan.cr-pan 提高特异性。全局规则 #pan .panItem(1,1,0)
+  // 与 #pan td(1,0,1) 带 !important, 会压掉原先的 .cr-pan 写法(0,2,0/0,1,1),
+  // 导致宫格沿用 26px 字/40px 行高与 14px 内边距 —— 内容把格子顶高, 失去正方形。
+  '#pan.cr-pan td{vertical-align:top!important;padding-left:4px!important;padding-right:4px!important;padding-top:6px!important;padding-bottom:6px!important}'+
+  '#pan.cr-pan .panItem{line-height:22px!important;font-size:14px!important}'+
   // 穿壬外圈标签
   '.cr-card{position:absolute;display:flex;flex-direction:column;align-items:center;border:1px solid #e0e0e0;border-radius:6px;background:#fff;padding:4px 6px;text-align:center;white-space:nowrap;font-size:12px}'+
   '.cr-ctg{color:#333;font-size:13px;font-weight:bold}'+
@@ -565,13 +569,13 @@ window.renderChuanRen=(data,containerId) => {
   '.cr-sc-tg{color:#c00;font-size:14px;font-weight:bold}'+
   '.cr-sc-dz{color:#333;font-size:14px;font-weight:bold}'+
   '.cr-sc-ex{color:#333;font-size:14px;font-weight:bold}'+
-  '.cr-bz-tbl{width:100%;max-width:500px;margin:0 auto;border-collapse:collapse;font-size:12px}'+
+  '.cr-bz-tbl{width:100%;margin:0 auto;border-collapse:collapse;font-size:12px}'+
   '.cr-bz-tbl td{border:1px solid #e6e6e6;text-align:center;vertical-align:middle;padding:4px 2px;line-height:1.3}'+
   '.cr-bz-tbl tr td:first-child{background:#f9f6ef;color:#c8a878;font-weight:500;font-size:11px}'+
   '.cr-bz-zao td{font-size:18px;font-weight:bold;padding:2px 1px!important}'+
   '.cr-bz-cg td{font-size:13px;padding:2px 1px!important}'+
   '.cr-bz-cgss{font-size:10px;color:#999}'+
-  '.cr-dy-tbl{width:100%;max-width:500px;margin:0 auto;border-collapse:collapse;border:1px solid #e5e5e5;border-top:none}'+
+  '.cr-dy-tbl{width:100%;margin:0 auto;border-collapse:collapse;border:1px solid #e5e5e5;border-top:none}'+
   '.cr-dy-tbl td{border:1px solid #e5e5e5;text-align:center;vertical-align:middle;padding:4px 2px;font-size:14px;line-height:1.35}'+
   '.cr-dy-lbl{background:#f9f6ef;color:#c8a878;font-weight:500;font-size:14px!important}'+
   '.cr-dy-lbl-v{width:24px;writing-mode:vertical-rl;letter-spacing:4px}'+

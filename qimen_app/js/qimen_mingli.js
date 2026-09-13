@@ -256,7 +256,7 @@
         // 不传 wrapperClass/panClass, 让 buildPaipanGrid 生成标准的
         // <div id="content"> 与 <TABLE id="pan">
         h += window.buildPaipanGrid(pals, kongGongs, (qr.ma && qr.ma.p) || 'ma2', agFn,
-               { colorSpan: csFn });
+               { colorSpan: csFn, panClass: 'ml-pan' });
         /* 颜色说明已上移到主盘内, 见上方 baziMainRows 调用处 */
       }
 
@@ -306,7 +306,7 @@
     }
 
     h += '<style>' +
-      '.ml-dy-wrap{width:100%;max-width:520px;margin:0 auto}' +
+      '.ml-dy-wrap{width:100%;margin:0 auto}' +
       '</style>';
 
     if (containerId) {

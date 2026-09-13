@@ -2654,7 +2654,9 @@ function doMingli(){
     _renderBottomBar();
     setTimeout(_bindActionButtons,50);
     // 宫位正方形 + 外圈行高同步 + 阴干对齐(照时盘/山向)
-    setTimeout(function(){ if(window.mingliFixLayout) window.mingliFixLayout(); },60);
+    /* 同穿壬: 宫格尺寸受字体加载影响, 在多个时机重算(fixLayout 幂等) */
+    [0,120,400,900].forEach(function(t){ setTimeout(function(){ if(window.mingliFixLayout) window.mingliFixLayout(); }, t); });
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){ if(window.mingliFixLayout) window.mingliFixLayout(); }).catch(function(){});
   }catch(e){
     let pw=document.getElementById("panWrap");
     if(pw)pw.innerHTML='<span style="color:red">命理错误:'+(e&&e.message)+'</span>';
@@ -2700,7 +2702,7 @@ function doChuanRen(){
     document.getElementById("panWrap").innerHTML=window.renderChuanRen(data,null);
     _renderBottomBar();
     setTimeout(_bindActionButtons, 50);
-    requestAnimationFrame(() =>{
+    function layoutCrOuter(){
       let crW=document.querySelector('.cr-grid-wrap');if(!crW)return;
       let pans=crW.querySelectorAll('#pan');if(!pans.length)return;
       let pan=pans[0];
@@ -2752,7 +2754,17 @@ function doChuanRen(){
 
       // 移除宫位点击(穿壬不需要)
       document.querySelectorAll('[id^=yinGan]').forEach(y => {y.onclick=null;y.style.cursor='default';});
-      document.querySelectorAll('[id^=gong]').forEach(x => {x.onclick=null;x.style.cursor='default';});    });
+      document.querySelectorAll('[id^=gong]').forEach(x => {x.onclick=null;x.style.cursor='default';});
+    }
+    /* 外圈布局(宫格正方化 + 卡片定位)依赖宫格实际尺寸, 而尺寸受字体影响:
+       web 端中文字体首次加载较慢, 只算一次会按 fallback 字体定位从而错位,
+       故在字体就绪、若干延时点、窗口尺寸变化时都重算一次(函数幂等, 可重复调用) */
+    requestAnimationFrame(layoutCrOuter);
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(layoutCrOuter).catch(function(){});
+    [120,400,900].forEach(function(t){setTimeout(layoutCrOuter,t);});
+    if(window._crLayoutPrev)window.removeEventListener('resize',window._crLayoutPrev);
+    window._crLayoutPrev=layoutCrOuter;
+    window.addEventListener('resize',layoutCrOuter,{passive:true});
   }catch(e){
     document.getElementById("panWrap").innerHTML="<span style=\"color:red;user-select:text;-webkit-user-select:text\">穿壬错误:"+e.message+"</span>";
   }
