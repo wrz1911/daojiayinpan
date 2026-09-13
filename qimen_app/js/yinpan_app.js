@@ -187,6 +187,8 @@ function setPanType(t) {
   // 金口诀只在时盘(1)与心盘(3)可用。切到其它盘型时若金口诀面板还开着, 直接刷新
   // 页面, 避免残留面板与新盘型混在一起(setPanType 先于 doPan 执行, 故守卫放这里)
   if (t !== 1 && t !== 3 && (document.getElementById('jinkoujueDIV') || _jkShow)) {
+    // 记住目标盘型, 刷新后自动切过去 —— 否则这次点击只刷新不切换, 用户得点两次
+    try { sessionStorage.setItem('_jkPendingPan', String(t)); } catch (e) {}
     location.reload(); return;
   }
   panType = t;
@@ -1980,6 +1982,20 @@ function _jkYongwei(kz4) {
   return 3;                                           // 纯阴、二阴二阳 → 将为用
 }
 window._jkYongwei = _jkYongwei;
+/* 刷新前若记录了待切换的盘型, 这里自动切过去, 用户不必再点一次 */
+function _jkResumePan() {
+  let t = 0;
+  try { t = parseInt(sessionStorage.getItem('_jkPendingPan') || '0', 10); sessionStorage.removeItem('_jkPendingPan'); } catch (e) {}
+  if (!t || t === panType) return;
+  setTimeout(() => {
+    try {
+      const r = document.querySelector('input[name="panType"][value="' + t + '"]');
+      if (r) { r.checked = true; setPanType(t); doPan(); }
+    } catch (e) { _logErr('jkResumePan', e && e.message); }
+  }, 60);
+}
+window._jkResumePan = _jkResumePan;
+
 /* 自适应字号 —— 不用 clamp()/vw: 部分 Android System WebView 版本不支持 clamp,
    整条声明会失效并退回默认 16px, 导致中宫挤成一团(桌面浏览器正常)。
    这里用 JS 按视口宽度算出像素值写进 CSS 变量, 所有环境表现一致。 */
@@ -1995,6 +2011,7 @@ function _jkFitFont() {
 }
 window._jkFitFont = _jkFitFont;
 _jkFitFont();
+_jkResumePan();   // 若上个页面是因切盘而刷新, 这里自动切到目标盘型
 window.addEventListener('resize', _jkFitFont);
 window.addEventListener('orientationchange', _jkFitFont);
 
