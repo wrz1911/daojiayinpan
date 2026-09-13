@@ -1484,6 +1484,8 @@ function savePan() {
   if (!panWrap) return;
   let titleEl = document.getElementById('title');
   let defaultName = (titleEl ? titleEl.innerText : '') || '';
+  // 命理模块(panType 6): 保存时默认用「姓名」框的内容作事项名称(与热卜一致)
+  if (panType === 6 && _mlVals && _mlVals.name) defaultName = _mlVals.name;
   let h = '<div style="padding:16px 16px 8px">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
     '<span style="font-weight:bold;font-size:16px">保存排盘</span>' +
@@ -2614,7 +2616,7 @@ function refreshXiangJu(){
 }
 
 
-let _mlVals={gender:'男'};
+let _mlVals={name:'',gender:'男'};
 function doMingli(){
   try{
     let tip=document.getElementById("tip");if(tip)tip.innerHTML="";
@@ -2631,11 +2633,18 @@ function doMingli(){
     }
     let box=document.getElementById("mlInputs");
     box.style.display="block";
+    // ★ 先取走现有输入再重建面板 —— 否则重建会把用户正在输入的内容清空
+    //   (穿壬的 crInputs 也是这个模式, 照它写)
+    {
+      let pN=document.getElementById("mlName"), pG=document.getElementById("mlGender");
+      if(pN) _mlVals.name=pN.value;
+      if(pG) _mlVals.gender=pG.value;
+    }
     box.innerHTML=window.renderMingliInputs?window.renderMingliInputs(_mlVals):"";
-    let gEl=document.getElementById("mlGender");
-    _mlVals={gender:gEl?gEl.value:'男'};
+    let gEl=document.getElementById("mlGender"),nEl=document.getElementById("mlName");
+    _mlVals={name:nEl?nEl.value:'',gender:gEl?gEl.value:'男'};
     let data=window.mingliChart({year:Y,month:M,day:D,hour:hr,minute:mn,
-      gender:_mlVals.gender});
+      name:_mlVals.name,gender:_mlVals.gender});
     window._mlData=data;   // 供按钮 onclick="mingliBtn(n, window._mlData)" 取用
     document.getElementById("panWrap").innerHTML=window.renderMingli(data,null);
     // 首屏填充当前大运的流年(热卜进入页面即显示当前运对应的 10 个流年)
