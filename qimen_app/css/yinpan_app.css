@@ -204,8 +204,15 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
   #panHead #tdTitle td{font-size:16px!important}
 }
 /* ===== 穿壬样式 ===== */
-.cr-grid-wrap{position:relative;display:block;width:100%;min-width:300px;overflow:visible}
-.cr-content{position:relative;z-index:1;width:100%}
+/* 穿壬盘: 十二地支卡片绝对定位在宫格左右两侧之外(左列向左侧延伸、右列向右侧
+   延伸)。原先盘体占满容器, 卡片只能顶出容器边界, 从而出现横向滚动条。
+   这里给盘体两侧各留出卡片宽度, 使卡片落在容器内。 */
+.cr-grid-wrap{position:relative;display:block;width:100%;overflow:visible}
+.cr-content{position:relative;z-index:1;width:calc(100% - 144px);margin:0 auto}
+@media (max-width:480px){
+  /* 窄屏卡片字号更小, 留白相应收窄, 避免宫格过窄 */
+  .cr-content{width:calc(100% - 108px)}
+}
 .cr-inner{width:100%;max-width:none!important}
 .cr-pan{width:100%!important;max-width:none!important;table-layout:fixed!important}
 .cr-card{position:absolute;z-index:2;white-space:nowrap;font-size:12px;line-height:16px;text-align:center;pointer-events:none}
@@ -458,3 +465,7 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
 #btnTable1 td:last-child, #btnTable2 td:last-child{padding-right:0}
 /* 翻页按钮同理不越界 */
 #preBtn{margin-left:0} #nextBtn{margin-right:0}
+
+/* 兜底: 穿壬外圈卡片定位在盘体外侧, 极端窄屏下不允许撑出横向滚动条 */
+#mainDIV, #result, #panWrap{overflow-x:hidden}
+.cr-grid-wrap{max-width:100%}
