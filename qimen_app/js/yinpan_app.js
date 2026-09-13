@@ -1990,17 +1990,23 @@ function jinkoujueChart(opt) {
 
   // ── 旺衰: 课内定(四位五行的计数 → 旺的五行 → 依相生序 旺相休囚死) ──
   const WXN = { 水:1, 木:2, 火:3, 土:4, 金:5 };
-  const kzx = [0, JK_ZHI_WX[kz4[1]], JK_ZHI_WX[kz4[2]], JK_ZHI_WX[kz4[3]], JK_ZHI_WX[kz4[4]]];
+  // 旺衰只看四位: 人元【天干】、贵神【地支】、将神【地支】、地分。
+  // 将干与神干不参与(它们是外象, 不是课的实体)。
+  const kzx = [0,
+    QM.WX_MAP[cur.renYuan] || 4,                     // 人元天干五行
+    JK_ZHI_WX[QM.ZHI.indexOf(cur.guiGanZhi[1])],     // 贵神地支五行
+    JK_ZHI_WX[cur.jiangZhiIdx],                      // 将神地支五行
+    JK_ZHI_WX[cur.difenIdx]];                        // 地分五行
   const cnt = [0,0,0,0,0,0];
   for (let i = 1; i < 5; i++) cnt[kzx[i]]++;
   const wangWx = _jkWangWx(cnt);
   // 旺五行 → 等级0, 其后按相生序依次 相1 休2 囚3 死4
   const wsOf = wxIdx => { for (let j = 0; j < 5; j++) if ((wangWx + j - 1) % 5 + 1 === wxIdx) return ['旺','相','休','囚','死'][j]; return ''; };
   houses.forEach(h => {
-    h.renWs = wsOf(JK_ZHI_WX[kz4[1]]);
-    h.guiWs = wsOf(JK_ZHI_WX[kz4[2]]);
-    h.jiangWs = wsOf(JK_ZHI_WX[kz4[3]]);
-    h.difenWs = wsOf(JK_ZHI_WX[kz4[4]]);
+    h.renWs = wsOf(kzx[1]);
+    h.guiWs = wsOf(kzx[2]);
+    h.jiangWs = wsOf(kzx[3]);
+    h.difenWs = wsOf(kzx[4]);
   });
 
   // 五动/三动按【乘支】的五行判(起课结果), 与本位干支无关
