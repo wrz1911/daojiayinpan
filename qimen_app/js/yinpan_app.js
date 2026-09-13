@@ -1234,7 +1234,8 @@ function _jkPick(idx) {
     const ctr = document.getElementById('jkCenter');
     if (ctr) ctr.innerHTML = _jkCenter(chart);
     const info = document.getElementById('jkInfo');
-    if (info) info.innerHTML = _jkInfoHtml(chart);
+    // 起法区也在 #jkInfo 内, 必须一并重绘 —— 否则点十二宫后起法区会被冲掉
+    if (info) info.innerHTML = _jkInfoHtml(chart) + _jkAdvHtml(_jkOpts(), chart) + _jkAdvNumHtml(_jkOpts());
     // 先清掉全部高亮, 再标记当前宫 —— 用 class 而非 inline style,
     // 避免切换后宫位残留底色与内容叠在一起
     document.querySelectorAll('#jinkoujueDIV [data-jk]').forEach(el => el.classList.remove('jk-sel'));
