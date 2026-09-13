@@ -1244,29 +1244,23 @@ function toggleJinKouJue(noScroll) {
     };
     const curIdx = chart.cur.difenIdx;
 
-    // 单宫(仿易瑞): 干支 + 神名 + 旺衰 + 用。人元与地分没有神名,
-    // 让它们的干支直接跨过神名列, 免得留一大段空白
+    // 单宫: 只列 干支 / 旺衰 / 用 —— 不显神名(贵神将神名删去)。
+    // 四行的干支同处一列, 旺衰同处一列, 与中宫的排法一致
     const one = (h) => {
       const isCur = h.difenIdx === curIdx;
       const u = n => h.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
-      // 列宽与间隙: 干支 25 / gap3 / 神名 22 / gap3 / 旺衰 11 / gap3 / 用
-      // 人元与地分没有神名, 其"宽行"须占满 干支+gap+神名+gap = 53px,
-      // 这样它们的旺衰才能与贵神/将神行的旺衰落在同一列(易瑞即如此)
-      const GAP = 3, W1 = 25, W2 = 22, W3 = 11;
-      const wideW = W1 + GAP + W2;   // 占干支+间隙+神名; 其后紧跟的 gap 与正常行一致
-      const line = (a, b, ws, mk, wide) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px;gap:' + GAP + 'px">' +
-        '<span style="flex:0 0 ' + (wide ? wideW : W1) + 'px;overflow:hidden">' + a + '</span>' +
-        (wide ? '' : '<span style="flex:0 0 ' + W2 + 'px;overflow:hidden">' + (b || '') + '</span>') +
-        '<span style="flex:0 0 ' + W3 + 'px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap;height:23px">' +
+        '<span style="flex:0 0 36px;overflow:hidden">' + a + '</span>' +
+        '<span style="flex:0 0 14px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
         '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
         ' class="jk-cell' + (isCur ? ' jk-sel' : '') + '"' +
         ' style="cursor:pointer;padding:7px 2px 3px;font-size:11px;line-height:1.7;overflow:hidden;' +
         'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' +
-        line('<span class="' + col(h.renWx) + '">' + h.renYuan + '</span>', '', h.renWs, '', true) +
-        line(wxSpan(h.guiGanZhi), shenSpan(h.guiShen, QM.ZHI.indexOf(h.guiGanZhi[1])), h.guiWs, u(2)) +
-        line(wxSpan(h.jiangGanZhi), shenSpan(h.jiangShen, h.jiangZhiIdx), h.jiangWs, u(3)) +
-        line('<span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>', '', h.difenWs, '', true) +
+        line('<span class="' + col(h.renWx) + '">' + h.renYuan + '</span>', h.renWs, '') +
+        line(wxSpan(h.guiGanZhi), h.guiWs, u(2)) +
+        line(wxSpan(h.jiangGanZhi), h.jiangWs, u(3)) +
+        line('<span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>', h.difenWs, '') +
         '</div>';
     };
     // 十二宫按地支方位：上南下北·左东右西
