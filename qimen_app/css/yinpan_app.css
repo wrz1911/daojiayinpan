@@ -216,12 +216,22 @@ span[id^="kong"]{font-size:28px!important;font-weight:bold!important;color:var(-
    这里给盘体两侧各留出卡片宽度, 使卡片落在容器内。 */
 .cr-grid-wrap{position:relative;display:block;width:100%;overflow:visible}
 .cr-content{position:relative;z-index:1;width:calc(100% - 144px);margin:0 auto}
-@media (max-width:480px){
-  /* 窄屏卡片字号更小, 留白相应收窄, 避免宫格过窄 */
-  .cr-content{width:calc(100% - 108px)}
+@media (max-width:500px){
+  /* 窄屏下穿壬最吃紧: 外圈 12 张卡片 + 九宫要挤进 400px。
+     九宫两侧各有一张"外盘表"占位(每侧 55px 列宽, 穿壬下内容为空却照样占位),
+     原先又额外留 108px 给卡片, 九宫只剩 182px(每格 60px), 而格内三行文字需要
+     88~116px —— 宫格被内容顶成竖长方形(实测宽高比 0.44)。
+     这里改为"补偿式": 容器宽度只扣掉卡片实际所需, 把被空表吃掉的 110px 补回来,
+     九宫回到 264px(每格 88px), 与格内内容高度相当, 正方形才立得住。
+     max-width 防止在 500px 附近九宫被拉得过大、格内留白过多。 */
+  .cr-content{width:calc(100% - 26px);max-width:380px}
 }
 .cr-inner{width:100%;max-width:none!important}
 .cr-pan{width:100%!important;max-width:none!important;table-layout:fixed!important}
+/* 宫格正方形是穿壬的硬要求: 外圈 12 张卡片按宫格实际边界定位, 宫格一旦被内容
+   顶高, 卡片位置随之错位。aspect-ratio 给出的高度只是"首选值", 内容更高时仍会
+   把容器撑开, 故补 overflow:hidden 让自动最小尺寸归零, 高度锁定为 1:1。 */
+#pan.cr-pan .pan-cell{overflow:hidden}
 .cr-card{position:absolute;z-index:2;white-space:nowrap;font-size:12px;line-height:16px;text-align:center;pointer-events:none}
 .cr-ctg,.cr-ctj,.cr-czhi,.cr-cdu,.cr-cgw{display:inline-block}
 .cr-hrow{display:flex;flex-direction:column;align-items:center}

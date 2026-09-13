@@ -583,7 +583,21 @@ window.renderChuanRen=(data,containerId) => {
   '.cr-dy-liu td{font-size:12px}'+
   '.cr-dy-info-row td{font-size:14px;padding:6px;text-align:center;color:var(--c-text)}'+
   '.cr-dy-info-row td{}'+
-  '@media(max-width:340px){.cr-pan td{padding-left:8px!important;padding-right:8px!important}.cr-pan .panItem{font-size:15px!important;line-height:30px!important}.cr-card{font-size:11px;padding:4px 6px}.cr-bz-zao td{font-size:15px!important}.cr-dy-gz{font-size:14px!important}}'+
+  // 窄屏(手机)是穿壬最吃紧的场合: 外圈 12 张卡片 + 九宫要挤在 400px 里。
+  // 此前九宫只剩 182px(每格 60px), 而格内三行文字需要 88~116px, 宫格被内容
+  // 顶成竖长方形(宽高比 0.44)。宽度问题由 .cr-content 的补偿式宽度解决(见
+  // yinpan_app.css), 这里解决"格内内容"与"卡片体积":
+  //   - 上下内边距与左右取齐(padding:2px), 否则 td 高比宽多 4px, 正方形被破坏
+  //   - 字号 13px/行高 20px: 三行共 60px, 放得进 88px 的宫格, 且手机 dpr=3 下可读
+  //   - 卡片缩到 10px, 左右卡片各 64px, 正好落在九宫两侧 68px 的空档里
+  '@media(max-width:500px){'+
+  '#pan.cr-pan td{padding:2px!important}'+
+  '#pan.cr-pan .panItem{font-size:13px!important;line-height:20px!important}'+
+  '.cr-card{font-size:10px;line-height:13px;padding:1px 2px}'+
+  '.cr-ctg{font-size:11px}.cr-ctj{font-size:9px}.cr-czhi{font-size:10px}.cr-cdu{font-size:9px}.cr-ckw{font-size:8px}'+
+  '}'+
+  // 500~700px 的窄窗口: 卡片可回到稍大字号, 宫格仍有富余
+  '@media(min-width:501px) and (max-width:700px){#pan.cr-pan .panItem{font-size:14px!important;line-height:22px!important}}'+
   '</style>';
 
   if(containerId){let el=document.getElementById(containerId);if(el)el.innerHTML=h;else return h;}
