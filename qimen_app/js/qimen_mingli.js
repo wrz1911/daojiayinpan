@@ -16,7 +16,6 @@
  *   #dayun_liunian    大运表(yunTitle + dayun_year{n} + dayun{n} onclick=yunFocus)
  *                     + 流年表(yunTitle + liunian1_{c} + liunian2_{c})
  *   #btnTable1        移星换斗 | 天门地户 | 长生状态        (btn1/btn3/btn2)
- *   #btnTable2        年神将 | 月神将 | 日神将 | 时神将     (btn4..btn7)
  *   #yixinghuandouDIV + #tableTemp
  *
  * 外圈与状态复用本项目**已有的**函数(山向盘在用, 已导出到 window):
@@ -103,7 +102,7 @@
 
   /** 按钮高亮: 3..7 互斥, 再点同一个则取消并清空外圈 */
   window.mingliBtn = function (b, data) {
-    var isRing = (b >= 3 && b <= 7);
+    var isRing = (b >= 3 && b <= 7);   // 神将按钮已下线, 保留分支不影响
     var bz = document.getElementById('yixinghuandouDIV');   // 切神将时收起八字盘
     if (bz && bz.getAttribute('data-mode') === 'bazi') {
       bz.innerHTML = ''; bz.removeAttribute('data-mode'); bz.style.display = 'none';
@@ -116,10 +115,6 @@
     if (window.clearWaipan) { try { window.clearWaipan(); } catch (e) { if (window._logErr) window._logErr('clearWaipan', e && e.message); } }
     try {
       if (b === 3) { if (window.tianmenDihu) window.tianmenDihu(); }      // 天门地户
-      else if (b === 4) { if (window.shen12) window.shen12(1); }          // 年神将
-      else if (b === 5) { if (window.shen12) window.shen12(2); }          // 月神将
-      else if (b === 6) { if (window.shen12) window.shen12(3); }          // 日神将
-      else if (b === 7) { if (window.shen12) window.shen12(4); }          // 时神将
     } catch (e) { if (window._logErr) window._logErr('mingliBtn', e && e.message); }
     return isRing ? b : (data ? data.ringKind : 'none');
   };
@@ -300,14 +295,8 @@
       h += '<TD><div class="btn" id="btn2" onclick="mingliState();mingliBtn(2,window._mlData);">长生状态</div></TD>';
       h += '</TR></TABLE>';
 
-      /* ── ⑤ #btnTable2 ── */
-      h += '<TABLE id="btnTable2"><TR>';
-      ['年神将', '月神将', '日神将', '时神将'].forEach(function (t, i) {
-        h += '<TD><div class="btn" id="btn' + (i + 4) + '" onclick="mingliBtn(' + (i + 4) + ',window._mlData);">' + t + '</div></TD>';
-      });
-      h += '</TR></TABLE>';
 
-      /* ── ⑥ 移星换斗容器 ── */
+      /* ── ⑤ 移星换斗容器 ── */
       h += '<div id="yixinghuandouDIV"></div><div id="tableTemp" style="display:none"></div>';
     } catch (e) {
       h += '<div style="color:red;padding:12px">命理渲染错误: ' + (e && e.message) + '</div>';
