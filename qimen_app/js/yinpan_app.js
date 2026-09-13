@@ -376,7 +376,7 @@ function doPan() {
   window.Y=Y; window.M=M; window.D=D; window.hr=hr; window.mn=mn;
   /* 切盘时清掉三个开关的残留状态: 下面各盘型分支会提前 return, 不在这里清的话
      (比如)时盘开过"年神将"→切命理→切回时盘, 按钮要点两次才生效。 */
-  _tmdhShow=false; _shenShow=0; _stateShowing=false; _diShenShow=false; _renShenShow=false;
+  _tmdhShow=false; _shenShow=0; _stateShowing=false; _diShenShow=false; _renShenShow=false; _xnShow=false;
 
 
         // 山向模式: 24山角度→局数/阴阳/黄泉→地盘星门神全算法
@@ -701,6 +701,7 @@ function renderPan(raw, engineData) {
   window._raw = raw;
   window._yueJiang = yueJiang;
   window._shiZhi = shiGz.length >= 2 ? shiGz[1] : '';
+  window._isYin = isYin;   // 玄女十六字诀排布要用(阳顺阴逆)
 
   // 阴干颜色计算(逐字处理寄干): 委托顶层 _siHaiSpan
   window._anGanColor = (ganStr, gong) => {
@@ -783,7 +784,8 @@ function renderPan(raw, engineData) {
     '<TABLE id="btnTable3"><TR>' +
     '<TD><div class="btn" id="btnDiShen" onclick="toggleDiBaShen()">地八神</div></TD>' +
     '<TD><div class="btn" id="btnRenShen" onclick="toggleRenBaShen()">人八神</div></TD>' +
-    '<TD></TD><TD></TD>' +
+    '<TD><div class="btn" id="btnXuanNv" onclick="xuanNv16()">玄女16诀</div></TD>' +
+    '<TD></TD>' +
     '</TR></TABLE>' : '') +
     '<div id="yixinghuandouDIV"></div>';
 
@@ -893,7 +895,8 @@ function _syncToggleBtns() {
     btn1: !!(yxDiv && yxDiv.style.display === 'block'),
     btn2: !!_stateShowing,
     btn3: !!_tmdhShow,
-    btn4: _shenShow === 1, btn5: _shenShow === 2, btn6: _shenShow === 3, btn7: _shenShow === 4
+    btn4: _shenShow === 1, btn5: _shenShow === 2, btn6: _shenShow === 3, btn7: _shenShow === 4,
+    btnXuanNv: !!_xnShow
   };
   for (const id in on) { const el = document.getElementById(id); if (el) el.classList.toggle('on', on[id]); }
 }
@@ -1318,6 +1321,7 @@ let _qrData = null; // 缓存doPan最近一次qimenChart结构化结果(天门�
 function tianmenDihu() {
   try{
   if (_shenShow) { _shenShow = 0; clearWaipan(); }
+  if (_xnShow) { _xnShow = false; clearWaipan(); }   // 与玄女十六字诀互斥(同一批外盘位)
   _tmdhShow = !_tmdhShow;
   _syncToggleBtns();
   if (!window._palaces) return;
@@ -1394,6 +1398,58 @@ function tianmenDihu() {
   }, 600);
   }catch(e){tip.innerHTML='<span style=color:red>天门地户错误:'+e.message+'</span>';}
 }
+
+/* ══════════════ 玄女十六字诀(盘外盘) ══════════════
+   用"排法二": 以【时支的六合】起"进"字, 沿十二地支阳顺阴逆铺开十二字:
+     进 曲 狱 丰 空 泣 欹 劫 散 破 灵 吾
+   例(讲义图例): 时支酉 → 六合辰 → 阴遁逆排 → 辰=进, 卯=曲 … 巳=吾。
+
+   与天门地户共用外圈那 12 个位置(waipan1~12), 所以两者必须互斥;
+   切换时互相清场, 见各自的入口。 */
+let _xnShow = false;
+
+function buildXuanNvMap(hourZhi, isYin) {
+  try {
+    const Z12 = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    const ZI12 = ['进','曲','狱','丰','空','泣','欹','劫','散','破','灵','吾'];
+    const si = Z12.indexOf(hourZhi);
+    if (si < 0) return null;
+    const HE = (window.QM && QM.HE) || [];      // 六合表(索引式): 子→丑 寅→亥 卯→戌 辰→酉 巳→申 午→未
+    const start = HE[si];
+    if (start === undefined) return null;
+    const step = isYin ? -1 : 1;                // 阳顺阴逆
+    const map = {};
+    for (let i = 0; i < 12; i++) map[Z12[((start + step * i) % 12 + 12) % 12]] = ZI12[i];
+    return map;
+  } catch (e) { _logErr('xuanNv16', e && e.message); return null; }
+}
+
+function xuanNv16() {
+  try {
+    if (_tmdhShow) { _tmdhShow = false; clearWaipan(); }   // 与天门地户互斥
+    if (_shenShow) { _shenShow = 0; clearWaipan(); }
+    _xnShow = !_xnShow;
+    _syncToggleBtns();
+    const WPOF = {子:1,丑:2,寅:3,卯:4,辰:5,巳:6,午:7,未:8,申:9,酉:10,戌:11,亥:12};
+    // 每次都按当前时支/阴阳遁重算 —— 换时辰后开关虽被复位, 手排一次也无妨
+    const map = _xnShow ? buildXuanNvMap(window._shiZhi, !!window._isYin) : null;
+    for (const z in WPOF) {
+      const el = document.getElementById('waipan' + WPOF[z]);
+      if (!el) continue;
+      if (map && map[z]) {
+        el.textContent = map[z];
+        el.style.fontSize = '15px';
+        el.style.lineHeight = '18px';
+        el.style.whiteSpace = 'nowrap';
+      } else {
+        el.textContent = '';
+        el.style.fontSize = ''; el.style.lineHeight = ''; el.style.whiteSpace = '';
+      }
+    }
+  } catch (e) { tip.innerHTML = '<span style=color:red>玄女16诀错误:' + e.message + '</span>'; }
+}
+window.xuanNv16 = xuanNv16;
+window.buildXuanNvMap = buildXuanNvMap;   // 导出便于单独验证排法
 
 // === 长生状态 ===
 // 天干在8宫(去中5)的十二长生状态, 双地支宫显示两个状态
