@@ -532,3 +532,7 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
 /* 易星盘/穿壬宫格同样走变量 */
 .yiXingPan td{ font-size:var(--pan-fs-sm)!important; line-height:var(--pan-lh-sm)!important }
 #pan.ml-pan .panItem, #pan.cr-pan .panItem{ font-size:var(--pan-fs-sm)!important; line-height:var(--pan-lh-sm)!important }
+
+/* 命理大运格: 可点击 + 选中态(JS 内联设置 background/box-shadow), hover 给即时反馈 */
+#dayun_liunian .pan .yun2{cursor:pointer;transition:background .15s,box-shadow .15s}
+#dayun_liunian .pan .yun2:hover{background:var(--c-theme-bg)}
