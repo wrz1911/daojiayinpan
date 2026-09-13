@@ -1175,9 +1175,9 @@ function _jkCenter(chart) {
         [kongMark(c.difenZhi)].concat(sishMarks(c.difenZhi))) +
     // 横杠分隔, 下方接五动三动
     '<div style="border-top:1px solid var(--c-border);margin:4px 0 3px"></div>' +
-    row('<span style="font-weight:bold;color:var(--c-theme)">五动</span>',
+    row('<span style="font-weight:bold;color:var(--c-text)">五动</span>',
         '<span>' + ((chart.wudong && chart.wudong.length) ? chart.wudong.join(' ') : '—') + '</span>', '', []) +
-    row('<span style="font-weight:bold;color:var(--c-theme)">三动</span>',
+    row('<span style="font-weight:bold;color:var(--c-text)">三动</span>',
         '<span>' + ((chart.sandong && chart.sandong.length) ? chart.sandong.join(' ') : '—') + '</span>', '', []) +
     '</div></div>';
 }
@@ -1213,8 +1213,7 @@ function _jkInfoHtml(chart) {
   return line('人煞', ss.shensh4 && ss.shensh4[1]) +
     line('贵煞', ss.shensh4 && ss.shensh4[2]) +
     line('将煞', ss.shensh4 && ss.shensh4[3]) +
-    line('地煞', ss.shensh4 && ss.shensh4[4]) +
-    line('', '');   // 五动/三动已移入中宫显示
+    line('地煞', ss.shensh4 && ss.shensh4[4]);
 }
 
 function toggleJinKouJue(noScroll) {
