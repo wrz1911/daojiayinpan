@@ -1244,24 +1244,23 @@ function toggleJinKouJue(noScroll) {
     };
     const curIdx = chart.cur.difenIdx;
 
-    // 单宫：四行(人元 / 干支+贵神 / 干支+将神 / 地分)，触按选中
-    const one = (h, first) => {
-      const sel = h.difenIdx === curIdx;
-      // 选中态一律用 class(.jk-sel), 不再用 inline style ——
-      // 否则初始那一格的 inline 背景不会被 _jkPick 的清 class 逻辑清掉,
-      // 表现为"切换后宫位仍残留灰色背景"
+    // 单宫：只显示 干支 / 旺衰 / 用 —— 不标四位名、不显神名,
+    // 也不含空亡、四空与五动三动(这些看中宫即可)
+    const one = (h) => {
+      const isCur = h.difenIdx === curIdx;
+      const u = n => chart.yongwei === n ? '<span style="color:var(--wx-huo);font-weight:bold">用</span>' : '';
+      const line = (a, ws, mk) => '<div style="display:flex;align-items:baseline;white-space:nowrap">' +
+        '<span style="flex:0 0 34px;overflow:hidden">' + a + '</span>' +
+        '<span style="flex:0 0 14px;color:' + (wsc[ws] || 'var(--c-text-3)') + '">' + ws + '</span>' +
+        '<span style="flex:0 0 auto">' + (mk || '') + '</span></div>';
       return '<div data-jk="' + h.difenIdx + '" onclick="_jkPick(' + h.difenIdx + ')"' +
-        ' class="jk-cell' + (sel ? ' jk-sel' : '') + '"' +
-        ' style="cursor:pointer;padding:3px 5px;line-height:1.6;font-size:13px;' +
+        ' class="jk-cell' + (isCur ? ' jk-sel' : '') + '"' +
+        ' style="cursor:pointer;padding:3px 4px;font-size:12px;line-height:1.7;overflow:hidden;' +
         'border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">' +
-        '<div><span class="' + col(h.renWx) + '">' + h.renYuan + '</span>' +
-          '<span style="float:right;color:' + wsc[h.renWs] + '">' + h.renWs + '</span></div>' +
-        '<div><span>' + wxSpan(h.guiGanZhi) + '</span>' +
-          '<span style="float:right">' + shenSpan(h.guiShen, QM.ZHI.indexOf(h.guiGanZhi[1])) + '</span></div>' +
-        '<div><span>' + wxSpan(h.jiangGanZhi) + '</span>' +
-          '<span style="float:right">' + shenSpan(h.jiangShen, h.jiangZhiIdx) + '</span></div>' +
-        '<div><span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>' +
-          '<span style="float:right;color:' + wsc[h.difenWs] + '">' + h.difenWs + '</span></div>' +
+        line('<span class="' + col(h.renWx) + '">' + h.renYuan + '</span>', h.renWs, '') +
+        line(wxSpan(h.guiGanZhi), h.guiWs, u(2)) +
+        line(wxSpan(h.jiangGanZhi), h.jiangWs, u(3)) +
+        line('<span class="' + col(JK_ZHI_WX[h.difenIdx]) + '">' + h.difenZhi + '</span>', h.difenWs, '') +
         '</div>';
     };
     // 十二宫按地支方位：上南下北·左东右西
