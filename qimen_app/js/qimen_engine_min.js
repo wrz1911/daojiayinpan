@@ -357,7 +357,8 @@ function shanxiangChart(sxDeg, sxYear) {
     // paipanrest核心: 旬首/空亡/马星
     let xunshou = Math.floor(hCyl / 10) * 10;
     let xunkong1 = (xunshou + 10) % 12, xunkong2 = (xunshou + 11) % 12;
-    let maxing = [2, 8, 11, 5][hCyl % 4]; // YiMa
+    let maxing = YIMA[hCyl % 4]; // YiMa 三合驿马: 申子辰→寅 / 巳酉丑→亥 / 亥卯未→巳 / 寅午戌→申
+                                 // (原为内联 [2,8,11,5], 索引1/2 颠倒, 与 QM.YIMA 及主盘口径不符)
 
     // 地盘
     let dg = Math.floor(xunshou / 10) + 1; // 旬首对应的liuyi索引 (AppStudio +4 = JS +1)
