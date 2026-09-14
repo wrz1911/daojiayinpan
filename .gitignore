@@ -24,3 +24,6 @@ qimen_app/_*.html
 
 # 教材草稿（未定稿，不入库）
 _textbook_draft/
+
+# 玄女十六字诀源记录与整理稿（不入库）
+_xn_raw/
