@@ -180,7 +180,14 @@ jobs:
       # —— upload-artifact 对缺失路径只告警不报错。
       - name: Tauri build (AppImage)
         continue-on-error: true
-        run: npx tauri build --bundles appimage
+        run: |
+          # 1) 生成 AppDir 并出包(CI 环境自洽, 这步通常成功)
+          npx tauri build --bundles appimage
+          # 2) 打「WebKit 辅助进程路径」补丁后重新打包。不做这步的话, 产物在
+          #    未安装 webkit2gtk-4.1 的机器上会以
+          #    "Unable to spawn a new child process" 启动失败 —— 而那些系统
+          #    恰恰是 AppImage 唯一可用的形态。原理见 scripts/build-appimage.sh。
+          bash scripts/build-appimage.sh --patch-only
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
