@@ -16,6 +16,12 @@ pub fn run() {
     }
   }));
 
+  // 窗口尺寸/位置记忆(仅桌面端):tauri.conf.json 的 440x600 只是首次启动的
+  // 默认值(最小尺寸), 用户拖大后由本插件记住, 下次启动沿用; 否则每次都会
+  // 缩回 440x600, "让用户自己缩放"就失去意义。状态存于应用配置目录。
+  #[cfg(desktop)]
+  let builder = builder.plugin(tauri_plugin_window_state::Builder::default().build());
+
   builder
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_dialog::init())

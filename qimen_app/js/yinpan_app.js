@@ -15908,11 +15908,18 @@ function showAbout() {
     let dlg = document.createElement('div');
     dlg.id = 'aboutDlg';
     dlg.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center';
+    // 快捷键提示只在精确指针(鼠标/触控板)下显示 —— 触屏设备没有物理键盘
+    const kbdHint = (window.matchMedia && window.matchMedia('(pointer: fine)').matches)
+      ? '<div style="font-size:12px;color:var(--c-text-3);margin-top:12px;padding-top:10px;border-top:1px solid var(--c-border);line-height:1.9">'
+        + '<b>键盘快捷键</b><br>1–6 切换盘型 &nbsp;·&nbsp; ← → 调整时辰<br>'
+        + 'Ctrl+S 保存 &nbsp;·&nbsp; Ctrl+H 排盘历史 &nbsp;·&nbsp; Esc 关闭弹窗</div>'
+      : '';
     dlg.innerHTML = '<div style="background:var(--c-bg);border-radius:12px;padding:20px;max-width:340px;width:88%;text-align:center">' +
       '<div style="font-size:18px;font-weight:bold;margin-bottom:4px">道家阴盘奇门遁甲</div>' +
       '<div style="font-size:13px;color:var(--c-text-3);margin-bottom:14px">v' + APP_VERSION + '</div>' +
       '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">作者: ' + APP_AUTHOR + '</div>' +
       '<div style="font-size:14px;line-height:1.9;color:var(--c-text)">开源项目地址:<br><span style="color:var(--c-theme)">https://' + APP_REPO + '</span></div>' +
+      kbdHint +
       '<button id="aboutCloseBtn" style="margin-top:16px;padding:8px 32px;border:1px solid var(--c-border);border-radius:20px;background:var(--c-bg);color:var(--c-text);font-size:14px;cursor:pointer">关闭</button>' +
       '</div>';
     document.body.appendChild(dlg);
@@ -15920,6 +15927,80 @@ function showAbout() {
     document.getElementById('aboutCloseBtn').addEventListener('click', () => { dlg.parentNode.removeChild(dlg); });
   } catch(e){ _logErr('about', e && e.message); }
 }
+
+// === 桌面端键盘快捷键 (2026-09-16) ===
+// 全部经 DOM 事件复用既有逻辑(盘型 radio 的 onclick、底栏按钮的 click、doPan),
+// 不直接调用 IIFE 内部函数, 避免与既有绑定脱节。
+// 不做设备判断: 触屏设备没有物理键盘不会误触, 外接键盘时同样受益。
+(function _initKeyShortcuts() {
+  try {
+    // 关闭浮层弹窗。本项目现有两种不同实现, 判据需同时覆盖:
+    //   a) 全屏遮罩 —— aboutDlg / jkHelpDlg / xnHelpDlg 是 z-index 10002 的
+    //      全屏遮罩; 而排盘历史用 #sheetOverlay(z-index 200, 全屏) + #bottomSheet
+    //      (z-index 10000, 仅 167px 高) 两个元素拼成;
+    //   b) 高层级浮层 —— 面板本体(z-index >= 9999)。
+    // 只处理 body 直属的 fixed 元素, 并排除顶栏 #topBar。
+    function closeOverlays() {
+      let n = 0;
+      Array.prototype.slice.call(document.body.children).forEach(function (el) {
+        if (el.id === 'topBar') return;
+        const cs = getComputedStyle(el);
+        if (cs.position !== 'fixed' || cs.display === 'none') return;
+        const r = el.getBoundingClientRect();
+        const full = r.width >= window.innerWidth * 0.9 && r.height >= window.innerHeight * 0.9;
+        const highZ = parseInt(cs.zIndex, 10) >= 9999;
+        if ((full || highZ) && el.parentNode) {
+          el.parentNode.removeChild(el);
+          n++;
+        }
+      });
+      return n;
+    }
+
+    // 以"时"为单位前后移动, 越界自动跨日(到月边界即止)
+    function stepHour(delta) {
+      const h = document.getElementById('selHour'), d = document.getElementById('selDay');
+      if (!h || !h.options.length) return;
+      let i = h.selectedIndex + delta;
+      if (i < 0 || i >= h.options.length) {
+        if (!d || !d.options.length) return;
+        const di = d.selectedIndex + (i < 0 ? -1 : 1);
+        if (di < 0 || di >= d.options.length) return;
+        d.selectedIndex = di;
+        i = i < 0 ? h.options.length - 1 : 0;
+      }
+      h.selectedIndex = i;
+      doPan();
+    }
+
+    document.addEventListener('keydown', function (e) {
+      // Esc: 关闭弹窗(输入框聚焦时也要响应, 故置于最前)
+      if (e.key === 'Escape') { if (closeOverlays()) e.preventDefault(); return; }
+      // 文本类控件内不劫持按键(方向键要留给下拉框自身)
+      const el = e.target, tag = el && el.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || (el && el.isContentEditable)) return;
+      if (e.ctrlKey || e.metaKey) {
+        if (e.shiftKey || e.altKey) return;
+        const bid = { s: 'barSaveBtn', h: 'barHistoryBtn' }[String(e.key || '').toLowerCase()];
+        if (bid) {
+          const b = document.getElementById(bid);
+          if (b) { b.click(); e.preventDefault(); }
+        }
+        return;
+      }
+      if (e.altKey) return;
+      // 1-6 切换盘型
+      if (e.key >= '1' && e.key <= '6') {
+        const r = document.querySelector('input[name="panType"][value="' + e.key + '"]');
+        if (r) { r.click(); e.preventDefault(); }
+        return;
+      }
+      // 方向键调整排盘时间(±1 时辰)
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { stepHour(-1); e.preventDefault(); }
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { stepHour(1); e.preventDefault(); }
+    });
+  } catch (e) { _logErr('keyShortcuts', e && e.message); }
+})();
 
 // Tauri启动时从文件同步记录
 (async function _initStorage() {

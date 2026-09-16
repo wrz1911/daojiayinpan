@@ -27,9 +27,10 @@ tauri-plugin-fs = "2"
 tauri-plugin-dialog = "2"
 time = "=0.3.36"
 
-# 单实例限制仅桌面端可用,移动端(无多实例概念)不引入该依赖
+# 桌面端专属插件:移动端没有多实例/窗口状态的概念, 不引入
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"
+tauri-plugin-window-state = "2"
 
 # Release 构建优化:收紧 Cargo 保守默认值以缩减二进制体积
 # (排盘为 IO/计算混合负载,对峰值性能不敏感,体积与启动速度收益更大)

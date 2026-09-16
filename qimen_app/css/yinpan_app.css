@@ -61,9 +61,9 @@
 .wx-shui{color:var(--wx-shui)}
 
 /* ===== 1. 基础通用样式 (tool.css) ===== */
-* { padding:0px; margin:0px;user-select: none;-moz-user-select: none;-ms-user-select: none;-webkit-user-select: none;font-family:Microsoft Yahei;-webkit-tap-highlight-color: transparent;}
-@media (min-width: 390px){ body{background-color:var(--c-bg);font-family:Microsoft Yahei;color:var(--c-ink);padding:0px;margin:0px;word-break:break-all;font-size:13px} }
-@media (max-width:389px){ body{background-color:var(--c-bg);font-family:Microsoft Yahei;color:var(--c-ink);padding:0px;margin:0px;word-break:break-all;font-size:11px} }
+* { padding:0px; margin:0px;user-select: none;-moz-user-select: none;-ms-user-select: none;-webkit-user-select: none;-webkit-tap-highlight-color: transparent;}
+@media (min-width: 390px){ body{background-color:var(--c-bg);color:var(--c-ink);padding:0px;margin:0px;word-break:break-all;font-size:13px} }
+@media (max-width:389px){ body{background-color:var(--c-bg);color:var(--c-ink);padding:0px;margin:0px;word-break:break-all;font-size:11px} }
 TD{border-collapse:collapse; table-layout:fixed;word-break:break-all;text-align:left}
 img{border:0px}
 div{text-align:left}
@@ -608,3 +608,44 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
 /* 命理大运格: 可点击 + 选中态(JS 内联设置灰底/描边), hover 给即时反馈 */
 #dayun_liunian .pan .yun2{cursor:pointer;transition:background .15s,box-shadow .15s}
 #dayun_liunian .pan .yun2:hover{background:var(--c-gray-bg)}
+
+/* ══════════════════════════════════════════════════════════════════
+   桌面端增强 (2026-09-16)
+   统一用 @media (pointer: fine) 而非宽度判断 —— 它精准对应"鼠标/触控板",
+   触屏设备(pointer: coarse)完全不受影响, 安卓端行为保持原样。
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. 放开文本选择 ──
+   全局 `*{user-select:none}` 与 `#mainDIV,#mainDIV *{user-select:none!important}`
+   是为触屏防误选设计的, 但桌面端连盘面文字都复制不了。此处用同等特异性 +
+   !important + 更靠后的源顺序覆盖。 */
+@media (pointer: fine){
+  #mainDIV, #mainDIV *{ user-select:text!important; -webkit-user-select:text!important }
+  /* 模式切换与底部按钮仍不可选, 避免点击时带出蓝色选区 */
+  #topBar, #topBar *, #bottomBar, #bottomBar *, #mainDIV label{
+    user-select:none!important; -webkit-user-select:none!important
+  }
+}
+
+/* ── 2. 细窄滚动条 ──
+   Windows WebView2 的经典滚动条约占 15px 宽, 在 440px 窗口里相当可观;
+   统一改为 8px 圆角条并跟随主题变量, 暗色模式下不再突兀。 */
+::-webkit-scrollbar{ width:8px; height:8px }
+::-webkit-scrollbar-track{ background:transparent }
+::-webkit-scrollbar-thumb{ background:var(--c-border); border-radius:4px }
+::-webkit-scrollbar-thumb:hover{ background:var(--c-text-4) }
+::-webkit-scrollbar-corner{ background:transparent }
+
+/* ── 3. 鼠标悬停反馈 ──
+   全站原本只有 1 处 :hover, 桌面端目标缺少"可交互"提示。 */
+@media (pointer: fine){
+  #topBar label{ border-radius:3px; transition:background .15s }
+  #topBar label:hover{ background:var(--c-gray-bg) }
+  #bottomBar > span{ transition:opacity .15s }
+  #bottomBar > span:hover{ opacity:.7 }
+  /* 宫格: 极淡底色提示可点击; 带内联背景色的格子(如选中态)不受影响 */
+  #pan td{ transition:background .15s }
+  #pan td:hover{ background:var(--c-gray-bg) }
+  select.sel-date, select.sel-zxj{ transition:border-color .15s }
+  select.sel-date:hover, select.sel-zxj:hover{ border-color:var(--c-theme) }
+}
