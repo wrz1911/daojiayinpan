@@ -18,7 +18,7 @@
 
 | 平台 | 文件 |
 |------|------|
-| Linux | `.deb` / `.rpm` |
+| Linux | `.deb` / `.rpm` / `.AppImage` |
 | macOS | `.dmg` |
 | Windows | `.exe` |
 | Android | `.apk` |
@@ -32,21 +32,27 @@
 > **macOS 用户注意**：dmg 未签名且未公证，首次打开可能被 Gatekeeper 拦截：
 > - 在「访达」中右键点击应用 →「打开」→ 再点「打开」
 > - 或前往「系统设置 → 隐私与安全性」→ 点击「仍要打开」
+>
+> **Linux 用户注意**：`.deb` 适用于 Debian / Ubuntu 系，`.rpm` 适用于 Fedora / openSUSE 系。
+> 其它发行版（如 Arch）请用 **`.AppImage`** —— 免安装、免 root，下载后赋予执行权限即可运行：
+> ```bash
+> chmod +x yinpan_*_linux_x86_64.AppImage && ./yinpan_*_linux_x86_64.AppImage
+> ```
 
 ## 本地构建
 
-前端打包（4 个 IIFE JS 合并压缩为单一 bundle）：
+前端打包（4 个 IIFE JS 合并压缩为单一 bundle，并把 CSS 压缩为 `.min.css`）：
 
 ```bash
 npm install --legacy-peer-deps
-npm run build:bundle        # 生成 qimen_app/js/qimen_bundle.min.js
+npm run build:bundle        # 生成 qimen_app/js/qimen_bundle.min.js + qimen_app/css/yinpan_app.min.css
 ```
 
 ### 桌面 (Linux / Tauri)
 
 ```bash
-bash build-tauri.sh         # 同步 web 资源 → tauri build → deb/rpm
-# 产物: src-tauri/target/release/bundle/deb|rpm/
+bash build-tauri.sh         # 同步 web 资源 → tauri build → deb/rpm/appimage
+# 产物: src-tauri/target/release/bundle/deb|rpm|appimage/
 ```
 
 Windows / macOS 需对应平台工具链，由 CI 构建（推送 tag 自动触发）。

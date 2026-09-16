@@ -10,22 +10,23 @@
     "windows": [
       {
         "title": "阴盘奇门遁甲",
-        "width": 440,
-        "height": 820,
+        "url": "qimen_app/yinpan.html",
+        "width": 620,
+        "height": 900,
         "minWidth": 440,
         "minHeight": 600,
-        "maximizable": false,
-        "resizable": false,
+        "maximizable": true,
+        "resizable": true,
         "fullscreen": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'"
     }
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "rpm"],
+    "targets": ["deb", "rpm", "appimage"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

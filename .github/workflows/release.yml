@@ -51,9 +51,10 @@ jobs:
           <meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html">
           <script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
           EOF
-          cp qimen_app/css/yinpan_app.css web/qimen_app/css/
           npm install --legacy-peer-deps >/dev/null 2>&1
           npm run build:bundle
+          # CSS 用压缩产物, 但沿用 HTML 里的引用名(见 scripts/build_bundle.sh)
+          cp qimen_app/css/yinpan_app.min.css web/qimen_app/css/yinpan_app.css
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
@@ -95,9 +96,10 @@ jobs:
       - name: Setup frontend
         run: |
           mkdir -p web/qimen_app/css web/qimen_app/js
-          cp qimen_app/css/yinpan_app.css web/qimen_app/css/
           npm install --legacy-peer-deps >/dev/null 2>&1
           npm run build:bundle
+          # CSS 用压缩产物, 但沿用 HTML 里的引用名(见 scripts/build_bundle.sh)
+          cp qimen_app/css/yinpan_app.min.css web/qimen_app/css/yinpan_app.css
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
@@ -144,9 +146,10 @@ jobs:
       - name: Setup frontend
         run: |
           mkdir -p web/qimen_app/css web/qimen_app/js
-          cp qimen_app/css/yinpan_app.css web/qimen_app/css/
           npm install --legacy-peer-deps >/dev/null 2>&1
           npm run build:bundle
+          # CSS 用压缩产物, 但沿用 HTML 里的引用名(见 scripts/build_bundle.sh)
+          cp qimen_app/css/yinpan_app.min.css web/qimen_app/css/yinpan_app.css
           cp qimen_app/js/qimen_bundle.min.js web/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js web/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js web/qimen_app/js/
@@ -161,8 +164,23 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Tauri build
+      # AppImage 由 linuxdeploy 打包, 它依赖 patchelf(改 RPATH)与
+      # squashfs-tools(mksquashfs 生成镜像)、zsync(zsyncmake 生成增量文件)。
+      # runner 镜像不保证预装, 缺任一项会以 "failed to run linuxdeploy" 告终。
+      - name: Install AppImage bundling deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf squashfs-tools zsync
+
+      - name: Tauri build (deb/rpm)
         run: npx tauri build --bundles deb,rpm
+
+      # AppImage 单独构建且允许失败:它是新增产物,打包链路依赖 linuxdeploy
+      # 外部工具(见上一步)。若该环节出问题,不应连带阻断 deb/rpm 的发布
+      # —— upload-artifact 对缺失路径只告警不报错。
+      - name: Tauri build (AppImage)
+        continue-on-error: true
+        run: npx tauri build --bundles appimage
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
@@ -171,6 +189,7 @@ jobs:
           path: |
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/appimage/*.AppImage
 
   android:
     runs-on: ubuntu-latest
@@ -356,10 +375,11 @@ jobs:
         run: |
           VER="${GITHUB_REF_NAME#v}"
           # 从子目录移出所有文件到根目录
-          find . -mindepth 2 -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.dmg' -o -name '*.exe' -o -name '*.dll' -o -name '*.apk' \) -exec mv {} . \; || true
+          find . -mindepth 2 -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.dmg' -o -name '*.exe' -o -name '*.dll' -o -name '*.apk' \) -exec mv {} . \; || true
           # 重命名
           for f in *.deb;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_linux_amd64.deb"; done
           for f in *.rpm;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_linux_x86_64.rpm"; done
+          for f in *.AppImage; do [ -f "$f" ] && mv "$f" "yinpan_${VER}_linux_x86_64.AppImage"; done
           for f in *.dmg;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_macos.dmg"; done
           for f in *.exe;  do [ -f "$f" ] && mv "$f" "yinpan_${VER}_windows.exe"; done
           for f in *.dll;  do [ -f "$f" ] && mv "$f" "WebView2Loader.dll" 2>/dev/null; done
@@ -373,6 +393,7 @@ jobs:
           files: |
             yinpan_*.deb
             yinpan_*.rpm
+            yinpan_*.AppImage
             yinpan_*.dmg
             yinpan_*.exe
             yinpan_*.apk
@@ -393,7 +414,7 @@ jobs:
           <script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
           EOF
           cp qimen_app/yinpan.html pages/qimen_app/
-          cp qimen_app/css/yinpan_app.css pages/qimen_app/css/
+          cp qimen_app/css/yinpan_app.min.css pages/qimen_app/css/yinpan_app.css
           cp qimen_app/js/qimen_bundle.min.js pages/qimen_app/js/
           cp qimen_app/js/tyme4j-browser.js pages/qimen_app/js/
           cp qimen_app/js/gong_detail_data.js pages/qimen_app/js/
