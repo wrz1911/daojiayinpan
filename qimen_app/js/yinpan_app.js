@@ -16002,6 +16002,48 @@ function showAbout() {
   } catch (e) { _logErr('keyShortcuts', e && e.message); }
 })();
 
+// === 宽屏两栏:让左列内容相对右列高度垂直居中 (2026-09-16) ===
+// 纯 CSS 做不到: 左列区块是 #panWrap 的平级 grid item, 无法作为"一整组"居中
+// (逐元素 align-self:center 只在其所在行内居中, 而行高恰等于内容高, 无余量)。
+// 故按实测高度给左列首个元素补一个上偏移, 使左列内容块在右列高度内居中。
+// 仅在两栏生效时运行(以 #panWrap 的 display:grid 判定), 窄屏完全不介入。
+(function _initWideCenter() {
+  try {
+    const wrap = document.getElementById('panWrap');
+    if (!wrap) return;
+    let timer = null;
+
+    function center() {
+      if (getComputedStyle(wrap).display !== 'grid') return;   // 窄屏单栏: 不动
+      const all = Array.prototype.slice.call(wrap.children);
+      const vis = el => getComputedStyle(el).display !== 'none';
+      const left = all.filter(el => vis(el) && getComputedStyle(el).gridColumnStart === '1');
+      const right = all.find(el => vis(el) && getComputedStyle(el).gridColumnStart === '2');
+      // 每次重算前先还原, 保留元素原本的内联 margin-top
+      left.forEach(el => {
+        if (el.dataset.qmMt === undefined) el.dataset.qmMt = el.style.marginTop || '';
+        el.style.marginTop = el.dataset.qmMt;
+      });
+      if (!left.length || !right) return;
+      const rs = left.map(el => el.getBoundingClientRect());
+      const leftH = Math.max.apply(null, rs.map(r => r.bottom)) - Math.min.apply(null, rs.map(r => r.top));
+      const rightH = right.getBoundingClientRect().height;
+      const pad = (rightH - leftH) / 2;
+      // 左列比右列高时不偏移(负值无意义), 留 4px 死区避免抖动
+      if (pad > 4) left[0].style.marginTop = (parseFloat(left[0].dataset.qmMt) || 0) + pad + 'px';
+    }
+
+    function schedule() {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(center, 130);   // 排盘会连续改 DOM, 合并抖动
+    }
+
+    new MutationObserver(schedule).observe(wrap, { childList: true, subtree: true });
+    window.addEventListener('resize', schedule);
+    schedule();
+  } catch (e) { _logErr('wideCenter', e && e.message); }
+})();
+
 // Tauri启动时从文件同步记录
 (async function _initStorage() {
   await _syncFromFile();
