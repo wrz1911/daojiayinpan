@@ -11,13 +11,14 @@
       {
         "title": "阴盘奇门遁甲",
         "url": "qimen_app/yinpan.html",
-        "width": 620,
-        "height": 900,
+        "width": 440,
+        "height": 600,
         "minWidth": 440,
         "minHeight": 600,
         "maximizable": true,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "center": true
       }
     ],
     "security": {
