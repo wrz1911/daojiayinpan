@@ -649,3 +649,30 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
   select.sel-date, select.sel-zxj{ transition:border-color .15s }
   select.sel-date:hover, select.sel-zxj:hover{ border-color:var(--c-theme) }
 }
+
+/* ── 4. 宽屏两栏布局 ──
+   根因: #mainDIV 固定 max-width:600px(为手机竖屏定的), 窗口再宽也只是两侧留白。
+   而九宫格外面还套着一张 3 列 `table-layout:fixed` 表格(两侧各留 55px 放"马"
+   标记 #ma1~#ma4), 故 九宫格宽 = 容器宽 - 110px —— 600px 容器下恒为 484px。
+   做法: 放开宽度上限, 并把「信息区」与「盘面」并排(二者本是 #panWrap 的兄弟节点)。
+   实测 1280 视口: 九宫格 484 → 704px(+45%), 文档高 1216 → 979px(少滚动 237px)。
+   断点取 1100 而非 1025 —— 后者已被字号规则占用, 且再窄放不下两栏。 */
+@media (min-width: 1100px){
+  #mainDIV, #topBar, #bottomBar{ max-width:1200px }
+  #panWrap{
+    display:grid;
+    grid-template-columns:minmax(280px,360px) minmax(0,1fr);
+    column-gap:20px;
+    align-items:start;
+  }
+  /* 其余区块(表单外的信息表/按钮行/大运表等)默认归左列 */
+  #panWrap > *{ grid-column:1 }
+  /* 盘面提到右列并跨满所有行。注意特异性: 选择器必须强于上面的
+     `#panWrap > *`(1,0,0) —— 否则 .cr-grid-wrap(0,0,1) 会被压回左列,
+     实测表现为穿壬十二宫格挤在左侧只剩 ~200px。 */
+  #panWrap > #content, #panWrap > .cr-grid-wrap{ grid-column:2; grid-row:1 / span 60 }
+  /* 穿壬的十二地支卡是绝对定位, 会向 .cr-grid-wrap 上方溢出 32px(固有行为,
+     单栏时上方恰是 #panHead 底部才没撞上)。两栏后右列顶部对齐行首, 这 32px
+     就会压到上方表单, 故补足间距。 */
+  #panWrap > .cr-grid-wrap{ margin-top:44px }
+}
