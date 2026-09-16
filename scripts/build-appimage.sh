@@ -109,12 +109,14 @@ PATCH_OLD="$PATCH_OLD" PATCH_NEW="$PATCH_NEW" WKLIB="$WKLIB" python3 - <<'PY'
 import io, os, re
 lib, new = os.environ['WKLIB'], os.environ['PATCH_NEW'].encode()
 data = io.open(lib, 'rb').read()
-# 自动探测库中的辅助进程目录 —— 各发行版编译期取值不同（Arch 为
-# /usr/lib/webkit2gtk-4.1，Debian/Ubuntu 为 /usr/lib/x86_64-linux-gnu/webkit2gtk-4.1），
-# 写死单一假设会让 CI 静默失效。
-# 注意必须限定在 /usr/lib 下：库里还有大量 /usr/src/debug/webkit2gtk-4.1 这类
-# 编译期调试路径，用宽泛正则会把它们一并改掉（无害但没必要，且掩盖真实命中）。
-pat = rb'/usr/lib(?:/[A-Za-z0-9_.+-]+)?/webkit2gtk-4\.1'
+# 自动探测库中的辅助进程目录 —— 各发行版编译期取值差异极大，写死必翻车：
+#   Arch:            /usr/lib/webkit2gtk-4.1
+#   Ubuntu(实测):    /.//lib/x86_64-linux-gnu/webkit2gtk-4.1   ← Debian 的 DESTDIR 风格，连 /usr 都没有
+# 首版正则按 Arch 的形状写成 `^/usr/lib`，结果在 CI 上 0 命中、静默跳过补丁
+# （产物依旧无法在无 webkit 的机器上启动），靠回读 CI 产物才发现。
+# 判据改为「路径中必须含 /lib/」，既能覆盖上述两种，又能排除库里那数百处
+# /usr/src/debug/webkit2gtk-4.1 编译期调试路径。
+pat = rb'/[A-Za-z0-9_./+-]*/lib/[A-Za-z0-9_./+-]*webkit2gtk-4\.1'
 cands = {c for c in re.findall(pat, data) if len(c) >= len(new)}
 if not cands:
     print('   未找到可替换的旧路径（已是补丁状态，跳过）')
@@ -202,10 +204,15 @@ OUT=$(find "$ROOT/src-tauri" -maxdepth 1 -name '*.AppImage' -print -quit)
 [ -n "$OUT" ] || { echo "❌ 未产出 AppImage，日志尾部："; tail -15 /tmp/qimen-appimage.log; exit 1; }
 
 # 自检：确认补丁确实进了产物
+# ⚠️ 别写成 `grep -c ... || echo 0` —— grep -c 无匹配时会**输出 "0" 且返回 1**，
+# 于是 `||` 又追加一个 0，得到两行的 "0\n0"，后面 `[ "$ok" -gt 0 ]` 直接报
+# "integer expression expected"（CI 上就这么翻过一次）。用 `| head -1` 取单行。
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 ( cd "$tmp" && "$OUT" --appimage-extract >/dev/null 2>&1 )
-ok_lib=$(grep -c "$PATCH_NEW" "$tmp/squashfs-root/usr/lib/libwebkit2gtk-4.1.so.0" 2>/dev/null || echo 0)
-ok_hook=$(grep -c "$HOOK_MARK" "$tmp/squashfs-root/apprun-hooks/linuxdeploy-plugin-gtk.sh" 2>/dev/null || echo 0)
+TMP_WKLIB=$(find "$tmp/squashfs-root" -name 'libwebkit2gtk-4.1.so.0' -print -quit 2>/dev/null)
+TMP_HOOK=$(find "$tmp/squashfs-root" -path '*apprun-hooks*' -name '*.sh' -print -quit 2>/dev/null)
+ok_lib=$(grep -ac "$PATCH_NEW" "$TMP_WKLIB" 2>/dev/null | head -1); ok_lib=${ok_lib:-0}
+ok_hook=$(grep -ac "$HOOK_MARK" "$TMP_HOOK" 2>/dev/null | head -1); ok_hook=${ok_hook:-0}
 
 echo ""
 echo "✅ 产物: $OUT  ($(du -h "$OUT" | cut -f1))"
