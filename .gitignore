@@ -15,6 +15,9 @@ src-tauri/target/
 code-sign-*.pem
 setup-desktop.sh
 
+# 本地构建的 AppImage 产物（约 100MB，自带 WebKit）—— 发布产物由 CI 生成
+*.AppImage
+
 # 本地验证/调试脚本 —— 仅本地运行, 不入库不进 CI
 scripts/verify_*.js
 scripts/verify_*.py
