@@ -659,6 +659,11 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
    断点取 1100 而非 1025 —— 后者已被字号规则占用, 且再窄放不下两栏。 */
 @media (min-width: 1100px){
   #mainDIV, #topBar, #bottomBar{ max-width:1200px }
+  /* 模式切换项在宽屏下居中聚拢。
+     原本 #topBar 用 justify-content:space-around, 栏宽 600 时项间空隙约 51px 尚可,
+     但宽屏放开到 1200 后会把 6 个选项摊到两端 —— 实测项间空隙达 151px,
+     视觉上就是"顶部有一条空白带"。改为居中 + 受限间距后内容聚拢在中间。 */
+  #topBar{ justify-content:center; gap:clamp(20px, 4vw, 56px) }
   #panWrap{
     display:grid;
     grid-template-columns:minmax(280px,360px) minmax(0,1fr);
