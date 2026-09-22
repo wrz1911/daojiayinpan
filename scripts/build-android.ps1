@@ -234,6 +234,41 @@ if ((Test-Path 'taiji.svg') -and (Test-Path 'scripts\make_launcher_icons.py') -a
 } else { Info '跳过图标生成(缺 taiji.svg / 生成脚本 / python)' }
 
 # ---------- 6. 版本号与签名 ----------
+# 5h) 固定 WebView 字体缩放
+#     Capacitor 7 生成的 MainActivity 是**空类**(只有 extends BridgeActivity, 没有 onCreate),
+#     不能"替换 super.onCreate 后插一行" —— 直接整体重写这个生成文件。
+#     盘面按设计尺寸精确排布, 继承系统 font_scale(实测 1.25 倍)会把信息表从 ~216px 撑到
+#     270px, 吃掉三分之一屏; Capacitor 没有对应配置项, 只能改 Java。
+#     注意: Java 源码里**只用英文注释** —— javac 在 Windows 默认按平台编码读源文件,
+#     中文注释可能乱码甚至吃掉整行代码(踩过); 详细说明留在本脚本里。
+$mainAct = 'android\app\src\main\java\com\qimen\yinpan\MainActivity.java'
+if (Test-Path $mainAct) {
+  $ja = [System.IO.File]::ReadAllText($mainAct)
+  if ($ja -notmatch 'setTextZoom') {
+    # 用数组拼接而非 here-string: here-string 里嵌 Java 极易丢换行, 曾把 setTextZoom 注释掉
+    $javaLines = @(
+      'package com.qimen.yinpan;',
+      '',
+      'import android.os.Bundle;',
+      'import com.getcapacitor.BridgeActivity;',
+      '',
+      'public class MainActivity extends BridgeActivity {',
+      '    @Override',
+      '    public void onCreate(Bundle savedInstanceState) {',
+      '        super.onCreate(savedInstanceState);',
+      '        // Pin WebView text zoom to 100%: the pan layout is pixel-tuned and must not',
+      '        // follow the system font scale (font_scale=1.25 inflates the info table by 1/4).',
+      '        getBridge().getWebView().getSettings().setTextZoom(100);',
+      '    }',
+      '}',
+      ''
+    )
+    [System.IO.File]::WriteAllText($mainAct, ($javaLines -join "`n"), (New-Object System.Text.UTF8Encoding($false)))
+    # 回读校验: 上一版"以为写了其实没写", 再上一版写进去却被注释吃掉
+    if (([System.IO.File]::ReadAllText($mainAct)) -match 'setTextZoom\(100\)') { Ok 'MainActivity.java -> WebView 字体缩放固定 100%' }
+    else { Info 'MainActivity.java 写入校验失败(字体缩放仍跟随系统)' }
+  } else { Ok 'MainActivity.java 已固定字体缩放' }
+} else { Info '未找到 MainActivity.java(跳过字体缩放补丁)' }
 Step '6/7 版本号与签名配置'
 $pkg = Get-Content 'package.json' -Raw | ConvertFrom-Json
 $parts = $pkg.version.Split('.')

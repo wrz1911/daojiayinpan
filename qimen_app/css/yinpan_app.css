@@ -566,10 +566,12 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
 }
 @media (max-width:500px){
   :root{
-    --pan-fs:13px; --pan-lh:22px;
+    /* 2026-09-22 压缩: 行高 22→19、内边距 3→2, 配合 Java 侧固定字体缩放,
+       把信息表从 ~270px 压下来腾给九宫格。宫格内的 --pan-lh-sm 不动(保符号可读性)。 */
+    --pan-fs:13px; --pan-lh:19px;
     --pan-fs-sm:14px; --pan-lh-sm:22px;
-    --pan-pad:3px;
-    --pan-fs-sz:14px; --pan-lh-sz:20px;
+    --pan-pad:2px;
+    --pan-fs-sz:14px; --pan-lh-sz:18px;
   }
 }
 @media (min-width:1025px){
