@@ -42,6 +42,7 @@
 
 ## 产品功能要点
 
+- **宫位长按(2026-09-22 用户要求)**: 刻盘(2)/心盘(3)/山向(4)/命理(6) 四种盘型的宫位改为**长按 550ms** 触发, 时盘(1) 仍为点击, 穿壬(5) 无宫位解释。目的: 移动端防误触。各盘触发其**原有行为** —— 刻/山向/命理 → 宫位解释; 心盘 → 宫位编辑器。实现三处: ①`LONG_PRESS_PAN_TYPES=[2,3,4,6]` 常量(yinpan_app.js:13622); ②`buildPaipanGrid` 对这四型**生成时就不挂内联 onclick**(`noInlineClick`, 与既有的 noClick 同思路 —— 靠渲染后清理容易漏); ③`_bindActionButtons` 改用 `_bindLongPress` 绑定。**同时静默启用了山向/命理的宫位解释**(原先 `showPalace` 开头 `panType===4||5||6` 直接 return) —— 数据本就齐备: 引擎 `pals[g]` 直接带 `shen/tian/di/xing/men/anGan`, 山向的 `_palaces` 是规范格式, 命理的 `_palaces` 引用 `qr.pals[g]`, 故**未改 qimen_mingli.js**
 - bottomBar 三按钮:**排盘历史/关于/保存**(关于在中间是用户指定);关于弹窗=应用名+APP_VERSION+作者 地天泰+项目地址
 - 心盘(panType 3):showPalace 里 `if(panType===3){showXinpanEditor(g);return;}` 路由到编辑器、不弹解释;宫位编辑器=overlay 卡片+5 类符号按钮+事件委托+坤2地盘干戊弹局选择+以此宫推算全盘
 - 穿壬(panType 5):doChuanRen 渲染后 RAF 把外圈 yinGan 移入宫内 topRow——**该逻辑必须幂等**(移入后清空 yg.textContent + 移入前移除 .cr-anGan 标记 span),否则重复执行显示两次(踩过);山向/穿壬宫位点击解释均禁用
