@@ -54,21 +54,33 @@ Step '设备发现'
 $usb = Get-UsbSerial
 if ($usb) { Ok "USB 设备: $usb" } else { Info '没有 USB 连接的设备' }
 
-# 未指定 IP 时, 通过 USB 读手机的 wlan0 地址
-if (-not $Ip) {
-  if (-not $usb) {
-    Bad '未指定 -Ip 且没有 USB 设备可用来探测手机地址'
-    Write-Host '   手机重启后必须先 USB 连接并加 -Setup; 或直接给 -Ip <手机IP>' -ForegroundColor Yellow
-    exit 1
-  }
+# 地址来源优先级: -Ip 参数 > USB 探测 > 上次成功的记录
+# (日常场景是手机只连 WiFi、不插 USB, 所以缓存这一路必须留)
+$cacheFile = Join-Path $env:LOCALAPPDATA 'qimen-adb-wireless.txt'
+
+if (-not $Ip -and $usb) {
   $route = & $adb -s $usb shell "ip route 2>/dev/null | grep wlan0" 2>$null
   if ("$route" -match 'src\s+(\d+\.\d+\.\d+\.\d+)') {
     $Ip = $Matches[1]
-    Ok "手机 WiFi 地址: $Ip"
+    Ok "手机 WiFi 地址(USB 探测): $Ip"
   } else {
-    Bad '无法从 USB 设备读到 wlan0 地址(手机可能没连 WiFi)'
-    exit 1
+    Info 'USB 设备在, 但读不到 wlan0 地址(手机可能没连 WiFi)'
   }
+}
+
+if (-not $Ip -and (Test-Path $cacheFile)) {
+  $cached = ((Get-Content $cacheFile -Raw) -replace '\s','') -replace ':\d+$',''
+  if ($cached -match '^\d+\.\d+\.\d+\.\d+$') {
+    $Ip = $cached
+    Info "使用上次记录的地址: $Ip"
+  }
+}
+
+if (-not $Ip) {
+  Bad '无法确定手机地址'
+  Write-Host '   手机重启后首次需要 USB 连接并加 -Setup; 之后可只用 WiFi' -ForegroundColor Yellow
+  Write-Host '   也可直接指定: npm run adb:wifi -- -Ip 192.168.1.4' -ForegroundColor Yellow
+  exit 1
 }
 
 # 重设 TCP 模式(手机重启后必须做一次, 且需要 USB 连接)
@@ -87,7 +99,8 @@ if ($Setup) {
 Step "连接 $Ip`:$Port"
 $out = & $adb connect "$Ip`:$Port" 2>&1
 $out | ForEach-Object { Info $_ }
-if ("$out" -notmatch 'connected') { Bad '连接失败'; exit 1 }
+if ("$out" -notmatch 'connected') { Bad '连接失败(地址可能已变, 试试 -Ip 指定)'; exit 1 }
+$Ip | Set-Content -Path $cacheFile -Encoding ASCII   # 记住这次成功的地址
 
 Step '当前设备'
 & $adb devices -l 2>&1 | ForEach-Object { Info $_ }
