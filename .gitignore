@@ -30,3 +30,6 @@ _textbook_draft/
 
 # 鐜勫コ鍗佸叚瀛楄瘈婧愯褰曚笌鏁寸悊绋匡紙涓嶅叆搴擄級
 _xn_raw/
+
+# 签名口令(与 keystore 同为敏感材料, 不入库)
+qimen-signing.properties
