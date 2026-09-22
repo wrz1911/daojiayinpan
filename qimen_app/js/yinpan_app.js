@@ -13722,8 +13722,9 @@ function _showXhBar(g) {
   const bar = document.createElement('div');
   bar.id = 'xhBar';
   bar.innerHTML = html;
+  // 位置: 宫位(盘面)**下方** —— 插在 #panWrap 之后而不是之前
   const wrap = document.getElementById('panWrap');
-  if (wrap && wrap.parentNode) wrap.parentNode.insertBefore(bar, wrap);
+  if (wrap && wrap.parentNode) wrap.parentNode.insertBefore(bar, wrap.nextSibling);
 }
 
 function toggleXianhouMark(g) {
