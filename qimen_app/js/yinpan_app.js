@@ -16153,10 +16153,26 @@ function showPalace(g) {
   if (_pt === 3) { showXinpanEditor(g); return; }
   let p = window._palaces ? window._palaces['gong'+g] : null;
   if (!p) return;
+
+  /* 符号归一化 —— 四个模式共用一套解释数据的前提。
+     山向/命理的 _palaces 直接引用引擎数据, 存的是**简称**('天'/'柱'/'生');
+     时盘/刻盘的 _palaces 来自 renderPan 解析, 存的是**全名**('九天'/'天柱'/'生门')。
+     解释表(SHEN_INFO/XING_INFO/MEN_INFO 与 *_FULL)的键都是全名, 简称会一路落到
+     undefined —— 原先山向/命理的弹窗里全是 'undefined' 就是这个原因。 */
+  function _toFull(val, ABBR) {
+    if (!val || !ABBR) return val || '';
+    if (ABBR[val] !== undefined) return val;                        // 本身已是全名
+    for (let full in ABBR) { if (ABBR[full] === val) return full; } // 简称 → 反查全名
+    return val;
+  }
+  const pShen = _toFull(p.shen, window.SHEN_ABBR);
+  const pXing = _toFull(p.xing, window.XING_ABBR);
+  const pMen  = _toFull(p.men,  window.MEN_ABBR);
+
   let gi = GONG_INFO[g] || {};
-  let sh = SHEN_INFO[p.shen] || {};
-  let xi = XING_INFO[p.xing] || {};
-  let me = MEN_INFO[p.men] || {};
+  let sh = SHEN_INFO[pShen] || {};
+  let xi = XING_INFO[pXing] || {};
+  let me = MEN_INFO[pMen] || {};
   let ag = p.anGan || '无';
 
   // 五行徽章配色: 引用主题变量, 暗色模式自动跟随(原先写死十六进制)
@@ -16220,12 +16236,13 @@ function showPalace(g) {
 
   // 构建各标签页内容
   let tabId = 'palace_tab_' + g + '_' + Date.now();
+  // 注意括号: '+' 优先级高于 '||', 不括起来会拼出 '八神·undefined' 且兜底永不生效
   let tabs = makeTab(tabId+'_gong', gi.name||'宫', true)
-    + makeTab(tabId+'_shen', '八神·'+(window.SHEN_ABBR||{})[p.shen]||p.shen, false)
-    + makeTab(tabId+'_xing', '九星·'+(window.XING_ABBR||{})[p.xing]||p.xing, false)
-    + makeTab(tabId+'_men', '八门·'+(window.MEN_ABBR||{})[p.men]||p.men, false)
+    + makeTab(tabId+'_shen', '八神·'+((window.SHEN_ABBR||{})[pShen] || pShen || '—'), false)
+    + makeTab(tabId+'_xing', '九星·'+((window.XING_ABBR||{})[pXing] || pXing || '—'), false)
+    + makeTab(tabId+'_men', '八门·'+((window.MEN_ABBR||{})[pMen] || pMen || '—'), false)
     + makeTab(tabId+'_gan', '干支', false)
-    + makeTab(tabId+'_geju', '格局·'+window._wxSpan((p.tian[0]||'')+(p.di[0]||'')), false);
+    + makeTab(tabId+'_geju', '格局·'+window._wxSpan(((p.tian||'')[0]||'')+((p.di||'')[0]||'')), false);
 
   function contentGong() {
     let s = '<div style="font-size:20px;font-weight:bold">第'+g+'宫 '+gi.name+' '+wxBadge(gi.wx)+'</div>';
@@ -16242,24 +16259,24 @@ function showPalace(g) {
     return s;
   }
   function contentShen() {
-    let s = '<div style="font-size:18px;font-weight:bold">八神：'+p.shen+'</div>';
-    if (window.SHEN_FULL && window.SHEN_FULL[p.shen]) s += fmtText(window.SHEN_FULL[p.shen].text);
+    let s = '<div style="font-size:18px;font-weight:bold">八神：'+pShen+'</div>';
+    if (window.SHEN_FULL && window.SHEN_FULL[pShen]) s += fmtText(window.SHEN_FULL[pShen].text);
     else s += '<p>'+sh.desc+'</p>';
-    if (window.WUCHENG_SHEN && window.WUCHENG_SHEN[p.shen]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_SHEN[p.shen].text);
+    if (window.WUCHENG_SHEN && window.WUCHENG_SHEN[pShen]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_SHEN[pShen].text);
     return s;
   }
   function contentXing() {
-    let s = '<div style="font-size:18px;font-weight:bold">九星：'+p.xing+'</div>';
-    if (window.XING_FULL && window.XING_FULL[p.xing]) s += fmtText(window.XING_FULL[p.xing].text);
+    let s = '<div style="font-size:18px;font-weight:bold">九星：'+pXing+'</div>';
+    if (window.XING_FULL && window.XING_FULL[pXing]) s += fmtText(window.XING_FULL[pXing].text);
     else s += '<p>'+xi.desc+'</p>';
-    if (window.WUCHENG_XING && window.WUCHENG_XING[p.xing]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_XING[p.xing].text);
+    if (window.WUCHENG_XING && window.WUCHENG_XING[pXing]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_XING[pXing].text);
     return s;
   }
   function contentMen() {
-    let s = '<div style="font-size:18px;font-weight:bold">八门：'+p.men+'</div>';
-    if (window.MEN_FULL && window.MEN_FULL[p.men]) s += fmtText(window.MEN_FULL[p.men].text);
+    let s = '<div style="font-size:18px;font-weight:bold">八门：'+pMen+'</div>';
+    if (window.MEN_FULL && window.MEN_FULL[pMen]) s += fmtText(window.MEN_FULL[pMen].text);
     else s += '<p>'+me.desc+'</p>';
-    if (window.WUCHENG_MEN && window.WUCHENG_MEN[p.men]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_MEN[p.men].text);
+    if (window.WUCHENG_MEN && window.WUCHENG_MEN[pMen]) s += '<hr style="border:0;border-top:1px dashed var(--c-border);margin:12px 0">'+fmtText(window.WUCHENG_MEN[pMen].text);
     return s;
   }
   function contentGan() {
