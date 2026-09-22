@@ -693,5 +693,24 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
 .xh-base-b { background: var(--c-theme); }
 .xh-xian-b { background: #5b8ff9; }
 .xh-hou-b  { background: #f6903d; }
-#xhBar { margin:6px 10px; padding:6px 10px; border-radius:8px; font-size:12.5px;
-         background: var(--c-gray-bg); color: var(--c-text-2); text-align:center; line-height:1.7; }
+/* 三宫通气说明卡(短按宫位后插在盘面上方) */
+#xhBar { margin:6px 10px 8px; padding:9px 11px; border-radius:10px; font-size:12.5px;
+         background: var(--c-gray-bg); color: var(--c-text-2); line-height:1.6; text-align:left; }
+.xh-title { font-weight:bold; font-size:13.5px; color: var(--c-text); margin-bottom:6px; }
+.xh-row { padding:6px 8px; margin:5px 0; border-radius:7px; border-left:3px solid var(--c-border); }
+.xh-base-row { background: rgba(13,194,179,.08); border-left-color: var(--c-theme); }
+.xh-xian-row { background: rgba(91,143,249,.08); border-left-color: #5b8ff9; }
+.xh-hou-row  { background: rgba(246,144,61,.08); border-left-color: #f6903d; }
+.xh-tag { display:inline-block; min-width:32px; text-align:center; padding:0 5px; margin-right:6px;
+          border-radius:5px; color:#fff; font-size:11px; font-weight:bold; }
+.xh-base-b { background: var(--c-theme); }
+.xh-xian-b { background: #5b8ff9; }
+.xh-hou-b  { background: #f6903d; }
+.xh-wx { margin-left:6px; color: var(--c-text-3); }
+.xh-syms { margin-top:3px; color: var(--c-text); }
+.xh-key { margin-top:2px; color: var(--c-text-3); }
+.xh-desc2 { margin-top:3px; color: var(--c-text-3); }
+.xh-role { color: var(--c-text-2); }
+.xh-warn { margin-top:6px; padding:6px 8px; border-radius:7px;
+           background: rgba(255,170,0,.14); color: var(--c-text); }
+.xh-tip { margin-top:7px; padding-top:7px; border-top:1px dashed var(--c-border); color: var(--c-text-3); }

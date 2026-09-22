@@ -13669,13 +13669,59 @@ function _clearXianhouMark() {
   if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
 }
 
+/* 三宫通气说明卡: 不只标位置, 还把三宫各自的卦意/五行/盘面符号与"该怎么读"讲出来,
+   对初学者友好。放在盘面之上, 跟着每次短按更新。 */
 function _showXhBar(g) {
   const x = XIANTIAN_GONG[g], h = HOUTIAN_GONG[g];
+  const P = window._palaces || {};
+  // 卦意详解太长(三宫全贴会刷屏), 只取第一句
+  const firstLine = function (t) {
+    if (!t) return '';
+    const m = String(t).split(/[。；]/)[0];
+    return m ? m + '。' : '';
+  };
+  // 该宫盘面上的符号(神/星/门/暗干), 用简称
+  const symsOf = function (gg) {
+    const p = P['gong' + gg];
+    if (!p) return '';
+    const a = [];
+    if (p.shen) a.push((window.SHEN_ABBR || {})[p.shen] || p.shen);
+    if (p.xing) a.push((window.XING_ABBR || {})[p.xing] || p.xing);
+    if (p.men)  a.push((window.MEN_ABBR  || {})[p.men]  || p.men);
+    if (p.anGan) a.push('暗干' + p.anGan);
+    return a.join(' · ');
+  };
+  const row = function (gg, cls, tag, role) {
+    const gi = GONG_INFO[gg] || {};
+    const s = symsOf(gg);
+    return '<div class="xh-row ' + cls + '-row">'
+      + '<span class="xh-tag ' + cls + '-b">' + tag + '</span>'
+      + '<b>' + gg + '宫 ' + (gi.name || GONG_GUA[gg] || '') + '</b>'
+      + '<span class="xh-wx">' + (gi.wx || '') + '</span>'
+      + (s ? '<div class="xh-syms">盘面：' + s + '</div>' : '')
+      + '<div class="xh-key">' + (gi.key || '') + '</div>'
+      + '<div class="xh-desc2">' + firstLine(gi.desc) + ' <span class="xh-role">' + role + '</span></div>'
+      + '</div>';
+  };
+  let html = '<div class="xh-title">三宫通气 · 本宫 ' + g + '宫'
+    + (GONG_GUA[g] || '') + (GONG_INFO[g] && GONG_INFO[g].wx ? '（' + GONG_INFO[g].wx + '）' : '') + '</div>';
+  html += row(g, 'xh-base', '本宫', '— 当前状态，用神落宫之象');
+  html += row(x, 'xh-xian', '先天', '— 过去 · 前因：根源、原生家庭（体）');
+  html += row(h, 'xh-hou',  '后天', '— 未来 · 后果：趋势、将显现之果（用）');
+  const kong = window._kongGongs || {};
+  if (kong[g]) {
+    html += '<div class="xh-warn">⚠ 本宫空亡：约 80% 的信息已转移至先天宫 <b>' + x + '宫'
+      + (GONG_GUA[x] || '') + '</b>，应重点看该宫（别只盯本宫或对宫）</div>';
+  } else if (kong[x]) {
+    html += '<div class="xh-warn">提示：先天宫 ' + x + '宫' + (GONG_GUA[x] || '')
+      + ' 逢空亡 —— 根源层信息被抽空，可再翻一层或参其对宫</div>';
+  }
+  html += '<div class="xh-tip"><b>读法</b>：三宫合参（三生万物）—— 现世看本宫、前因看先天宫、'
+    + '后果看后天宫。<b>先天为体</b>（论来源＝过去之因），<b>后天为用</b>（论显现＝未来之果）；'
+    + '伏吟局信息少时，可继续连翻先天/后天宫取信息。</div>';
   const bar = document.createElement('div');
   bar.id = 'xhBar';
-  bar.innerHTML = '<b>' + g + '宫' + (GONG_GUA[g] || '') + '</b> 本宫'
-    + ' · <b style="color:#5b8ff9">' + x + '宫' + (GONG_GUA[x] || '') + '</b> 先天(过去/前因)'
-    + ' · <b style="color:#f6903d">' + h + '宫' + (GONG_GUA[h] || '') + '</b> 后天(未来/后果)';
+  bar.innerHTML = html;
   const wrap = document.getElementById('panWrap');
   if (wrap && wrap.parentNode) wrap.parentNode.insertBefore(bar, wrap);
 }
