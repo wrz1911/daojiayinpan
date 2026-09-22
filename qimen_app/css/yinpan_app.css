@@ -161,14 +161,18 @@ body{padding-top:34px}
    输入类控件仍保留可选中, 否则无法输入/编辑。 */
 #mainDIV,#mainDIV *{user-select:none!important;-webkit-user-select:none!important}
 #mainDIV input,#mainDIV textarea,#mainDIV select{user-select:text!important;-webkit-user-select:text!important}
-.form-card{background:var(--c-bg);border-radius:0;padding:4px 0 0;margin:0;box-shadow:none}
+/* 左右边框与信息表的 #headTable 对齐 —— 否则时间选择器比信息表宽、看着"浮"在外面,
+   与"融合成一体"的意图相反(2026-09-22 实测: headTable 有 1px 左右框, form-card 为 0)。 */
+.form-card{background:var(--c-bg);border-radius:0;padding:4px 0 0;margin:0;box-shadow:none;border-left:1px solid var(--c-border);border-right:1px solid var(--c-border)}
 .form-row{display:flex;align-items:center;border-bottom:1px solid var(--c-border);padding:4px 10px}
 /* 时间选择器所在的表单卡与信息表要**视觉连成一体**(用户 2026-09-22 要求, 山向/穿壬/命理
    输入行更多、隔离感更明显)。原先是 form-card 的下内边距 + #timeRow 的下边框 +
    #headTable 的上边框三者叠在一起, 看起来像两层。现在: 去掉 form-card 的下内边距与
    headTable 的上边框, 只保留 .form-row 那一条线作为表格行分隔 —— 全盘型通用。 */
 .form-card{padding-bottom:0}
-.form-row:last-child{border-bottom:none}
+/* 原为 border-bottom:none(避免多余线)。融合后这条线**正是**时间选择器与信息表之间
+   唯一的分隔线, 故保留 —— 去掉它两者会粘在一起没有分界。 */
+.form-row:last-child{border-bottom:1px solid var(--c-border)}
 .form-label{color:var(--c-text-2);font-size:13px;min-width:55px}
 .sel-date{border:1px solid var(--c-border);border-radius:6px;padding:3px 6px;font-size:14px;color:var(--c-text);background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:48px}
 .sel-date:focus{border-color:var(--c-theme);background:var(--c-bg)}
@@ -177,6 +181,10 @@ body{padding-top:34px}
 #panHead{background:var(--c-bg);padding:0}
 #panHead td{background:var(--c-bg)}
 #panHead #headTable{width:100%;margin:0 auto;border:1px solid var(--c-border);border-bottom:none;border-top:none;border-collapse:collapse;table-layout:fixed}
+/* 只去 #headTable 的上边框不够 —— #panHead #headTable td{border:1px solid} 给每个单元格
+   都加了四边框, 首行的 border-top 又是一条线, 与时间行那条叠在一起, 视觉上是 2px 的"粗线"
+   (2026-09-22 用户反馈"时盘刻盘 事件选择 和下面日期 中间框线还是明显粗")。 */
+#panHead #headTable tr:first-child td{ border-top:none !important; }
 #panHead #headTable td{padding:4px 6px;font-size:16px;line-height:34px;color:var(--c-text);border:1px solid var(--c-border)}
 #panHead .sizhuTitle{color:var(--c-gold)!important;text-align:center}
 #panHead #itemTitle,#panHead #dTitle{color:var(--c-gold)!important}
