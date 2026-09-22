@@ -13903,6 +13903,11 @@ function renderXinpan(useBg) {
 
   let mkTag = '<span class="cx-horse" style="font-size:18px">马</span>';
   let sizhuParts = _xpBgSizhu ? _xpBgSizhu.split(/\s+/) : [];
+  // 玄女16诀(外盘四角)排布要用时支与阴阳遁(阳顺阴逆)。原先这两值只在 renderPan 里赋值,
+  // 心盘没设 → 用户 2026-09-22 要求把玄女16诀也放进心盘, 故在此补齐, 否则取到 undefined。
+  let _xpShiGz = sizhuParts[3] || '';
+  window._shiZhi = _xpShiGz.length >= 2 ? _xpShiGz[1] : '';
+  window._isYin = !!_xpBgIsYin;
   let sizhuHTML = '';
   for(let si = 0; si < 4; si++) { let gz = sizhuParts[si] || '—'; sizhuHTML += '<TD class="sizhu sizhu-v">'+(gz.length>=2?gz[0]+'<br>'+gz[1]:gz)+'</TD>'; }
   let wxSpanBg = window._wxSpan;
@@ -13946,8 +13951,11 @@ function renderXinpan(useBg) {
     '<TD><div class="btn" id="btn3" onclick="tianmenDihu()">天门地户</div></TD>' +
     '<TD><div class="btn" id="btn2" onclick="showState()">长生状态</div></TD>' +
     '</TR></TABLE>' +
-    // 心盘只在"长生状态"右边加一个金口诀按钮(地八神/人八神/玄女16诀是时盘专用, 不加)
+    // 心盘: 金口诀 + 玄女16诀 **并列**(用户 2026-09-22 要求把玄女16诀也放到心盘, 与时盘一致)。
+    // 地八神/人八神仍不加(时盘专用)。玄女16诀所依赖的 window._shiZhi / window._isYin
+    // 已在本函数上方补齐(见 sizhuParts 处), 否则按钮点了也排不出。
     '<TABLE id="btnTable3"><TR>' +
+    '<TD><div class="btn" id="btnXuanNv" onclick="xuanNv16()">玄女16诀</div></TD>' +
     '<TD><div class="btn" id="btnJinKou" onclick="toggleJinKouJue()">金口诀</div></TD>' +
     '</TR></TABLE>' +
     '<div id="yixinghuandouDIV"></div>';
