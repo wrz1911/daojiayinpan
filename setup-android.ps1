@@ -10,15 +10,15 @@
   用法:
     npm run setup:android
     powershell -ExecutionPolicy Bypass -File setup-android.ps1
-    powershell -ExecutionPolicy Bypass -File setup-android.ps1 -JdkDir D:\dev\jdk-21 -SdkDir D:\Android\Sdk
+    powershell -ExecutionPolicy Bypass -File setup-android.ps1 -JdkDir D:\devtools\jdk-21 -SdkDir D:\devtools\android-sdk
 
   装完后仍不能直接打 release APK —— 还缺签名密钥(android/qimen-release.keystore,
   该目录不入库, 需从原开发机拷入并配置 android/gradle.properties 口令), 详见 AGENTS.md。
 #>
 [CmdletBinding()]
 param(
-  [string]$JdkDir = 'D:\dev\jdk-21',
-  [string]$SdkDir = 'D:\Android\Sdk',
+  [string]$JdkDir = 'D:\devtools\jdk-21',
+  [string]$SdkDir = 'D:\devtools\android-sdk',
   [string]$CompileSdk = '35',
   [string]$BuildTools = '35.0.0'
 )
