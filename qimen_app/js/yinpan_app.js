@@ -184,6 +184,10 @@ function clearXinpan() {
   renderXinpan(true);
 }
 function setPanType(t) {
+  // 归一化为数字: 调用方既有 parseInt 过的数字, 也有从存档/会话里取回的字符串,
+  // 而下游大量使用 `panType === N` 的严格比较 —— 类型不一致会让分支静默失效。
+  t = parseInt(t, 10);
+  if (!t || t < 1 || t > 6) t = 1;
   // 金口诀只在时盘(1)与心盘(3)可用。切到其它盘型时若金口诀面板还开着, 直接刷新
   // 页面, 避免残留面板与新盘型混在一起(setPanType 先于 doPan 执行, 故守卫放这里)
   if (t !== 1 && t !== 3 && (document.getElementById('jinkoujueDIV') || _jkShow)) {
@@ -13620,6 +13624,8 @@ function needJsSquare(){ return !(window.CSS && CSS.supports && CSS.supports('as
    目的是避免移动端误触 —— 轻点与滑动不再弹窗, 按住 550ms 才触发。
    各盘型触发的是其原有行为: 刻/山向/命理 → 宫位解释; 心盘 → 宫位编辑器。 */
 const LONG_PRESS_PAN_TYPES = [2, 3, 4, 6];
+/* panType 存在字符串来源(存档/会话), 判定前统一 parseInt */
+const isLongPressPanType = function (t) { return LONG_PRESS_PAN_TYPES.indexOf(parseInt(t, 10)) >= 0; };
 
 function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
   opts = opts || {};
@@ -13648,7 +13654,7 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     // 它们复用同一份宫位 id, 点击会被 showPalace 按"主盘"的数据解释(心盘模式下
     // 更会打开主盘宫位的编辑器并写回 _xpData)。原先靠在渲染后逐个清 onclick,
     // 漏一处就出错, 改为生成时就不挂。
-    let noInlineClick = opts.noClick || LONG_PRESS_PAN_TYPES.indexOf(panType) >= 0;
+    let noInlineClick = opts.noClick || isLongPressPanType(panType);
     return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'"'+(noInlineClick?'':' onclick="showPalace('+g+')"')+'>' +
       '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
       '<div class="panItem top mid-row" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span>'+(opts.diShen?'<span class="w4shen" id="w4'+g+'"></span>':'')+'<span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
@@ -15164,6 +15170,34 @@ function _bindLongPress(id, fn) {
   b.addEventListener('mouseleave', end);
 }
 
+/* 宫位长按(刻/心/山向/命理): 用 document 级事件委托, 只绑一次。
+   不能用逐元素绑定 —— 宫格每次排盘都会重建(_bindActionButtons 也并非每次渲染都调用),
+   漏绑就等于宫位彻底失去交互。委托同时天然适配盘型切换: 判定在事件触发时才做。 */
+(function _bindGridLongPress() {
+  if (window._gridLpBound) return;
+  window._gridLpBound = true;
+  let timer = null;
+  const hitGong = e => {
+    const el = (e.target && e.target.closest) ? e.target.closest('[id^="gong"]') : null;
+    if (!el || !/^gong\d+$/.test(el.id)) return null;
+    if (!isLongPressPanType(panType)) return null;
+    return el;
+  };
+  const begin = e => {
+    const el = hitGong(e); if (!el) return;
+    const gn = parseInt(el.id.replace('gong', ''), 10); if (!gn) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => { timer = null; showPalace(gn); }, 550);
+  };
+  const end = () => { clearTimeout(timer); timer = null; };
+  document.addEventListener('touchstart', begin, { passive: true });
+  document.addEventListener('touchend', end);
+  document.addEventListener('touchmove', end);
+  document.addEventListener('touchcancel', end);
+  document.addEventListener('mousedown', begin);
+  document.addEventListener('mouseup', end);
+})();
+
 function showXuanNvHelp() { _showHelpDlg('xnHelpDlg', XN_HELP); }
 function _showHelpDlg(dlgId, DATA) {
   try {
@@ -15852,21 +15886,15 @@ function _bindActionButtons() {
     if (el && !el._bound) { el.onclick = btns[id]; el._bound = true; }
   }
   _bindXnLongPress();
-  // 宫位交互: 长按类盘型(刻/心/山向/命理)绑长按, 时盘绑点击; 穿壬不绑。
-  // buildPaipanGrid 对长按类盘型已不挂内联 onclick, 这里再清一次以防旧 HTML 残留。
-  if (panType !== 5) {
-    const useLongPress = LONG_PRESS_PAN_TYPES.indexOf(panType) >= 0;
+  // 宫位交互: 长按类盘型由 document 级委托统一处理(见 _bindGridLongPress) ——
+  // 宫格每次排盘都会重建, 逐元素绑定会漏(且 _bindActionButtons 并非每次渲染都调用)。
+  // 这里只兜底清掉可能残留的内联 onclick。
+  if (isLongPressPanType(panType)) {
+    document.querySelectorAll('[id^="gong"]').forEach(g => { g.onclick = null; g.removeAttribute('onclick'); });
+  } else if (parseInt(panType, 10) !== 5) {
     let gongs = document.querySelectorAll('[id^="gong"]');
     gongs.forEach(g => {
-      let gn = parseInt(g.id.replace('gong','')); if (!gn) return;
-      if (useLongPress) {
-        g.onclick = null;
-        g.removeAttribute('onclick');
-        _bindLongPress('gong' + gn, () => showPalace(gn));
-      } else if (!g._bound) {
-        g.onclick = () => showPalace(gn);
-        g._bound = true;
-      }
+      if (!g._bound) { let gn = parseInt(g.id.replace('gong',''), 10); if (gn) g.onclick = ()=>showPalace(gn); g._bound = true; }
     });
   }
   // 标题编辑
@@ -16119,8 +16147,9 @@ let MEN_INFO = {
 };
 
 function showPalace(g) {
-  if (panType === 5) return;   // 穿壬盘无宫位解释(时盘/刻盘/心盘/山向/命理均有)
-  if (panType === 3) { showXinpanEditor(g); return; }
+  const _pt = parseInt(panType, 10);
+  if (_pt === 5) return;   // 穿壬盘无宫位解释(时盘/刻盘/心盘/山向/命理均有)
+  if (_pt === 3) { showXinpanEditor(g); return; }
   let p = window._palaces ? window._palaces['gong'+g] : null;
   if (!p) return;
   let gi = GONG_INFO[g] || {};
