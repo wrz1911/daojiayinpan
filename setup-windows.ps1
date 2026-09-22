@@ -177,7 +177,25 @@ $wvKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A
 if (Test-Path $wvKey) { Pass 'WebView2 运行时' (Get-ItemProperty $wvKey).pv }
 else { Warn 'WebView2 运行时' '未检出' 'Win11 通常随 Edge 自带; 缺失时 app.exe 会启动失败' }
 
-# ---------- 7. 自动补齐 ----------
+# ---------- 7. Android 构建链(可选: 只有本地打 APK 才需要) ----------
+Section 'Android 构建链(可选, 由 setup:android 安装)'
+$jdkHome = [System.Environment]::GetEnvironmentVariable('JAVA_HOME', 'User')
+if ($jdkHome -and (Test-Path (Join-Path $jdkHome 'bin\javac.exe'))) {
+  Pass 'JDK (JAVA_HOME)' ((& (Join-Path $jdkHome 'bin\javac.exe') -version) 2>&1)
+} else {
+  Warn 'JDK' '未安装' 'npm run setup:android (全程免管理员)'
+}
+$sdkHome = [System.Environment]::GetEnvironmentVariable('ANDROID_HOME', 'User')
+if ($sdkHome -and (Test-Path (Join-Path $sdkHome 'platform-tools\adb.exe'))) {
+  Pass 'Android SDK' $sdkHome
+  $aapt = Join-Path $sdkHome 'build-tools\35.0.0\aapt2.exe'
+  if (Test-Path $aapt) { Pass 'build-tools 35.0.0' 'aapt2 / zipalign / apksigner 就位' }
+  else { Warn 'build-tools 35.0.0' '缺失' 'npm run setup:android' }
+} else {
+  Warn 'Android SDK' '未安装' 'npm run setup:android (全程免管理员)'
+}
+
+# ---------- 8. 自动补齐 ----------
 if ($Install -and $script:toFix.Count -gt 0) {
   Section '自动补齐'
   foreach ($item in $script:toFix) {
@@ -203,7 +221,7 @@ if ($Install -and $script:toFix.Count -gt 0) {
   }
 }
 
-# ---------- 8. 汇总 ----------
+# ---------- 9. 汇总 ----------
 Section '汇总'
 if ($script:missing.Count -eq 0) {
   Write-Host '  环境就绪, 可以构建 Windows 桌面版。' -ForegroundColor Green
@@ -219,5 +237,5 @@ Write-Host '    npx tauri dev                    # 开发模式(热重载)'
 Write-Host '    npx eslint qimen_app/js/*.js     # 静态检查(CI 同款)'
 Write-Host ''
 Write-Host '  说明: PATH 变更只对新开的终端生效, 当前窗口请重开。' -ForegroundColor DarkGray
-Write-Host '        deb/rpm/AppImage 与 APK 由 CI 构建, Windows 本地不产出。' -ForegroundColor DarkGray
+Write-Host '        deb/rpm/AppImage 由 CI 构建(Windows 本地不产出); APK 本地可构建, 但 release 签名需 android/ 与 keystore。' -ForegroundColor DarkGray
 Write-Host ''
