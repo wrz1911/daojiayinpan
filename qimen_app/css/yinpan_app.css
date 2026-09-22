@@ -688,8 +688,10 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
 .xh-base { box-shadow: inset 0 0 0 3px var(--c-theme); background: rgba(13,194,179,.10); }
 .xh-xian { box-shadow: inset 0 0 0 3px #5b8ff9;        background: rgba(91,143,249,.10); }
 .xh-hou  { box-shadow: inset 0 0 0 3px #f6903d;        background: rgba(246,144,61,.10); }
-.xh-badge { position:absolute; top:1px; right:1px; z-index:6; font-size:10px; line-height:1;
-            padding:1px 4px; border-radius:7px; color:#fff; font-weight:bold; }
+/* 角标放在宫位"上方正中": 右上角是空亡圈(○)的位置, 靠右会遮挡它 */
+.xh-badge { position:absolute; top:0; left:50%; transform:translateX(-50%); z-index:6;
+            font-size:10px; line-height:1; padding:1px 4px; border-radius:7px;
+            color:#fff; font-weight:bold; white-space:nowrap; }
 .xh-base-b { background: var(--c-theme); }
 .xh-xian-b { background: #5b8ff9; }
 .xh-hou-b  { background: #f6903d; }
