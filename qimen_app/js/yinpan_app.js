@@ -13631,17 +13631,84 @@ const LONG_PRESS_PAN_TYPES = [1, 2, 4, 6];
 /* 宫位**短按**(click)行为 —— 与长按(_bindGridLongPress)对称, 集中定义在一处,
    免得"没反应"看起来像漏绑。各盘型分工:
      · 心盘(3)              → 打开宫位编辑器
-     · 时盘(1)/刻盘(2)/命理(6) → **留白**(显式占位, 用途待定, 后续填在 onGongShortPress 里)
+     · 时盘(1)/刻盘(2)/命理(6) → **标记该宫的先后天三宫**(三宫通气可视化)
      · 山向(4)/穿壬(5)      → 无短按行为
    注意: 长按成立后那次 click 会被 _bindGridLongPress 在捕获阶段拦掉, 所以长按不会
    顶替短按 —— 两套机制互不干扰。 */
 const SHORT_PRESS_RESERVED = [1, 2, 6];
+
+/* ── 先后天三宫标记(时/刻/命理 短按触发) ─────────────────────────────
+   对应关系由"同方位上后天卦↔先天卦互换"推出, 与教材《阴盘奇门遁甲》的对应表
+   逐条一致(坎先坤后兑 / 艮先震后乾 / 震先离后艮 / 巽先兑后坤 / 离先乾后震 /
+   坤先巽后坎 / 兑先坎后巽 / 乾先艮后离)。中宫(5)不参与。
+   语义: 先天=体, 论来源为过去/前因, 论显现为未来(因未显现); 后天=用, 反之。
+   短按某宫 → 本宫 + 先天宫 + 后天宫 三宫同时高亮, 即"三宫通气"。 */
+const XIANTIAN_GONG = {1:2, 2:4, 3:9, 4:7, 6:8, 7:1, 8:3, 9:6};
+const HOUTIAN_GONG  = {1:7, 2:1, 3:8, 4:2, 6:9, 7:4, 8:6, 9:3};
+const GONG_GUA = {1:'坎', 2:'坤', 3:'震', 4:'巽', 6:'乾', 7:'兑', 8:'艮', 9:'离'};
+let _xhBase = 0;   // 当前标记的本宫号, 0=未标记
+
+/* 主盘宫格定位: 副盘(移星换斗的旋转盘、向角度选局的盘)复用同一批 gong id 且渲染在
+   #yixinghuandouDIV 内, 必须排除, 否则会标到副盘上。 */
+function _findMainGong(g) {
+  const list = document.querySelectorAll('#gong' + g);
+  for (let i = 0; i < list.length; i++) {
+    if (!list[i].closest('#yixinghuandouDIV')) return list[i];
+  }
+  return null;
+}
+
+function _clearXianhouMark() {
+  document.querySelectorAll('.xh-base,.xh-xian,.xh-hou').forEach(function (el) {
+    el.classList.remove('xh-base', 'xh-xian', 'xh-hou');
+  });
+  document.querySelectorAll('.xh-badge').forEach(function (b) {
+    if (b.parentNode) b.parentNode.removeChild(b);
+  });
+  const bar = document.getElementById('xhBar');
+  if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+}
+
+function _showXhBar(g) {
+  const x = XIANTIAN_GONG[g], h = HOUTIAN_GONG[g];
+  const bar = document.createElement('div');
+  bar.id = 'xhBar';
+  bar.innerHTML = '<b>' + g + '宫' + (GONG_GUA[g] || '') + '</b> 本宫'
+    + ' · <b style="color:#5b8ff9">' + x + '宫' + (GONG_GUA[x] || '') + '</b> 先天(过去/前因)'
+    + ' · <b style="color:#f6903d">' + h + '宫' + (GONG_GUA[h] || '') + '</b> 后天(未来/后果)';
+  const wrap = document.getElementById('panWrap');
+  if (wrap && wrap.parentNode) wrap.parentNode.insertBefore(bar, wrap);
+}
+
+function toggleXianhouMark(g) {
+  g = parseInt(g, 10);
+  if (!g || g === 5) return;                    // 中宫不参与
+  // 重排盘/切盘型后 DOM 会重建(旧标记随之消失), 故"是否已标记"以 DOM 为准, 不能只看变量
+  const same = (_xhBase === g) && !!document.querySelector('.xh-base');
+  _clearXianhouMark();
+  if (same) { _xhBase = 0; return; }             // 再按同一宫 → 取消
+  _xhBase = g;
+  const put = function (gong, cls, label) {
+    const el = _findMainGong(gong);
+    if (!el) return;
+    el.classList.add(cls);
+    el.style.position = 'relative';              // 角标的定位基准(td 默认 static)
+    const badge = document.createElement('span');
+    badge.className = 'xh-badge ' + cls + '-b';
+    badge.textContent = label;
+    el.appendChild(badge);
+  };
+  put(g, 'xh-base', '本');
+  if (XIANTIAN_GONG[g]) put(XIANTIAN_GONG[g], 'xh-xian', '先');
+  if (HOUTIAN_GONG[g])  put(HOUTIAN_GONG[g],  'xh-hou',  '后');
+  _showXhBar(g);
+}
+
 function onGongShortPress(g) {
   const pt = parseInt(panType, 10);
   if (pt === 3) { showPalace(g); return; }             // 心盘 → showPalace 内部路由到编辑器
   if (SHORT_PRESS_RESERVED.indexOf(pt) >= 0) {
-    // ── 留白 ──
-    // 时盘/刻盘/命理的短按用途待定(用户 2026-09-22 要求预留), 将来在此实现。
+    toggleXianhouMark(g);                              // 时/刻/命理 → 标记先后天三宫
     return;
   }
   // 山向(4)/穿壬(5): 无短按行为

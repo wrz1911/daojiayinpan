@@ -681,3 +681,17 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
      就会压到上方表单, 故补足间距。 */
   #panWrap > .cr-grid-wrap{ margin-top:44px }
 }
+
+/* ==== 先后天三宫标记(时盘/刻盘/命理 短按宫位触发) ====
+   三宫通气可视化: 本宫(主题青) + 先天宫(蓝, 过去/前因) + 后天宫(橙, 未来/后果)。
+   用 box-shadow 内描边而非 border, 避免撑动表格布局; 角标绝对定位在右上角。 */
+.xh-base { box-shadow: inset 0 0 0 3px var(--c-theme); background: rgba(13,194,179,.10); }
+.xh-xian { box-shadow: inset 0 0 0 3px #5b8ff9;        background: rgba(91,143,249,.10); }
+.xh-hou  { box-shadow: inset 0 0 0 3px #f6903d;        background: rgba(246,144,61,.10); }
+.xh-badge { position:absolute; top:1px; right:1px; z-index:6; font-size:10px; line-height:1;
+            padding:1px 4px; border-radius:7px; color:#fff; font-weight:bold; }
+.xh-base-b { background: var(--c-theme); }
+.xh-xian-b { background: #5b8ff9; }
+.xh-hou-b  { background: #f6903d; }
+#xhBar { margin:6px 10px; padding:6px 10px; border-radius:8px; font-size:12.5px;
+         background: var(--c-gray-bg); color: var(--c-text-2); text-align:center; line-height:1.7; }
