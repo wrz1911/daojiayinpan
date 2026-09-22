@@ -775,13 +775,12 @@ function renderPan(raw, engineData) {
     // 日期行: 公历 + 农历(无括号) + 月将。月将一个月才换一次(比局数稳定得多),
     // 所以从局数行挪到这里跟农历放一起(用户 2026-09-22 要求)。
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' '+nongliShort+'【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
-    // 节气与局数分两行, 但**必须在同一个单元格内**(两个 div) —— 拆成两个 <TR> 且跨满全宽
-    // 时那行的边框自成一块, 看起来像"突兀地又加了一个表格"(用户反馈)。局数居中。
+    // 节气与局数回到同一行(用户 2026-09-22: 月将挪去日期行后位置腾出来了, 不必占两行)。
+    // 此前分行是因为"节气 + 农历 + 月将 + 局数"一行放不下(实测会换行到 43px);
+    // 现在这行只剩"节气区间 + [自选] + 阴遁X局", 实测放得下。
     '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'">' +
-    '<div><span id="jieqi">'+(jieqi||'节气')+'</span></div>' +
-    '<div style="text-align:center">' + ziXuanMark +
-    '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局</div>' +
-    '</TD></TR>' +
+    '<span id="jieqi">'+(jieqi||'节气')+'</span> ' + ziXuanMark +
+    '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD>'+(panType===2?'<TD colspan=2>空亡</TD>':'<TD>空亡</TD>')+'</TR>' +
     '<TR><TD id="xunShou">'+wxSpan(xunShou)+'</TD><TD>天<font id="zhiFu">'+zhiFuShort+'</font></TD>' +
     '<TD><font id="zhiShi">'+zhiShiShort+'</font>门</TD>' +
