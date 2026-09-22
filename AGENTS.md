@@ -28,11 +28,17 @@
 - 验证:`/home/wrz/Android/sdk/build-tools/35.0.0/apksigner verify --print-certs <apk>`
 - 系统旧 SDK /opt/android-sdk 已于 2026-08-16 删除;唯一 SDK 在 /home/wrz/Android/sdk(local.properties sdk.dir),build-tools 28.0.3/34/35 并存, ANDROID_HOME 已写入 ~/.bashrc 与 fish 配置
 
-## 无线调试部署(手机 192.168.1.5:46529,设备 5d5c76a6)
+## 无线调试部署(固定端口 5555, 2026-09-22 重做)
 
-- 首次 adb pair IP:配对端口(设备"使用配对码配对设备"给码);日常 adb connect 192.168.1.5:46529 + adb install -r
-- 设备 IP 未知:`nmap -p <端口> --open 192.168.1.0/24` 扫网段
-- **签名变化时必须先卸载再安装(数据丢,提醒用户先备份)**;同签名直接 -r 覆盖
+- **手机无 root**(`id` = uid=2000(shell), 无 su), 故 Android 11+ 设置里的「无线调试」端口随机、**无法固定**, 且 `persist.adb.tcp.port` 也改不了 → 改用经典 TCP/IP 模式, 把 adbd 固定在 **5555**
+- 一条命令: `npm run adb:wifi`(`scripts/adb-wireless.ps1`) —— 自动从 USB 设备读出手机 wlan0 地址并 `adb connect <ip>:5555`, 再回读属性确认通道可用
+- **手机重启后 TCP 模式失效**: 用 USB 连一次并跑 `npm run adb:wifi -- -Setup` 重设(脚本内 `adb tcpip 5555`)
+- 当前环境: 电脑 **192.168.1.2** / 手机 **192.168.1.4**(SSID "Wrz"), 序列号 **5d5c76a6**, 型号 25102RKBEC, Android 16 (API 36)。手机开着 VPN(tun0) 不影响 adb
+- 所有命令需加 `-s 192.168.1.4:5555`, 例如无线安装:
+  `D:\devtools\android-sdk\platform-tools\adb.exe -s 192.168.1.4:5555 install -r android\app\build\outputs\apk\release\app-release.apk`
+  (实测传 2.08MB 包 **0.7 秒**, 约 2.9MB/s)
+- **签名变化时必须先卸载再安装(数据丢, 提醒用户先备份)**;同签名直接 `-r` 覆盖
+- 旧记录已废弃: 曾用「无线调试」的随机端口 `192.168.1.5:46529`(IP 与端口都会变, 故弃用)
 
 ## 产品功能要点
 

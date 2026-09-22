@@ -7,6 +7,7 @@
     "build:linux": "bash build-tauri.sh",
     "build:windows": "sh scripts/build-windows.sh",
     "build:android": "powershell -ExecutionPolicy Bypass -File scripts/build-android.ps1",
+    "adb:wifi": "powershell -ExecutionPolicy Bypass -File scripts/adb-wireless.ps1",
     "build:bundle": "sh scripts/build_bundle.sh",
     "setup:windows": "powershell -ExecutionPolicy Bypass -File setup-windows.ps1",
     "setup:android": "powershell -ExecutionPolicy Bypass -File setup-android.ps1",
