@@ -772,11 +772,10 @@ function renderPan(raw, engineData) {
   let html =
     '<div id="panHead">' +
     '<TABLE class="pan" id="headTable">' +
-    // 试验过把日期行并入节气行 —— **会换行**(节气区间+农历+遁局+月将一行放不下),
-    // 节气行从 24 涨到 43px, 净省仅 5px, 得不偿失, 故仍分两行。
-    // 但日期行只留农历: 公历部分与顶部时间选择器**完全重复**(选择器 2026/9/22 23:06
-    // ↔ 原日期行 2026-09-22 23:06:00), 去掉后无信息损失。
-    '<TR><TD id="dTitle">农历</TD><TD colspan="'+keCols+'" id="dateTime">'+nongliShort+'</TD></TR>' +
+    // 日期行: 公历 + 农历并列(用户 2026-09-22 反馈"只留农历太单调")。
+    // 农历去掉"2026年"前缀 —— 公历已含年份, 顶部选择器也有, 三处重复没必要。
+    // 节气行另起一行, 不与本行合并(实测合并会换行, 节气行 24→43px)。
+    '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongliShort+')</TD></TR>' +
     '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'">' +
     '<span id="jieqi">'+(jieqi||'节气')+'</span> · ' + ziXuanMark +
     '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
