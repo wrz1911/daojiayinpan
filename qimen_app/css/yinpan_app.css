@@ -760,3 +760,14 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
    直接改它会把山向/穿壬/命理的输入行也一起居中。.form-row 本身未设 justify-content,
    故这条无需 !important 即可生效。 */
 #timeRow{ justify-content:center }
+/* ==== 时间选择器增大 + 山向选择器居中(用户 2026-09-22) ====
+   手机断点里 .sel-date 原为 font-size:12px!important(见上方 @media),
+   偏小。这里适度加到 13.5px, 同时把 min-width/padding 略收, 给字号让位,
+   保证"5 个 select + 年/月/日/时/分 单位 + 自选局"仍在 400px 内不换行。
+   ⚠️ 必须带 !important 且放在文件末尾 —— 与上方同名规则同特异性同权重, 靠"后定义胜"。 */
+@media (max-width:500px){
+  .sel-date{ font-size:13.5px!important; padding:3px 4px!important; min-width:36px!important }
+  .sel-zxj{ font-size:13px!important; padding:3px 6px!important }
+}
+/* 山向的"年 / 度数"选择器也居中(它同样带 .form-row, 但只在 #timeRow 之外, 故单独指定) */
+#shanxiangInputs{ justify-content:center }
