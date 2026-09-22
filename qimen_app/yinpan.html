@@ -32,21 +32,21 @@
   <!-- 表单 -->
   <div class="form-card">
     <div class="form-row" id="timeRow">
-      <span class="form-label">排盘时间</span>
-      <div id="selGroup" style="display:flex;align-items:center;gap:2px;font-size:15px">
+      <div id="selGroup" style="display:flex;align-items:center;gap:2px;font-size:15px;flex-wrap:nowrap">
         <select id="selYear" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">年</span>
         <select id="selMonth" class="sel-date" onchange="adjDays();doPan()"></select><span style="color:#999;font-size:12px">月</span>
         <select id="selDay" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">日</span>
         <select id="selHour" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">时</span>
         <select id="selMin" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">分</span>
       </div>
-    </div>
-    <div class="form-row" id="zxjRow">
-      <span id="zxjSpan" style="display:flex;align-items:center;gap:4px">
-        <span style="font-size:14px;color:#666">自选局</span>
+      <!-- 自选局并入本行: 原来它独占一行只放一个 select, 白占 33px。两个标签(排盘时间/自选局)
+           一并去掉腾出宽度 —— 本行就在模式栏下方, 语义自明。 -->
+      <span id="zxjSpan" style="display:flex;align-items:center;gap:2px;margin-left:4px">
         <select id="selZxj" class="sel-zxj" onchange="onZxjChange()"></select>
       </span>
     </div>
+    <!-- #zxjRow 保留为空容器: setPanType 仍会写它的 display, 直接删会报错 -->
+    <div class="form-row" id="zxjRow" style="display:none"></div>
     <div id="shanxiangInputs" class="form-row" style="padding:6px 10px;display:none;align-items:center;gap:6px">
       <span style="font-size:13px;color:#666">年</span>
       <select id="selShanXiangYear" class="sel-date" style="width:72px" onchange="doPan()"></select>

@@ -205,7 +205,14 @@ function setPanType(t) {
   let mlIn=document.getElementById('mlInputs');
   if(mlIn)mlIn.style.display=(t===6)?'block':'none';
   let zxjRow=document.getElementById('zxjRow');
-  if(zxjRow){let hide=(t===3||t===4||t===5||t===6);zxjRow.style.display=hide?'none':'';if(!hide){let zs=document.getElementById('zxjSpan');if(zs)zs.style.display='';}}
+  // 自选局已并入 timeRow(见 yinpan.html), zxjRow 现在是空容器; 显隐必须同时管 zxjSpan,
+  // 否则心盘/山向/穿壬/命理下会残留一个无用的自选局 select(2026-09-22)
+  if(zxjRow){
+    let hide=(t===3||t===4||t===5||t===6);
+    zxjRow.style.display=hide?'none':'';
+    let zs=document.getElementById('zxjSpan');
+    if(zs) zs.style.display=hide?'none':'flex';
+  }
   let tr=document.getElementById('timeRow');
   if(tr)tr.style.display=(t===4)?'none':'flex';
   document.body.className = document.body.className.replace(/mode-\w+/g,'');
@@ -763,9 +770,12 @@ function renderPan(raw, engineData) {
     '<div id="panHead">' +
     '<TABLE class="pan" id="headTable">' +
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongli+')</TD></TR>' +
-    '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'" id="jieqi">'+(jieqi||'节气')+'</TD></TR>' +
-    '<TR><TD style="color:var(--c-gold)">类型</TD><TD colspan="'+keCols+'">' +
-    (panType===2?'刻盘':'时盘')+'·			'+ziXuanMark+'<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
+    // 节气与类型合并为一行, 照命理盘的现成样式(那边本就是"白露～秋分 月将巳 阴遁3局"一行)。
+    // 同时去掉"时盘·"/"刻盘·"前缀 —— 顶部模式栏已标明当前盘型, 重复。省一整行 24px。
+    // 注意 id="jieqi" 从 TD 移到 SPAN, id 本身保留(其它地方按 id 取值不受影响)。
+    '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'">' +
+    '<span id="jieqi">'+(jieqi||'节气')+'</span> · ' + ziXuanMark +
+    '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD>'+(panType===2?'<TD colspan=2>空亡</TD>':'<TD>空亡</TD>')+'</TR>' +
     '<TR><TD id="xunShou">'+wxSpan(xunShou)+'</TD><TD>天<font id="zhiFu">'+zhiFuShort+'</font></TD>' +
     '<TD><font id="zhiShi">'+zhiShiShort+'</font>门</TD>' +
