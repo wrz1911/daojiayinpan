@@ -756,3 +756,7 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
 @media (max-width:500px){ :root{ --pan-sz-v:20px; --pan-lh-v:24px; } }
 @media (min-width:1025px){ :root{ --pan-sz-v:30px; --pan-lh-v:34px; } }
 #panHead #headTable .sizhu-v{ font-size:var(--pan-sz-v)!important; line-height:var(--pan-lh-v)!important; }
+/* 时间选择器整行居中(用户 2026-09-22 要求)。只针对 #timeRow —— .form-row 是通用类,
+   直接改它会把山向/穿壬/命理的输入行也一起居中。.form-row 本身未设 justify-content,
+   故这条无需 !important 即可生效。 */
+#timeRow{ justify-content:center }
