@@ -774,11 +774,18 @@ function renderPan(raw, engineData) {
     '<TABLE class="pan" id="headTable">' +
     // 日期行: 公历 + 农历并列(用户 2026-09-22 反馈"只留农历太单调")。
     // 农历去掉"2026年"前缀 —— 公历已含年份, 顶部选择器也有, 三处重复没必要。
-    // 节气行另起一行, 不与本行合并(实测合并会换行, 节气行 24→43px)。
     '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongliShort+')</TD></TR>' +
+    // 节气与局数分两行(用户 2026-09-22 要求), 但**必须在同一个单元格内** ——
+    // 一开始拆成两个 <TR> 且第二行 colspan 跨满全宽, 结果那行的边框自成一块,
+    // 看起来像"突兀地又加了一个表格"(用户反馈)。改用同一个 TD 里两个 div:
+    // 第一行节气靠左(跟着"节气"标签), 第二行局数+月将居中。
+    // 原因: 选了自选局后 ziXuanMark 会多出"自选"两字, 与节气挤一行容易换行。
+    // "时盘·"/"刻盘·"前缀仍去掉(顶部模式栏已标)。
     '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'">' +
-    '<span id="jieqi">'+(jieqi||'节气')+'</span> · ' + ziXuanMark +
-    '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
+    '<div><span id="jieqi">'+(jieqi||'节气')+'</span></div>' +
+    '<div style="text-align:center">' + ziXuanMark +
+    '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</div>' +
+    '</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD>'+(panType===2?'<TD colspan=2>空亡</TD>':'<TD>空亡</TD>')+'</TR>' +
     '<TR><TD id="xunShou">'+wxSpan(xunShou)+'</TD><TD>天<font id="zhiFu">'+zhiFuShort+'</font></TD>' +
     '<TD><font id="zhiShi">'+zhiShiShort+'</font>门</TD>' +
