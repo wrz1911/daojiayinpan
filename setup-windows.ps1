@@ -60,7 +60,9 @@ function Update-SessionPath {
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $gitBin = 'C:\Program Files\Git\bin'
-$cargoBin = Join-Path $env:USERPROFILE '.cargo\bin'
+# Rust 已统一到 D:\devtools\cargo(CARGO_HOME); 兜底顺序: CARGO_HOME -> 旧默认位置
+$cargoHome = [System.Environment]::GetEnvironmentVariable('CARGO_HOME', 'User')
+$cargoBin = if ($cargoHome) { Join-Path $cargoHome 'bin' } else { Join-Path $env:USERPROFILE '.cargo\bin' }
 $shExe = Join-Path $gitBin 'sh.exe'
 
 Write-Host ''
