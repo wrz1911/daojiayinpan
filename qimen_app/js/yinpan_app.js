@@ -791,11 +791,11 @@ function renderPan(raw, engineData) {
     (panType===2?'<TD class="sizhuTitle">刻柱</TD>':'') + '</TR>' +
     // 四柱横排(干支同行)而非竖排: 原来天干+<br>+地支占两行, 每行 49px;
     // 横排后单行约 25px, 一行省 24px。字号不变, 每格 71px 宽足够容纳两字。
-    '<TR><TD class="sizhu" id="nianzhu">'+wxSpan(nianGz[0]||'')+wxSpan(nianGz[1]||'')+'</TD>' +
-    '<TD class="sizhu" id="yuezhu">'+wxSpan(yueGz[0]||'')+wxSpan(yueGz[1]||'')+'</TD>' +
-    '<TD class="sizhu" id="rizhu">'+wxSpan(riGz[0]||'')+wxSpan(riGz[1]||'')+'</TD>' +
-    '<TD class="sizhu" id="shizhu">'+wxSpan(shiGz[0]||'')+wxSpan(shiGz[1]||'')+'</TD>' +
-    (panType===2 ? '<TD class="sizhu" id="kezhu">'+wxSpan(keGz[0]||'')+wxSpan(keGz[1]||'')+'</TD>' : '') +
+    '<TR><TD class="sizhu sizhu-v" id="nianzhu">'+wxSpan(nianGz[0]||'')+'<br>'+wxSpan(nianGz[1]||'')+'</TD>' +
+    '<TD class="sizhu sizhu-v" id="yuezhu">'+wxSpan(yueGz[0]||'')+'<br>'+wxSpan(yueGz[1]||'')+'</TD>' +
+    '<TD class="sizhu sizhu-v" id="rizhu">'+wxSpan(riGz[0]||'')+'<br>'+wxSpan(riGz[1]||'')+'</TD>' +
+    '<TD class="sizhu sizhu-v" id="shizhu">'+wxSpan(shiGz[0]||'')+'<br>'+wxSpan(shiGz[1]||'')+'</TD>' +
+    (panType===2 ? '<TD class="sizhu sizhu-v" id="kezhu">'+wxSpan(keGz[0]||'')+'<br>'+wxSpan(keGz[1]||'')+'</TD>' : '') +
     '</TR></TABLE></div>' +
     gridHTML +
     '<div id="Tip">颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span></div>' +
@@ -13905,10 +13905,10 @@ function renderXinpan(useBg) {
   let mkTag = '<span class="cx-horse" style="font-size:18px">马</span>';
   let sizhuParts = _xpBgSizhu ? _xpBgSizhu.split(/\s+/) : [];
   let sizhuHTML = '';
-  for(let si = 0; si < 4; si++) { let gz = sizhuParts[si] || '—'; sizhuHTML += '<TD class="sizhu">'+(gz.length>=2?gz[0]+'<br>'+gz[1]:gz)+'</TD>'; }
+  for(let si = 0; si < 4; si++) { let gz = sizhuParts[si] || '—'; sizhuHTML += '<TD class="sizhu sizhu-v">'+(gz.length>=2?gz[0]+'<br>'+gz[1]:gz)+'</TD>'; }
   let wxSpanBg = window._wxSpan;
   let sizhuColorHTML = '';
-  for(let si2 = 0; si2 < 4; si2++) { let gz2 = sizhuParts[si2] || '——'; sizhuColorHTML += '<TD class="sizhu">'+wxSpanBg(gz2[0]||'')+'<br>'+wxSpanBg(gz2[1]||'')+'</TD>'; }
+  for(let si2 = 0; si2 < 4; si2++) { let gz2 = sizhuParts[si2] || '——'; sizhuColorHTML += '<TD class="sizhu sizhu-v">'+wxSpanBg(gz2[0]||'')+'<br>'+wxSpanBg(gz2[1]||'')+'</TD>'; }
   let dStr = Y+'-'+String(M).padStart(2,'0')+'-'+String(D).padStart(2,'0');
   let nongliStr = _xpBgNongli || '';
 

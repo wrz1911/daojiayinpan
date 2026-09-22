@@ -401,11 +401,11 @@ window.renderChuanRen=(data,containerId) => {
     // 四柱标题+数据(顶部显示)
     h+='<TR id="tdTitle"><TD>'+(isKe?'五柱':'四柱')+'</TD><TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD><TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD>'+(isKe?'<TD class="sizhuTitle">刻柱</TD>':'')+'</TR>';
     h+='<TR><TD></TD>';
-    h+='<TD class="sizhu" id="nianzhu">'+wxSpan(nianGz[0]||'')+'<br>'+wxSpan(nianGz[1]||'')+'</TD>';
-    h+='<TD class="sizhu" id="yuezhu">'+wxSpan(yueGz[0]||'')+'<br>'+wxSpan(yueGz[1]||'')+'</TD>';
-    h+='<TD class="sizhu" id="rizhu">'+wxSpan(riGz[0]||'')+'<br>'+wxSpan(riGz[1]||'')+'</TD>';
-    h+='<TD class="sizhu" id="shizhu">'+wxSpan(shiGz[0]||'')+'<br>'+wxSpan(shiGz[1]||'')+'</TD>';
-    if(isKe)h+='<TD class="sizhu" id="kezhu">'+wxSpan(keGan)+'<br>'+wxSpan(keZhi)+'</TD>';
+    h+='<TD class="sizhu sizhu-v" id="nianzhu">'+wxSpan(nianGz[0]||'')+'<br>'+wxSpan(nianGz[1]||'')+'</TD>';
+    h+='<TD class="sizhu sizhu-v" id="yuezhu">'+wxSpan(yueGz[0]||'')+'<br>'+wxSpan(yueGz[1]||'')+'</TD>';
+    h+='<TD class="sizhu sizhu-v" id="rizhu">'+wxSpan(riGz[0]||'')+'<br>'+wxSpan(riGz[1]||'')+'</TD>';
+    h+='<TD class="sizhu sizhu-v" id="shizhu">'+wxSpan(shiGz[0]||'')+'<br>'+wxSpan(shiGz[1]||'')+'</TD>';
+    if(isKe)h+='<TD class="sizhu sizhu-v" id="kezhu">'+wxSpan(keGan)+'<br>'+wxSpan(keZhi)+'</TD>';
     h+='</TR>';
     // 八字信息(十神/藏干/纳音/地势/自坐/空亡): 紧接四柱下方, 与四柱同表对齐
     h+='<TR><TD>十神</TD>';

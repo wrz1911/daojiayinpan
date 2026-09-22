@@ -748,3 +748,11 @@ body.mode-mingli{ --pan-fs-sz:20px; --pan-lh-sz:24px }
 .xh-warn { margin-top:6px; padding:6px 8px; border-radius:7px;
            background: rgba(255,170,0,.14); color: var(--c-text); }
 .xh-tip { margin-top:7px; padding-top:7px; border-top:1px dashed var(--c-border); color: var(--c-text-3); }
+/* ==== 四柱/五柱: 竖排 + 加大字号(用户 2026-09-22 要求) ====
+   "凡事牵扯到四柱五柱的内容一律竖排并加大字号, 不用刻意缩小"。
+   山向的"干支"行不是四柱, 未挂 .sizhu-v, 故不受影响(用户明确"山向除外")。
+   必须 !important: 上面 #panHead #headTable td{font-size:var(--pan-fs)!important} 统一压着。 */
+:root{ --pan-sz-v:22px; --pan-lh-v:26px; }
+@media (max-width:500px){ :root{ --pan-sz-v:20px; --pan-lh-v:24px; } }
+@media (min-width:1025px){ :root{ --pan-sz-v:30px; --pan-lh-v:34px; } }
+#panHead #headTable .sizhu-v{ font-size:var(--pan-sz-v)!important; line-height:var(--pan-lh-v)!important; }

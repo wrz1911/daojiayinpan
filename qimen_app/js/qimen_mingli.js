@@ -219,7 +219,7 @@
       [sz.nian, sz.yue, sz.ri, sz.shi].forEach(function (gz) {
         gz = gz || '';
         /* 用 .sizhu(时盘同款): 复用 #panHead .sizhu 的整套响应式尺寸 */
-        h += '<TD class="sizhu">' + ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
+        h += '<TD class="sizhu sizhu-v">' + ganSpan(gz[0] || '') + '<br>' + zhiSpan(gz[1] || '') + '</TD>';
       });
       h += '</TR>';
       /* ── 八字信息(原「八字排盘」主盘, 合并进命理主盘): 十神/藏干/纳音/地势/
