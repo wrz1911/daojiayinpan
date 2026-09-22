@@ -13,7 +13,9 @@
     否则读项目根目录下的 .qimen-web-pass (已 gitignore), 文件内容即密码。
 """
 import argparse
+import hashlib
 import os
+import shlex
 import sys
 
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -108,11 +110,16 @@ def main():
         rp = REMOTE_ROOT + '/' + remote
         try:
             sftp.put(lp, rp)
-            rsize = sftp.stat(rp).st_size
             lsize = os.path.getsize(lp)
-            flag = '✓' if rsize == lsize else '⚠️ 大小不符(%d≠%d)' % (rsize, lsize)
+            # 只比大小不够: 改动后字节数可能恰好不变(如常量 [2,3,4,6]→[1,2,4,6]),
+            # 再比一次 sha256 才算真的同步成功。
+            local_hash = hashlib.sha256(open(lp, 'rb').read()).hexdigest()
+            _, out, _ = ssh.exec_command('sha256sum %s' % shlex.quote(rp), timeout=30)
+            remote_hash = out.read().decode('utf-8', 'replace').split()[0] if out else ''
+            good = (local_hash == remote_hash)
+            flag = '✓ sha256 一致' if good else '⚠️ 哈希不符(本地 %s / 远端 %s)' % (local_hash[:12], remote_hash[:12])
             print('  %-46s %10d  %s' % (remote, lsize, flag))
-            uploaded.append((remote, lsize, rsize == lsize))
+            uploaded.append((remote, lsize, good))
         except Exception as e:
             print('  %-46s  ✗ %s' % (remote, e))
             uploaded.append((remote, 0, False))

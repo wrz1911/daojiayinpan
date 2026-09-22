@@ -13619,11 +13619,12 @@ function recalcColors(palaces) {
 /* CSS 的 aspect-ratio 已保证宫位正方; 仅在旧环境才需 JS 量宽回写 */
 function needJsSquare(){ return !(window.CSS && CSS.supports && CSS.supports('aspect-ratio','1 / 1')); }
 
-/* 宫位改用「长按」触发的盘型: 刻盘(2) / 心盘(3) / 山向(4) / 命理(6)。
-   时盘(1) 保持点击弹解释; 穿壬(5) 本来就没有宫位解释。
-   目的是避免移动端误触 —— 轻点与滑动不再弹窗, 按住 550ms 才触发。
-   各盘型触发的是其原有行为: 刻/山向/命理 → 宫位解释; 心盘 → 宫位编辑器。 */
-const LONG_PRESS_PAN_TYPES = [2, 3, 4, 6];
+/* 宫位改用「长按」弹出宫位解释的盘型: 时盘(1) / 刻盘(2) / 山向(4) / 命理(6)。
+   四者**共用同一套**长按→解释逻辑(见 _bindGridLongPress 与 showPalace), 不各写一份。
+   心盘(3) 不在此列 —— 它的宫位点击仍是"打开宫位编辑器"(showXinpanEditor);
+   穿壬(5) 本来就没有宫位解释。
+   目的: 避免移动端误触 —— 轻点与滑动不再弹窗, 按住 550ms 才触发。 */
+const LONG_PRESS_PAN_TYPES = [1, 2, 4, 6];
 /* panType 存在字符串来源(存档/会话), 判定前统一 parseInt */
 const isLongPressPanType = function (t) { return LONG_PRESS_PAN_TYPES.indexOf(parseInt(t, 10)) >= 0; };
 
