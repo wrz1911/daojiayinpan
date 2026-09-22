@@ -5,7 +5,9 @@
   "scripts": {
     "start": "./run-desktop.sh",
     "build:linux": "bash build-tauri.sh",
+    "build:windows": "sh scripts/build-windows.sh",
     "build:bundle": "sh scripts/build_bundle.sh",
+    "setup:windows": "powershell -ExecutionPolicy Bypass -File setup-windows.ps1",
     "cap:sync": "npx cap sync",
     "cap:open": "npx cap open android"
   },
