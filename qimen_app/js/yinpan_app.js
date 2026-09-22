@@ -764,15 +764,19 @@ function renderPan(raw, engineData) {
 
   let dStr = Y+'-'+String(M).padStart(2,'0')+'-'+String(D).padStart(2,'0')+' '+
              String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0')+':00';
+  // 日期行已删(见下方), 农历并入节气行; 同时存一份全局给 _doSave 生成记录时间串用
+  let nongliShort = String(nongli||'').replace(/^\d+年/,'');
+  window._nongliFull = nongli;
   let keCols = panType===2 ? 5 : 4;
   ziXuanMark = raw.indexOf('自选') >= 0 ? '<span class="cx-zixuan">自选 </span>' : '';
   let html =
     '<div id="panHead">' +
     '<TABLE class="pan" id="headTable">' +
-    '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongli+')</TD></TR>' +
-    // 节气与类型合并为一行, 照命理盘的现成样式(那边本就是"白露～秋分 月将巳 阴遁3局"一行)。
-    // 同时去掉"时盘·"/"刻盘·"前缀 —— 顶部模式栏已标明当前盘型, 重复。省一整行 24px。
-    // 注意 id="jieqi" 从 TD 移到 SPAN, id 本身保留(其它地方按 id 取值不受影响)。
+    // 试验过把日期行并入节气行 —— **会换行**(节气区间+农历+遁局+月将一行放不下),
+    // 节气行从 24 涨到 43px, 净省仅 5px, 得不偿失, 故仍分两行。
+    // 但日期行只留农历: 公历部分与顶部时间选择器**完全重复**(选择器 2026/9/22 23:06
+    // ↔ 原日期行 2026-09-22 23:06:00), 去掉后无信息损失。
+    '<TR><TD id="dTitle">农历</TD><TD colspan="'+keCols+'" id="dateTime">'+nongliShort+'</TD></TR>' +
     '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'">' +
     '<span id="jieqi">'+(jieqi||'节气')+'</span> · ' + ziXuanMark +
     '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
@@ -15741,7 +15745,11 @@ function _doSave() {
   let panWrap = document.getElementById('panWrap');
   if (!panWrap) { _closeSheet(); return; }
   let panHTML = panWrap.innerHTML;
-  let timeStr = document.getElementById('dateTime') ? document.getElementById('dateTime').innerText : '';
+  // 时间串不再从 #dateTime 读 —— 该行已删(公历与顶部选择器重复), 农历改由 renderPan
+  // 存到 window._nongliFull。params 里本就有 year/month/day/hour/minute 完整参数。
+  let _p2 = function(v){ return String(v).padStart(2,'0'); };
+  let timeStr = Y+'-'+_p2(M)+'-'+_p2(D)+' '+_p2(hr)+':'+_p2(mn)+':00';
+  if (window._nongliFull) timeStr += ' ('+window._nongliFull+')';
   let params = {year:Y, month:M, day:D, hour:hr, minute:mn, panType:panType};
   if (panType === 4) {
     let sdEl=document.getElementById('selShanXiangDeg'), syEl=document.getElementById('selShanXiangYear');

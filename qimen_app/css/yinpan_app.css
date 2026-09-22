@@ -162,7 +162,7 @@ body{padding-top:34px}
 #mainDIV,#mainDIV *{user-select:none!important;-webkit-user-select:none!important}
 #mainDIV input,#mainDIV textarea,#mainDIV select{user-select:text!important;-webkit-user-select:text!important}
 .form-card{background:var(--c-bg);border-radius:0;padding:4px 0;margin:0;box-shadow:none}
-.form-row{display:flex;align-items:center;border-bottom:1px solid var(--c-border);padding:6px 10px}
+.form-row{display:flex;align-items:center;border-bottom:1px solid var(--c-border);padding:4px 10px}
 .form-row:last-child{border-bottom:none}
 .form-label{color:var(--c-text-2);font-size:13px;min-width:55px}
 .sel-date{border:1px solid var(--c-border);border-radius:6px;padding:3px 6px;font-size:14px;color:var(--c-text);background:var(--c-bg);outline:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer;min-width:48px}
