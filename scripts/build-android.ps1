@@ -18,7 +18,8 @@
 [CmdletBinding()]
 param(
   [switch]$Release,
-  [switch]$SkipWeb
+  [switch]$SkipWeb,
+  [switch]$NoDeploy
 )
 
 $ErrorActionPreference = 'Continue'
@@ -325,3 +326,18 @@ if (Test-Path $apk) {
   Write-Host '   安装到已连接的设备: ' -ForegroundColor White
   Write-Host ("     " + (Join-Path $sdkHome 'platform-tools\adb.exe') + " install -r `"$($f.FullName)`"") -ForegroundColor Gray
 } else { Die "未找到产物 $apk" }
+
+# ---------- 8. 推送到内网 web 服务器 ----------
+# 构建完顺手同步到 nginx, 手机上直接开 http://192.168.1.3/qimen_app/yinpan.html 验证,
+# 比每次装 APK 快得多。推送失败只提示, 不影响 APK 产物。
+if (-not $NoDeploy) {
+  Step '推送网页版到内网服务器'
+  $deploy = Join-Path $root 'scripts\deploy-web.py'
+  if ((Test-Path $deploy) -and (Get-Command python -ErrorAction SilentlyContinue)) {
+    & python $deploy
+    if ($LASTEXITCODE -eq 0) { Ok '网页版已同步到 192.168.1.3' }
+    else { Info '推送未成功(不影响 APK); 可稍后单独执行 npm run deploy:web' }
+  } else {
+    Info '跳过推送(缺 scripts/deploy-web.py 或 python)'
+  }
+}

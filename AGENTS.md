@@ -13,6 +13,7 @@
 
 ## 构建与发布流程
 
+- **内网网页版(2026-09-22)**: `npm run deploy:web` 把构建产物同步到 **192.168.1.3** 的 nginx, 手机浏览器直接开 **http://192.168.1.3/qimen_app/yinpan.html** 验证, 比装 APK 快得多。**已挂在 `npm run build:android` 之后自动执行**(失败只提示不影响 APK; 加 `-NoDeploy` 可跳过)。细节: 文档根 `/srv/http/qimen`(**属主 wrz, 可直接写, 不需要 sudo**); 推送 5 个文件(yinpan.html / yinpan_app.min.css→重命名为 yinpan_app.css / qimen_bundle.min.js / tyme4j-browser.js / gong_detail_data.js); `--with-apk` 可顺带推 `app-release.apk` 与下载页 `apk.html`。**口令不入库**: 读环境变量 `QIMEN_WEB_PASS` 或项目根的 `.qimen-web-pass`(已 gitignore)。注意另有一份独立拷贝在 `/home/wrz/qimen-web`(与文档根**不是**软链, 本脚本不更新它)
 - **Linux**:`bash build-tauri.sh`(rm -rf web → 同步 html/css/4js 资源 → npm run build:bundle → npx tauri build)→ 产物 src-tauri/target/release/bundle/{deb,rpm}/阴盘奇门遁甲_1.3.9_amd64.deb
 - **Android**:`npx cap sync android`(**必须从项目根执行**;在 android/ 子目录跑报 "platform has not been added" 且 gradle 全 up-to-date 假成功;漏跑 cap sync 会导致 APK 内嵌旧资源——踩过)→ `cd android && ./gradlew assembleRelease` → android/app/build/outputs/apk/release/app-release.apk
 - 版本号 4 处:src-tauri/tauri.conf.json(决定 deb/rpm 文件名)、package.json、package-lock.json(顶层+packages[""]两处)、android/app/build.gradle(versionName+versionCode;**android/ 目录在 .gitignore 不入库**);另有 yinpan_app.js 的 `const APP_VERSION`(release.sh 自动 sed)

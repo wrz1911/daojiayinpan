@@ -33,3 +33,6 @@ _xn_raw/
 
 # 签名口令(与 keystore 同为敏感材料, 不入库)
 qimen-signing.properties
+
+# 内网 web 服务器口令(公开仓库, 绝不入库)
+.qimen-web-pass

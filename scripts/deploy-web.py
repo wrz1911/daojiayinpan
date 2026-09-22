@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""把构建产物同步到内网 web 服务器(nginx @ 192.168.1.3)
+
+浏览器直接开: http://192.168.1.3/qimen_app/yinpan.html —— 手机上验证网页版比装 APK 快得多。
+
+用法:
+    npm run deploy:web                # 推网页资源
+    npm run deploy:web -- --with-apk  # 顺带推 release APK 与下载页
+    npm run deploy:web -- --dry-run   # 只看要推什么, 不实际上传
+
+凭据(不写入仓库, 本仓库是公开的):
+    优先读环境变量 QIMEN_WEB_PASS / QIMEN_WEB_USER / QIMEN_WEB_HOST / QIMEN_WEB_ROOT,
+    否则读项目根目录下的 .qimen-web-pass (已 gitignore), 文件内容即密码。
+"""
+import argparse
+import os
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
+try:
+    import paramiko
+except ImportError:
+    print('缺少 paramiko: python -m pip install paramiko')
+    sys.exit(2)
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+HOST = os.environ.get('QIMEN_WEB_HOST', '192.168.1.3')
+PORT = int(os.environ.get('QIMEN_WEB_PORT', '22'))
+USER = os.environ.get('QIMEN_WEB_USER', 'wrz')
+REMOTE_ROOT = os.environ.get('QIMEN_WEB_ROOT', '/srv/http/qimen')
+SITE = os.environ.get('QIMEN_WEB_URL', 'http://%s' % HOST)
+
+# (本地相对路径, 远端相对路径)
+WEB_FILES = [
+    ('qimen_app/yinpan.html',            'qimen_app/yinpan.html'),
+    ('qimen_app/css/yinpan_app.min.css', 'qimen_app/css/yinpan_app.css'),   # 压缩版, 前端引用名不变
+    ('qimen_app/js/qimen_bundle.min.js', 'qimen_app/js/qimen_bundle.min.js'),
+    ('qimen_app/js/tyme4j-browser.js',   'qimen_app/js/tyme4j-browser.js'),
+    ('qimen_app/js/gong_detail_data.js', 'qimen_app/js/gong_detail_data.js'),
+]
+APK_FILES = [
+    ('qimen_app/apk.html', 'apk.html'),
+    ('android/app/build/outputs/apk/release/app-release.apk', 'app-release.apk'),
+]
+
+
+def get_password():
+    pwd = os.environ.get('QIMEN_WEB_PASS')
+    if pwd:
+        return pwd.strip()
+    f = os.path.join(ROOT, '.qimen-web-pass')
+    if os.path.isfile(f):
+        with open(f, 'r', encoding='utf-8') as fh:
+            return fh.read().strip()
+    print('未找到服务器口令。二选一:')
+    print('  1) 设置环境变量 QIMEN_WEB_PASS')
+    print('  2) 在项目根创建 .qimen-web-pass 文件写入口令(该文件已 gitignore)')
+    sys.exit(1)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--with-apk', action='store_true', help='同时推送 release APK 与下载页')
+    ap.add_argument('--dry-run', action='store_true', help='只列出将上传的文件')
+    args = ap.parse_args()
+
+    plan = list(WEB_FILES) + (APK_FILES if args.with_apk else [])
+
+    print('=== 待同步(%d 个文件) → %s%s ===' % (len(plan), HOST, REMOTE_ROOT))
+    missing = []
+    for local, remote in plan:
+        lp = os.path.join(ROOT, local)
+        ok = os.path.isfile(lp)
+        size = os.path.getsize(lp) if ok else 0
+        print('  %-52s %10s  %s' % (local + '  →  ' + remote,
+                                    ('%d' % size) if ok else '-',
+                                    '' if ok else '✗ 不存在'))
+        if not ok:
+            missing.append(local)
+    if missing:
+        print('\n缺少文件: %s' % ', '.join(missing))
+        if any('qimen_bundle' in m for m in missing):
+            print('提示: 先跑 npm run build:bundle')
+        if any('.apk' in m for m in missing):
+            print('提示: 先跑 npm run build:android -- -Release')
+        sys.exit(1)
+
+    if args.dry_run:
+        print('\n(--dry-run, 未实际上传)')
+        return 0
+
+    print('\n=== 连接 %s@%s ===' % (USER, HOST))
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        ssh.connect(HOST, port=PORT, username=USER, password=get_password(),
+                    timeout=20, look_for_keys=False, allow_agent=False)
+    except Exception as e:
+        print('连接失败: %s: %s' % (type(e).__name__, e))
+        return 1
+    sftp = ssh.open_sftp()
+
+    uploaded = []
+    for local, remote in plan:
+        lp = os.path.join(ROOT, local)
+        rp = REMOTE_ROOT + '/' + remote
+        try:
+            sftp.put(lp, rp)
+            rsize = sftp.stat(rp).st_size
+            lsize = os.path.getsize(lp)
+            flag = '✓' if rsize == lsize else '⚠️ 大小不符(%d≠%d)' % (rsize, lsize)
+            print('  %-46s %10d  %s' % (remote, lsize, flag))
+            uploaded.append((remote, lsize, rsize == lsize))
+        except Exception as e:
+            print('  %-46s  ✗ %s' % (remote, e))
+            uploaded.append((remote, 0, False))
+
+    sftp.close()
+    ssh.close()
+
+    ok = sum(1 for _, _, good in uploaded if good)
+    print('\n=== 完成: %d/%d 个文件已同步 ===' % (ok, len(uploaded)))
+    if ok == len(uploaded):
+        print('  网页版: %s/qimen_app/yinpan.html' % SITE)
+        if args.with_apk:
+            print('  安卓包: %s/apk.html' % SITE)
+        print('  (手机浏览器直接打开即可, 可能需要下拉刷新清缓存)')
+        return 0
+    print('  有文件未同步成功, 请检查上面的输出')
+    return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
