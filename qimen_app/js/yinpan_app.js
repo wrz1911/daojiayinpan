@@ -13621,9 +13621,9 @@ function needJsSquare(){ return !(window.CSS && CSS.supports && CSS.supports('as
 
 /* 宫位改用「长按」弹出宫位解释的盘型: 时盘(1) / 刻盘(2) / 山向(4) / 命理(6)。
    四者**共用同一套**长按→解释逻辑(见 _bindGridLongPress 与 showPalace), 不各写一份。
-   心盘(3) 不在此列 —— 它的宫位**短按**仍是"打开宫位编辑器"(showXinpanEditor);
-   **长按暂不定义, 预留作后续功能**: 将来要加时在 _bindGridLongPress 里单开分支,
-   不要塞进这个数组(否则会被当成"长按弹解释"的一员)。
+   心盘(3) 不在此列 —— 它的宫位**短按**是"打开宫位编辑器"(showXinpanEditor),
+   **长按**是"先后天三宫标记"(toggleXianhouMark); 两者不冲突, 因为长按成立后那次
+   click 会被委托在捕获阶段拦掉。
    穿壬(5) 本来就没有宫位解释。
    目的: 避免移动端误触 —— 轻点与滑动不再弹窗, 按住 550ms 才触发。 */
 const LONG_PRESS_PAN_TYPES = [1, 2, 4, 6];
@@ -15327,8 +15327,8 @@ function _bindLongPress(id, fn) {
     const el = findGong(e); if (!el) return;
     const pt = parseInt(panType, 10);
     const isExplain = isLongPressPanType(pt);
-    // 心盘(3) 也纳入监听 —— 不是为了触发什么, 而是为了**压掉长按后的 click**:
-    // 它的长按"暂不定义"(预留), 不管的话松手时的 click 会照样打开宫位编辑器。
+    // 心盘(3) 也纳入监听: 长按 = 先后天三宫标记; 同时必须压掉长按后的 click,
+    // 否则松手时那次 click 会照样打开宫位编辑器(与短按撞车)。
     if (!isExplain && pt !== 3) return;
     const gn = parseInt(el.id.replace('gong', ''), 10); if (!gn) return;
     // 注意: 这里**不能**重置 suppressClick —— 触屏松手后 WebView 会补发一套合成的
@@ -15341,8 +15341,11 @@ function _bindLongPress(id, fn) {
       // 兜底: 万一 click 没派发(被系统手势吃掉), 1.5 秒后自动失效, 免得多拦一次真短按
       clearTimeout(suppressTimer);
       suppressTimer = setTimeout(() => { suppressClick = false; }, 1500);
-      if (isExplain) showPalace(gn);   // 时/刻/山向/命理 → 宫位解释(共用同一套)
-      // 心盘: 此处留白 —— 长按的后续功能加在这一支(短按已是宫位编辑器)
+      if (isExplain) {
+        showPalace(gn);              // 时/刻/山向/命理 → 宫位解释(共用同一套)
+      } else {
+        toggleXianhouMark(gn);       // 心盘 → 先后天三宫标记(短按仍是宫位编辑器)
+      }
     }, 550);
   };
   const end = () => { clearTimeout(timer); timer = null; };
