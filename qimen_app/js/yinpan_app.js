@@ -204,15 +204,14 @@ function setPanType(t) {
   if(crIn)crIn.style.display=(t===5)?'block':'none';
   let mlIn=document.getElementById('mlInputs');
   if(mlIn)mlIn.style.display=(t===6)?'block':'none';
-  let zxjRow=document.getElementById('zxjRow');
-  // 自选局已并入 timeRow(见 yinpan.html), zxjRow 现在是空容器; 显隐必须同时管 zxjSpan,
-  // 否则心盘/山向/穿壬/命理下会残留一个无用的自选局 select(2026-09-22)
-  if(zxjRow){
-    let hide=(t===3||t===4||t===5||t===6);
-    zxjRow.style.display=hide?'none':'';
-    let zs=document.getElementById('zxjSpan');
-    if(zs) zs.style.display=hide?'none':'flex';
-  }
+  // 自选局显隐 —— 2026-09-22 修 bug:
+  // 原来整块包在 if(zxjRow) 里, 但 #zxjRow 容器已删(getElementById 得 null) → 整块永不执行,
+  // 显隐彻底失效。表现为: 进过穿壬/命理(doChuanRen/doMingli 会把 #zxjSpan 设为 none)后,
+  // 再切回时/刻, 自选局选择器不恢复显示 —— 即用户报的"自选局平白无故丢失"。
+  // 隐藏范围: 心盘(3)/山向(4)/穿壬(5)/命理(6) —— **心盘是用户自定义的局, 本就不该有自选局**
+  // (用户 2026-09-22 明确); 只有 时盘(1)/刻盘(2) 显示自选局。
+  let zs=document.getElementById('zxjSpan');
+  if(zs) zs.style.display=(t===3||t===4||t===5||t===6)?'none':'flex';
   let tr=document.getElementById('timeRow');
   if(tr)tr.style.display=(t===4)?'none':'flex';
   document.body.className = document.body.className.replace(/mode-\w+/g,'');
