@@ -563,6 +563,7 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
   --pan-pad:5px;      /* 单元格内边距 */
   --pan-fs-sz:17px;   /* 四柱干支 */
   --pan-lh-sz:20px;
+  --pan-lh-xs:16px;   /* 小字号标头行(字号=--pan-fs−4px 的表头/侧标)的行高 */
 }
 @media (max-width:500px){
   :root{
@@ -572,6 +573,7 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
     --pan-fs-sm:14px; --pan-lh-sm:22px;
     --pan-pad:2px;
     --pan-fs-sz:14px; --pan-lh-sz:18px;
+    --pan-lh-xs:13px;
   }
 }
 @media (min-width:1025px){
@@ -580,6 +582,7 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
     --pan-fs-sm:16px; --pan-lh-sm:26px;
     --pan-pad:6px;
     --pan-fs-sz:20px; --pan-lh-sz:24px;
+    --pan-lh-xs:20px;
   }
 }
 /* 盘面正文与宫格统一引用变量(不带 !important, 由变量决定各断点取值) */
@@ -588,6 +591,17 @@ body, #mainDIV, #panHead, #content, #dayun_liunian, #btnTable1, #btnTable2,
 #pan td{ padding-left:var(--pan-pad); padding-right:var(--pan-pad) }
 #panHead .sizhu{ font-size:var(--pan-fs-sz); line-height:var(--pan-lh-sz) }
 #pan.ml-pan td, #pan.cr-pan td{ padding-left:var(--pan-pad); padding-right:var(--pan-pad) }
+/* 标头类单元格(旬首/值符/值使/马星/空亡 表头、年柱/月柱/日柱/时柱、各类侧标)的字号
+   本就比正文小 4px, 却沿用正文行高, 白占空间 —— 给它们独立的行高与更紧的内边距。
+   2026-09-22: 实测这类行原为 24px/行, 压缩后约 15px。 */
+#panHead #headTable #tdTitle td,
+#panHead #headTable .sizhuTitle,
+#panHead #headTable .hd-side{
+  /* 必须 !important —— CSS 中另有 #panHead #headTable td{...line-height:var(--pan-lh)!important}
+     统一压了所有 td 的行高, 不带 !important 会被它盖掉(实测踩过)。 */
+  line-height:var(--pan-lh-xs)!important;
+  padding-top:1px!important; padding-bottom:1px!important;
+}
 
 /* 四柱字号按盘型微调: 用变量特例表达, 不再各写一条 !important */
 body.mode-shi, body.mode-ke, body.mode-xin{ --pan-fs-sz:22px; --pan-lh-sz:26px }
