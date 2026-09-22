@@ -764,27 +764,23 @@ function renderPan(raw, engineData) {
 
   let dStr = Y+'-'+String(M).padStart(2,'0')+'-'+String(D).padStart(2,'0')+' '+
              String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0')+':00';
-  // 日期行已删(见下方), 农历并入节气行; 同时存一份全局给 _doSave 生成记录时间串用
-  let nongliShort = String(nongli||'').replace(/^\d+年/,'');
+  // 农历显示成"八月十三"式: 去年份前缀(公历与顶部选择器已有年份) + 去末尾"日"字(用户要求)
+  let nongliShort = String(nongli||'').replace(/^\d+年/,'').replace(/日$/,'');
   window._nongliFull = nongli;
   let keCols = panType===2 ? 5 : 4;
   ziXuanMark = raw.indexOf('自选') >= 0 ? '<span class="cx-zixuan">自选 </span>' : '';
   let html =
     '<div id="panHead">' +
     '<TABLE class="pan" id="headTable">' +
-    // 日期行: 公历 + 农历并列(用户 2026-09-22 反馈"只留农历太单调")。
-    // 农历去掉"2026年"前缀 —— 公历已含年份, 顶部选择器也有, 三处重复没必要。
-    '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' ('+nongliShort+')</TD></TR>' +
-    // 节气与局数分两行(用户 2026-09-22 要求), 但**必须在同一个单元格内** ——
-    // 一开始拆成两个 <TR> 且第二行 colspan 跨满全宽, 结果那行的边框自成一块,
-    // 看起来像"突兀地又加了一个表格"(用户反馈)。改用同一个 TD 里两个 div:
-    // 第一行节气靠左(跟着"节气"标签), 第二行局数+月将居中。
-    // 原因: 选了自选局后 ziXuanMark 会多出"自选"两字, 与节气挤一行容易换行。
-    // "时盘·"/"刻盘·"前缀仍去掉(顶部模式栏已标)。
+    // 日期行: 公历 + 农历(无括号) + 月将。月将一个月才换一次(比局数稳定得多),
+    // 所以从局数行挪到这里跟农历放一起(用户 2026-09-22 要求)。
+    '<TR><TD id="dTitle">日期</TD><TD colspan="'+keCols+'" id="dateTime">'+dStr+' '+nongliShort+'【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</TD></TR>' +
+    // 节气与局数分两行, 但**必须在同一个单元格内**(两个 div) —— 拆成两个 <TR> 且跨满全宽
+    // 时那行的边框自成一块, 看起来像"突兀地又加了一个表格"(用户反馈)。局数居中。
     '<TR><TD style="color:var(--c-gold)">节气</TD><TD colspan="'+keCols+'">' +
     '<div><span id="jieqi">'+(jieqi||'节气')+'</span></div>' +
     '<div style="text-align:center">' + ziXuanMark +
-    '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局【月将<B id="yueJiang">'+wxSpan(yueJiang)+'</B>】</div>' +
+    '<font id="yinYang">'+yinYang+'</font>遁<B id="juNum">'+juNum+'</B>局</div>' +
     '</TD></TR>' +
     '<TR id="tdTitle"><TD>旬首</TD><TD>值符</TD><TD>值使</TD><TD>马星</TD>'+(panType===2?'<TD colspan=2>空亡</TD>':'<TD>空亡</TD>')+'</TR>' +
     '<TR><TD id="xunShou">'+wxSpan(xunShou)+'</TD><TD>天<font id="zhiFu">'+zhiFuShort+'</font></TD>' +
