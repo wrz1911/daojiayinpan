@@ -774,11 +774,13 @@ function renderPan(raw, engineData) {
     '<TD class="sizhuTitle">年柱</TD><TD class="sizhuTitle">月柱</TD>' +
     '<TD class="sizhuTitle">日柱</TD><TD class="sizhuTitle">时柱</TD>' +
     (panType===2?'<TD class="sizhuTitle">刻柱</TD>':'') + '</TR>' +
-    '<TR><TD class="sizhu" id="nianzhu">'+wxSpan(nianGz[0]||'')+'<br>'+wxSpan(nianGz[1]||'')+'</TD>' +
-    '<TD class="sizhu" id="yuezhu">'+wxSpan(yueGz[0]||'')+'<br>'+wxSpan(yueGz[1]||'')+'</TD>' +
-    '<TD class="sizhu" id="rizhu">'+wxSpan(riGz[0]||'')+'<br>'+wxSpan(riGz[1]||'')+'</TD>' +
-    '<TD class="sizhu" id="shizhu">'+wxSpan(shiGz[0]||'')+'<br>'+wxSpan(shiGz[1]||'')+'</TD>' +
-    (panType===2 ? '<TD class="sizhu" id="kezhu">'+wxSpan(keGz[0]||'')+'<br>'+wxSpan(keGz[1]||'')+'</TD>' : '') +
+    // 四柱横排(干支同行)而非竖排: 原来天干+<br>+地支占两行, 每行 49px;
+    // 横排后单行约 25px, 一行省 24px。字号不变, 每格 71px 宽足够容纳两字。
+    '<TR><TD class="sizhu" id="nianzhu">'+wxSpan(nianGz[0]||'')+wxSpan(nianGz[1]||'')+'</TD>' +
+    '<TD class="sizhu" id="yuezhu">'+wxSpan(yueGz[0]||'')+wxSpan(yueGz[1]||'')+'</TD>' +
+    '<TD class="sizhu" id="rizhu">'+wxSpan(riGz[0]||'')+wxSpan(riGz[1]||'')+'</TD>' +
+    '<TD class="sizhu" id="shizhu">'+wxSpan(shiGz[0]||'')+wxSpan(shiGz[1]||'')+'</TD>' +
+    (panType===2 ? '<TD class="sizhu" id="kezhu">'+wxSpan(keGz[0]||'')+wxSpan(keGz[1]||'')+'</TD>' : '') +
     '</TR></TABLE></div>' +
     gridHTML +
     '<div id="Tip">颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span></div>' +

@@ -107,16 +107,19 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .yinTable td{text-align:left;padding:10px}
 #pan{border:solid 1px var(--c-text-2);width:100%;border-collapse:collapse;box-shadow:0 0 3px var(--c-border);}
 #pan td{border:solid 1px var(--c-text-2);padding-left:8px;padding-right:8px;padding-top:5px;background:var(--c-bg);color:var(--c-text);}
-#ma1{width:55px;height:50px;text-align:right;vertical-align:bottom;color:var(--c-horse)}
-#ma2{width:55px;height:50px;text-align:left;vertical-align:bottom;color:var(--c-horse)}
-#ma3{width:55px;height:50px;text-align:right;vertical-align:top;color:var(--c-horse)}
-#ma4{width:55px;height:50px;text-align:left;vertical-align:top;color:var(--c-horse)}
+/* 四角马星位。原为 55x50px —— 只为放一个"马"字, 却把上下两条外圈各撑到 50px,
+   白白吃掉 100px 纵向空间。压到 24px(与外圈隐干格同高), 四角各让出 26px。
+   2026-09-22: 实测外层容器表 389 → 337px。 */
+#ma1{width:55px;height:24px;text-align:right;vertical-align:bottom;color:var(--c-horse)}
+#ma2{width:55px;height:24px;text-align:left;vertical-align:bottom;color:var(--c-horse)}
+#ma3{width:55px;height:24px;text-align:right;vertical-align:top;color:var(--c-horse)}
+#ma4{width:55px;height:24px;text-align:left;vertical-align:top;color:var(--c-horse)}
 .top{height:20px;line-height:20px}
 .yiXingPan{border:solid 1px var(--c-text-2);width:100%;border-collapse:collapse;box-shadow:0 0 3px var(--c-border);}
 .yiXingPan td{border:solid 1px var(--c-text-2);padding-left:10px;padding-right:10px;background:var(--c-bg);color:var(--c-text)}
 .yinGan{text-align:center;width:30px}
-.waipan1{width:33%;text-align:center;line-height:30px;color:var(--c-text);height:30px}
-.waipan2{width:34%;text-align:center;line-height:30px;color:var(--c-text);height:30px}
+.waipan1{width:33%;text-align:center;line-height:24px;color:var(--c-text);height:24px}
+.waipan2{width:34%;text-align:center;line-height:24px;color:var(--c-text);height:24px}
 .waipan3{width:20px;color:var(--c-text);line-height:15px}
 .waipan4{width:20px;text-align:right;color:var(--c-text);line-height:15px}
 .waipan3 div{width:10px}
