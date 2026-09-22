@@ -32,21 +32,24 @@
   <!-- 表单 -->
   <div class="form-card">
     <div class="form-row" id="timeRow">
-      <span class="form-label">排盘时间</span>
-      <div id="selGroup" style="display:flex;align-items:center;gap:2px;font-size:15px">
+      <div id="selGroup" style="display:flex;align-items:center;gap:2px;font-size:15px;flex-wrap:nowrap">
         <select id="selYear" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">年</span>
         <select id="selMonth" class="sel-date" onchange="adjDays();doPan()"></select><span style="color:#999;font-size:12px">月</span>
         <select id="selDay" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">日</span>
         <select id="selHour" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">时</span>
         <select id="selMin" class="sel-date" onchange="doPan()"></select><span style="color:#999;font-size:12px">分</span>
       </div>
-    </div>
-    <div class="form-row" id="zxjRow">
-      <span id="zxjSpan" style="display:flex;align-items:center;gap:4px">
-        <span style="font-size:14px;color:#666">自选局</span>
+      <!-- 自选局并入本行: 原来它独占一行只放一个 select, 白占 33px。标签保留"自选局"
+           (去掉后那个下拉框看不出是干什么的)。 -->
+      <span id="zxjSpan" style="display:flex;align-items:center;gap:2px;margin-left:6px">
+        <span style="font-size:12px;color:#666">自选局</span>
         <select id="selZxj" class="sel-zxj" onchange="onZxjChange()"></select>
       </span>
     </div>
+    <!-- #zxjRow 已删除: 自选局搬进 timeRow 后它成了空容器, 却仍占 9px(padding 4+4 + 边框 1),
+         是"时间选择器到信息表之间那段空白"的真正来源。原先写 style="display:none" **无效** ——
+         setPanType 会把它重置为 ''(空串=移除行内样式), 于是回落到 CSS 的 .form-row{display:flex}。
+         JS 取 zxjRow 处有 if 保护, 故直接删掉这个容器。 -->
     <div id="shanxiangInputs" class="form-row" style="padding:6px 10px;display:none;align-items:center;gap:6px">
       <span style="font-size:13px;color:#666">年</span>
       <select id="selShanXiangYear" class="sel-date" style="width:72px" onchange="doPan()"></select>
