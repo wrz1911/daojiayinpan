@@ -13627,6 +13627,26 @@ function needJsSquare(){ return !(window.CSS && CSS.supports && CSS.supports('as
    穿壬(5) 本来就没有宫位解释。
    目的: 避免移动端误触 —— 轻点与滑动不再弹窗, 按住 550ms 才触发。 */
 const LONG_PRESS_PAN_TYPES = [1, 2, 4, 6];
+
+/* 宫位**短按**(click)行为 —— 与长按(_bindGridLongPress)对称, 集中定义在一处,
+   免得"没反应"看起来像漏绑。各盘型分工:
+     · 心盘(3)              → 打开宫位编辑器
+     · 时盘(1)/刻盘(2)/命理(6) → **留白**(显式占位, 用途待定, 后续填在 onGongShortPress 里)
+     · 山向(4)/穿壬(5)      → 无短按行为
+   注意: 长按成立后那次 click 会被 _bindGridLongPress 在捕获阶段拦掉, 所以长按不会
+   顶替短按 —— 两套机制互不干扰。 */
+const SHORT_PRESS_RESERVED = [1, 2, 6];
+function onGongShortPress(g) {
+  const pt = parseInt(panType, 10);
+  if (pt === 3) { showPalace(g); return; }             // 心盘 → showPalace 内部路由到编辑器
+  if (SHORT_PRESS_RESERVED.indexOf(pt) >= 0) {
+    // ── 留白 ──
+    // 时盘/刻盘/命理的短按用途待定(用户 2026-09-22 要求预留), 将来在此实现。
+    return;
+  }
+  // 山向(4)/穿壬(5): 无短按行为
+}
+window.onGongShortPress = onGongShortPress;            // 内联 onclick 需要全局可见
 /* panType 存在字符串来源(存档/会话), 判定前统一 parseInt */
 const isLongPressPanType = function (t) { return LONG_PRESS_PAN_TYPES.indexOf(parseInt(t, 10)) >= 0; };
 
@@ -13657,8 +13677,11 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     // 它们复用同一份宫位 id, 点击会被 showPalace 按"主盘"的数据解释(心盘模式下
     // 更会打开主盘宫位的编辑器并写回 _xpData)。原先靠在渲染后逐个清 onclick,
     // 漏一处就出错, 改为生成时就不挂。
-    let noInlineClick = opts.noClick || isLongPressPanType(panType);
-    return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'"'+(noInlineClick?'':' onclick="showPalace('+g+')"')+'>' +
+    // 短按统一走 onGongShortPress —— 它按盘型分发(心盘→编辑器, 时/刻/命理→显式留白),
+    // 这样"没反应"是刻意设计而非漏绑。长按另由 _bindGridLongPress 的委托处理,
+    // 且长按成立后那次 click 会被它在捕获阶段拦掉, 两套机制互不干扰。
+    let noInlineClick = opts.noClick;
+    return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'"'+(noInlineClick?'':' onclick="onGongShortPress('+g+')"')+'>' +
       '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
       '<div class="panItem top mid-row" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span>'+(opts.diShen?'<span class="w4shen" id="w4'+g+'"></span>':'')+'<span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem mid-row" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span>'+(opts.diShen?'<span class="rshen" id="rshen'+g+'"></span>':'')+'<span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
@@ -15909,15 +15932,17 @@ function _bindActionButtons() {
     if (el && !el._bound) { el.onclick = btns[id]; el._bound = true; }
   }
   _bindXnLongPress();
-  // 宫位交互: 长按类盘型由 document 级委托统一处理(见 _bindGridLongPress) ——
-  // 宫格每次排盘都会重建, 逐元素绑定会漏(且 _bindActionButtons 并非每次渲染都调用)。
-  // 这里只兜底清掉可能残留的内联 onclick。
-  if (isLongPressPanType(panType)) {
-    document.querySelectorAll('[id^="gong"]').forEach(g => { g.onclick = null; g.removeAttribute('onclick'); });
-  } else if (parseInt(panType, 10) !== 5) {
-    let gongs = document.querySelectorAll('[id^="gong"]');
-    gongs.forEach(g => {
-      if (!g._bound) { let gn = parseInt(g.id.replace('gong',''), 10); if (gn) g.onclick = ()=>showPalace(gn); g._bound = true; }
+  // 宫位短按统一走 onGongShortPress(内联已挂, 见 buildPaipanGrid); 这里只兜底
+  // 给没挂上的宫位补一次绑定, 并清掉可能残留的旧 showPalace 直连。
+  // 长按由 _bindGridLongPress 的 document 委托处理, 不在这里绑。
+  if (parseInt(panType, 10) !== 5) {
+    document.querySelectorAll('[id^="gong"]').forEach(g => {
+      if (g._bound) return;
+      const gn = parseInt(g.id.replace('gong', ''), 10);
+      if (!gn) return;
+      const cur = g.getAttribute('onclick') || '';
+      if (cur.indexOf('onGongShortPress') < 0) g.onclick = () => onGongShortPress(gn);
+      g._bound = true;
     });
   }
   // 标题编辑
