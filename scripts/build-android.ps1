@@ -165,13 +165,16 @@ if ($Release) {
     Write-Host '   只想验证编译请去掉 -Release(出 debug 包)。' -ForegroundColor Yellow
     exit 1
   }
+  # 注意: Gradle 的 rootProject 是 android/(settings.gradle 所在), 而本项目把密钥放在
+  # android/qimen-release.keystore —— 所以是 file('qimen-release.keystore')。
+  # CI 用的是仓库根的那份, 故其配置写作 file('../qimen-release.keystore'), 两者别混。
   if ($c -notmatch 'signingConfigs') {
     Add-Content -Path $abg -Value @"
 
 android {
     signingConfigs {
         release {
-            storeFile rootProject.file('../qimen-release.keystore')
+            storeFile rootProject.file('qimen-release.keystore')
             storePassword project.findProperty('QIMEN_STORE_PASSWORD')
             keyAlias 'qimen'
             keyPassword project.findProperty('QIMEN_KEY_PASSWORD')
