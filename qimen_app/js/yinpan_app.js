@@ -16156,7 +16156,7 @@ function _renderBottomBar() {
 }
 
 // === 关于弹窗 ===
-const APP_VERSION = '1.4.2';
+const APP_VERSION = '1.4.3';
 const APP_AUTHOR = '地天泰';
 const APP_REPO = 'github.com/wrz1911/daojiayinpan';
 function showAbout() {
