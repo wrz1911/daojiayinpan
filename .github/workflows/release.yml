@@ -187,7 +187,7 @@ jobs:
           #    未安装 webkit2gtk-4.1 的机器上会以
           #    "Unable to spawn a new child process" 启动失败 —— 而那些系统
           #    恰恰是 AppImage 唯一可用的形态。原理见 scripts/build-appimage.sh。
-          bash scripts/build-appimage.sh --patch-only
+          bash scripts/build.sh appimage --patch-only
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4

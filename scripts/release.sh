@@ -1,14 +1,14 @@
 #!/bin/bash
 # 发布脚本: 同步版本号 + 创建tag
-# 用法: bash release.sh 1.3.1
+# 用法: bash scripts/release.sh 1.3.1
 # 版本号无变化时可重发: 自动跳过版本提交, 删除旧 tag 重建
 set -e
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # 脚本在 scripts/ 下, 仓库根是上一级
 
 VER="$1"
 if [ -z "$VER" ]; then
-  echo "用法: bash release.sh <版本号>"
-  echo "例如: bash release.sh 1.3.1"
+  echo "用法: bash scripts/release.sh <版本号>"
+  echo "例如: bash scripts/release.sh 1.3.1"
   exit 1
 fi
 
@@ -22,11 +22,11 @@ sed -i "s/const APP_VERSION = '[^']*'/const APP_VERSION = '${VER}'/" qimen_app/j
 # 重建 bundle, 让新的 APP_VERSION 真正进包。
 # (原脚本只 sed 源码不重建: CI 会重建所以线上没问题, 但仓库里提交的
 #  qimen_bundle.min.js 会停留在旧版本号, 直接用仓库产物时会显示旧版本。)
-if [ -f scripts/build_bundle.sh ] && command -v npx >/dev/null 2>&1; then
-  if bash scripts/build_bundle.sh >/dev/null 2>&1; then
+if [ -f scripts/build.sh ] && command -v npx >/dev/null 2>&1; then
+  if bash scripts/build.sh bundle >/dev/null 2>&1; then
     echo "  (已重建 qimen_bundle.min.js)"
   else
-    echo "  ⚠️ bundle 重建失败, 请手动执行 scripts/build_bundle.sh"
+    echo "  ⚠️ bundle 重建失败, 请手动执行 scripts/build.sh bundle"
   fi
 fi
 # 同步 Tauri 的 Rust 包版本(与 tauri.conf.json 保持一致)及 Cargo.lock 中的 app 条目
