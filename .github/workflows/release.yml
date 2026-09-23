@@ -314,6 +314,10 @@ jobs:
 
       - name: Inject launcher icons
         run: |
+          # apt-get update 必须有: runner 的 apt 缓存是旧的, imagemagick 依赖的
+          # ghostscript 包版本会 404(v1.4.3 发版实测踩过) —— linux job 两处都
+          # update 了, 唯独这里漏了
+          sudo apt-get update
           sudo apt-get install -y imagemagick
           rm -f android/app/src/main/res/mipmap-anydpi-v26/*.xml android/app/src/main/res/drawable*/ic_launcher*.xml
           for dir in android/app/src/main/res/mipmap-*; do
