@@ -59,6 +59,7 @@
 ## Android 签名(2026-08-14 全部理顺)
 
 - **keystore:android/qimen-release.keystore**,DN=`CN=地天泰, OU=道家阴盘奇门遁甲, O=github.com/wrz1911/daojiayinpan, C=CN`,SHA-256 指纹 5376ae5f...e8a9(**2026-08-15 重生成;旧 CN=王润梓 keystore 归档于 ~/qimen-sign-old/,旧签名 App 无法覆盖安装,用户需先卸载再装新版**),RSA2048/SHA384withRSA/10000 天,别名 qimen
+- **keystore 加密备份脚本(2026-09-24)**: `bash scripts/backup-keystore.sh` —— gpg AES256 对称加密到 `~/qimen-sign-backup/qimen-release.keystore.<日期>.asc`, 口令自定(**必须存密码管理器, 口令丢=备份作废**)。恢复: `gpg -d <asc> > android/qimen-release.keystore` + gradle.properties 补口令两行。round-trip 已验证(逐字节一致)。⚠️ **脚本就绪但尚未跑过正式备份** —— 首次请手动执行并抄送 .asc 到离线介质
 - **⚠️ 签名材料曾随迁移丢失又找回(2026-09-24)**: 项目从 ~/文档/奇门排盘 迁到 ~/src/daojiayinpan 时 **android/(gitignore 不入库)整个没跟过来**, 本机与 Windows 盘遍寻无果; 最终在**原开发机 192.168.1.3(即内网 nginx 那台, SSH 免密)的 `~/文档/奇门排盘/android/`** 找回 —— `qimen-release.keystore` 与 `gradle.properties` 尾部的两行口令一起 scp 回本地即恢复(指纹已对拍一致)。**教训: 迁移项目时 gitignore 掉的目录(签名/密钥/本地配置)要单独盘点, git 不会替你搬**。另: CI 的 Secrets(KEYSTORE_BASE64/KEYSTORE_PASSWORD)不受本地丢失影响, 但 release job needs android, 本地与 CI 至少要有一路能签
 - 签名口令存 android/gradle.properties(QIMEN_STORE_PASSWORD/QIMEN_KEY_PASSWORD,不入库,**口令值只写在该文件,勿再记录到任何入库文件**),build.gradle 用 `project.findProperty()` 读取;**CI:Secrets KEYSTORE_BASE64(keystore 的 base64)+ KEYSTORE_PASSWORD,运行时注入 gradle.properties,仓库零明文密码**;CI APK 与本地签名一致,可覆盖安装升级
 - 历史坑:曾经根目录 qimen-release.keystore 与 android/ 下的 keystore 是两个不同文件(CI 与本地签名不一致,覆盖安装失败);旧签名文件已归档 ~/qimen-sign-old/
