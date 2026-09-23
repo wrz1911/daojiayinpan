@@ -105,6 +105,21 @@ HTMLEOF
 # 各文件均为 IIFE 包裹, 顺序拼接无作用域冲突, engine 的 'use strict' 指令随 IIFE 保留。
 cmd_bundle() {
   Step '前端 bundle'
+
+  # ── 防回归: HTML 不得有内联 <script>(2026-09-24 CSP 教训) ─────────────
+  # 裸 <script>(无 src)会让 tauri-codegen 往 CSP 注入 sha256 → script-src
+  # 含 hash → 内联事件属性全废。rebind(qimen_boot.js)只接管事件属性, 管不了
+  # <script> 标签本体 —— 必须从源头拒绝。先剥离 HTML 注释再查(注释里
+  # 提及 "<script>" 字样是合法的, 不能误报)。
+  if ! python3 -c "
+import re, sys
+h = open('$ROOT/qimen_app/yinpan.html', encoding='utf-8').read()
+h = re.sub(r'<!--.*?-->', '', h, flags=re.S)
+sys.exit(1 if re.search(r'<script>[^<]', h) else 0)
+"; then
+    Die "yinpan.html 含内联 <script>(CSP 会注入 hash 废掉内联事件), 请把代码移入 qimen_app/js/ 下的文件"
+  fi
+
   cd "$ROOT/qimen_app/js" || Die '找不到 qimen_app/js'
 
   local VER BANNER
