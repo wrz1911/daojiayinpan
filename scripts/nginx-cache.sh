@@ -44,7 +44,6 @@ new = '''        # 静态资源: 引用都带 ?v=<APP_VERSION> 版本戳(deploy-
         location ~* \\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf)$ {
             root   /srv/http/qimen;
             expires 30d;
-            add_header Cache-Control "public, max-age=2592000";
             access_log off;
         }
 
