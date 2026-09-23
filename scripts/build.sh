@@ -66,6 +66,16 @@ prepare_web() {
   local ASSET_VER
   ASSET_VER=$(sed -n "s/.*const APP_VERSION = '\([^']*\)'.*/\1/p" \
     "$ROOT/qimen_app/js/yinpan_app.js" | head -1)
+  # 版本戳附加 git 短 hash: APP_VERSION 在两次发布之间不变, 若只用它做 ?v=,
+  # 同一版本内的多次修复部署 URL 不变 → 浏览器 30 天缓存一直命中旧文件,
+  # 表现为"修了但用户看不到修复"(2026-09-24 CSP 二次修复部署时踩到)。
+  # 追加 -g<hash>[-dirty] 后: 每次提交 URL 必变; 工作树脏时再带 -dirty。
+  local GIT_SH
+  GIT_SH=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null)
+  if [ -n "$GIT_SH" ]; then
+    git -C "$ROOT" diff --quiet 2>/dev/null || GIT_SH="${GIT_SH}-dirty"
+    ASSET_VER="$ASSET_VER-g$GIT_SH"
+  fi
   if [ -n "$ASSET_VER" ]; then
     sed -i \
       -e "s|href=\"css/yinpan_app.css\"|href=\"css/yinpan_app.css?v=$ASSET_VER\"|" \

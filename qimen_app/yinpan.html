@@ -53,7 +53,9 @@
       <span style="font-size:13px;color:#666">年</span>
       <select id="selShanXiangYear" class="sel-date" style="width:72px" onchange="doPan()"></select>
       <span style="font-size:13px;color:#666">度数</span>
-      <input id="selShanXiangDeg" class="sel-date" style="width:55px" type="number" min="0" max="359" value="0" onchange="var v=parseInt(this.value);if(isNaN(v)||v<0){this.value=0;}else if(v>359){this.value=359;}doPan();" onkeydown="if(event.key==='Enter'){this.blur();event.preventDefault();}">
+      <input id="selShanXiangDeg" class="sel-date" style="width:55px" type="number" min="0" max="359" value="0" onchange="clampShanXiangDeg()" onkeydown="shanXiangDegKey(event)">
+      <!-- ↑ 原为复杂内联语句(var/if/else 链), qimen_boot.js 的内联接管只解析
+           fn()/fn(N)/fn('str')/fn(event) 形态, 故抽成具名函数(见 yinpan_app.js)。 -->
       <span id="shanXiangLabel" style="font-size:13px;color:#0dc2b3;font-weight:bold"></span>
     </div>
   </div>

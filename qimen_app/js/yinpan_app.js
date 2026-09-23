@@ -13478,6 +13478,22 @@ window.buildDiBaShenMap = buildDiBaShenMap;   // 导出便于单独验证排法
 window.buildRenBaShenMap = buildRenBaShenMap;
 window.toggleRenBaShen = toggleRenBaShen;
 
+/* 山向度数输入框: 矫正取值并重排 / 回车失焦。
+   原为 yinpan.html 里 selShanXiangDeg 的复杂内联属性(var/if/else 链),
+   qimen_boot.js 的内联事件接管只解析 fn(args) 形态, 故抽成具名函数。
+   ⚠️ this 语义 = 输入框元素(接管层用 fn.apply(host) 调用, 与内联一致)。 */
+function clampShanXiangDeg() {
+  var v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 0) { this.value = 0; }
+  else if (v > 359) { this.value = 359; }
+  doPan();
+}
+function shanXiangDegKey(ev) {
+  if (ev && ev.key === 'Enter') { this.blur(); ev.preventDefault(); }
+}
+window.clampShanXiangDeg = clampShanXiangDeg;
+window.shanXiangDegKey = shanXiangDegKey;
+
 // ============ 颜色标记 + 阴干对齐 ============
 /* 阴干对齐依赖宫内的行高, 而行高受字体影响: 中文首屏字体加载较慢, 原先只在
    10/50ms 各跑一次, 很可能跑在字体就绪之前 —— 按 fallback 字体算出的 paddingTop
