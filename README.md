@@ -51,23 +51,55 @@
 
 ## 本地构建
 
-前端打包（4 个 IIFE JS 合并压缩为单一 bundle，并把 CSS 压缩为 `.min.css`）：
+所有构建走同一个入口 `scripts/build.sh`（子命令 `bundle` / `linux` / `appimage` / `android`）：
 
 ```bash
-npm install --legacy-peer-deps
-npm run build:bundle        # 生成 qimen_app/js/qimen_bundle.min.js + qimen_app/css/yinpan_app.min.css
+npm install --legacy-peer-deps   # 安装依赖（npm 12 的注意事项见下）
+npm run dev                      # 监听源码改动 → 自动重建 bundle + 同步内网服务器
+npm run build                    # 默认 = bundle + linux
+npm run build:bundle             # 仅前端：qimen_bundle.min.js + yinpan_app.min.css
+npm run build:linux              # 桌面 deb / rpm
+npm run build:appimage           # AppImage（含 WebKit 路径补丁，真正零安装）
+npm run build:android            # Android APK
+npm run setup                    # 构建环境体检 / 补齐（缺什么提示什么）
 ```
+
+> npm 12 起默认 `allow-remote=none`，而本仓库 `package-lock.json` 里部分包锁定的是镜像地址，
+> 直接装会报 `EALLOWREMOTE`。此时改用：
+> ```bash
+> npm install --legacy-peer-deps --allow-remote=all
+> ```
 
 ### 桌面 (Linux / Tauri)
 
 ```bash
-bash build-tauri.sh         # 同步 web 资源 → tauri build → deb/rpm/appimage
-# 产物: src-tauri/target/release/bundle/deb|rpm|appimage/
+npm run build:linux         # 同步 web 资源 → tauri build → deb/rpm
+# 产物: src-tauri/target/release/bundle/deb|rpm/
 ```
 
 Windows / macOS 需对应平台工具链，由 CI 构建（推送 tag 自动触发）。
 
 ### Android
+
+```bash
+npm run build:android                  # debug 包（无需签名）
+npm run build:android -- --release     # release 包（需签名密钥，见下）
+npm run build:android -- --skip-web    # 跳过 www 资源准备，仅重编译
+npm run adb:wifi                       # 手机无线调试连接（固定 5555 端口）
+npm run adb:install                    # 装 debug 包到已连接设备
+npm run adb:install -- --release       # 装 release 包
+```
+
+
+这些脚本会把 CI 的 android job **整套复现到本地**（minSdk/targetSdk、状态栏、R8、ProGuard、
+图标、WebView 字体缩放等 9 项定制），并自动处理国内网络必需的两处镜像
+（Gradle → 腾讯云、Maven → 阿里云）。
+
+release 包需要两样**不入库**的签名材料：`qimen-release.keystore`（放仓库根或 `android/` 下）
+与 `qimen-signing.properties` 里的 `QIMEN_STORE_PASSWORD` / `QIMEN_KEY_PASSWORD`。
+缺任一项脚本会明确拒绝，而不是产出一个签名不对的包。
+
+等价的纯手工步骤（脚本做的就是这些）：
 
 ```bash
 npx cap sync android                          # 同步 www 资源到 android assets（必须从项目根执行）
