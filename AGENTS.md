@@ -6,7 +6,7 @@
 ## 项目概况
 
 - 路径 `/home/wrz/文档/奇门排盘`,作者 地天泰,仓库 github.com/wrz1911/daojiayinpan
-- 五种盘型:1=时盘 2=刻盘 3=心盘 4=山向 5=穿壬;纯 HTML+JS 前端,Tauri 2 桌面 + Capacitor Android,当前版本 **1.4.2**(Android versionCode 10402; CI 的 APK versionName 取两段故显示 "1.4")
+- 五种盘型:1=时盘 2=刻盘 3=心盘 4=山向 5=穿壬;纯 HTML+JS 前端,Tauri 2 桌面 + Capacitor Android,当前版本 **1.4.3**(Android versionCode 10403; CI 的 APK versionName 取两段故显示 "1.4")
 - 前端:qimen_app/yinpan.html + css/yinpan_app.css + 4 个自有 IIFE JS(qimen_constants.js 112 行 / qimen_engine_min.js 475 行 / qimen_chuanren.js 617 行 / **yinpan_app.js 2800+ 行**)由 scripts/build_bundle.sh(cat 拼接 + esbuild --minify --target=es2017)合成 qimen_bundle.min.js(~149KB);tyme4j-browser.js 日历库;gong_detail_data.js(258KB 宫位详解)懒加载
 - **yinpan_app IIFE 是 strict 模式——未声明赋值必抛 ReferenceError,历史踩过 4 次同类雷(h/ag/agColor/fw,均被 catch 吞掉表现为功能无反应)。ESLint(eslint.config.js,no-undef/no-redeclare error 级)已设防,0 errors;44 个 no-unused-vars warning 是历史遗留未清理。**注意 `npx eslint .` 会因 tyme4j/ 子目录的 eslint.config.mjs 缺 typescript-eslint 而崩,必须用 `npx eslint qimen_app/js/*.js`**
 - 网页版:gh-pages 部署 https://wrz1911.github.io/daojiayinpan/(CI release job 构建 bundle 后由 peaceiris/actions-gh-pages 部署,与 exe 直链共存;根 index.html 重定向到 qimen_app/yinpan.html)
@@ -120,6 +120,8 @@
 - Android:仅 localStorage(卸载即丢,用户手动导出备份);**Android 文件化持久化(Capacitor Filesystem DATA 目录)用户已明确决定不做(2026-08-15 终止),不再重提**
 
 ## 历史大事记(JOURNAL 摘录)
+
+- 2026-09-24 凌晨:**v1.4.3 发布** —— CSP nonce 根因修复(桌面版四按钮点击无反应, 见上文 rebind 方案)+ 版本戳加 git hash(两处: build.sh 与 deploy-web.py)+ CI android job 补 apt-get update。本地全链路收口: release APK(keystore 从原开发机 192.168.1.3 找回, 指纹对拍一致)→ 无线装手机(覆盖安装不丢存档)→ 内网 7/7 同步(含 APK+下载页); 三端实测: 桌面(.on 描边/toggle/面板展开)+ 手机 CDP(四按钮接管+toggle 闭环)+ jsdom 21 项。⚠️ tag 重发过一次: 首发时 CI android job 因 apt 缓存过期 404 失败 → 修 workflow 后 release.sh 幂等重发(同版本删旧 tag 重建, 设计验证有效)
 
 - 2026-06-27:用户想打包安卓 App,最终走 Capacitor
 - 2026-06-30:vinput 4 个 bug 修复、rime 词库集成(总量 ~100 万→118 万,table.bin 64MB)
