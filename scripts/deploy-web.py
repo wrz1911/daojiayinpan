@@ -8,9 +8,11 @@
     npm run deploy:web -- --with-apk  # 顺带推 release APK 与下载页
     npm run deploy:web -- --dry-run   # 只看要推什么, 不实际上传
 
-凭据(不写入仓库, 本仓库是公开的):
-    优先读环境变量 QIMEN_WEB_PASS / QIMEN_WEB_USER / QIMEN_WEB_HOST / QIMEN_WEB_ROOT,
-    否则读项目根目录下的 .qimen-web-pass (已 gitignore), 文件内容即密码。
+认证(凭据不写入仓库, 本仓库是公开的):
+    1) **优先 SSH 密钥免密** —— 默认读 ~/.ssh/id_ed25519(可用 QIMEN_WEB_KEY 覆盖)。
+       一次性配置: 把本机公钥追加到服务器的 ~/.ssh/authorized_keys, 之后永不需口令。
+    2) 回退口令 —— 环境变量 QIMEN_WEB_PASS, 否则读项目根 .qimen-web-pass(已 gitignore)。
+    3) 其它可覆盖项: QIMEN_WEB_USER / QIMEN_WEB_HOST / QIMEN_WEB_PORT / QIMEN_WEB_ROOT。
 """
 import argparse
 import hashlib
@@ -96,9 +98,23 @@ def main():
     print('\n=== 连接 %s@%s ===' % (USER, HOST))
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # 认证: 优先 SSH 密钥免密(配一次就一劳永逸), 服务器不接受时才回退口令。
+    keyfile = os.environ.get('QIMEN_WEB_KEY', os.path.expanduser('~/.ssh/id_ed25519'))
     try:
-        ssh.connect(HOST, port=PORT, username=USER, password=get_password(),
-                    timeout=20, look_for_keys=False, allow_agent=False)
+        if os.path.isfile(keyfile):
+            try:
+                ssh.connect(HOST, port=PORT, username=USER, key_filename=keyfile,
+                            timeout=20, look_for_keys=False, allow_agent=False)
+                print('  认证: SSH 密钥 %s' % keyfile)
+            except paramiko.AuthenticationException:
+                print('  密钥未被服务器接受, 回退口令认证')
+                ssh.connect(HOST, port=PORT, username=USER, password=get_password(),
+                            timeout=20, look_for_keys=False, allow_agent=False)
+                print('  认证: 口令')
+        else:
+            ssh.connect(HOST, port=PORT, username=USER, password=get_password(),
+                        timeout=20, look_for_keys=False, allow_agent=False)
+            print('  认证: 口令')
     except Exception as e:
         print('连接失败: %s: %s' % (type(e).__name__, e))
         return 1
