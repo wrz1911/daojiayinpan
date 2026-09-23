@@ -15,7 +15,6 @@
 
 <body>
 
-<script>if(navigator.userAgent.indexOf('Android')>-1||window.Capacitor)document.body.classList.add('is-mobile')</script>
 <!-- 顶部模式栏: 六个盘型切换常驻于此, 不再占用内容区一整行 -->
 <!-- 点击由 yinpan_app.js 程序化绑定(用 onclick 确保 Tauri/Capacitor 兼容) -->
 <div id="topBar">
@@ -54,7 +53,9 @@
       <span style="font-size:13px;color:#666">年</span>
       <select id="selShanXiangYear" class="sel-date" style="width:72px" onchange="doPan()"></select>
       <span style="font-size:13px;color:#666">度数</span>
-      <input id="selShanXiangDeg" class="sel-date" style="width:55px" type="number" min="0" max="359" value="0" onchange="var v=parseInt(this.value);if(isNaN(v)||v<0){this.value=0;}else if(v>359){this.value=359;}doPan();" onkeydown="if(event.key==='Enter'){this.blur();event.preventDefault();}">
+      <input id="selShanXiangDeg" class="sel-date" style="width:55px" type="number" min="0" max="359" value="0" onchange="clampShanXiangDeg()" onkeydown="shanXiangDegKey(event)">
+      <!-- ↑ 原为复杂内联语句(var/if/else 链), qimen_boot.js 的内联接管只解析
+           fn()/fn(N)/fn('str')/fn(event) 形态, 故抽成具名函数(见 yinpan_app.js)。 -->
       <span id="shanXiangLabel" style="font-size:13px;color:#0dc2b3;font-weight:bold"></span>
     </div>
   </div>
@@ -66,8 +67,11 @@
 </div>
 
 	<script src="js/tyme4j-browser.js"></script>
-	<script>window.tyme4j = window.tyme || {};</script>
-	<!-- 四个自有 JS 由 npm run build:bundle 打包合成(见 scripts/build_bundle.sh) -->
+	<!-- 自有 JS 由 npm run build:bundle 打包合成(见 scripts/build.sh 的 bundle 子命令)。
+	     ⚠️ 页面里**不能**再有内联 <script>: 内联会让 Tauri 往 CSP 注入 sha256,
+	     而 CSP 一旦含 hash, 'unsafe-inline' 即被忽略 —— 所有内联 onclick 全废
+	     (桌面版里表现为"宫格短按/多个按钮点击无反应")。is-mobile 标记与
+	     tyme4j 别名已移入 bundle 首位(qimen_boot.js)。 -->
 	<script src="js/qimen_bundle.min.js"></script>
 	<!-- gong_detail_data.js(258KB)由 yinpan_app 首次打开宫详情时懒加载 -->
 </body>
