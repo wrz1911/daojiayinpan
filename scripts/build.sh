@@ -57,6 +57,32 @@ prepare_web() {
   cp "$ROOT/qimen_app/js/tyme4j-browser.js"   "$ROOT/web/qimen_app/js/"
   cp "$ROOT/qimen_app/js/gong_detail_data.js" "$ROOT/web/qimen_app/js/"
 
+  # ── 版本戳注入 ────────────────────────────────────────────────
+  # 目的: 让 nginx 能对这些静态资源启用长缓存(expires)。
+  # 没有版本戳时只能用 no-store, 于是每次打开网页都要重下 539KB(gzip 后);
+  # 有了 ?v=<APP_VERSION> 后, 发新版时版本号一变 URL 就变, 浏览器自然拿到新文件,
+  # 旧缓存不再命中 —— 长缓存与「部署即生效」得以兼得。
+  # 只改 web/ 里的副本, 源文件保持干净。
+  local ASSET_VER
+  ASSET_VER=$(sed -n "s/.*const APP_VERSION = '\([^']*\)'.*/\1/p" \
+    "$ROOT/qimen_app/js/yinpan_app.js" | head -1)
+  if [ -n "$ASSET_VER" ]; then
+    sed -i \
+      -e "s|href=\"css/yinpan_app.css\"|href=\"css/yinpan_app.css?v=$ASSET_VER\"|" \
+      -e "s|src=\"js/tyme4j-browser.js\"|src=\"js/tyme4j-browser.js?v=$ASSET_VER\"|" \
+      -e "s|src=\"js/qimen_bundle.min.js\"|src=\"js/qimen_bundle.min.js?v=$ASSET_VER\"|" \
+      "$ROOT/web/qimen_app/yinpan.html"
+    # bundle 里对 gong_detail_data.js 的懒加载引用同样要带版本, 否则它会命中旧缓存。
+    # 注意 esbuild 压缩后引号会变(源码单引号 → 产物双引号), 两种都要替换。
+    sed -i \
+      -e "s|'js/gong_detail_data.js'|'js/gong_detail_data.js?v=$ASSET_VER'|g" \
+      -e "s|\"js/gong_detail_data.js\"|\"js/gong_detail_data.js?v=$ASSET_VER\"|g" \
+      "$ROOT/web/qimen_app/js/qimen_bundle.min.js"
+    Ok "版本戳: v$ASSET_VER"
+  else
+    Warn "未能从 yinpan_app.js 提取 APP_VERSION, 跳过版本戳注入"
+  fi
+
   # 兼容入口页: 桌面端窗口已由 tauri.conf.json 的 windows[0].url 直达
   # qimen_app/yinpan.html, 不再经过本页(消除一次跳转白屏)。
   # 保留此文件仅为万一直接用浏览器/静态服务器打开 web/ 目录时的兜底入口。

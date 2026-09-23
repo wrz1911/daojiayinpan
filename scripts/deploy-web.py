@@ -17,6 +17,7 @@
 import argparse
 import hashlib
 import os
+import re
 import shlex
 import sys
 
@@ -48,6 +49,50 @@ APK_FILES = [
     ('qimen_app/apk.html', 'apk.html'),
     ('android/app/build/outputs/apk/release/app-release.apk', 'app-release.apk'),
 ]
+
+
+# ── 上传时的版本戳注入 ──────────────────────────────────────────────
+# 为什么要它:
+#   要让 nginx 对这些静态资源启用长缓存(expires), 引用就必须带版本戳 ——
+#   否则发新版后浏览器会继续用旧 JS, 出现「HTML 新 + JS 旧」的功能错乱,
+#   比"每次重下"更糟。而带上 ?v=<APP_VERSION> 后, 版本号一变 URL 就变,
+#   浏览器自然取到新文件, 「长缓存」与「部署即生效」得以兼得。
+# 关键: 只改写**要上传的内容**, 本地源文件保持干净;
+#       并且下面的 sha256 校验必须用改写后的数据, 否则会误报"哈希不符"。
+def get_app_version():
+    p = os.path.join(ROOT, 'qimen_app/js/yinpan_app.js')
+    try:
+        with open(p, 'r', encoding='utf-8', errors='replace') as fh:
+            m = re.search(r"const APP_VERSION = '([^']+)'", fh.read())
+        return m.group(1) if m else ''
+    except OSError:
+        return ''
+
+
+APP_VERSION = get_app_version()
+
+
+def stamp_asset(rel_path, data):
+    """按需给待上传内容注入版本戳; 不需要改动的原样返回"""
+    if not APP_VERSION:
+        return data
+    name = os.path.basename(rel_path)
+    if name not in ('yinpan.html', 'qimen_bundle.min.js'):
+        return data
+    try:
+        text = data.decode('utf-8')
+    except UnicodeDecodeError:
+        return data
+    if name == 'yinpan.html':
+        for asset in ('css/yinpan_app.css', 'js/tyme4j-browser.js', 'js/qimen_bundle.min.js'):
+            text = text.replace('"%s"' % asset, '"%s?v=%s"' % (asset, APP_VERSION))
+    else:
+        # bundle 内部懒加载 gong_detail_data.js, 同样要带版本(否则它吃旧缓存)。
+        # 注意: esbuild 压缩后引号形式会变(源码单引号 → 产物双引号), 两种都要处理。
+        for q in ("'", '"'):
+            text = text.replace('%sjs/gong_detail_data.js%s' % (q, q),
+                                '%sjs/gong_detail_data.js?v=%s%s' % (q, APP_VERSION, q))
+    return text.encode('utf-8')
 
 
 def get_password():
@@ -125,11 +170,18 @@ def main():
         lp = os.path.join(ROOT, local)
         rp = REMOTE_ROOT + '/' + remote
         try:
-            sftp.put(lp, rp)
-            lsize = os.path.getsize(lp)
+            raw = open(lp, 'rb').read()
+            data = stamp_asset(local, raw)          # 注入版本戳(不改本地文件)
+            if len(data) != len(raw):
+                with sftp.open(rp, 'wb') as rf:     # 内容有改动 → 走内存写入
+                    rf.write(data)
+            else:
+                sftp.put(lp, rp)
+            lsize = len(data)
             # 只比大小不够: 改动后字节数可能恰好不变(如常量 [2,3,4,6]→[1,2,4,6]),
             # 再比一次 sha256 才算真的同步成功。
-            local_hash = hashlib.sha256(open(lp, 'rb').read()).hexdigest()
+            # 注意: 必须用注入后的 data 算哈希, 否则会与服务端不一致而误报。
+            local_hash = hashlib.sha256(data).hexdigest()
             _, out, _ = ssh.exec_command('sha256sum %s' % shlex.quote(rp), timeout=30)
             remote_hash = out.read().decode('utf-8', 'replace').split()[0] if out else ''
             good = (local_hash == remote_hash)

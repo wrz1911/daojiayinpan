@@ -3,7 +3,7 @@
   "version": "1.4.2",
   "license": "MIT",
   "scripts": {
-    "start": "DISPLAY=${DISPLAY:-:0} ./src-tauri/target/release/app",
+    "start": "DISPLAY=${DISPLAY:-localhost:0} ./src-tauri/target/release/app",
     "dev": "node scripts/watch.js",
     "build": "bash scripts/build.sh",
     "build:bundle": "bash scripts/build.sh bundle",
