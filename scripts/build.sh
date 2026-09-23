@@ -54,7 +54,6 @@ prepare_web() {
   # CSS 拷压缩产物, 但沿用 HTML 里的引用名 yinpan_app.css(见 cmd_bundle)
   cp "$ROOT/qimen_app/css/yinpan_app.min.css" "$ROOT/web/qimen_app/css/yinpan_app.css"
   cp "$ROOT/qimen_app/js/qimen_bundle.min.js" "$ROOT/web/qimen_app/js/"
-  cp "$ROOT/qimen_app/js/tyme4j-browser.js"   "$ROOT/web/qimen_app/js/"
   cp "$ROOT/qimen_app/js/gong_detail_data.js" "$ROOT/web/qimen_app/js/"
 
   # ── 版本戳注入 ────────────────────────────────────────────────
@@ -79,7 +78,6 @@ prepare_web() {
   if [ -n "$ASSET_VER" ]; then
     sed -i \
       -e "s|href=\"css/yinpan_app.css\"|href=\"css/yinpan_app.css?v=$ASSET_VER\"|" \
-      -e "s|src=\"js/tyme4j-browser.js\"|src=\"js/tyme4j-browser.js?v=$ASSET_VER\"|" \
       -e "s|src=\"js/qimen_bundle.min.js\"|src=\"js/qimen_bundle.min.js?v=$ASSET_VER\"|" \
       "$ROOT/web/qimen_app/yinpan.html"
     # bundle 里对 gong_detail_data.js 的懒加载引用同样要带版本, 否则它会命中旧缓存。
@@ -125,9 +123,14 @@ cmd_bundle() {
  */
 EOF
   # 注意: esbuild 的 stdin 管道模式走 transform API(不支持 --outfile 构建 flag), 结果须重定向 stdout
-  # 顺序: boot(引导) → constants → engine → chuanren → mingli → bazi → app
-  { cat qimen_boot.js qimen_constants.js qimen_engine_min.js qimen_chuanren.js qimen_mingli.js qimen_bazi.js yinpan_app.js; } \
-    | npx esbuild --minify --target=es2017 --loader=js > "$BANNER.body" || Die 'esbuild 打包 JS 失败'
+  # --charset=utf8(2026-09-24): esbuild 默认 ascii 把中文转义成 \uXXXX(3字节→6字节),
+  #   实测 bundle 1925KB→1152KB(-40%)、gzip 539K→403K(-25%)。附带好处: bundle 里从此是
+  #   原始中文字面量, "grep 中文判断改动是否打进 bundle"恢复可用(旧教训作废)。
+  # 顺序: tyme4j(历法库, 必须最先 —— qimen_boot.js 的 window.tyme4j 别名依赖 window.tyme 已就绪;
+  #       2026-09-24 起并入 bundle, 不再独立分发, 三端少一个 ~300KB 请求)
+  #       → boot(引导) → constants → engine → chuanren → mingli → bazi → app
+  { cat tyme4j-browser.js qimen_boot.js qimen_constants.js qimen_engine_min.js qimen_chuanren.js qimen_mingli.js qimen_bazi.js yinpan_app.js; } \
+    | npx esbuild --minify --target=es2017 --loader=js --charset=utf8 > "$BANNER.body" || Die 'esbuild 打包 JS 失败'
   # banner 在压缩**之后**前置: esbuild 会把 legal comment 挪到文件末尾, 且 stdin 模式
   # 不支持 --banner:js, 所以自行拼接以保证版权声明稳定出现在产物开头。
   cat "$BANNER" "$BANNER.body" > qimen_bundle.min.js
@@ -139,7 +142,7 @@ EOF
   # (六大盘型共 4000+ 元素 × 41 属性, 0 差异), 可安全替换。
   # 源文件 yinpan_app.css 保持可读不覆盖; 压缩产物另存 .min.css, 由各构建脚本
   # 拷贝为产物目录下的 yinpan_app.css —— HTML 里的引用名保持不变。
-  npx esbuild --minify --loader=css < ../css/yinpan_app.css > ../css/yinpan_app.min.css \
+  npx esbuild --minify --loader=css --charset=utf8 < ../css/yinpan_app.css > ../css/yinpan_app.min.css \
     || Die 'esbuild 压缩 CSS 失败'
   printf '   CSS 生成: qimen_app/css/yinpan_app.min.css (%s bytes)\n' "$(wc -c < ../css/yinpan_app.min.css)"
   cd "$ROOT"

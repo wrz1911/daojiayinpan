@@ -18,7 +18,8 @@ if (navigator.userAgent.indexOf('Android') > -1 || window.Capacitor) {
 }
 
 /* tyme4j 别名(原为紧跟 tyme4j-browser.js 的内联脚本)。
-   bundle 排在其后加载, 执行顺序不变, window.tyme 此时已就绪。 */
+   2026-09-24 起 tyme4j-browser.js 已并入 bundle 且排在 boot **之前**
+   (见 build.sh 的拼接顺序), 执行到这里时 window.tyme 必已就绪。 */
 window.tyme4j = window.tyme || {};
 
 /* ============================================================

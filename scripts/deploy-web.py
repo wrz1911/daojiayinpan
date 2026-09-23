@@ -42,8 +42,7 @@ SITE = os.environ.get('QIMEN_WEB_URL', 'http://%s' % HOST)
 WEB_FILES = [
     ('qimen_app/yinpan.html',            'qimen_app/yinpan.html'),
     ('qimen_app/css/yinpan_app.min.css', 'qimen_app/css/yinpan_app.css'),   # 压缩版, 前端引用名不变
-    ('qimen_app/js/qimen_bundle.min.js', 'qimen_app/js/qimen_bundle.min.js'),
-    ('qimen_app/js/tyme4j-browser.js',   'qimen_app/js/tyme4j-browser.js'),
+    ('qimen_app/js/qimen_bundle.min.js', 'qimen_app/js/qimen_bundle.min.js'),   # tyme4j 已并入(2026-09-24)
     ('qimen_app/js/gong_detail_data.js', 'qimen_app/js/gong_detail_data.js'),
 ]
 APK_FILES = [
@@ -98,7 +97,7 @@ def stamp_asset(rel_path, data):
     except UnicodeDecodeError:
         return data
     if name == 'yinpan.html':
-        for asset in ('css/yinpan_app.css', 'js/tyme4j-browser.js', 'js/qimen_bundle.min.js'):
+        for asset in ('css/yinpan_app.css', 'js/qimen_bundle.min.js'):
             text = text.replace('"%s"' % asset, '"%s?v=%s"' % (asset, APP_VERSION))
     else:
         # bundle 内部懒加载 gong_detail_data.js, 同样要带版本(否则它吃旧缓存)。

@@ -92,7 +92,6 @@ HTMLEOF
   npm run build:bundle 2>&1 | tail -2 | while IFS= read -r l; do Info "$l"; done
   cp qimen_app/css/yinpan_app.min.css www/qimen_app/css/yinpan_app.css
   cp qimen_app/js/qimen_bundle.min.js www/qimen_app/js/
-  cp qimen_app/js/tyme4j-browser.js   www/qimen_app/js/
   cp qimen_app/js/gong_detail_data.js www/qimen_app/js/
   cp qimen_app/yinpan.html            www/qimen_app/
   Ok "www 资源就绪: $(find www -type f | wc -l) 个文件"
