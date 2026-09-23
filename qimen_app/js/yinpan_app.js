@@ -16085,8 +16085,12 @@ function _bindActionButtons() {
       if (g._bound) return;
       const gn = parseInt(g.id.replace('gong', ''), 10);
       if (!gn) return;
-      const cur = g.getAttribute('onclick') || '';
-      if (cur.indexOf('onGongShortPress') < 0) g.onclick = () => onGongShortPress(gn);
+      // ⚠️ 不要用"内联 onclick 属性是否存在"来判断已绑定 —— Tauri 的 CSP 会让
+      // 内联事件处理器不执行(见 qimen_boot.js 的说明), 但属性字符串仍然读得到,
+      // 于是这里会把"其实没生效"误判成"已挂"而跳过, 结果宫格短按彻底没有处理函数
+      // (症状: 桌面版里先后天三宫标记怎么点都没反应, 浏览器里却正常)。
+      // 直接覆盖绑定即可: g.onclick = fn 本来就覆盖内联 onclick, 行为一致。
+      g.onclick = () => onGongShortPress(gn);
       g._bound = true;
     });
   }
