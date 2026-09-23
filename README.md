@@ -19,7 +19,7 @@
 ---
 
 <p align="center">
-  <img src="docs/screenshot-android.png" height="680" alt="Android 版 · 时盘完整页面">
+  <img src="https://raw.githubusercontent.com/wrz1911/daojiayinpan/main/docs/screenshot-android.png" height="680" alt="Android 版 · 时盘完整页面">
 </p>
 
 <p align="center"><sub>Android 版 · 时盘 · 滚屏完整截图（信息表、九宫、断局按钮一屏尽览）</sub></p>
