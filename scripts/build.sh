@@ -87,7 +87,7 @@ prepare_web() {
   # qimen_app/yinpan.html, 不再经过本页(消除一次跳转白屏)。
   # 保留此文件仅为万一直接用浏览器/静态服务器打开 web/ 目录时的兜底入口。
   cat > "$ROOT/web/index.html" << 'HTMLEOF'
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html"><script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html"></head><body></body></html>
 HTMLEOF
   Ok "web/ 就绪 ($(find "$ROOT/web" -type f | wc -l) 个文件)"
 }

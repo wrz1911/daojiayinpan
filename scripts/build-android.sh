@@ -87,7 +87,7 @@ if [ "$SKIP_WEB" = 0 ]; then
   rm -rf www
   mkdir -p www/qimen_app/css www/qimen_app/js
   cat > www/index.html << 'HTMLEOF'
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html"><script>window.location.replace('qimen_app/yinpan.html');</script></head><body></body></html>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta http-equiv="refresh" content="0;url=qimen_app/yinpan.html"></head><body></body></html>
 HTMLEOF
   npm run build:bundle 2>&1 | tail -2 | while IFS= read -r l; do Info "$l"; done
   cp qimen_app/css/yinpan_app.min.css www/qimen_app/css/yinpan_app.css
