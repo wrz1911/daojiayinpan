@@ -19,6 +19,7 @@ import hashlib
 import os
 import re
 import shlex
+import subprocess
 import sys
 
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -64,9 +65,22 @@ def get_app_version():
     try:
         with open(p, 'r', encoding='utf-8', errors='replace') as fh:
             m = re.search(r"const APP_VERSION = '([^']+)'", fh.read())
-        return m.group(1) if m else ''
+        ver = m.group(1) if m else ''
     except OSError:
-        return ''
+        ver = ''
+    # 附加 git 短 hash(与 scripts/build.sh 的版本戳逻辑保持一致):
+    # APP_VERSION 两次发布之间不变, 同版本内的修复部署若 URL 不变,
+    # 会被浏览器 30 天缓存吃掉 —— 表现为"修了但用户看不到修复"。
+    try:
+        sh = subprocess.run(['git', '-C', ROOT, 'rev-parse', '--short', 'HEAD'],
+                            capture_output=True, text=True, timeout=10).stdout.strip()
+        if sh:
+            dirty = subprocess.run(['git', '-C', ROOT, 'diff', '--quiet'],
+                                   capture_output=True, timeout=10).returncode != 0
+            ver = '%s-g%s%s' % (ver, sh, '-dirty' if dirty else '')
+    except Exception:
+        pass
+    return ver
 
 
 APP_VERSION = get_app_version()
