@@ -14745,10 +14745,8 @@ window.jinkoujueChart = jinkoujueChart;
    据第一天、第二天讲课记录重写: 问答改为叙述, 图片文字已并入正文。
    十六字: 十二字沿地支排, 四字(雷火风豹)排四维宫。 */
 const XN_HELP = {
- "toc": true,
- "lazy": true,
  "title": "玄女十六字诀",
- "head": "进 曲 狱 丰 空 泣 欹 劫 散 破 灵 吾　＋　雷 火 风 豹<br><span style='font-size:11px'>十六字诀 · 点上方目录可跳转</span>",
+ "head": "进 曲 狱 丰 空 泣 欹 劫 散 破 灵 吾　＋　雷 火 风 豹",
  "blocks": [
   {
    "t": "排法",
