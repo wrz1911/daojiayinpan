@@ -66,12 +66,12 @@
   <div id="result"><div id="panWrap"></div></div>
 </div>
 
-	<script src="js/tyme4j-browser.js"></script>
-	<!-- 自有 JS 由 npm run build:bundle 打包合成(见 scripts/build.sh 的 bundle 子命令)。
+	<!-- 自有 JS 与 tyme4j 历法库均由 npm run build:bundle 打包合成单一
+	     qimen_bundle.min.js(见 scripts/build.sh 的 bundle 子命令, tyme4j 排在最前)。
 	     ⚠️ 页面里**不能**再有内联 <script>: 内联会让 Tauri 往 CSP 注入 sha256,
 	     而 CSP 一旦含 hash, 'unsafe-inline' 即被忽略 —— 所有内联 onclick 全废
 	     (桌面版里表现为"宫格短按/多个按钮点击无反应")。is-mobile 标记与
-	     tyme4j 别名已移入 bundle 首位(qimen_boot.js)。 -->
+	     tyme4j 别名已移入 bundle(qimen_boot.js)。 -->
 	<script src="js/qimen_bundle.min.js"></script>
 	<!-- gong_detail_data.js(258KB)由 yinpan_app 首次打开宫详情时懒加载 -->
 </body>
