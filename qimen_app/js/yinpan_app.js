@@ -13504,6 +13504,9 @@ function scheduleYinGanAlign() {
   setTimeout(fixYinGanAlign, 10);
   setTimeout(fixYinGanAlign, 50);
   setTimeout(fixYinGanAlign, 300);
+  // 中文字体就绪往往晚于以上三个时间点, 行高随之微变 → 阴干 paddingTop 失准
+  // (2026-09-28 补: fonts.ready 后重算一次, AGENTS.md 219 行老问题的收口)
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fixYinGanAlign);
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => fixYinGanAlign()).catch(() => {});
   }

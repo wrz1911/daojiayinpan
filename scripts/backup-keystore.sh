@@ -24,6 +24,8 @@ gpg --yes --symmetric --cipher-algo AES256 --armor --output "$OUT" "$SRC"
 
 echo ""
 echo "已加密备份: $OUT ($(wc -c < "$OUT") 字节)"
-echo "指纹核对: $(keytool -list -keystore "$SRC" -storepass "$(grep QIMEN_STORE_PASSWORD android/gradle.properties | cut -d= -f2)" 2>/dev/null | grep SHA256 | head -1 | tr -d ' ')"
+STOREPASS=$(grep -E '^QIMEN_STORE_PASSWORD=' android/gradle.properties | head -1 | cut -d= -f2 | tr -d '\r')
+FP=$(keytool -list -keystore "$SRC" -storepass "$STOREPASS" 2>/dev/null | grep -i 'SHA256:' | head -1 | tr -d ' ')
+echo "指纹核对: ${FP:-⚠️ 未取到(口令/keystore 异常, 请自行 keytool -list 复核)}"
 echo "⚠️  请立刻把 gpg 口令存入密码管理器 —— 口令丢失 = 此备份作废。"
 echo "   建议再把 .asc 文件抄送一份到离线介质(U盘/网盘加密区)。"

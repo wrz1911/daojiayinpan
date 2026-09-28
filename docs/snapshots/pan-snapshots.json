@@ -1,0 +1,2070 @@
+{
+ "generated": "2026-09-28T07:47:15.396Z",
+ "count": 27,
+ "snaps": [
+  {
+   "type": 1,
+   "label": "2026-9-24 4:00",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "九天",
+      "tian": "己",
+      "di": "己",
+      "xing": "天辅",
+      "men": "惊门",
+      "anGan": "丙"
+     },
+     "gong9": {
+      "shen": "九地",
+      "tian": "癸",
+      "di": "癸",
+      "xing": "天英",
+      "men": "开门",
+      "anGan": "乙"
+     },
+     "gong2": {
+      "shen": "玄武",
+      "tian": "辛戊",
+      "di": "辛戊",
+      "xing": "天芮",
+      "men": "休门",
+      "anGan": "壬"
+     },
+     "gong3": {
+      "shen": "值符",
+      "tian": "庚",
+      "di": "庚",
+      "xing": "天冲",
+      "men": "死门",
+      "anGan": "辛戊"
+     },
+     "gong7": {
+      "shen": "白虎",
+      "tian": "丙",
+      "di": "丙",
+      "xing": "天柱",
+      "men": "生门",
+      "anGan": "丁"
+     },
+     "gong8": {
+      "shen": "腾蛇",
+      "tian": "丁",
+      "di": "丁",
+      "xing": "天任",
+      "men": "景门",
+      "anGan": "癸"
+     },
+     "gong1": {
+      "shen": "太阴",
+      "tian": "壬",
+      "di": "壬",
+      "xing": "天蓬",
+      "men": "杜门",
+      "anGan": "己"
+     },
+     "gong6": {
+      "shen": "六合",
+      "tian": "乙",
+      "di": "乙",
+      "xing": "天心",
+      "men": "伤门",
+      "anGan": "庚"
+     }
+    },
+    "kong": {
+     "2": true,
+     "9": true
+    },
+    "ma": "ma2"
+   }
+  },
+  {
+   "type": 1,
+   "label": "2026-9-22 23:55",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "值符",
+      "tian": "己",
+      "di": "丙",
+      "xing": "天蓬",
+      "men": "伤门",
+      "anGan": "戊丁"
+     },
+     "gong9": {
+      "shen": "九天",
+      "tian": "辛",
+      "di": "庚",
+      "xing": "天任",
+      "men": "杜门",
+      "anGan": "壬"
+     },
+     "gong2": {
+      "shen": "九地",
+      "tian": "乙",
+      "di": "戊丁",
+      "xing": "天冲",
+      "men": "景门",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "腾蛇",
+      "tian": "癸",
+      "di": "乙",
+      "xing": "天心",
+      "men": "生门",
+      "anGan": "庚"
+     },
+     "gong7": {
+      "shen": "玄武",
+      "tian": "丙",
+      "di": "壬",
+      "xing": "天辅",
+      "men": "死门",
+      "anGan": "己"
+     },
+     "gong8": {
+      "shen": "太阴",
+      "tian": "壬",
+      "di": "辛",
+      "xing": "天柱",
+      "men": "休门",
+      "anGan": "丙"
+     },
+     "gong1": {
+      "shen": "六合",
+      "tian": "戊丁",
+      "di": "己",
+      "xing": "天芮",
+      "men": "开门",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "白虎",
+      "tian": "庚",
+      "di": "癸",
+      "xing": "天英",
+      "men": "惊门",
+      "anGan": "辛"
+     }
+    },
+    "kong": {
+     "2": true,
+     "7": true
+    },
+    "ma": "ma3"
+   }
+  },
+  {
+   "type": 1,
+   "label": "2026-9-23 0:05",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "值符",
+      "tian": "己",
+      "di": "丙",
+      "xing": "天蓬",
+      "men": "伤门",
+      "anGan": "戊丁"
+     },
+     "gong9": {
+      "shen": "九天",
+      "tian": "辛",
+      "di": "庚",
+      "xing": "天任",
+      "men": "杜门",
+      "anGan": "壬"
+     },
+     "gong2": {
+      "shen": "九地",
+      "tian": "乙",
+      "di": "戊丁",
+      "xing": "天冲",
+      "men": "景门",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "腾蛇",
+      "tian": "癸",
+      "di": "乙",
+      "xing": "天心",
+      "men": "生门",
+      "anGan": "庚"
+     },
+     "gong7": {
+      "shen": "玄武",
+      "tian": "丙",
+      "di": "壬",
+      "xing": "天辅",
+      "men": "死门",
+      "anGan": "己"
+     },
+     "gong8": {
+      "shen": "太阴",
+      "tian": "壬",
+      "di": "辛",
+      "xing": "天柱",
+      "men": "休门",
+      "anGan": "丙"
+     },
+     "gong1": {
+      "shen": "六合",
+      "tian": "戊丁",
+      "di": "己",
+      "xing": "天芮",
+      "men": "开门",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "白虎",
+      "tian": "庚",
+      "di": "癸",
+      "xing": "天英",
+      "men": "惊门",
+      "anGan": "辛"
+     }
+    },
+    "kong": {
+     "2": true,
+     "7": true
+    },
+    "ma": "ma3"
+   }
+  },
+  {
+   "type": 1,
+   "label": "2026-1-15 12:30",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "太阴",
+      "tian": "庚",
+      "di": "丙",
+      "xing": "天任",
+      "men": "休门",
+      "anGan": "丁"
+     },
+     "gong9": {
+      "shen": "六合",
+      "tian": "丁",
+      "di": "辛",
+      "xing": "天冲",
+      "men": "生门",
+      "anGan": "丙"
+     },
+     "gong2": {
+      "shen": "白虎",
+      "tian": "丙",
+      "di": "癸乙",
+      "xing": "天辅",
+      "men": "伤门",
+      "anGan": "辛"
+     },
+     "gong3": {
+      "shen": "腾蛇",
+      "tian": "壬",
+      "di": "丁",
+      "xing": "天蓬",
+      "men": "开门",
+      "anGan": "庚"
+     },
+     "gong7": {
+      "shen": "玄武",
+      "tian": "辛",
+      "di": "己",
+      "xing": "天英",
+      "men": "杜门",
+      "anGan": "癸乙"
+     },
+     "gong8": {
+      "shen": "值符",
+      "tian": "戊",
+      "di": "庚",
+      "xing": "天心",
+      "men": "惊门",
+      "anGan": "壬"
+     },
+     "gong1": {
+      "shen": "九天",
+      "tian": "己",
+      "di": "壬",
+      "xing": "天柱",
+      "men": "死门",
+      "anGan": "戊"
+     },
+     "gong6": {
+      "shen": "九地",
+      "tian": "癸乙",
+      "di": "戊",
+      "xing": "天芮",
+      "men": "景门",
+      "anGan": "己"
+     }
+    },
+    "kong": {
+     "6": true
+    },
+    "ma": "ma2"
+   }
+  },
+  {
+   "type": 1,
+   "label": "2024-2-29 12:30",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "白虎",
+      "tian": "庚",
+      "di": "丙",
+      "xing": "天任",
+      "men": "生门",
+      "anGan": "丙"
+     },
+     "gong9": {
+      "shen": "玄武",
+      "tian": "丁",
+      "di": "辛",
+      "xing": "天冲",
+      "men": "伤门",
+      "anGan": "辛"
+     },
+     "gong2": {
+      "shen": "九地",
+      "tian": "丙",
+      "di": "癸乙",
+      "xing": "天辅",
+      "men": "杜门",
+      "anGan": "癸乙"
+     },
+     "gong3": {
+      "shen": "六合",
+      "tian": "壬",
+      "di": "丁",
+      "xing": "天蓬",
+      "men": "休门",
+      "anGan": "丁"
+     },
+     "gong7": {
+      "shen": "九天",
+      "tian": "辛",
+      "di": "己",
+      "xing": "天英",
+      "men": "景门",
+      "anGan": "己"
+     },
+     "gong8": {
+      "shen": "太阴",
+      "tian": "戊",
+      "di": "庚",
+      "xing": "天心",
+      "men": "开门",
+      "anGan": "庚"
+     },
+     "gong1": {
+      "shen": "腾蛇",
+      "tian": "己",
+      "di": "壬",
+      "xing": "天柱",
+      "men": "惊门",
+      "anGan": "壬"
+     },
+     "gong6": {
+      "shen": "值符",
+      "tian": "癸乙",
+      "di": "戊",
+      "xing": "天芮",
+      "men": "死门",
+      "anGan": "戊"
+     }
+    },
+    "kong": {
+     "1": true,
+     "8": true
+    },
+    "ma": "ma2"
+   }
+  },
+  {
+   "type": 1,
+   "label": "2030-6-21 13:00",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "白虎",
+      "tian": "丁",
+      "di": "壬",
+      "xing": "天心",
+      "men": "休门",
+      "anGan": "戊"
+     },
+     "gong9": {
+      "shen": "玄武",
+      "tian": "己",
+      "di": "戊",
+      "xing": "天蓬",
+      "men": "生门",
+      "anGan": "庚癸"
+     },
+     "gong2": {
+      "shen": "九地",
+      "tian": "乙",
+      "di": "庚癸",
+      "xing": "天任",
+      "men": "伤门",
+      "anGan": "丙"
+     },
+     "gong3": {
+      "shen": "六合",
+      "tian": "丙",
+      "di": "辛",
+      "xing": "天柱",
+      "men": "开门",
+      "anGan": "壬"
+     },
+     "gong7": {
+      "shen": "九天",
+      "tian": "辛",
+      "di": "丙",
+      "xing": "天冲",
+      "men": "杜门",
+      "anGan": "丁"
+     },
+     "gong8": {
+      "shen": "太阴",
+      "tian": "庚癸",
+      "di": "乙",
+      "xing": "天芮",
+      "men": "惊门",
+      "anGan": "辛"
+     },
+     "gong1": {
+      "shen": "腾蛇",
+      "tian": "戊",
+      "di": "己",
+      "xing": "天英",
+      "men": "死门",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "值符",
+      "tian": "壬",
+      "di": "丁",
+      "xing": "天辅",
+      "men": "景门",
+      "anGan": "己"
+     }
+    },
+    "kong": {
+     "3": true,
+     "8": true
+    },
+    "ma": "ma1"
+   }
+  },
+  {
+   "type": 1,
+   "label": "1986-12-11 14:00",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "太阴",
+      "tian": "己",
+      "di": "己",
+      "xing": "天辅",
+      "men": "伤门",
+      "anGan": "庚"
+     },
+     "gong9": {
+      "shen": "腾蛇",
+      "tian": "癸",
+      "di": "癸",
+      "xing": "天英",
+      "men": "杜门",
+      "anGan": "己"
+     },
+     "gong2": {
+      "shen": "值符",
+      "tian": "辛戊",
+      "di": "辛戊",
+      "xing": "天芮",
+      "men": "景门",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "六合",
+      "tian": "庚",
+      "di": "庚",
+      "xing": "天冲",
+      "men": "生门",
+      "anGan": "丁"
+     },
+     "gong7": {
+      "shen": "九天",
+      "tian": "丙",
+      "di": "丙",
+      "xing": "天柱",
+      "men": "死门",
+      "anGan": "辛戊"
+     },
+     "gong8": {
+      "shen": "白虎",
+      "tian": "丁",
+      "di": "丁",
+      "xing": "天任",
+      "men": "休门",
+      "anGan": "壬"
+     },
+     "gong1": {
+      "shen": "玄武",
+      "tian": "壬",
+      "di": "壬",
+      "xing": "天蓬",
+      "men": "开门",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "九地",
+      "tian": "乙",
+      "di": "乙",
+      "xing": "天心",
+      "men": "惊门",
+      "anGan": "丙"
+     }
+    },
+    "kong": {
+     "6": true
+    },
+    "ma": "ma1"
+   }
+  },
+  {
+   "type": 1,
+   "label": "2026-12-31 23:30",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "九地",
+      "tian": "乙",
+      "di": "丁",
+      "xing": "天心",
+      "men": "景门",
+      "anGan": "辛"
+     },
+     "gong9": {
+      "shen": "九天",
+      "tian": "辛",
+      "di": "庚",
+      "xing": "天蓬",
+      "men": "死门",
+      "anGan": "己"
+     },
+     "gong2": {
+      "shen": "值符",
+      "tian": "己",
+      "di": "壬丙",
+      "xing": "天任",
+      "men": "惊门",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "玄武",
+      "tian": "戊",
+      "di": "癸",
+      "xing": "天柱",
+      "men": "杜门",
+      "anGan": "乙"
+     },
+     "gong7": {
+      "shen": "腾蛇",
+      "tian": "癸",
+      "di": "戊",
+      "xing": "天冲",
+      "men": "开门",
+      "anGan": "丁"
+     },
+     "gong8": {
+      "shen": "白虎",
+      "tian": "壬丙",
+      "di": "己",
+      "xing": "天芮",
+      "men": "伤门",
+      "anGan": "戊"
+     },
+     "gong1": {
+      "shen": "六合",
+      "tian": "庚",
+      "di": "辛",
+      "xing": "天英",
+      "men": "生门",
+      "anGan": "壬丙"
+     },
+     "gong6": {
+      "shen": "太阴",
+      "tian": "丁",
+      "di": "乙",
+      "xing": "天辅",
+      "men": "休门",
+      "anGan": "庚"
+     }
+    },
+    "kong": {
+     "2": true,
+     "7": true
+    },
+    "ma": "ma3"
+   }
+  },
+  {
+   "type": 1,
+   "label": "2027-1-1 0:35",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "九地",
+      "tian": "乙",
+      "di": "丁",
+      "xing": "天心",
+      "men": "景门",
+      "anGan": "辛"
+     },
+     "gong9": {
+      "shen": "九天",
+      "tian": "辛",
+      "di": "庚",
+      "xing": "天蓬",
+      "men": "死门",
+      "anGan": "己"
+     },
+     "gong2": {
+      "shen": "值符",
+      "tian": "己",
+      "di": "壬丙",
+      "xing": "天任",
+      "men": "惊门",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "玄武",
+      "tian": "戊",
+      "di": "癸",
+      "xing": "天柱",
+      "men": "杜门",
+      "anGan": "乙"
+     },
+     "gong7": {
+      "shen": "腾蛇",
+      "tian": "癸",
+      "di": "戊",
+      "xing": "天冲",
+      "men": "开门",
+      "anGan": "丁"
+     },
+     "gong8": {
+      "shen": "白虎",
+      "tian": "壬丙",
+      "di": "己",
+      "xing": "天芮",
+      "men": "伤门",
+      "anGan": "戊"
+     },
+     "gong1": {
+      "shen": "六合",
+      "tian": "庚",
+      "di": "辛",
+      "xing": "天英",
+      "men": "生门",
+      "anGan": "壬丙"
+     },
+     "gong6": {
+      "shen": "太阴",
+      "tian": "丁",
+      "di": "乙",
+      "xing": "天辅",
+      "men": "休门",
+      "anGan": "庚"
+     }
+    },
+    "kong": {
+     "2": true,
+     "7": true
+    },
+    "ma": "ma3"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2026-9-24 4:00",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "九地",
+      "tian": "丁",
+      "di": "乙",
+      "xing": "天心",
+      "men": "惊门",
+      "anGan": "戊"
+     },
+     "gong9": {
+      "shen": "玄武",
+      "tian": "庚",
+      "di": "辛",
+      "xing": "天蓬",
+      "men": "开门",
+      "anGan": "乙"
+     },
+     "gong2": {
+      "shen": "白虎",
+      "tian": "壬",
+      "di": "己丙",
+      "xing": "天任",
+      "men": "休门",
+      "anGan": "辛"
+     },
+     "gong3": {
+      "shen": "九天",
+      "tian": "癸",
+      "di": "戊",
+      "xing": "天柱",
+      "men": "死门",
+      "anGan": "壬"
+     },
+     "gong7": {
+      "shen": "六合",
+      "tian": "戊",
+      "di": "癸",
+      "xing": "天冲",
+      "men": "生门",
+      "anGan": "己丙"
+     },
+     "gong8": {
+      "shen": "值符",
+      "tian": "己丙",
+      "di": "壬",
+      "xing": "天芮",
+      "men": "景门",
+      "anGan": "庚"
+     },
+     "gong1": {
+      "shen": "腾蛇",
+      "tian": "辛",
+      "di": "庚",
+      "xing": "天英",
+      "men": "杜门",
+      "anGan": "丁"
+     },
+     "gong6": {
+      "shen": "太阴",
+      "tian": "乙",
+      "di": "丁",
+      "xing": "天辅",
+      "men": "伤门",
+      "anGan": "癸"
+     }
+    },
+    "kong": {
+     "2": true,
+     "7": true
+    },
+    "ma": "ma2"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2026-9-22 23:55",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "九天",
+      "tian": "丙",
+      "di": "壬",
+      "xing": "天蓬",
+      "men": "杜门",
+      "anGan": "己"
+     },
+     "gong9": {
+      "shen": "九地",
+      "tian": "戊",
+      "di": "乙",
+      "xing": "天任",
+      "men": "景门",
+      "anGan": "庚"
+     },
+     "gong2": {
+      "shen": "玄武",
+      "tian": "癸",
+      "di": "丁辛",
+      "xing": "天冲",
+      "men": "死门",
+      "anGan": "丙"
+     },
+     "gong3": {
+      "shen": "值符",
+      "tian": "庚",
+      "di": "癸",
+      "xing": "天心",
+      "men": "伤门",
+      "anGan": "丁辛"
+     },
+     "gong7": {
+      "shen": "白虎",
+      "tian": "壬",
+      "di": "己",
+      "xing": "天辅",
+      "men": "惊门",
+      "anGan": "戊"
+     },
+     "gong8": {
+      "shen": "腾蛇",
+      "tian": "己",
+      "di": "戊",
+      "xing": "天柱",
+      "men": "生门",
+      "anGan": "乙"
+     },
+     "gong1": {
+      "shen": "太阴",
+      "tian": "丁辛",
+      "di": "丙",
+      "xing": "天芮",
+      "men": "休门",
+      "anGan": "壬"
+     },
+     "gong6": {
+      "shen": "六合",
+      "tian": "乙",
+      "di": "庚",
+      "xing": "天英",
+      "men": "开门",
+      "anGan": "癸"
+     }
+    },
+    "kong": {
+     "2": true,
+     "9": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2026-9-23 0:05",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "白虎",
+      "tian": "癸",
+      "di": "癸",
+      "xing": "天辅",
+      "men": "杜门",
+      "anGan": "壬"
+     },
+     "gong9": {
+      "shen": "六合",
+      "tian": "戊",
+      "di": "戊",
+      "xing": "天英",
+      "men": "景门",
+      "anGan": "乙"
+     },
+     "gong2": {
+      "shen": "太阴",
+      "tian": "丙壬",
+      "di": "丙壬",
+      "xing": "天芮",
+      "men": "死门",
+      "anGan": "丁辛"
+     },
+     "gong3": {
+      "shen": "玄武",
+      "tian": "丁",
+      "di": "丁",
+      "xing": "天冲",
+      "men": "伤门",
+      "anGan": "癸"
+     },
+     "gong7": {
+      "shen": "腾蛇",
+      "tian": "庚",
+      "di": "庚",
+      "xing": "天柱",
+      "men": "惊门",
+      "anGan": "己"
+     },
+     "gong8": {
+      "shen": "九地",
+      "tian": "己",
+      "di": "己",
+      "xing": "天任",
+      "men": "生门",
+      "anGan": "戊"
+     },
+     "gong1": {
+      "shen": "九天",
+      "tian": "乙",
+      "di": "乙",
+      "xing": "天蓬",
+      "men": "休门",
+      "anGan": "丙"
+     },
+     "gong6": {
+      "shen": "值符",
+      "tian": "辛",
+      "di": "辛",
+      "xing": "天心",
+      "men": "开门",
+      "anGan": "庚"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma2"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2026-1-15 12:30",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "白虎",
+      "tian": "辛",
+      "di": "丁",
+      "xing": "天蓬",
+      "men": "开门",
+      "anGan": "癸"
+     },
+     "gong9": {
+      "shen": "玄武",
+      "tian": "己",
+      "di": "庚",
+      "xing": "天任",
+      "men": "休门",
+      "anGan": "丁"
+     },
+     "gong2": {
+      "shen": "九地",
+      "tian": "癸",
+      "di": "壬丙",
+      "xing": "天冲",
+      "men": "生门",
+      "anGan": "庚"
+     },
+     "gong3": {
+      "shen": "六合",
+      "tian": "乙",
+      "di": "癸",
+      "xing": "天心",
+      "men": "惊门",
+      "anGan": "己"
+     },
+     "gong7": {
+      "shen": "九天",
+      "tian": "丁",
+      "di": "戊",
+      "xing": "天辅",
+      "men": "伤门",
+      "anGan": "壬丙"
+     },
+     "gong8": {
+      "shen": "太阴",
+      "tian": "戊",
+      "di": "己",
+      "xing": "天柱",
+      "men": "死门",
+      "anGan": "辛"
+     },
+     "gong1": {
+      "shen": "腾蛇",
+      "tian": "壬丙",
+      "di": "辛",
+      "xing": "天芮",
+      "men": "景门",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "值符",
+      "tian": "庚",
+      "di": "乙",
+      "xing": "天英",
+      "men": "杜门",
+      "anGan": "戊"
+     }
+    },
+    "kong": {
+     "2": true,
+     "9": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2024-2-29 12:30",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "六合",
+      "tian": "壬丙",
+      "di": "丁",
+      "xing": "天芮",
+      "men": "死门",
+      "anGan": "丁"
+     },
+     "gong9": {
+      "shen": "白虎",
+      "tian": "戊",
+      "di": "庚",
+      "xing": "天柱",
+      "men": "惊门",
+      "anGan": "庚"
+     },
+     "gong2": {
+      "shen": "玄武",
+      "tian": "乙",
+      "di": "壬丙",
+      "xing": "天心",
+      "men": "开门",
+      "anGan": "壬丙"
+     },
+     "gong3": {
+      "shen": "太阴",
+      "tian": "庚",
+      "di": "癸",
+      "xing": "天英",
+      "men": "景门",
+      "anGan": "癸"
+     },
+     "gong7": {
+      "shen": "九地",
+      "tian": "辛",
+      "di": "戊",
+      "xing": "天蓬",
+      "men": "休门",
+      "anGan": "戊"
+     },
+     "gong8": {
+      "shen": "腾蛇",
+      "tian": "丁",
+      "di": "己",
+      "xing": "天辅",
+      "men": "杜门",
+      "anGan": "己"
+     },
+     "gong1": {
+      "shen": "值符",
+      "tian": "癸",
+      "di": "辛",
+      "xing": "天冲",
+      "men": "伤门",
+      "anGan": "辛"
+     },
+     "gong6": {
+      "shen": "九天",
+      "tian": "己",
+      "di": "乙",
+      "xing": "天任",
+      "men": "生门",
+      "anGan": "乙"
+     }
+    },
+    "kong": {
+     "1": true,
+     "8": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2030-6-21 13:00",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "腾蛇",
+      "tian": "乙",
+      "di": "辛",
+      "xing": "天英",
+      "men": "惊门",
+      "anGan": "己壬"
+     },
+     "gong9": {
+      "shen": "太阴",
+      "tian": "己壬",
+      "di": "乙",
+      "xing": "天芮",
+      "men": "开门",
+      "anGan": "丁"
+     },
+     "gong2": {
+      "shen": "六合",
+      "tian": "丁",
+      "di": "己壬",
+      "xing": "天柱",
+      "men": "休门",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "值符",
+      "tian": "辛",
+      "di": "庚",
+      "xing": "天辅",
+      "men": "死门",
+      "anGan": "乙"
+     },
+     "gong7": {
+      "shen": "白虎",
+      "tian": "癸",
+      "di": "丁",
+      "xing": "天心",
+      "men": "生门",
+      "anGan": "戊"
+     },
+     "gong8": {
+      "shen": "九天",
+      "tian": "庚",
+      "di": "丙",
+      "xing": "天冲",
+      "men": "景门",
+      "anGan": "辛"
+     },
+     "gong1": {
+      "shen": "九地",
+      "tian": "丙",
+      "di": "戊",
+      "xing": "天任",
+      "men": "杜门",
+      "anGan": "庚"
+     },
+     "gong6": {
+      "shen": "玄武",
+      "tian": "戊",
+      "di": "癸",
+      "xing": "天蓬",
+      "men": "伤门",
+      "anGan": "丙"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma3"
+   }
+  },
+  {
+   "type": 2,
+   "label": "1986-12-11 14:00",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "腾蛇",
+      "tian": "乙",
+      "di": "乙",
+      "xing": "天辅",
+      "men": "杜门",
+      "anGan": "壬"
+     },
+     "gong9": {
+      "shen": "值符",
+      "tian": "辛",
+      "di": "辛",
+      "xing": "天英",
+      "men": "景门",
+      "anGan": "乙"
+     },
+     "gong2": {
+      "shen": "九天",
+      "tian": "己丙",
+      "di": "己丙",
+      "xing": "天芮",
+      "men": "死门",
+      "anGan": "丁辛"
+     },
+     "gong3": {
+      "shen": "太阴",
+      "tian": "戊",
+      "di": "戊",
+      "xing": "天冲",
+      "men": "伤门",
+      "anGan": "癸"
+     },
+     "gong7": {
+      "shen": "九地",
+      "tian": "癸",
+      "di": "癸",
+      "xing": "天柱",
+      "men": "惊门",
+      "anGan": "己"
+     },
+     "gong8": {
+      "shen": "六合",
+      "tian": "壬",
+      "di": "壬",
+      "xing": "天任",
+      "men": "生门",
+      "anGan": "戊"
+     },
+     "gong1": {
+      "shen": "白虎",
+      "tian": "庚",
+      "di": "庚",
+      "xing": "天蓬",
+      "men": "休门",
+      "anGan": "丙"
+     },
+     "gong6": {
+      "shen": "玄武",
+      "tian": "丁",
+      "di": "丁",
+      "xing": "天心",
+      "men": "开门",
+      "anGan": "庚"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma2"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2026-12-31 23:30",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "九地",
+      "tian": "丁",
+      "di": "庚",
+      "xing": "天任",
+      "men": "生门",
+      "anGan": "庚"
+     },
+     "gong9": {
+      "shen": "九天",
+      "tian": "己",
+      "di": "丙",
+      "xing": "天冲",
+      "men": "伤门",
+      "anGan": "丙"
+     },
+     "gong2": {
+      "shen": "值符",
+      "tian": "庚",
+      "di": "戊辛",
+      "xing": "天辅",
+      "men": "杜门",
+      "anGan": "戊辛"
+     },
+     "gong3": {
+      "shen": "玄武",
+      "tian": "乙",
+      "di": "己",
+      "xing": "天蓬",
+      "men": "休门",
+      "anGan": "己"
+     },
+     "gong7": {
+      "shen": "腾蛇",
+      "tian": "丙",
+      "di": "癸",
+      "xing": "天英",
+      "men": "景门",
+      "anGan": "癸"
+     },
+     "gong8": {
+      "shen": "白虎",
+      "tian": "壬",
+      "di": "丁",
+      "xing": "天心",
+      "men": "开门",
+      "anGan": "丁"
+     },
+     "gong1": {
+      "shen": "六合",
+      "tian": "癸",
+      "di": "乙",
+      "xing": "天柱",
+      "men": "惊门",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "太阴",
+      "tian": "戊辛",
+      "di": "壬",
+      "xing": "天芮",
+      "men": "死门",
+      "anGan": "壬"
+     }
+    },
+    "kong": {
+     "2": true,
+     "9": true
+    },
+    "ma": "ma1"
+   }
+  },
+  {
+   "type": 2,
+   "label": "2027-1-1 0:35",
+   "data": {
+    "palaces": {
+     "gong4": {
+      "shen": "九地",
+      "tian": "癸",
+      "di": "癸",
+      "xing": "天辅",
+      "men": "杜门",
+      "anGan": "庚"
+     },
+     "gong9": {
+      "shen": "九天",
+      "tian": "己",
+      "di": "己",
+      "xing": "天英",
+      "men": "景门",
+      "anGan": "丙"
+     },
+     "gong2": {
+      "shen": "值符",
+      "tian": "辛丁",
+      "di": "辛丁",
+      "xing": "天芮",
+      "men": "死门",
+      "anGan": "戊辛"
+     },
+     "gong3": {
+      "shen": "玄武",
+      "tian": "壬",
+      "di": "壬",
+      "xing": "天冲",
+      "men": "伤门",
+      "anGan": "己"
+     },
+     "gong7": {
+      "shen": "腾蛇",
+      "tian": "乙",
+      "di": "乙",
+      "xing": "天柱",
+      "men": "惊门",
+      "anGan": "癸"
+     },
+     "gong8": {
+      "shen": "白虎",
+      "tian": "戊",
+      "di": "戊",
+      "xing": "天任",
+      "men": "生门",
+      "anGan": "丁"
+     },
+     "gong1": {
+      "shen": "六合",
+      "tian": "庚",
+      "di": "庚",
+      "xing": "天蓬",
+      "men": "休门",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "太阴",
+      "tian": "丙",
+      "di": "丙",
+      "xing": "天心",
+      "men": "开门",
+      "anGan": "壬"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2026年 0°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "天",
+      "tian": "戊",
+      "di": "丁",
+      "xing": "柱",
+      "men": "生",
+      "anGan": "辛"
+     },
+     "gong2": {
+      "shen": "阴",
+      "tian": "辛",
+      "di": "癸庚",
+      "xing": "辅",
+      "men": "惊",
+      "anGan": "丁"
+     },
+     "gong3": {
+      "shen": "玄",
+      "tian": "丁",
+      "di": "壬",
+      "xing": "蓬",
+      "men": "杜",
+      "anGan": "癸庚"
+     },
+     "gong4": {
+      "shen": "白",
+      "tian": "乙",
+      "di": "辛",
+      "xing": "任",
+      "men": "景",
+      "anGan": "戊"
+     },
+     "gong6": {
+      "shen": "符",
+      "tian": "癸庚",
+      "di": "己",
+      "xing": "芮",
+      "men": "休",
+      "anGan": "壬"
+     },
+     "gong7": {
+      "shen": "蛇",
+      "tian": "丙",
+      "di": "戊",
+      "xing": "英",
+      "men": "开",
+      "anGan": "乙"
+     },
+     "gong8": {
+      "shen": "地",
+      "tian": "己",
+      "di": "乙",
+      "xing": "心",
+      "men": "伤",
+      "anGan": "丙"
+     },
+     "gong9": {
+      "shen": "六",
+      "tian": "壬",
+      "di": "丙",
+      "xing": "冲",
+      "men": "死",
+      "anGan": "己"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2026年 45°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "地",
+      "tian": "乙",
+      "di": "乙",
+      "xing": "蓬",
+      "men": "惊",
+      "anGan": "庚"
+     },
+     "gong2": {
+      "shen": "蛇",
+      "tian": "丙壬",
+      "di": "丙壬",
+      "xing": "芮",
+      "men": "杜",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "白",
+      "tian": "丁",
+      "di": "丁",
+      "xing": "冲",
+      "men": "休",
+      "anGan": "乙"
+     },
+     "gong4": {
+      "shen": "六",
+      "tian": "癸",
+      "di": "癸",
+      "xing": "辅",
+      "men": "生",
+      "anGan": "己"
+     },
+     "gong6": {
+      "shen": "天",
+      "tian": "辛",
+      "di": "辛",
+      "xing": "心",
+      "men": "死",
+      "anGan": "丙壬"
+     },
+     "gong7": {
+      "shen": "符",
+      "tian": "庚",
+      "di": "庚",
+      "xing": "柱",
+      "men": "景",
+      "anGan": "戊"
+     },
+     "gong8": {
+      "shen": "玄",
+      "tian": "己",
+      "di": "己",
+      "xing": "任",
+      "men": "开",
+      "anGan": "辛"
+     },
+     "gong9": {
+      "shen": "阴",
+      "tian": "戊",
+      "di": "戊",
+      "xing": "英",
+      "men": "伤",
+      "anGan": "丁"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2026年 90°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "符",
+      "tian": "庚",
+      "di": "壬",
+      "xing": "冲",
+      "men": "开",
+      "anGan": "辛戊"
+     },
+     "gong2": {
+      "shen": "六",
+      "tian": "乙",
+      "di": "辛戊",
+      "xing": "心",
+      "men": "景",
+      "anGan": "庚"
+     },
+     "gong3": {
+      "shen": "地",
+      "tian": "癸",
+      "di": "庚",
+      "xing": "英",
+      "men": "生",
+      "anGan": "乙"
+     },
+     "gong4": {
+      "shen": "玄",
+      "tian": "辛戊",
+      "di": "己",
+      "xing": "芮",
+      "men": "伤",
+      "anGan": "壬"
+     },
+     "gong6": {
+      "shen": "蛇",
+      "tian": "丁",
+      "di": "乙",
+      "xing": "任",
+      "men": "惊",
+      "anGan": "癸"
+     },
+     "gong7": {
+      "shen": "阴",
+      "tian": "壬",
+      "di": "丙",
+      "xing": "蓬",
+      "men": "死",
+      "anGan": "己"
+     },
+     "gong8": {
+      "shen": "天",
+      "tian": "己",
+      "di": "丁",
+      "xing": "辅",
+      "men": "休",
+      "anGan": "丙"
+     },
+     "gong9": {
+      "shen": "白",
+      "tian": "丙",
+      "di": "癸",
+      "xing": "柱",
+      "men": "杜",
+      "anGan": "丁"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2026年 179°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "天",
+      "tian": "癸",
+      "di": "癸",
+      "xing": "蓬",
+      "men": "休",
+      "anGan": "乙"
+     },
+     "gong2": {
+      "shen": "白",
+      "tian": "丁戊",
+      "di": "丁戊",
+      "xing": "芮",
+      "men": "死",
+      "anGan": "戊辛"
+     },
+     "gong3": {
+      "shen": "蛇",
+      "tian": "丙",
+      "di": "丙",
+      "xing": "冲",
+      "men": "伤",
+      "anGan": "己"
+     },
+     "gong4": {
+      "shen": "阴",
+      "tian": "乙",
+      "di": "乙",
+      "xing": "辅",
+      "men": "杜",
+      "anGan": "庚"
+     },
+     "gong6": {
+      "shen": "地",
+      "tian": "己",
+      "di": "己",
+      "xing": "心",
+      "men": "开",
+      "anGan": "壬"
+     },
+     "gong7": {
+      "shen": "玄",
+      "tian": "庚",
+      "di": "庚",
+      "xing": "柱",
+      "men": "惊",
+      "anGan": "癸"
+     },
+     "gong8": {
+      "shen": "符",
+      "tian": "辛",
+      "di": "辛",
+      "xing": "任",
+      "men": "生",
+      "anGan": "丁"
+     },
+     "gong9": {
+      "shen": "六",
+      "tian": "壬",
+      "di": "壬",
+      "xing": "英",
+      "men": "景",
+      "anGan": "丙"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2026年 180°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "六",
+      "tian": "戊",
+      "di": "丙",
+      "xing": "冲",
+      "men": "生",
+      "anGan": "辛"
+     },
+     "gong2": {
+      "shen": "符",
+      "tian": "辛",
+      "di": "乙庚",
+      "xing": "心",
+      "men": "惊",
+      "anGan": "丁"
+     },
+     "gong3": {
+      "shen": "玄",
+      "tian": "丁",
+      "di": "戊",
+      "xing": "英",
+      "men": "杜",
+      "anGan": "癸"
+     },
+     "gong4": {
+      "shen": "地",
+      "tian": "乙庚",
+      "di": "己",
+      "xing": "芮",
+      "men": "景",
+      "anGan": "戊"
+     },
+     "gong6": {
+      "shen": "阴",
+      "tian": "癸",
+      "di": "辛",
+      "xing": "任",
+      "men": "休",
+      "anGan": "壬"
+     },
+     "gong7": {
+      "shen": "蛇",
+      "tian": "丙",
+      "di": "壬",
+      "xing": "蓬",
+      "men": "开",
+      "anGan": "乙庚"
+     },
+     "gong8": {
+      "shen": "白",
+      "tian": "己",
+      "di": "癸",
+      "xing": "辅",
+      "men": "伤",
+      "anGan": "丙"
+     },
+     "gong9": {
+      "shen": "天",
+      "tian": "壬",
+      "di": "丁",
+      "xing": "柱",
+      "men": "死",
+      "anGan": "己"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2026年 270°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "六",
+      "tian": "壬",
+      "di": "癸",
+      "xing": "英",
+      "men": "开",
+      "anGan": "乙"
+     },
+     "gong2": {
+      "shen": "符",
+      "tian": "辛",
+      "di": "丁戊",
+      "xing": "任",
+      "men": "景",
+      "anGan": "癸"
+     },
+     "gong3": {
+      "shen": "玄",
+      "tian": "庚",
+      "di": "丙",
+      "xing": "柱",
+      "men": "生",
+      "anGan": "丁戊"
+     },
+     "gong4": {
+      "shen": "地",
+      "tian": "己",
+      "di": "乙",
+      "xing": "心",
+      "men": "伤",
+      "anGan": "庚"
+     },
+     "gong6": {
+      "shen": "阴",
+      "tian": "乙",
+      "di": "己",
+      "xing": "辅",
+      "men": "惊",
+      "anGan": "丙"
+     },
+     "gong7": {
+      "shen": "蛇",
+      "tian": "丙",
+      "di": "庚",
+      "xing": "冲",
+      "men": "死",
+      "anGan": "辛"
+     },
+     "gong8": {
+      "shen": "白",
+      "tian": "丁戊",
+      "di": "辛",
+      "xing": "芮",
+      "men": "休",
+      "anGan": "壬"
+     },
+     "gong9": {
+      "shen": "天",
+      "tian": "癸",
+      "di": "壬",
+      "xing": "蓬",
+      "men": "杜",
+      "anGan": "己"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2026年 359°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "玄",
+      "tian": "辛戊",
+      "di": "壬",
+      "xing": "芮",
+      "men": "生",
+      "anGan": "癸"
+     },
+     "gong2": {
+      "shen": "符",
+      "tian": "庚",
+      "di": "辛戊",
+      "xing": "冲",
+      "men": "惊",
+      "anGan": "丁"
+     },
+     "gong3": {
+      "shen": "六",
+      "tian": "乙",
+      "di": "庚",
+      "xing": "心",
+      "men": "杜",
+      "anGan": "丙"
+     },
+     "gong4": {
+      "shen": "阴",
+      "tian": "壬",
+      "di": "己",
+      "xing": "蓬",
+      "men": "景",
+      "anGan": "乙"
+     },
+     "gong6": {
+      "shen": "地",
+      "tian": "癸",
+      "di": "乙",
+      "xing": "英",
+      "men": "休",
+      "anGan": "己"
+     },
+     "gong7": {
+      "shen": "天",
+      "tian": "己",
+      "di": "丙",
+      "xing": "辅",
+      "men": "开",
+      "anGan": "庚"
+     },
+     "gong8": {
+      "shen": "白",
+      "tian": "丙",
+      "di": "丁",
+      "xing": "柱",
+      "men": "伤",
+      "anGan": "辛戊"
+     },
+     "gong9": {
+      "shen": "蛇",
+      "tian": "丁",
+      "di": "癸",
+      "xing": "任",
+      "men": "死",
+      "anGan": "壬"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 4,
+   "label": "2027年 133°",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "阴",
+      "tian": "庚",
+      "di": "己",
+      "xing": "英",
+      "men": "开",
+      "anGan": "丙"
+     },
+     "gong2": {
+      "shen": "玄",
+      "tian": "辛",
+      "di": "戊丁",
+      "xing": "任",
+      "men": "景",
+      "anGan": "己"
+     },
+     "gong3": {
+      "shen": "符",
+      "tian": "壬",
+      "di": "乙",
+      "xing": "柱",
+      "men": "生",
+      "anGan": "戊丁"
+     },
+     "gong4": {
+      "shen": "天",
+      "tian": "癸",
+      "di": "丙",
+      "xing": "心",
+      "men": "伤",
+      "anGan": "壬"
+     },
+     "gong6": {
+      "shen": "六",
+      "tian": "丙",
+      "di": "癸",
+      "xing": "辅",
+      "men": "惊",
+      "anGan": "乙"
+     },
+     "gong7": {
+      "shen": "白",
+      "tian": "乙",
+      "di": "壬",
+      "xing": "冲",
+      "men": "死",
+      "anGan": "辛"
+     },
+     "gong8": {
+      "shen": "蛇",
+      "tian": "戊丁",
+      "di": "辛",
+      "xing": "芮",
+      "men": "休",
+      "anGan": "庚"
+     },
+     "gong9": {
+      "shen": "地",
+      "tian": "己",
+      "di": "庚",
+      "xing": "蓬",
+      "men": "杜",
+      "anGan": "癸"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  },
+  {
+   "type": 6,
+   "label": "生辰 1988-8-8 8:00",
+   "data": {
+    "palaces": {
+     "gong1": {
+      "shen": "六",
+      "tian": "辛",
+      "di": "癸",
+      "xing": "冲",
+      "men": "景",
+      "anGan": "辛"
+     },
+     "gong2": {
+      "shen": "地",
+      "tian": "戊",
+      "di": "壬己",
+      "xing": "心",
+      "men": "生",
+      "anGan": "戊"
+     },
+     "gong3": {
+      "shen": "蛇",
+      "tian": "丁",
+      "di": "辛",
+      "xing": "英",
+      "men": "惊",
+      "anGan": "丁"
+     },
+     "gong4": {
+      "shen": "符",
+      "tian": "壬己",
+      "di": "庚",
+      "xing": "芮",
+      "men": "开",
+      "anGan": "壬己"
+     },
+     "gong6": {
+      "shen": "白",
+      "tian": "丙",
+      "di": "戊",
+      "xing": "任",
+      "men": "杜",
+      "anGan": "丙"
+     },
+     "gong7": {
+      "shen": "玄",
+      "tian": "癸",
+      "di": "乙",
+      "xing": "蓬",
+      "men": "伤",
+      "anGan": "癸"
+     },
+     "gong8": {
+      "shen": "阴",
+      "tian": "庚",
+      "di": "丙",
+      "xing": "辅",
+      "men": "死",
+      "anGan": "庚"
+     },
+     "gong9": {
+      "shen": "天",
+      "tian": "乙",
+      "di": "丁",
+      "xing": "柱",
+      "men": "休",
+      "anGan": "乙"
+     }
+    },
+    "kong": {
+     "4": true
+    },
+    "ma": "ma4"
+   }
+  }
+ ]
+}
