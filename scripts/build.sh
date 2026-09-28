@@ -145,7 +145,7 @@ EOF
   #       2026-09-24 起并入 bundle, 不再独立分发, 三端少一个 ~300KB 请求)
   #       → boot(引导) → constants → engine → chuanren → mingli → bazi → app
   { cat tyme4j-browser.js qimen_boot.js qimen_constants.js qimen_engine_min.js qimen_chuanren.js qimen_mingli.js qimen_bazi.js yinpan_app.js; } \
-    | npx esbuild --minify --target=es2017 --loader=js --charset=utf8 > "$BANNER.body" || Die 'esbuild 打包 JS 失败'
+    | npx esbuild --minify --target=es2020 --loader=js --charset=utf8 > "$BANNER.body" || Die 'esbuild 打包 JS 失败'
   # banner 在压缩**之后**前置: esbuild 会把 legal comment 挪到文件末尾, 且 stdin 模式
   # 不支持 --banner:js, 所以自行拼接以保证版权声明稳定出现在产物开头。
   cat "$BANNER" "$BANNER.body" > qimen_bundle.min.js

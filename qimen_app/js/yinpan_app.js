@@ -15147,7 +15147,7 @@ function _showHelpDlg(dlgId, DATA) {
         + '<div style="font-size:18px;font-weight:bold;color:var(--wx-jin)">' + (DATA.title || '') + '</div>'
         + '<div style="font-size:12px;color:var(--c-text-4);margin-top:4px;line-height:1.7">' + DATA.head + '</div></div>';
     const h = '<div id="' + dlgId + '" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
-      + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
+      + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:var(--vh88,88vh);overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
       + '<span onclick="event.stopPropagation();document.getElementById(\'' + dlgId + '\').remove()" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
       + head + toc + body
       + '</div></div>';
@@ -15398,7 +15398,7 @@ function _ensureSheet() {
   if (!sheet) {
     sheet = document.createElement('div');
     sheet.id = 'bottomSheet';
-    sheet.style.cssText = 'position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:600px;max-height:70vh;background:var(--c-bg);border-radius:14px 14px 0 0;z-index:10000;overflow-y:auto;transition:transform 0.3s ease;padding-bottom:env(safe-area-inset-bottom,0)';
+    sheet.style.cssText = 'position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:600px;max-height:var(--vh70,70vh);background:var(--c-bg);border-radius:14px 14px 0 0;z-index:10000;overflow-y:auto;transition:transform 0.3s ease;padding-bottom:env(safe-area-inset-bottom,0)';
     document.body.appendChild(sheet);
   }
   return {overlay, sheet};
@@ -16222,7 +16222,7 @@ function showPalace(g) {
   }
 
   let h = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">'
-    + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:88vh;overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
+    + '<div style="position:relative;background:var(--c-bg);border-radius:12px;padding:20px;max-width:520px;width:92vw;max-height:var(--vh88,88vh);overflow-y:auto;font-size:14px;line-height:1.9;color:var(--c-text);cursor:default" onclick="event.stopPropagation()">'
     + '<span onclick="event.stopPropagation();let p=this;while(p){if(p.style&&p.style.position==\'fixed\'){p.remove();break;}p=p.parentNode;}" style="position:sticky;top:0;float:right;width:32px;height:32px;line-height:30px;text-align:center;background:var(--c-bg);border-radius:50%;font-size:18px;color:var(--c-text-4);cursor:pointer;z-index:10;margin:-8px -8px 0 0">&times;</span>'
     + '<div id="'+tabId+'_tabs" style="text-align:center;margin-bottom:12px;border-bottom:1px solid var(--c-border);padding-bottom:10px">'+tabs+'</div>'
     + '<div id="'+tabId+'_gong" class="ptab">'+contentGong()+'</div>'
@@ -16552,7 +16552,7 @@ function showJuSelectForKun2(gan) {
 	  ];
 
 	  // 构建HTML，所有按钮用data属性替代onclick
-	  let h = '<div id="xpEditorCard" style="background:var(--c-bg);border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:85vh;overflow-y:auto">';
+	  let h = '<div id="xpEditorCard" style="background:var(--c-bg);border-radius:12px;padding:14px;max-width:380px;width:92%;max-height:var(--vh85,85vh);overflow-y:auto">';
 	  h += '<div style="font-weight:bold;font-size:17px;text-align:center;margin-bottom:10px">'+GONG_NAMES[g]+'宫 编辑</div>';
 	  for(let ci = 0; ci < cats.length; ci++) {
 	    let cat = cats[ci];

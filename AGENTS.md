@@ -59,6 +59,12 @@
 
 - **CSP 收紧 + 内联 script 防回归(2026-09-24)**: `tauri.conf.json` 的 script-src 去掉 `'unsafe-inline'` —— 它在 Tauri 2 下**本来就被运行时注入的 nonce 无效化**(见上文 rebind 条目), 留着只会误导后人以为内联可用; style-src 的 'unsafe-inline' **保留**(内联 style 属性是真实需求, 遍地都是)。实测收紧后桌面版排盘/四按钮/rebind 全正常(rebind 走 IDL 赋值, 不受 script-src 影响)。**build.sh 的 cmd_bundle 开头加了防回归检查**: 剥离 HTML 注释后若仍有裸 `<script>` 直接 Die(注释里提及 "<script>" 字样不误报; bash if 对退出码的语义坑 —— `if cmd; then` 是**退出码 0** 才进 then, python "发现即 exit 1" 的写法要配 `if ! cmd`)
 
+## 新代码语法规约(2026-09-28 定, JS target 已升 es2020)
+
+- **JS**: esbuild target es2020(`?.` `??` 不再转译)。**新代码直接用现代写法**: 可选链 `?.`、空值合并 `??`、模板字符串 `` `${}` ``; 存量 16k 行的 `+` 拼接与 `||` 判断**不强制回改**(碰哪儿改哪儿; `\|\|`→`??` 必须逐处确认 0/''/false 语义)。var→let 已清零(mingli/bazi 211 处, 2026-09-28)——⚠️ **教训: var→let 机械替换的最大陷阱是"try 块内 var + try 外使用"的提升依赖**(mingli bzInfo 实例: 强转 let 成 TDZ bug, 且被外层 catch 吞成静默回归, 27 快照都测不出, 靠 eslint no-undef error 级守门抓住)。同类替换必须: eslint 0 errors + snapshot 回归 + 目标代码路径专项验证
+- **CSS**: 已用 aspect-ratio(带 @supports 回退)/grid/变量/calc/clamp。**新代码**: 优先 `:where()` 包裹(零特异性, 避免再添 !important —— 本项目特异性战争史见上文三连坑); 弹窗类 max-height 用 `var(--vh88/--vh85/--vh70)` 变量(dvh 渐进增强已铺, 行内样式无法级联回退所以走变量); `:has()`/nesting 基线允许(WebKit 16.4+/Chrome 108+)但存量不重写
+- **改 JS 必跑**: `node scripts/snapshot.js`(27 盘面零漂移); 改交互另跑 `node scripts/verify_rebind_behavior.js`(16 项)
+
 ## 可靠性工具与修复(2026-09-28 批次)
 
 - **盘面快照回归工具 `scripts/snapshot.js`(入库)**: 参照物 ~/src/refimpl 与 4 个 verify_* 对拍脚本已随历史清理**丢失**(2026-09-28 复核发现), 5000 万项对拍能力不复存在 —— 本工具把当前引擎输出固化为数据快照入库(docs/snapshots/pan-snapshots.json, 27 个: 时/刻盘×9 时间点含交节跨日跨年闰年、山向×8 度数、命理×1), `node scripts/snapshot.js` 比对当前代码, 任何引擎/历法漂移即红灯。**jsdom 已进 devDependencies**。⚠️ 与"verify 不入库"约定的差异: snapshot 是可持续使用的工具而非一次性调试脚本, 且快照数据+脚本必须同入库才有跨机价值(2026-09-28 用户以"其他自动化完成"授权)

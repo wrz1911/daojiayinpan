@@ -105,6 +105,12 @@ input,textarea{outline:none;-webkit-user-select:text;user-select: text}
 .pan{border:solid 1px var(--c-border);width:100%;border-collapse:collapse}
 .yinTable{width:100%;border-collapse:collapse;height:100%;}
 .yinTable td{text-align:left;padding:10px}
+/* 视口单位渐进增强(2026-09-28): 弹窗/抽屉的 max-height 用变量, 支持 dvh 的
+   引擎(WebKit 16.4+/Chrome 108+)动态跟随移动端地址栏收展, 不支持的回退静态 vh。
+   行内样式无法写级联回退, 故统一引用这里的变量(用法: max-height:var(--vh88,88vh))。 */
+:root{--vh88:88vh;--vh85:85vh;--vh70:70vh}
+@supports (height:1dvh){:root{--vh88:88dvh;--vh85:85dvh;--vh70:70dvh}}
+
 #pan{border:solid 1px var(--c-text-2);width:100%;border-collapse:collapse;box-shadow:0 0 3px var(--c-border);}
 /* 2026-09-28 宫格对齐修复: fixed 布局让三列由表格均分(原先离9/坎1 被特殊化为 34%、
    其余 33%, 配合 .pan-cell 的 aspect-ratio:1/1 使中列两宫比其他宫高 ~5px →

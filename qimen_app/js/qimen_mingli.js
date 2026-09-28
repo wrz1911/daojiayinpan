@@ -27,23 +27,23 @@
   'use strict';
 
   // 共享常量(见 qimen_constants.js): 显式挂接, 不依赖加载顺序
-  var QM = window.QM || {};
-  var GAN = '甲乙丙丁戊己庚辛壬癸';
-  var ZHI = '子丑寅卯辰巳午未申酉戌亥';
-  var SX = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
-  var dec = function (s) { return String(s == null ? '' : s); };
+  let QM = window.QM || {};
+  let GAN = '甲乙丙丁戊己庚辛壬癸';
+  let ZHI = '子丑寅卯辰巳午未申酉戌亥';
+  let SX = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+  let dec = function (s) { return String(s == null ? '' : s); };
   /* 五行着色统一走 QM.wxSpan(qimen_constants.js 的单字表), 不再各模块自备色表 ——
      否则同一干支在不同盘里出现色差。保留这两个别名只为调用处读起来清楚。 */
-  var wx = function (s) { return (window.QM && QM.wxSpan) ? QM.wxSpan(s) : dec(s); };
-  var ganSpan = wx, zhiSpan = wx;
+  let wx = function (s) { return (window.QM && QM.wxSpan) ? QM.wxSpan(s) : dec(s); };
+  let ganSpan = wx, zhiSpan = wx;
 
   /** 某一柱的旬空: 旬空偏移 = 10 - (干序+1), 与地支序相加取模(旬空 = 10-(干序+1) 与地支序相加取模) */
   function xunKongOf(gz) {
     gz = dec(gz);
     if (gz.length < 2) return '';
-    var gi = GAN.indexOf(gz[0]), zi = ZHI.indexOf(gz[1]);
+    let gi = GAN.indexOf(gz[0]), zi = ZHI.indexOf(gz[1]);
     if (gi < 0 || zi < 0) return '';
-    var b = ((zi + (10 - (gi + 1))) % 12 + 12) % 12;
+    let b = ((zi + (10 - (gi + 1))) % 12 + 12) % 12;
     return ZHI[(b + 1) % 12] + ZHI[(b + 2) % 12];
   }
 
@@ -53,31 +53,31 @@
    */
   window.mingliChart = function (opts) {
     opts = opts || {};
-    var year = opts.year, month = opts.month, day = opts.day, hour = opts.hour, minute = opts.minute || 0;
-    var gender = opts.gender || '男';
+    let year = opts.year, month = opts.month, day = opts.day, hour = opts.hour, minute = opts.minute || 0;
+    let gender = opts.gender || '男';
 
-    var qr = window.qimenChart({ year: year, month: month, day: day, hour: hour, minute: minute, panType: 1 });
+    let qr = window.qimenChart({ year: year, month: month, day: day, hour: hour, minute: minute, panType: 1 });
 
-    var bz = null;
+    let bz = null;
     try { bz = window.computeBaZiDaYun({ year: year, month: month, day: day, hour: hour, gender: gender }); }
     catch (e) { if (window._logErr) window._logErr('mingli.bazi', e && e.message); }
 
     // 四柱 —— qimenChart 的 sizhu 是**对象**(与 chuanRenChart 的字符串不同)
-    var gzOf = function (k) { return dec(qr.sizhu && qr.sizhu[k] && qr.sizhu[k].ganZhi); };
-    var siZhu = { nian: gzOf('y'), yue: gzOf('m'), ri: gzOf('d'), shi: gzOf('h') };
+    let gzOf = function (k) { return dec(qr.sizhu && qr.sizhu[k] && qr.sizhu[k].ganZhi); };
+    let siZhu = { nian: gzOf('y'), yue: gzOf('m'), ri: gzOf('d'), shi: gzOf('h') };
 
-    var kong = { nian: xunKongOf(siZhu.nian), yue: xunKongOf(siZhu.yue),
+    let kong = { nian: xunKongOf(siZhu.nian), yue: xunKongOf(siZhu.yue),
                  ri: xunKongOf(siZhu.ri), shi: xunKongOf(siZhu.shi) };
 
     // 供 shen12 / tianmenDihu / showState 使用
     window._raw = qr.raw || '';
     window._sizhuObj = qr.sizhu || null;
-    var palsForState = {};
-    for (var g = 1; g <= 9; g++) { if (g !== 5) palsForState['gong' + g] = (qr.pals && qr.pals[g]) || null; }
+    let palsForState = {};
+    for (let g = 1; g <= 9; g++) { if (g !== 5) palsForState['gong' + g] = (qr.pals && qr.pals[g]) || null; }
     window._palaces = palsForState;
 
     // 生肖: 按年支
-    var shengXiao = SX[ZHI.indexOf(siZhu.nian[1])] || '';
+    let shengXiao = SX[ZHI.indexOf(siZhu.nian[1])] || '';
 
     return {
       qr: qr, bz: bz, sizhu: siZhu, gender: gender, shengXiao: shengXiao,
@@ -96,8 +96,8 @@
 
   /** 按钮高亮: 3..7 互斥, 再点同一个则取消并清空外圈 */
   window.mingliBtn = function (b, data) {
-    var isRing = (b >= 3 && b <= 7);   // 神将按钮已下线, 保留分支不影响
-    var bz = document.getElementById('yixinghuandouDIV');   // 切神将时收起八字盘
+    let isRing = (b >= 3 && b <= 7);   // 神将按钮已下线, 保留分支不影响
+    let bz = document.getElementById('yixinghuandouDIV');   // 切神将时收起八字盘
     if (bz && bz.getAttribute('data-mode') === 'bazi') {
       bz.innerHTML = ''; bz.removeAttribute('data-mode'); bz.style.display = 'none';
     }
@@ -123,17 +123,17 @@
    * 大运切换行为: 一步大运 10 年, 虚岁 = 流年-出生年+1。
    */
   window.mingliYun = function (n, data) {
-    var bz = data && data.bz;
+    let bz = data && data.bz;
     if (!bz || !bz.dayun || !bz.dayun.length) return;
     n = parseInt(n, 10) || 0;
     if (n < 0) n = 0;
     if (n >= bz.dayun.length) n = bz.dayun.length - 1;
 
     // 大运格高亮
-    for (var i = 0; i < 10; i++) {
-      var el = document.getElementById('dayun' + i);
-      var yr = document.getElementById('dayun_year' + i);
-      var on = (i === n);
+    for (let i = 0; i < 10; i++) {
+      let el = document.getElementById('dayun' + i);
+      let yr = document.getElementById('dayun_year' + i);
+      let on = (i === n);
       if (el) {
         el.style.color = on ? 'var(--wx-huo)' : '';
         el.style.fontWeight = on ? 'bold' : '';
@@ -149,15 +149,15 @@
       }
     }
     // 流年: 该运第 c 年
-    var startYear = (bz.qiYunYear || 0) + 10 * n;
-    var birthYear = (data.qr && data.qr.gongli ? parseInt(dec(data.qr.gongli).slice(0, 4), 10) : 0);
-    var ln = bz.liuNian || [];
-    for (var c = 0; c < 10; c++) {
-      var y = ln[n * 10 + c];
-      var e1 = document.getElementById('liunian1_' + c);
-      var e2 = document.getElementById('liunian2_' + c);
+    let startYear = (bz.qiYunYear || 0) + 10 * n;
+    let birthYear = (data.qr && data.qr.gongli ? parseInt(dec(data.qr.gongli).slice(0, 4), 10) : 0);
+    let ln = bz.liuNian || [];
+    for (let c = 0; c < 10; c++) {
+      let y = ln[n * 10 + c];
+      let e1 = document.getElementById('liunian1_' + c);
+      let e2 = document.getElementById('liunian2_' + c);
       if (!y) { if (e1) e1.innerHTML = ''; if (e2) e2.innerHTML = ''; continue; }
-      var age = birthYear ? (y.year - birthYear + 1) : '';
+      let age = birthYear ? (y.year - birthYear + 1) : '';
       if (e1) e1.innerHTML = y.year + '<br>' + age + '岁';
       if (e2) e2.innerHTML = ganSpan(y.g) + zhiSpan(y.z);
     }
@@ -170,9 +170,9 @@
   /** 命理输入面板(姓名 + 性别)。出生时间复用页面顶部的年月日时选择器。 */
   window.renderMingliInputs = function (d) {
     d = d || {};
-    var gender = d.gender || '男';
-    var name = d.name || '';
-    var h = '<div class="ml-input-panel"><table style="width:100%;border-collapse:collapse"><tr>';
+    let gender = d.gender || '男';
+    let name = d.name || '';
+    let h = '<div class="ml-input-panel"><table style="width:100%;border-collapse:collapse"><tr>';
     h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">姓名</td>';
     h += '<td style="width:34%"><input id="mlName" class="sel-date" style="width:100%;box-sizing:border-box" type="text" maxlength="20" value="' + name.replace(/"/g, '&quot;') + '" onchange="doMingli()"></td>';
     h += '<td style="width:44px;font-size:13px;color:var(--c-text-2);text-align:right;padding-right:4px">性别</td>';
@@ -186,9 +186,9 @@
   /* ───────────────── 渲染 ───────────────── */
 
   window.renderMingli = function (data, containerId) {
-    var h = '';
+    let h = '';
     try {
-      var qr = data.qr, bz = data.bz, sz = data.sizhu;
+      let qr = data.qr, bz = data.bz, sz = data.sizhu;
 
       /* ── ① #panHead 头部表 ── */
       h += '<div id="panHead" class="bz-pan"><TABLE class="pan" id="headTable">';
@@ -197,7 +197,7 @@
            '<font style="color:var(--c-gold)">性别：</font><font id="gender">' + data.gender + '</font>&emsp;' +
            '<font style="color:var(--c-gold)">生肖：</font>' + data.shengXiao + '</TD></TR>';
       // 日期格式: 1986-12-11(农历十一月初十)
-      var birthYmd = qr.gongli.replace(/^(\d+)年(\d+)月(\d+)日.*$/, function (m, a, b, c) {
+      let birthYmd = qr.gongli.replace(/^(\d+)年(\d+)月(\d+)日.*$/, function (m, a, b, c) {
         return a + '-' + ('0' + b).slice(-2) + '-' + ('0' + c).slice(-2);
       });
       h += '<TR><TD style="width:16%;color:var(--c-gold)">出生</TD>' +
@@ -207,8 +207,8 @@
            '<TD colspan="2">' + qr.juLabel.replace(/^(\D+)/, '$1<B>').replace(/(\d+)$/, '$1</B>') + '</TD></TR>';
       /* 旬首/值符/值使/马星/空亡: 小标签内联在值上方, 省掉纯标题行 */
       // 旬首显示为「旬首+遁干」(格式: 甲子戊), 六甲遁于六仪
-      var XUN_DUN = { 子: '戊', 戌: '己', 申: '庚', 午: '辛', 辰: '壬', 寅: '癸' };
-      var xunShouTxt = dec(qr.xs.gz) + (XUN_DUN[dec(qr.xs.gz)[1]] || '');
+      let XUN_DUN = { 子: '戊', 戌: '己', 申: '庚', 午: '辛', 辰: '壬', 寅: '癸' };
+      let xunShouTxt = dec(qr.xs.gz) + (XUN_DUN[dec(qr.xs.gz)[1]] || '');
       h += '<TR class="hd-row"><TD id="xunShou"><span class="hd-lbl">旬首</span>' + wx(xunShouTxt) + '</TD>' +
            '<TD><span class="hd-lbl">值符</span>天<font id="zhiFu">' + qr.zf.s + '</font></TD>' +
            '<TD><span class="hd-lbl">值使</span><font id="zhiShi">' + qr.zs.s + '</font>门</TD>' +
@@ -224,13 +224,14 @@
       h += '</TR>';
       /* ── 八字信息(原「八字排盘」主盘, 合并进命理主盘): 十神/藏干/纳音/地势/
             自坐/空亡/神煞/胎元·命宫·身宫/旺相休囚死/交运; 四柱行主盘已有, 不重复 ── */
+      let bzInfo = null;   /* 声明提块外: 270 行交运说明在 try 外使用, 原 var 提升语义 */
       try {
-        var bzInfo = window.baziChart ? window.baziChart({
+        bzInfo = window.baziChart ? window.baziChart({
           year: window.Y, month: window.M, day: window.D,
           hour: window.hr, minute: window.mn,
           name: data.name, gender: data.gender
         }) : null;
-        var tipHtml = '颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、' +
+        let tipHtml = '颜色说明：<span class="cx-mu">入墓</span>、<span class="cx-xing">击刑</span>、' +
                       '<span class="cx-po">门迫</span>、<span class="cx-xingmu">刑+墓</span>';
         if (bzInfo && window.baziMainRows) h += window.baziMainRows(bzInfo, false, 'bz-sec', tipHtml, true);
       } catch (e) {
@@ -240,10 +241,10 @@
 
       /* ── ② #content 盘体 + 外圈 ── */
       if (window.buildPaipanGrid && qr.pals) {
-        var pals = {}, kongGongs = {};
-        for (var g = 1; g <= 9; g++) {
+        let pals = {}, kongGongs = {};
+        for (let g = 1; g <= 9; g++) {
           if (g === 5) continue;
-          var p = qr.pals[g] || {};
+          let p = qr.pals[g] || {};
           pals['gong' + g] = {
             shen: p.shen || '', tian: p.tian || '', di: p.di || '', xing: p.xing || '',
             men: p.men || '', anGan: p.anGan || '', kong: !!p.kong, isMenPo: !!p.mp,
@@ -252,11 +253,11 @@
           if (p.kong) kongGongs[g] = true;
         }
         if (window.recalcColors) window.recalcColors(pals);
-        var csFn = window._colorSpan || function (v) { return v || ''; };
+        let csFn = window._colorSpan || function (v) { return v || ''; };
         /* 阴干: 照时盘的做法, 取本宫 anGan 并着色(入墓/击刑用同一套标记) */
-        var agFn = function (g) {
-          var p2 = pals['gong' + g];
-          var ag = p2 ? p2.anGan : '';
+        let agFn = function (g) {
+          let p2 = pals['gong' + g];
+          let ag = p2 ? p2.anGan : '';
           return ag ? (window._anGanColor ? window._anGanColor(ag, g) : ag) : '';
         };
         // 不传 wrapperClass/panClass, 让 buildPaipanGrid 生成标准的
@@ -271,17 +272,17 @@
 
       /* ── ③ #dayun_liunian 大运 + 流年(两个独立 TABLE) ── */
       if (bz && bz.dayun && bz.dayun.length) {
-        var n = Math.min(bz.dayun.length, 10);
+        let n = Math.min(bz.dayun.length, 10);
 
         h += '<div id="dayun_liunian"><TABLE class="pan">';
         h += '<TR><TD class="yunTitle" rowspan="2">大<br>运</TD>';
-        for (var d = 0; d < n; d++) {
+        for (let d = 0; d < n; d++) {
           h += '<TD class="yun1" id="dayun_year' + d + '">' + (bz.qiYunYear + d * 10) + '</TD>';
         }
         h += '</TR><TR>';
-        for (var d2 = 0; d2 < n; d2++) {
-          var dy = bz.dayun[d2], ss = (bz.dayunSS || [])[d2] || '';
-          var cur = (d2 === data.yunIdx);
+        for (let d2 = 0; d2 < n; d2++) {
+          let dy = bz.dayun[d2], ss = (bz.dayunSS || [])[d2] || '';
+          let cur = (d2 === data.yunIdx);
           h += '<TD class="yun2" id="dayun' + d2 + '" onclick="mingliYun(' + d2 + ',window._mlData)"' +
                (cur ? ' style="font-weight:bold;color:var(--c-po)"' : '') + '>' +
                ganSpan(dy.g) + '<br>' + zhiSpan(dy.z) + '<br><font class="shishen">' + ss + '</font></TD>';
@@ -290,9 +291,9 @@
 
         h += '<TABLE class="pan">';
         h += '<TR><TD class="yunTitle" rowspan="2">流<br>年</TD>';
-        for (var c = 0; c < 10; c++) h += '<TD class="liunian1" id="liunian1_' + c + '"></TD>';
+        for (let c = 0; c < 10; c++) h += '<TD class="liunian1" id="liunian1_' + c + '"></TD>';
         h += '</TR><TR>';
-        for (var c2 = 0; c2 < 10; c2++) h += '<TD class="liunian2" id="liunian2_' + c2 + '"></TD>';
+        for (let c2 = 0; c2 < 10; c2++) h += '<TD class="liunian2" id="liunian2_' + c2 + '"></TD>';
         h += '</TR></TABLE></div>';
       }
 
@@ -316,7 +317,7 @@
       '</style>';
 
     if (containerId) {
-      var el = document.getElementById(containerId);
+      let el = document.getElementById(containerId);
       if (el) el.innerHTML = h;
     }
     return h;
@@ -324,24 +325,24 @@
 
   /** 命理盘渲染后处理: 宫位正方形 + 左右行高同步 + 阴干对齐(照时盘/山向) */
   window.mingliFixLayout = function () {
-    var wrap = document.getElementById('panWrap');
+    let wrap = document.getElementById('panWrap');
     if (!wrap) return;
-    var box = wrap.querySelector('#content');
+    let box = wrap.querySelector('#content');
     if (!box) return;
     /* 宫位正方形: 已由 .pan-cell 的 aspect-ratio 保证, 旧环境才回写高度 */
-    var _noAR = !(window.CSS && CSS.supports && CSS.supports('aspect-ratio', '1 / 1'));
+    let _noAR = !(window.CSS && CSS.supports && CSS.supports('aspect-ratio', '1 / 1'));
     if (_noAR) {
       [4, 9, 2, 3, 7, 8, 1, 6].forEach(function (g) {
-        var el = box.querySelector('#gong' + g);
-        if (el) { var w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
+        let el = box.querySelector('#gong' + g);
+        if (el) { let w = el.getBoundingClientRect().width; if (w > 0) el.style.height = w + 'px'; }
       });
     }
     /* 左右外圈行高与中宫对齐 */
-    var pRows = box.querySelectorAll('#pan tr'),
+    let pRows = box.querySelectorAll('#pan tr'),
         lRows = box.querySelectorAll('#leftTable tr'),
         rRows = box.querySelectorAll('#rightTable tr');
-    for (var i = 0; i < 3 && i < pRows.length; i++) {
-      var rh = pRows[i].getBoundingClientRect().height;
+    for (let i = 0; i < 3 && i < pRows.length; i++) {
+      let rh = pRows[i].getBoundingClientRect().height;
       if (rh > 0) {
         if (lRows[i]) lRows[i].style.height = rh + 'px';
         if (rRows[i]) rRows[i].style.height = rh + 'px';
@@ -349,7 +350,7 @@
     }
     /* 阴干对齐: 左列(4/3/8)贴天盘干, 右列(2/7/6)贴九星 */
     [4, 3, 8].forEach(function (g) {
-      var y = box.querySelector('#yinGan' + g), t = box.querySelector('#tian' + g), go = box.querySelector('#gong' + g);
+      let y = box.querySelector('#yinGan' + g), t = box.querySelector('#tian' + g), go = box.querySelector('#gong' + g);
       if (y && t && go) {
         y.style.paddingTop = Math.max(0, t.getBoundingClientRect().top - go.getBoundingClientRect().top) + 'px';
         y.style.textAlign = 'right';
@@ -357,21 +358,21 @@
       if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = 'var(--pan-fs-sm)'; y.style.lineHeight = 'var(--pan-lh-sm)'; y.style.color = 'var(--c-text)'; }
     });
     [2, 7, 6].forEach(function (g) {
-      var y = box.querySelector('#yinGan' + g), x = box.querySelector('#xing' + g), go = box.querySelector('#gong' + g);
+      let y = box.querySelector('#yinGan' + g), x = box.querySelector('#xing' + g), go = box.querySelector('#gong' + g);
       if (y && x && go) {
         y.style.paddingTop = Math.max(0, x.getBoundingClientRect().top - go.getBoundingClientRect().top) + 'px';
         y.style.textAlign = 'left';
       }
       if (y) { y.style.verticalAlign = 'top'; y.style.fontSize = 'var(--pan-fs-sm)'; y.style.lineHeight = 'var(--pan-lh-sm)'; y.style.color = 'var(--c-text)'; }
     });
-    var y9 = box.querySelector('#yinGan9'), y1 = box.querySelector('#yinGan1');
+    let y9 = box.querySelector('#yinGan9'), y1 = box.querySelector('#yinGan1');
     if (y9) { y9.style.verticalAlign = 'bottom'; y9.style.fontSize = 'var(--pan-fs-sm)'; y9.style.color = 'var(--c-text)'; }
     if (y1) { y1.style.verticalAlign = 'top'; y1.style.fontSize = 'var(--pan-fs-sm)'; y1.style.color = 'var(--c-text)'; }
   };
 
   /** 移星换斗(占位: 按钮结构已就位, 功能待补) */
   window.showMingliYixing = function () {
-    var d = document.getElementById('yixinghuandouDIV');
+    let d = document.getElementById('yixinghuandouDIV');
     if (!d) return;
     if (d.getAttribute('data-mode') === 'bazi') {   // 八字盘占着容器时先让位
       d.innerHTML = ''; d.removeAttribute('data-mode'); d.style.display = 'none';
