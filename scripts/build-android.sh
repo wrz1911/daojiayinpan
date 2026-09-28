@@ -304,15 +304,14 @@ else
   pkgVer="$(grep -m1 '"version"' package.json | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
 fi
 IFS='.' read -r vMaj vMin vPat <<< "$pkgVer"
-# 与 CI 完全一致: versionName 取两段(1.4.0 → "1.4"), versionCode = major*10000+minor*100+patch
+# versionName 用完整三段(2026-09-28 用户要求: 安装时显示 1.4.5 而非截断的 "1.4"); CI 已同步改口
 verCode=$(( vMaj * 10000 + vMin * 100 + vPat ))
-verShort="$vMaj.$vMin"
 if [ -f "$appGradle" ]; then
   sed -i -E \
     -e "s/versionCode [0-9]+/versionCode $verCode/" \
-    -e "s/versionName \"[^\"]*\"/versionName \"$verShort\"/" \
+    -e "s/versionName \"[^\"]*\"/versionName \"$pkgVer\"/" \
     "$appGradle"
-  Ok "版本号 → $verShort / $verCode (与 CI 的 android job 一致)"
+  Ok "版本号 → $pkgVer / $verCode"
 fi
 
 # 签名材料优先放仓库根, 因为 android/ 是生成目录 —— cap add android 会把它整个重建。
