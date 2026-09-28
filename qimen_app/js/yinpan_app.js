@@ -13811,7 +13811,6 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
   function renderPalace(g) {
     let p = palaces['gong'+g];
     if (!p) return '<TD></TD>';
-    let w = (g === 9 || g === 1) ? '34%' : '33%';
     let shenAbbr = (window.SHEN_ABBR||{})[p.shen] || p.shen || '';
     let xingAbbr = (window.XING_ABBR||{})[p.xing] || p.xing || '';
     let menAbbr = (window.MEN_ABBR||{})[p.men] || p.men || '';
@@ -13827,7 +13826,7 @@ function buildPaipanGrid(palaces, kongGongs, maPosId, agColorFn, opts) {
     // 这样"没反应"是刻意设计而非漏绑。长按另由 _bindGridLongPress 的委托处理,
     // 且长按成立后那次 click 会被它在捕获阶段拦掉, 两套机制互不干扰。
     let noInlineClick = opts.noClick;
-    return '<TD style="width:'+w+';'+hlt+'" id="gong'+g+'"'+(noInlineClick?'':' onclick="onGongShortPress('+g+')"')+'>' +
+    return '<TD style="'+hlt+'" id="gong'+g+'"'+(noInlineClick?'':' onclick="onGongShortPress('+g+')"')+'>' +
       '<div class="pan-cell" style="display:grid;grid-template-rows:1fr 1fr 1fr;position:relative">' +
       '<div class="panItem top mid-row" style="align-self:start"><span id="shen'+g+'">'+colorSpan(shenAbbr)+'</span>'+(opts.diShen?'<span class="w4shen" id="w4'+g+'"></span>':'')+'<span id="kong'+KONG_ID[g]+'">'+kongMark+'</span></div>' +
       '<div class="panItem mid-row" style="align-self:center"><span id="tian'+g+'">'+charColor(p.tian)+'</span>'+(opts.diShen?'<span class="rshen" id="rshen'+g+'"></span>':'')+'<span id="xing'+g+'">'+colorSpan(xingAbbr)+'</span></div>' +
