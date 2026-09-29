@@ -278,6 +278,8 @@ jobs:
           public class MainActivity extends BridgeActivity {
               @Override
               public void onCreate(Bundle savedInstanceState) {
+                  // registerPlugin 必须在 super.onCreate 之前(Bridge 在 super 内 create)
+                  registerPlugin(NativeSharePlugin.class);
                   super.onCreate(savedInstanceState);
                   getBridge().getWebView().getSettings().setTextZoom(100);
                   WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
@@ -302,6 +304,56 @@ jobs:
               }
           }
           MAEOF
+          # NativeSharePlugin: 原生分享桥(替代静默失效的 navigator.share)
+          cat > android/app/src/main/java/com/qimen/yinpan/NativeSharePlugin.java << 'NSPEOF'
+          package com.qimen.yinpan;
+
+          import android.content.Intent;
+          import android.net.Uri;
+          import androidx.core.content.FileProvider;
+          import com.getcapacitor.Plugin;
+          import com.getcapacitor.PluginCall;
+          import com.getcapacitor.PluginMethod;
+          import com.getcapacitor.JSObject;
+          import com.getcapacitor.annotation.CapacitorPlugin;
+          import java.io.File;
+          import java.io.FileOutputStream;
+          import java.nio.charset.StandardCharsets;
+
+          @CapacitorPlugin(name = "NativeShare")
+          public class NativeSharePlugin extends Plugin {
+              @PluginMethod
+              public void shareFile(PluginCall call) {
+                  String data = call.getString("data", "");
+                  String name = call.getString("name", "qimen_backup.json");
+                  try {
+                      File dir = new File(getContext().getCacheDir(), "share");
+                      if (!dir.exists()) dir.mkdirs();
+                      File f = new File(dir, name);
+                      try (FileOutputStream fos = new FileOutputStream(f)) {
+                          fos.write(data.getBytes(StandardCharsets.UTF_8));
+                      }
+                      Uri uri = FileProvider.getUriForFile(getContext(),
+                              getContext().getPackageName() + ".fileprovider", f);
+                      Intent i = new Intent(Intent.ACTION_SEND);
+                      i.setType("application/json");
+                      i.putExtra(Intent.EXTRA_STREAM, uri);
+                      i.putExtra(Intent.EXTRA_TITLE, "奇门排盘备份");
+                      i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                      getContext().startActivity(Intent.createChooser(i, "保存排盘数据"));
+                      JSObject ret = new JSObject(); ret.put("ok", true);
+                      call.resolve(ret);
+                  } catch (Exception e) {
+                      call.reject("share failed: " + e.getMessage(), e);
+                  }
+              }
+          }
+          NSPEOF
+
+          # FileProvider(content:// URI 分享必需)
+          sed -i 's|</application>|  <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true"><meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"/></provider>\n    </application>|' android/app/src/main/AndroidManifest.xml
+          mkdir -p android/app/src/main/res/xml
+          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<paths>' '    <cache-path name="share" path="share/" />' '</paths>' > android/app/src/main/res/xml/file_paths.xml
           # 开启R8混淆+资源压缩
           sed -i 's/minifyEnabled false/minifyEnabled true/' android/app/build.gradle
           sed -i '/minifyEnabled true/a\            shrinkResources true' android/app/build.gradle
@@ -309,6 +361,7 @@ jobs:
           # 添加ProGuard规则保留Capacitor
           cat >> android/app/proguard-rules.pro << 'PGEOF'
           -keep class com.getcapacitor.** { *; }
+          -keep class com.qimen.yinpan.NativeSharePlugin { *; }
           -keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }
           PGEOF
           # 开启硬件加速

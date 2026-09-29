@@ -224,7 +224,8 @@ fi
 # 5e) ProGuard: 保留 Capacitor 与 JS 桥接方法
 pg='android/app/proguard-rules.pro'
 if [ -f "$pg" ] && ! grep -q 'com\.getcapacitor' "$pg"; then
-  printf '\n-keep class com.getcapacitor.** { *; }\n-keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }\n' >> "$pg"
+  printf '\n-keep class com.getcapacitor.** { *; }
+          -keep class com.qimen.yinpan.NativeSharePlugin { *; }\n-keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }\n' >> "$pg"
   Ok 'proguard-rules.pro → 保留 Capacitor / JavascriptInterface'
 fi
 
@@ -232,6 +233,16 @@ fi
 if [ -f "$manifest" ]; then
   grep -q 'hardwareAccelerated' "$manifest" || \
     sed -i 's|<application|<application android:hardwareAccelerated="true"|' "$manifest"
+  # FileProvider: NativeShare 分享文件需 content:// URI
+  manifest='android/app/src/main/AndroidManifest.xml'
+  if [ -f "$manifest" ] && ! grep -q 'fileprovider' "$manifest"; then
+    sed -i 's|</application>|  <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true"><meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"/></provider>\n    </application>|' "$manifest"
+    mkdir -p android/app/src/main/res/xml
+    printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<paths>' '    <cache-path name="share" path="share/" />' '</paths>' > android/app/src/main/res/xml/file_paths.xml
+    Ok 'Manifest -> FileProvider + res/xml/file_paths.xml'
+  else
+    Ok 'FileProvider 已配置'
+  fi
   grep -q 'xmlns:tools' "$manifest" || \
     sed -i 's|<manifest |<manifest xmlns:tools="http://schemas.android.com/tools" |' "$manifest"
   if ! grep -q 'permission\.SMS' "$manifest"; then
@@ -263,7 +274,8 @@ fi
 #     中文注释可能乱码甚至吃掉整行代码(踩过); 详细说明留在本脚本里。
 mainAct='android/app/src/main/java/com/qimen/yinpan/MainActivity.java'
 if [ -f "$mainAct" ]; then
-  if ! grep -q 'ViewCompat.setOnApplyWindowInsetsListener' "$mainAct"; then
+  nsp='android/app/src/main/java/com/qimen/yinpan/NativeSharePlugin.java'
+  if [ ! -f "$nsp" ] || ! grep -q 'registerPlugin(NativeSharePlugin' "$mainAct"; then
     # 用 printf 逐行写入而非 here-doc 嵌入: 与 ps1 版一样刻意避免"注释吃掉代码行"
     printf '%s\n' \
       'package com.qimen.yinpan;' \
@@ -282,6 +294,8 @@ if [ -f "$mainAct" ]; then
       'public class MainActivity extends BridgeActivity {' \
       '    @Override' \
       '    public void onCreate(Bundle savedInstanceState) {' \
+      '        // registerPlugin 必须在 super.onCreate 之前(Bridge 在 super 内 create, 之后再加无效)' \
+      '        registerPlugin(NativeSharePlugin.class);' \
       '        super.onCreate(savedInstanceState);' \
       '        // Pin WebView text zoom to 100%: 布局按像素调校, 不随系统字体缩放' \
       '        getBridge().getWebView().getSettings().setTextZoom(100);' \
@@ -312,14 +326,61 @@ if [ -f "$mainAct" ]; then
       '        c.setAppearanceLightNavigationBars(lightUi);' \
       '    }' \
       '}' > "$mainAct"
+
+  # NativeSharePlugin: 原生分享桥(2026-09-29, 替代 WebView 里静默失效的 navigator.share
+  # 与已移除的 Capacitor Share 插件) —— 写缓存 + FileProvider + ACTION_SEND 系统面板
+  printf '%s\n' \
+      'package com.qimen.yinpan;' \
+      '' \
+      'import android.content.Intent;' \
+      'import android.net.Uri;' \
+      'import androidx.core.content.FileProvider;' \
+      'import com.getcapacitor.Plugin;' \
+      'import com.getcapacitor.PluginCall;' \
+      'import com.getcapacitor.PluginMethod;' \
+      'import com.getcapacitor.JSObject;' \
+      'import com.getcapacitor.annotation.CapacitorPlugin;' \
+      'import java.io.File;' \
+      'import java.io.FileOutputStream;' \
+      'import java.nio.charset.StandardCharsets;' \
+      '' \
+      '@CapacitorPlugin(name = "NativeShare")' \
+      'public class NativeSharePlugin extends Plugin {' \
+      '    @PluginMethod' \
+      '    public void shareFile(PluginCall call) {' \
+      '        String data = call.getString("data", "");' \
+      '        String name = call.getString("name", "qimen_backup.json");' \
+      '        try {' \
+      '            File dir = new File(getContext().getCacheDir(), "share");' \
+      '            if (!dir.exists()) dir.mkdirs();' \
+      '            File f = new File(dir, name);' \
+      '            try (FileOutputStream fos = new FileOutputStream(f)) {' \
+      '                fos.write(data.getBytes(StandardCharsets.UTF_8));' \
+      '            }' \
+      '            Uri uri = FileProvider.getUriForFile(getContext(),' \
+      '                    getContext().getPackageName() + ".fileprovider", f);' \
+      '            Intent i = new Intent(Intent.ACTION_SEND);' \
+      '            i.setType("application/json");' \
+      '            i.putExtra(Intent.EXTRA_STREAM, uri);' \
+      '            i.putExtra(Intent.EXTRA_TITLE, "奇门排盘备份");' \
+      '            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);' \
+      '            getContext().startActivity(Intent.createChooser(i, "保存排盘数据"));' \
+      '            JSObject ret = new JSObject(); ret.put("ok", true);' \
+      '            call.resolve(ret);' \
+      '        } catch (Exception e) {' \
+      '            call.reject("share failed: " + e.getMessage(), e);' \
+      '        }' \
+      '    }' \
+      '}' > "$nsp"
+  grep -q 'ACTION_SEND' "$nsp" && Ok 'NativeSharePlugin.java -> ACTION_SEND + FileProvider' || Bad 'NativeSharePlugin 写入失败'
     # 回读校验: 上一版"以为写了其实没写", 再上一版写进去却被注释吃掉
-    if grep -q 'ViewCompat.setOnApplyWindowInsetsListener' "$mainAct"; then
+    if grep -q 'registerPlugin(NativeSharePlugin' "$mainAct" && grep -q 'ACTION_SEND' "$nsp"; then
       Ok 'MainActivity.java -> 字体缩放固定 + edge-to-edge insets 适配'
     else
       Info 'MainActivity.java 写入校验失败(字体缩放仍跟随系统)'
     fi
   else
-    Ok 'MainActivity.java 已固定字体缩放'
+    Ok 'MainActivity + NativeSharePlugin 均已是最新'
   fi
 else
   Info '未找到 MainActivity.java(跳过字体缩放补丁)'

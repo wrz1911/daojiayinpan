@@ -15698,6 +15698,14 @@ function _downloadBlob(data) {
 }
 
 async function _androidShare(data) {
+  // 原生桥接优先(2026-09-29: WebView 的 navigator.share 实测静默无反应,
+  // NativeSharePlugin 走 ACTION_SEND 系统面板 —— 与原 Capacitor Share 插件同体验)
+  let NS = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeShare;
+  if (NS) {
+    let fn = 'qimen_' + new Date().toISOString().slice(0,10) + '.json';
+    await NS.shareFile({data: data, name: fn});
+    return;
+  }
   let fn = 'qimen_' + new Date().toISOString().slice(0,10) + '.json';
   let file = new File([data], fn, {type:'application/json'});
   if (navigator.canShare && navigator.canShare({files: [file]})) {
