@@ -1,6 +1,6 @@
 {
   "name": "qimen-yinpan",
-  "version": "--help",
+  "version": "1.4.7",
   "license": "MIT",
   "scripts": {
     "start": "DISPLAY=${DISPLAY:-localhost:0} ./src-tauri/target/release/app",
