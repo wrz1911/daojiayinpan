@@ -255,8 +255,8 @@ jobs:
           sed -i 's/targetSdkVersion = 35/targetSdkVersion = 37/' android/variables.gradle
           sed -i 's/compileSdkVersion = 35/compileSdkVersion = 37/' android/variables.gradle
           # AGP 9.4.1(模板默认 8.13, 需 Gradle 9.8 配套)
-          sed -i "s|gradle:8.13.0|gradle:9.4.1|" android/build.gradle
-          sed -i 's|gradle-8.14-all.zip|gradle-9.8.0-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
+          sed -E -i 's|gradle:[0-9.]+"|gradle:9.4.1"|' android/build.gradle
+          sed -E -i 's|gradle-[0-9.]+-all\.zip|gradle-9.8.0-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
           # Gradle 9 移除了 Project.buildDir
           sed -i 's|delete rootProject.buildDir|delete rootProject.layout.buildDirectory|' android/build.gradle
           # MainActivity: 字体缩放固定 + edge-to-edge insets 适配(targetSdk 37)

@@ -193,9 +193,9 @@ fi
 #      模板默认 AGP 8.13 不支持 Gradle 9.8 的服务 API, 必须同步提)
 bg='android/build.gradle'
 wp='android/gradle/wrapper/gradle-wrapper.properties'
-[ -f "$bg" ] && sed -i 's|gradle:8.13.0|gradle:9.4.1|' "$bg"
+[ -f "$bg" ] && sed -E -i 's|gradle:[0-9.]+"|gradle:9.4.1"|' "$bg"
 [ -f "$bg" ] && sed -i 's|delete rootProject.buildDir|delete rootProject.layout.buildDirectory|' "$bg"
-[ -f "$wp" ] && sed -i 's|gradle-8.14-all.zip|gradle-9.8.0-all.zip|' "$wp"
+[ -f "$wp" ] && sed -E -i 's|gradle-[0-9.]+-all\.zip|gradle-9.8.0-all.zip|' "$wp"
 Ok 'AGP 9.4.1 / Gradle 9.8.0 / JDK: ${JAVA_HOME##*/}'
 
 # 5b/5c) 状态栏: targetSdk 37(Android 15+)强制 edge-to-edge, 主题里的
