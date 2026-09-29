@@ -66,7 +66,7 @@
 - **AGP 8.13 + Gradle 9.8 不兼容**(ProblemReporter 服务 API 移除), Gradle 8.14.3+AGP 8.13.2+JDK 27 组合也没走通 —— 升级时 Gradle 与 AGP 必须同代
 - **CI(release.yml android job)与 build-android.sh 已同步全部补丁**: JDK 27(setup-java)/compileSdk+targetSdk 37/AGP classpath 9.4.1(模板默认 8.13.0)/wrapper 9.8.0(模板默认 8.14)/`rootProject.buildDir`→`layout.buildDirectory`(Gradle 9 移除)。本地 android/ 重建后由脚本补丁自动恢复
 - **JDK 探测**: build-android.sh 优先 /usr/lib/jvm/java-27-openjdk; 系统 java-21-openjdk 仍是 default(archlinux-java), 仅构建时 export JAVA_HOME
-- **targetSdk 37 后 edge-to-edge 强制**: 状态栏样式项(statusBarColor 等)在 Android 15+ 被忽略, 内容延伸到系统栏后 —— **装机后须实测状态栏表现**, 必要时在 styles 补 windowOptOutEdgeToEdgeEnforcement 或适配 insets
+- **edge-to-edge 适配已实施(2026-09-28, targetSdk 37)**: 主题项(statusBarColor/windowLightStatusBar/values-night 段)在 Android 15+ 全部失效已清理 —— 适配全在 **MainActivity 代码**: `WindowCompat.setDecorFitsSystemWindows(false)` + 透明系统栏 + `ViewCompat.setOnApplyWindowInsetsListener` 把 systemBars insets 作为 padding 还给根布局(背景延伸、内容不被遮挡) + `WindowInsetsControllerCompat` 图标明暗随昼夜模式。⚠️ **两个实现坑**: ① `view.setOnApplyWindowInsetsListener(lambda)` 绑的是**平台接口**(返回 android.graphics.Insets), 与 androidx 的 Insets 类型冲突 —— 必须用 `ViewCompat.setOnApplyWindowInsetsListener`; ② build-android.sh 的 MainActivity 重写条件要检测**最新代码特征**(现为 ViewCompat.setOnApply...), 旧特征会让重写被跳过(踩过两次)。CI 的 MainActivity 步骤是本批新增(CI 原先竟无字体缩放项)
 - **Android 导出备份已退化**(插件移除), 排盘记录仍存 localStorage; 桌面 Tauri 导出不受影响
 
 ## 新代码语法规约(2026-09-28 定, JS target 已升 es2020)

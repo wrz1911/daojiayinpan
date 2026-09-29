@@ -198,33 +198,19 @@ wp='android/gradle/wrapper/gradle-wrapper.properties'
 [ -f "$wp" ] && sed -i 's|gradle-8.14-all.zip|gradle-9.8.0-all.zip|' "$wp"
 Ok 'AGP 9.4.1 / Gradle 9.8.0 / JDK: ${JAVA_HOME##*/}'
 
-# 5b) 状态栏做成不透明实色(与页面顶部装饰条同色)
+# 5b/5c) 状态栏: targetSdk 37(Android 15+)强制 edge-to-edge, 主题里的
+#       statusBarColor/windowLightStatusBar 等一律被忽略 —— 旧注入段已删除,
+#       适配全部移入 MainActivity 代码(insets padding + 图标明暗, 见 5a+ 前的
+#       MainActivity 重写)。此处仅清掉历史注入残留(如有)
 styles="$resDir/values/styles.xml"
-if [ -f "$styles" ] && ! grep -q 'statusBarColor' "$styles"; then
-  sed -i 's|\([[:space:]]*\)<item name="android:background">@null</item>|\1<item name="android:background">@null</item>\n\1<item name="android:statusBarColor">#ffffff</item>\n\1<item name="android:windowLightStatusBar">true</item>\n\1<item name="android:windowTranslucentStatus">false</item>\n\1<item name="android:windowDrawsSystemBarBackgrounds">true</item>|' "$styles"
-  Ok 'values/styles.xml → 不透明状态栏 + 深色图标'
+if [ -f "$styles" ] && grep -q 'statusBarColor' "$styles"; then
+  sed -i '/statusBarColor\|windowLightStatusBar\|windowTranslucentStatus\|windowDrawsSystemBarBackgrounds/d' "$styles"
+  Ok 'values/styles.xml → 已清理旧状态栏注入(edge-to-edge 由代码适配)'
 else
-  Ok 'values/styles.xml 已配置'
+  Ok 'values/styles.xml 无需清理'
 fi
+rm -rf "$resDir/values-night"
 
-# 5c) 暗色模式: 同名 style 会整体替换 values/ 里的定义, 故必须写全各项
-nightDir="$resDir/values-night"
-mkdir -p "$nightDir"
-cat > "$nightDir/styles.xml" << 'XMLEOF'
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:background">@null</item>
-        <item name="android:statusBarColor">#1b1b1b</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowTranslucentStatus">false</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-    </style>
-</resources>
-XMLEOF
-Ok 'values-night/styles.xml → 暗色状态栏'
 
 # 5d) R8 混淆 + 资源压缩
 if [ -f "$appGradle" ]; then
@@ -277,26 +263,58 @@ fi
 #     中文注释可能乱码甚至吃掉整行代码(踩过); 详细说明留在本脚本里。
 mainAct='android/app/src/main/java/com/qimen/yinpan/MainActivity.java'
 if [ -f "$mainAct" ]; then
-  if ! grep -q 'setTextZoom' "$mainAct"; then
+  if ! grep -q 'ViewCompat.setOnApplyWindowInsetsListener' "$mainAct"; then
     # 用 printf 逐行写入而非 here-doc 嵌入: 与 ps1 版一样刻意避免"注释吃掉代码行"
     printf '%s\n' \
       'package com.qimen.yinpan;' \
       '' \
+      'import android.content.res.Configuration;' \
+      'import android.graphics.Color;' \
       'import android.os.Bundle;' \
+      'import android.view.View;' \
+      'import androidx.core.graphics.Insets;' \
+      'import androidx.core.view.ViewCompat;
+          import androidx.core.view.WindowCompat;' \
+      'import androidx.core.view.WindowInsetsCompat;' \
+      'import androidx.core.view.WindowInsetsControllerCompat;' \
       'import com.getcapacitor.BridgeActivity;' \
       '' \
       'public class MainActivity extends BridgeActivity {' \
       '    @Override' \
       '    public void onCreate(Bundle savedInstanceState) {' \
       '        super.onCreate(savedInstanceState);' \
-      '        // Pin WebView text zoom to 100%: the pan layout is pixel-tuned and must not' \
-      '        // follow the system font scale (font_scale=1.25 inflates the info table by 1/4).' \
+      '        // Pin WebView text zoom to 100%: 布局按像素调校, 不随系统字体缩放' \
       '        getBridge().getWebView().getSettings().setTextZoom(100);' \
+      '' \
+      '        // Edge-to-edge 适配(targetSdk 37 / Android 15+ 强制):' \
+      '        // 内容默认延伸到系统栏后面 —— 用 insets 把系统栏高度作为 padding' \
+      '        // 还给根布局: 背景延伸(观感统一), 内容不被状态栏/手势条遮挡。' \
+      '        // 替代已失效的主题项(statusBarColor/windowLightStatusBar 被忽略)。' \
+      '        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);' \
+      '        getWindow().setStatusBarColor(Color.TRANSPARENT);' \
+      '        getWindow().setNavigationBarColor(Color.TRANSPARENT);' \
+      '        View root = findViewById(android.R.id.content);' \
+      '        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {' \
+      '            Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());' \
+      '            v.setPadding(sys.left, sys.top, sys.right, sys.bottom);' \
+      '            return WindowInsetsCompat.CONSUMED;' \
+      '        });' \
+      '        applySystemBarAppearance();' \
+      '    }' \
+      '' \
+      '    // 状态栏/导航栏图标明暗跟随系统昼夜模式(浅色 UI 用深色图标)' \
+      '    private void applySystemBarAppearance() {' \
+      '        View root = findViewById(android.R.id.content);' \
+      '        WindowInsetsControllerCompat c = WindowCompat.getInsetsController(getWindow(), root);' \
+      '        boolean lightUi = (getResources().getConfiguration().uiMode' \
+      '                & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES;' \
+      '        c.setAppearanceLightStatusBars(lightUi);' \
+      '        c.setAppearanceLightNavigationBars(lightUi);' \
       '    }' \
       '}' > "$mainAct"
     # 回读校验: 上一版"以为写了其实没写", 再上一版写进去却被注释吃掉
-    if grep -q 'setTextZoom(100)' "$mainAct"; then
-      Ok 'MainActivity.java -> WebView 字体缩放固定 100%'
+    if grep -q 'ViewCompat.setOnApplyWindowInsetsListener' "$mainAct"; then
+      Ok 'MainActivity.java -> 字体缩放固定 + edge-to-edge insets 适配'
     else
       Info 'MainActivity.java 写入校验失败(字体缩放仍跟随系统)'
     fi

@@ -259,10 +259,49 @@ jobs:
           sed -i 's|gradle-8.14-all.zip|gradle-9.8.0-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
           # Gradle 9 移除了 Project.buildDir
           sed -i 's|delete rootProject.buildDir|delete rootProject.layout.buildDirectory|' android/build.gradle
-          sed -i 's|<item name="android:background">@null</item>|<item name="android:background">@null</item>\n        <item name="android:statusBarColor">#ffffff</item>\n        <item name="android:windowLightStatusBar">true</item>\n        <item name="android:windowTranslucentStatus">false</item>\n        <item name="android:windowDrawsSystemBarBackgrounds">true</item>|' android/app/src/main/res/values/styles.xml
-          # 暗色模式: 同名 style 会整体替换 values/ 里的定义, 故需写全各项
-          mkdir -p android/app/src/main/res/values-night
-          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<resources>' '    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">' '        <item name="windowActionBar">false</item>' '        <item name="windowNoTitle">true</item>' '        <item name="android:background">@null</item>' '        <item name="android:statusBarColor">#1b1b1b</item>' '        <item name="android:windowLightStatusBar">false</item>' '        <item name="android:windowTranslucentStatus">false</item>' '        <item name="android:windowDrawsSystemBarBackgrounds">true</item>' '    </style>' '</resources>' > android/app/src/main/res/values-night/styles.xml
+          # MainActivity: 字体缩放固定 + edge-to-edge insets 适配(targetSdk 37)
+          # (主题项 statusBarColor 等在 Android 15+ 被忽略, 适配全走代码)
+          cat > android/app/src/main/java/com/qimen/yinpan/MainActivity.java << 'MAEOF'
+          package com.qimen.yinpan;
+
+          import android.content.res.Configuration;
+          import android.graphics.Color;
+          import android.os.Bundle;
+          import android.view.View;
+          import androidx.core.graphics.Insets;
+          import androidx.core.view.ViewCompat;
+          import androidx.core.view.WindowCompat;
+          import androidx.core.view.WindowInsetsCompat;
+          import androidx.core.view.WindowInsetsControllerCompat;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  getBridge().getWebView().getSettings().setTextZoom(100);
+                  WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+                  getWindow().setStatusBarColor(Color.TRANSPARENT);
+                  getWindow().setNavigationBarColor(Color.TRANSPARENT);
+                  View root = findViewById(android.R.id.content);
+                  ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                      Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                      v.setPadding(sys.left, sys.top, sys.right, sys.bottom);
+                      return WindowInsetsCompat.CONSUMED;
+                  });
+                  applySystemBarAppearance();
+              }
+
+              private void applySystemBarAppearance() {
+                  View root = findViewById(android.R.id.content);
+                  WindowInsetsControllerCompat c = WindowCompat.getInsetsController(getWindow(), root);
+                  boolean lightUi = (getResources().getConfiguration().uiMode
+                          & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES;
+                  c.setAppearanceLightStatusBars(lightUi);
+                  c.setAppearanceLightNavigationBars(lightUi);
+              }
+          }
+          MAEOF
           # 开启R8混淆+资源压缩
           sed -i 's/minifyEnabled false/minifyEnabled true/' android/app/build.gradle
           sed -i '/minifyEnabled true/a\            shrinkResources true' android/app/build.gradle
