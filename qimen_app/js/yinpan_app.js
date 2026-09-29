@@ -15682,9 +15682,11 @@ async function _exportJSON() {
 }
 
 function _downloadBlob(data) {
-  // Android Capacitor: 走分享通道
-  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-    _shareTextFile(data).catch(e => { alert('分享失败: '+e.message); });
+  // Android: Web Share API 三层降级(2026-09-28, 替代已移除的 Capacitor Share 插件,
+  // 插件底层本就是同一个系统分享面板 —— 原生 share{files} 需 WebView/Chrome 90+,
+  // minSdk 31 的设备全覆盖; 不支持则分享文本, 再退剪贴板)
+  if (/Android/.test(navigator.userAgent)) {
+    _androidShare(data).catch(e => { _logErr('share', e && e.message); alert('分享失败: ' + (e && e.message || e)); });
     return;
   }
   // PC/浏览器: Blob下载
@@ -15695,22 +15697,21 @@ function _downloadBlob(data) {
   URL.revokeObjectURL(a.href);
 }
 
-// Android: 写文件到缓存目录 → 用Share插件调起系统分享/保存
-async function _shareTextFile(data) {
-  let ts = new Date().toISOString().slice(0,10);
-  let fn = 'qimen_'+ts+'.json';
-  let FS = window.Capacitor.Plugins.Filesystem;
-  let Share = window.Capacitor.Plugins.Share;
-  // 先写缓存目录
-  try { await FS.mkdir({path: '.', directory: 'CACHE', recursive: true}); } catch(e){ _logErr('cacheDir', e && e.message); }
-  let wr = await FS.writeFile({path: fn, data: data, directory: 'CACHE'});
-  // 用Share插件分享文件URI, 用户可选择保存到文件管理器
-  if (wr && wr.uri) {
-    await Share.share({title: '奇门排盘备份', files: [wr.uri], dialogTitle: '保存排盘数据'});
-  } else {
-    await Share.share({title: '奇门排盘备份', text: data, dialogTitle: '保存排盘数据'});
+async function _androidShare(data) {
+  let fn = 'qimen_' + new Date().toISOString().slice(0,10) + '.json';
+  let file = new File([data], fn, {type:'application/json'});
+  if (navigator.canShare && navigator.canShare({files: [file]})) {
+    await navigator.share({files: [file], title: '奇门排盘备份', dialogTitle: '保存排盘数据'});
+    return;
   }
+  if (navigator.share) {
+    await navigator.share({text: data, title: '奇门排盘备份'});
+    return;
+  }
+  await navigator.clipboard.writeText(data);
+  alert('已复制备份数据\n请粘贴到备忘录或文件中保存');
 }
+
 
 async function _doExport() {
   let data = localStorage.getItem(STORAGE_KEY)||'[]';
@@ -15724,15 +15725,6 @@ async function _doExport() {
       const fp = await save({defaultPath: fn, filters: [{name:'JSON',extensions:['json']}]});
       if (fp) { await writeTextFile(fp, data); alert('已保存'); }
     } catch(e) { alert('导出失败: '+e.message); }
-    return;
-  }
-  // Android Capacitor: 分享方式导出 (用户可选文件管理器保存)
-  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-    try {
-      await _shareTextFile(data);
-    } catch(e) {
-      alert('导出失败: '+e.message);
-    }
     return;
   }
   // 浏览器回退: Blob下载
