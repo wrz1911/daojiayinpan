@@ -59,6 +59,16 @@
 
 - **CSP 收紧 + 内联 script 防回归(2026-09-24)**: `tauri.conf.json` 的 script-src 去掉 `'unsafe-inline'` —— 它在 Tauri 2 下**本来就被运行时注入的 nonce 无效化**(见上文 rebind 条目), 留着只会误导后人以为内联可用; style-src 的 'unsafe-inline' **保留**(内联 style 属性是真实需求, 遍地都是)。实测收紧后桌面版排盘/四按钮/rebind 全正常(rebind 走 IDL 赋值, 不受 script-src 影响)。**build.sh 的 cmd_bundle 开头加了防回归检查**: 剥离 HTML 注释后若仍有裸 `<script>` 直接 Die(注释里提及 "<script>" 字样不误报; bash if 对退出码的语义坑 —— `if cmd; then` 是**退出码 0** 才进 then, python "发现即 exit 1" 的写法要配 `if ! cmd`)
 
+## Android 工具链全面升级(2026-09-28)
+
+- **版本矩阵**: Gradle **9.8.0** + AGP **9.4.1** + JDK **27**(系统 jdk-openjdk 27.u35, `JAVA_HOME=/usr/lib/jvm/java-27-openjdk`) + compileSdk/**targetSdk 37**(Android 17) + Capacitor **8.5.2** + build-tools 37(AGP 9 自动装 36 亦可)。minSdk 保持 31
+- **⚠️ AGP 9 与 Capacitor 插件生态断裂(取舍实录)**: AGP 9 内置 Kotlin, 与 `@capacitor/filesystem/share` 的 `kotlin-android` 旧插件冲突(extension 已注册 + KGP 2.2 的 BaseExtension 被移除); filesystem 8.1.3 只修了 compileSdk 未修 kotlin。**用户拍板"无论如何用 Gradle 9.8, 插件先不管"** → **已从 dependencies 移除两个插件**, JS 侧守卫(`window.Capacitor.Plugins.Filesystem` 判空)保护不炸, **Android 导出备份功能暂缺, 待另实现**(候选: Web Share API `navigator.share`)。@capacitor/android 8.5.2 本体纯 Java 无冲突
+- **AGP 8.13 + Gradle 9.8 不兼容**(ProblemReporter 服务 API 移除), Gradle 8.14.3+AGP 8.13.2+JDK 27 组合也没走通 —— 升级时 Gradle 与 AGP 必须同代
+- **CI(release.yml android job)与 build-android.sh 已同步全部补丁**: JDK 27(setup-java)/compileSdk+targetSdk 37/AGP classpath 9.4.1(模板默认 8.13.0)/wrapper 9.8.0(模板默认 8.14)/`rootProject.buildDir`→`layout.buildDirectory`(Gradle 9 移除)。本地 android/ 重建后由脚本补丁自动恢复
+- **JDK 探测**: build-android.sh 优先 /usr/lib/jvm/java-27-openjdk; 系统 java-21-openjdk 仍是 default(archlinux-java), 仅构建时 export JAVA_HOME
+- **targetSdk 37 后 edge-to-edge 强制**: 状态栏样式项(statusBarColor 等)在 Android 15+ 被忽略, 内容延伸到系统栏后 —— **装机后须实测状态栏表现**, 必要时在 styles 补 windowOptOutEdgeToEdgeEnforcement 或适配 insets
+- **Android 导出备份已退化**(插件移除), 排盘记录仍存 localStorage; 桌面 Tauri 导出不受影响
+
 ## 新代码语法规约(2026-09-28 定, JS target 已升 es2020)
 
 - **JS**: esbuild target es2020(`?.` `??` 不再转译)。**新代码直接用现代写法**: 可选链 `?.`、空值合并 `??`、模板字符串 `` `${}` ``; 存量 16k 行的 `+` 拼接与 `||` 判断**不强制回改**(碰哪儿改哪儿; `\|\|`→`??` 必须逐处确认 0/''/false 语义)。var→let 已清零(mingli/bazi 211 处, 2026-09-28)——⚠️ **教训: var→let 机械替换的最大陷阱是"try 块内 var + try 外使用"的提升依赖**(mingli bzInfo 实例: 强转 let 成 TDZ bug, 且被外层 catch 吞成静默回归, 27 快照都测不出, 靠 eslint no-undef error 级守门抓住)。同类替换必须: eslint 0 errors + snapshot 回归 + 目标代码路径专项验证

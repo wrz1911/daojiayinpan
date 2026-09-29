@@ -54,9 +54,9 @@ PY="$(command -v python3 || command -v python || true)"
 
 # ---------- 0. 环境 ----------
 Step '环境检查'
-# JAVA_HOME: 环境变量优先, 否则探测常见 JDK 安装位置(Arch: /usr/lib/jvm/java-21-openjdk)
+# JAVA_HOME: 环境变量优先, 否则探测常见 JDK 安装位置(2026-09-28 升 JDK 27)
 if [ -z "${JAVA_HOME:-}" ] || [ ! -x "${JAVA_HOME:-}/bin/javac" ]; then
-  for c in /usr/lib/jvm/java-21-openjdk /usr/lib/jvm/java-17-openjdk \
+  for c in /usr/lib/jvm/java-27-openjdk /usr/lib/jvm/java-21-openjdk /usr/lib/jvm/java-17-openjdk \
            /usr/lib/jvm/default /usr/lib/jvm/default-java; do
     [ -x "$c/bin/javac" ] && { JAVA_HOME="$c"; break; }
   done
@@ -130,7 +130,7 @@ if [ -f "$wrapper" ]; then
   zipname=$(grep -oE 'gradle-[0-9.]+-(all|bin)\.zip' "$wrapper" | head -1)
   ver=$(printf '%s' "$zipname" | sed -E 's/^gradle-([0-9.]+)-(all|bin)\.zip$/\1/')
   kind=$(printf '%s' "$zipname" | sed -E 's/^gradle-([0-9.]+)-(all|bin)\.zip$/\2/')
-  [ -n "$ver" ] || ver='8.11.1'
+  [ -n "$ver" ] || ver='9.8.0'
   [ -n "$kind" ] || kind='all'
   mirror="distributionUrl=https\\://mirrors.cloud.tencent.com/gradle/gradle-$ver-$kind.zip"
   if grep -q '^distributionUrl=' "$wrapper"; then
@@ -174,18 +174,29 @@ resDir='android/app/src/main/res'
 appGradle='android/app/build.gradle'
 manifest='android/app/src/main/AndroidManifest.xml'
 
-# 5a) SDK 版本: CI 把 minSdk 提到 31、targetSdk 压到 34
-#     (targetSdk 35 起 Android 15 强制 edge-to-edge, 主题里的 statusBarColor 会被忽略而变透明)
+# 5a) SDK 版本: minSdk 31、targetSdk 37(2026-09-28 全面升级)
+#     (原 targetSdk 压 34 是规避 Android 15 edge-to-edge; 现已授权升最新,
+#      edge-to-edge 行为交由 Cap 8 模板与主题适配, 装机后须实测状态栏)
 vg='android/variables.gradle'
 if [ -f "$vg" ]; then
   sed -i -E \
     -e 's/minSdkVersion[[:space:]]*=[[:space:]]*[0-9]+/minSdkVersion = 31/' \
-    -e 's/targetSdkVersion[[:space:]]*=[[:space:]]*[0-9]+/targetSdkVersion = 34/' \
+    -e 's/targetSdkVersion[[:space:]]*=[[:space:]]*[0-9]+/targetSdkVersion = 37/' \
+    -e 's/compileSdkVersion[[:space:]]*=[[:space:]]*[0-9]+/compileSdkVersion = 37/' \
     "$vg"
-  Ok 'variables.gradle → minSdk 31 / targetSdk 34'
+  Ok 'variables.gradle → minSdk 31 / targetSdk 37 / compileSdk 37'
 else
   Bad '找不到 variables.gradle'
 fi
+
+# 5a+) AGP 9.4.1 + Gradle 9.8.0(2026-09-28 全面升级, 与 CI android job 同步;
+#      模板默认 AGP 8.13 不支持 Gradle 9.8 的服务 API, 必须同步提)
+bg='android/build.gradle'
+wp='android/gradle/wrapper/gradle-wrapper.properties'
+[ -f "$bg" ] && sed -i 's|gradle:8.13.0|gradle:9.4.1|' "$bg"
+[ -f "$bg" ] && sed -i 's|delete rootProject.buildDir|delete rootProject.layout.buildDirectory|' "$bg"
+[ -f "$wp" ] && sed -i 's|gradle-8.14-all.zip|gradle-9.8.0-all.zip|' "$wp"
+Ok 'AGP 9.4.1 / Gradle 9.8.0 / JDK: ${JAVA_HOME##*/}'
 
 # 5b) 状态栏做成不透明实色(与页面顶部装饰条同色)
 styles="$resDir/values/styles.xml"

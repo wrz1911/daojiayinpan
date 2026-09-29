@@ -212,7 +212,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '27'
 
       - name: Setup Android SDK
         run: |
@@ -248,11 +248,17 @@ jobs:
           npx cap add android
           # 覆盖variables.gradle: 保留Capacitor默认的AndroidX版本号, 仅修改minSdk
           sed -i 's/minSdkVersion = 23/minSdkVersion = 31/' android/variables.gradle
-          # 状态栏: 做成不透明的实色, 且与页面顶部装饰条同色。
-          # targetSdk 35 起 Android 15+ 强制 edge-to-edge, 主题里的 statusBarColor
-          # 会被忽略、状态栏变透明, 页面内容从状态栏底下穿过; 降一档到 34 即可
-          # 回到由主题控制的状态栏。
-          sed -i 's/targetSdkVersion = 35/targetSdkVersion = 34/' android/variables.gradle
+          # 2026-09-28 全面升级(用户授权不兼容旧版安卓):
+          # compileSdk/targetSdk 37 + AGP 9.4.1 + Gradle 9.8 + JDK 27。
+          # (原 targetSdk 压 34 是规避 Android 15 edge-to-edge; 升 37 后状态栏
+          #  走 edge-to-edge 行为, 装机后须实测, 必要时在 styles 补适配)
+          sed -i 's/targetSdkVersion = 35/targetSdkVersion = 37/' android/variables.gradle
+          sed -i 's/compileSdkVersion = 35/compileSdkVersion = 37/' android/variables.gradle
+          # AGP 9.4.1(模板默认 8.13, 需 Gradle 9.8 配套)
+          sed -i "s|gradle:8.13.0|gradle:9.4.1|" android/build.gradle
+          sed -i 's|gradle-8.14-all.zip|gradle-9.8.0-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
+          # Gradle 9 移除了 Project.buildDir
+          sed -i 's|delete rootProject.buildDir|delete rootProject.layout.buildDirectory|' android/build.gradle
           sed -i 's|<item name="android:background">@null</item>|<item name="android:background">@null</item>\n        <item name="android:statusBarColor">#ffffff</item>\n        <item name="android:windowLightStatusBar">true</item>\n        <item name="android:windowTranslucentStatus">false</item>\n        <item name="android:windowDrawsSystemBarBackgrounds">true</item>|' android/app/src/main/res/values/styles.xml
           # 暗色模式: 同名 style 会整体替换 values/ 里的定义, 故需写全各项
           mkdir -p android/app/src/main/res/values-night
