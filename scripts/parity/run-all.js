@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * 全盘型对拍：只对「本项目有、热卜也有」的排盘项
+ * 全盘型对拍：只对「本项目有、第三方也有」的排盘项
  *
- *   时盘   ours panType=1   vs rebu paipan()（输入注入）
- *   刻盘   ours panType=2   vs rebu paipan()（输入注入，热卜刻盘输入在服务端）
- *   山向   ours shanxiangChart vs rebu shanxiangpaipan（**端到端**，双方各自算输入）
+ *   时盘   ours panType=1   vs third paipan()（输入注入）
+ *   刻盘   ours panType=2   vs third paipan()（输入注入，第三方刻盘输入在服务端）
+ *   山向   ours shanxiangChart vs third shanxiangpaipan（**端到端**，双方各自算输入）
  *
- * 本项目有、热卜无 → 跳过：心盘（本项目独有的宫位编辑器）
- * 热卜有、本项目无 → 忽略（用户口径）
+ * 本项目有、第三方无 → 跳过：心盘（本项目独有的宫位编辑器）
+ * 第三方有、本项目无 → 忽略（用户口径）
  *
  * 用法: node scripts/parity/run-all.js [--verbose] [--json]
  */
@@ -16,12 +16,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const { runOurs, runRebu, compare, cases, stripTags } = require('./run-parity');
+const { runOurs, runThird, compare, cases, stripTags } = require('./run-parity');
 
 const ROOT = path.resolve(__dirname, '../..');
-const REBU_SX = '/home/wrz/dsh/reverse-rebu/tools/site/Mobile/tools/shanxiang/shanxiangAPI.pretty.js';
+const THIRD_SX = process.env.QIMEN_THIRD_SHANXIANG_JS || '';
 
-// ---------------------------------------------------------------- 山向（热卜）
+// ---------------------------------------------------------------- 山向（第三方）
 function sxStore() {
   const store = {};
   const el = (id) => ({
@@ -34,8 +34,9 @@ function sxStore() {
   return { store, $: (sel) => { const m = String(sel).match(/^#([\w-]+)/); return el(m ? m[1] : String(sel)); } };
 }
 let _sxCode = null;
-function runSxRebu({ year, deg }) {
-  if (!_sxCode) _sxCode = fs.readFileSync(REBU_SX, 'utf8');
+function runSxThird({ year, deg }) {
+  if (!THIRD_SX) throw new Error('未设置 QIMEN_THIRD_SHANXIANG_JS（第三方山向脚本路径）');
+  if (!_sxCode) _sxCode = fs.readFileSync(THIRD_SX, 'utf8');
   const { $ } = sxStore();
   const ctx = {
     console, Date, Math, JSON, parseInt, parseFloat, isNaN, String, Number, Boolean, Array, Object, RegExp, Error,
@@ -45,7 +46,7 @@ function runSxRebu({ year, deg }) {
   };
   ctx.window = ctx; ctx.globalThis = ctx;
   vm.createContext(ctx);
-  try { vm.runInContext(_sxCode, ctx, { filename: 'shanxiangAPI.js' }); } catch (e) { /* 尾部交互代码 */ }
+  try { vm.runInContext(_sxCode, ctx, { filename: 'third-shanxiang.js' }); } catch (e) { /* 尾部交互代码 */ }
   const du = Math.floor(((deg % 360) + 360) % 360 / 5);
   ctx.shanxiangpaipan(year, du, true);
   const g = (arr, i) => stripTags(arr[i]);
@@ -59,7 +60,7 @@ function runSxRebu({ year, deg }) {
   }
   const cyclical = (n) => '甲乙丙丁戊己庚辛壬癸'[n % 10] + '子丑寅卯辰巳午未申酉戌亥'[n % 12];
   return {
-    source: 'rebu', ju: { yinYang: ctx.yy, number: ctx.ju, label: ctx.yy + ctx.ju + '局' },
+    source: 'third', ju: { yinYang: ctx.yy, number: ctx.ju, label: ctx.yy + ctx.ju + '局' },
     sizhu: null, jieqi: '', xunshou: cyclical(ctx.xunshou || 0),
     kongwang: '子丑寅卯辰巳午未申酉戌亥'[ctx.xunkong1] + '子丑寅卯辰巳午未申酉戌亥'[ctx.xunkong2],
     maxing: '子丑寅卯辰巳午未申酉戌亥'[ctx.maxing],
@@ -140,7 +141,8 @@ function sxCases() {
 }
 
 // ---------------------------------------------------------------- 穿壬
-const REBU_CR_DIR = '/home/wrz/dsh/reverse-rebu/tools/site/Mobile/tools/chuanren';
+const THIRD_SIXREN_JS = process.env.QIMEN_THIRD_LIUREN_JS || '';
+const THIRD_CR_JS = process.env.QIMEN_THIRD_CHUANREN_JS || '';
 const JIANG_NORM = { 腾: '蛇', 贵: '贵', 后: '后', 阴: '阴', 玄: '玄', 常: '常', 白: '白', 空: '空', 青: '青', 勾: '勾', 六: '六', 朱: '朱' };
 
 function crMock() {
@@ -156,9 +158,10 @@ function crMock() {
   });
   return { store, $: (sel) => { const m = String(sel).match(/^#([\w-]+)/); return el(m ? m[1] : String(sel)); } };
 }
-let _crCode = null, _skCode = null;
-function runCrRebu(t, input) {
-  if (!_crCode) { _skCode = fs.readFileSync(path.join(REBU_CR_DIR, 'sksc.unpacked.pretty.js'), 'utf8'); _crCode = fs.readFileSync(path.join(REBU_CR_DIR, 'chuanrenPan.unpacked.pretty.js'), 'utf8'); }
+let _crCode = null, _sixrenCode = null;
+function runCrThird(t, input) {
+  if (!THIRD_SIXREN_JS || !THIRD_CR_JS) throw new Error('未设置 QIMEN_THIRD_LIUREN_JS / QIMEN_THIRD_CHUANREN_JS（第三方六壬脚本路径）');
+  if (!_crCode) { _sixrenCode = fs.readFileSync(THIRD_SIXREN_JS, 'utf8'); _crCode = fs.readFileSync(THIRD_CR_JS, 'utf8'); }
   const { store, $ } = crMock();
   const ctx = {
     console, Date, Math, JSON, parseInt, parseFloat, isNaN, String, Number, Boolean, Array, Object, RegExp, Error,
@@ -172,8 +175,8 @@ function runCrRebu(t, input) {
   };
   ctx.window = ctx; ctx.globalThis = ctx;
   vm.createContext(ctx);
-  try { vm.runInContext(_skCode, ctx, { filename: 'sksc.js' }); } catch (e) { }
-  try { vm.runInContext(_crCode, ctx, { filename: 'chuanrenPan.js' }); } catch (e) { }
+  try { vm.runInContext(_sixrenCode, ctx, { filename: 'third-sixren.js' }); } catch (e) { }
+  try { vm.runInContext(_crCode, ctx, { filename: 'third-chuanren.js' }); } catch (e) { }
   const g = (id) => stripTags(store[id] || '');
   const palaces = {};
   for (let i = 1; i <= 9; i++) {
@@ -185,7 +188,7 @@ function runCrRebu(t, input) {
     tianPan[i] = g('yuejiang' + i); tianGans[i] = g('gan' + i);
     tianJiangs[i] = JIANG_NORM[g('gui' + i)] || g('gui' + i); jianchu[i] = g('jianchu' + i);
   }
-  return { source: 'rebu', palaces, tianPan, tianGans, tianJiangs, jianchu };
+  return { source: 'third', palaces, tianPan, tianGans, tianJiangs, jianchu };
 }
 
 function runCrOurs(t) {
@@ -243,10 +246,11 @@ function compareCr(base, other) {
 }
 
 // ---------------------------------------------------------------- 命理
-const REBU_ML = '/home/wrz/dsh/reverse-rebu/tools/site/Mobile/tools/mingli/mingliPan.unpacked.js';
+const THIRD_ML = process.env.QIMEN_THIRD_MINGLI_JS || '';
 let _mlCode = null;
-function runMlRebu(t, input) {
-  if (!_mlCode) _mlCode = fs.readFileSync(REBU_ML, 'utf8');
+function runMlThird(t, input) {
+  if (!THIRD_ML) throw new Error('未设置 QIMEN_THIRD_MINGLI_JS（第三方命理脚本路径）');
+  if (!_mlCode) _mlCode = fs.readFileSync(THIRD_ML, 'utf8');
   const { store, $ } = crMock();
   const ctx = {
     console, Date, Math, JSON, parseInt, parseFloat, isNaN, String, Number, Boolean, Array, Object, RegExp, Error,
@@ -261,14 +265,14 @@ function runMlRebu(t, input) {
   };
   ctx.window = ctx; ctx.globalThis = ctx;
   vm.createContext(ctx);
-  try { vm.runInContext(_mlCode, ctx, { filename: 'mingliPan.js' }); } catch (e) { }
+  try { vm.runInContext(_mlCode, ctx, { filename: 'third-mingli.js' }); } catch (e) { }
   const g = (id) => stripTags(store[id] || '');
   const palaces = {};
   for (let i = 1; i <= 9; i++) {
     if (i === 5) continue;
     palaces[i] = { shen: g('shen' + i), xing: g('xing' + i), men: g('men' + i), tian: g('tian' + i), di: g('di' + i), anGan: g('yinGan' + i), kong: false };
   }
-  return { source: 'rebu', palaces, sizhuRebu: { n: g('nianzhu'), y: g('yuezhu'), r: g('rizhu'), s: g('shizhu') } };
+  return { source: 'third', palaces, sizhuThird: { n: g('nianzhu'), y: g('yuezhu'), r: g('rizhu'), s: g('shizhu') } };
 }
 
 function runMlOurs(t, gender) {
@@ -305,7 +309,7 @@ function runMlOurs(t, gender) {
 function compareMl(base, other) {
   const rows = [];
   const push = (scope, a, b) => rows.push({ scope, ours: a, other: b, same: String(a ?? '') === String(b ?? '') });
-  // 四柱：热卜命理的四柱由服务端页面渲染，前端无输出 → 无基准，不比
+  // 四柱：第三方命理的四柱由服务端页面渲染，前端无输出 → 无基准，不比
   for (let g = 1; g <= 9; g++) {
     const A = base.palaces[g], B = other.palaces[g];
     if (!A || !B) continue;
@@ -326,9 +330,9 @@ function main() {
   for (const panType of [1, 2]) {
     const key = panType === 1 ? 'time' : 'ke';
     for (const t of cases()) {
-      let ours, rebu;
+      let ours, third;
       try { ours = runOurs(t, panType); } catch (e) { report[key].push({ input: t, error: 'ours: ' + e.message }); continue; }
-      // 刻盘的「时干/时支」必须用刻柱，不是时柱（热卜 paipanke 用刻柱替换 hCyl）
+      // 刻盘的「时干/时支」必须用刻柱，不是时柱（第三方刻盘排布用刻柱替换 hCyl）
       const keGz = panType === 2 && ours.sizhu && ours.sizhu.minute ? stripTags(ours.sizhu.minute) : '';
       const shiGZ = keGz || (ours.sizhu.h || '');
       const input = {
@@ -337,36 +341,36 @@ function main() {
         currentYi: { 甲子: '戊', 甲戌: '己', 甲申: '庚', 甲午: '辛', 甲辰: '壬', 甲寅: '癸' }[ours.xunshou] || '',
         maXingPos: ours.maxingGong,
       };
-      try { rebu = runRebu(t, input); } catch (e) { report[key].push({ input: t, error: 'rebu: ' + e.message }); continue; }
-      const rows = compare(ours, rebu, { palaces: true, anGan: true, zhifu: true, ganExact: true });
+      try { third = runThird(t, input); } catch (e) { report[key].push({ input: t, error: 'third: ' + e.message }); continue; }
+      const rows = compare(ours, third, { palaces: true, anGan: true, zhifu: true, ganExact: true });
       report[key].push({ input: t, rows, bad: rows.filter((r) => !r.same) });
     }
   }
 
   // 穿壬（奇门九宫 + 天盘/天干/天将/建除）
   for (const t of cases().slice(0, 8)) {
-    let ours, rebu;
+    let ours, third;
     try { ours = runCrOurs(t); } catch (e) { report.cr.push({ input: t, error: 'ours: ' + e.message }); continue; }
-    try { rebu = runCrRebu(t, ours.input); } catch (e) { report.cr.push({ input: t, error: 'rebu: ' + e.message }); continue; }
-    const rows = compareCr(ours, rebu);
+    try { third = runCrThird(t, ours.input); } catch (e) { report.cr.push({ input: t, error: 'third: ' + e.message }); continue; }
+    const rows = compareCr(ours, third);
     report.cr.push({ input: t, rows, bad: rows.filter((r) => !r.same) });
   }
 
   // 命理（奇门九宫 + 四柱）
   for (const t of mlCases()) {
-    let ours, rebu;
+    let ours, third;
     try { ours = runMlOurs(t, t.gender); } catch (e) { report.ml.push({ input: t, error: 'ours: ' + e.message }); continue; }
-    try { rebu = runMlRebu(t, ours.input); } catch (e) { report.ml.push({ input: t, error: 'rebu: ' + e.message }); continue; }
-    const rows = compareMl(ours, rebu);
+    try { third = runMlThird(t, ours.input); } catch (e) { report.ml.push({ input: t, error: 'third: ' + e.message }); continue; }
+    const rows = compareMl(ours, third);
     report.ml.push({ input: t, rows, bad: rows.filter((r) => !r.same) });
   }
 
   // 山向
   for (const t of sxCases()) {
-    let ours, rebu;
+    let ours, third;
     try { ours = runSxOurs(t); } catch (e) { report.sx.push({ input: t, error: 'ours: ' + e.message }); continue; }
-    try { rebu = runSxRebu(t); } catch (e) { report.sx.push({ input: t, error: 'rebu: ' + e.message }); continue; }
-    const rows = compareSx(ours, rebu);
+    try { third = runSxThird(t); } catch (e) { report.sx.push({ input: t, error: 'third: ' + e.message }); continue; }
+    const rows = compareSx(ours, third);
     report.sx.push({ input: t, rows, bad: rows.filter((r) => !r.same) });
   }
 
@@ -388,8 +392,8 @@ function main() {
       for (const it of r.bad.slice(0, verbose ? 99 : 4)) console.log(`      ${it.scope}: 本=${it.ours} 他=${it.other}`);
     }
   }
-  console.log('\n跳过: 心盘（热卜无对应引擎，无基准）');
+  console.log('\n跳过: 心盘（第三方无对应引擎，无基准）');
 }
 
 if (require.main === module) main();
-module.exports = { runSxOurs, runSxRebu, compareSx };
+module.exports = { runSxOurs, runSxThird, compareSx };

@@ -2,13 +2,13 @@
 /**
  * 阴盘时盘对拍（同门派）
  *
- * 基准：rebu（热卜 yinpanPan.js，阴盘）—— 盘面六层 + 暗干
- * 参照：csp -t 2（taynpg/csp，独立 C++ 实现）—— 定局/四柱 + 六层
+ * 基准：third（第三方 第三方排盘脚本，阴盘）—— 盘面六层 + 暗干
+ * 参照：第三方 CLI -t 2（第三方独立实现（C++ CLI））—— 定局/四柱 + 六层
  * 被对拍：本项目 qimenChart（panType=1）
  *
- * 热卜前端的定局/四柱/旬首/马星来自服务端，本地只跑盘面排布：
- * 因此以本项目算出的输入注入 rebu.paipan()，比较「同输入下盘面是否一致」；
- * 定局/四柱另由 csp 独立验证。
+ * 第三方前端的定局/四柱/旬首/马星来自服务端，本地只跑盘面排布：
+ * 因此以本项目算出的输入注入 third.paipan()，比较「同输入下盘面是否一致」；
+ * 定局/四柱另由第三方 CLI 独立验证。
  *
  * 用法: node scripts/parity/run-parity.js [--verbose] [--json] [--cases=N]
  */
@@ -21,9 +21,12 @@ const vm = require('node:vm');
 const { execFileSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '../..');
-const REBU = '/home/wrz/dsh/reverse-rebu';
-const REBU_JS = path.join(REBU, 'yinpan/site/Mobile/tools/yinpan/yinpanPan.unpacked.pretty.js');
-const CSP_BIN = path.join(REBU, 'opensource/csp/build/csp');
+// 第三方基准的路径一律由环境变量提供，源码不硬编码任何第三方来源。
+// 需要运行对拍时设置：
+//   QIMEN_THIRD_YINPAN_JS   第三方时盘脚本
+//   QIMEN_THIRD_CLI_BIN     第三方定局 CLI
+const THIRD_JS = process.env.QIMEN_THIRD_YINPAN_JS || '';
+const THIRD_CLI_BIN = process.env.QIMEN_THIRD_CLI_BIN || '';
 
 // ---------------------------------------------------------------- 常量
 const SHEN_ABBR = { 值符: '符', 腾蛇: '蛇', 太阴: '阴', 六合: '六', 白虎: '白', 玄武: '玄', 九地: '地', 九天: '天', 朱雀: '雀', 勾陈: '勾' };
@@ -64,9 +67,9 @@ function runOurs(t, panType = 1) {
   };
 }
 
-// ---------------------------------------------------------------- 热卜（基准）
+// ---------------------------------------------------------------- 第三方（基准）
 /** mock jQuery：只需 #id 的 html() 读写 */
-function rebuStore() {
+function thirdStore() {
   const store = {};
   const el = (id) => ({
     _id: id,
@@ -82,21 +85,22 @@ function rebuStore() {
   return { store, $: (sel) => { const m = String(sel).match(/^#([\w-]+)/); return el(m ? m[1] : String(sel)); } };
 }
 
-let _rebuCode = null;
-function runRebu(t, input) {
-  if (!_rebuCode) _rebuCode = fs.readFileSync(REBU_JS, 'utf8');
-  const { store, $ } = rebuStore();
+let _thirdCode = null;
+function runThird(t, input) {
+  if (!THIRD_JS) throw new Error('未设置 QIMEN_THIRD_YINPAN_JS（第三方时盘脚本路径）');
+  if (!_thirdCode) _thirdCode = fs.readFileSync(THIRD_JS, 'utf8');
+  const { store, $ } = thirdStore();
   const ctx = {
     console, Date, Math, JSON, parseInt, parseFloat, isNaN, String, Number, Boolean, Array, Object, RegExp, Error,
     setTimeout, clearTimeout, $, jQuery: $,
     document: { getElementById: () => null, all: { item: () => ({ value: 0 }) } },
-    // 热卜 paipan() 的输入（SPEC.md 1.1）
+    // 第三方 paipan() 的输入（SPEC.md 1.1）
     yinYang: input.yinYang, juNum: input.juNum, shiGan: input.shiGan, currentYi: input.currentYi,
     maXingPos: input.maXingPos, type: 1, shiZhi: input.shiZhi, xunZhiPos: 6, yueJiang: '',
   };
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
-  try { vm.runInContext(_rebuCode, ctx, { filename: 'yinpanPan.js' }); } catch (e) { /* 尾部非盘面代码可能缺变量，盘面已生成 */ }
+  try { vm.runInContext(_thirdCode, ctx, { filename: '第三方排盘脚本' }); } catch (e) { /* 尾部非盘面代码可能缺变量，盘面已生成 */ }
   const g = (id) => stripTags(store[id] || '');
   const palaces = {};
   for (let i = 1; i <= 9; i++) {
@@ -104,7 +108,7 @@ function runRebu(t, input) {
     palaces[i] = { shen: g('shen' + i), xing: g('xing' + i), men: g('men' + i), tian: g('tian' + i), di: g('di' + i), anGan: g('yinGan' + i), kong: false };
   }
   return {
-    source: 'rebu', school: 'yin',
+    source: 'third', school: 'yin',
     sizhu: null, ju: { yinYang: input.yinYang, number: input.juNum, label: '' },
     jieqi: '', xunshou: '', kongwang: '', maxing: '',
     zhifu: { star: g('zhiFu'), gong: 0 }, zhishi: { men: g('zhiShi'), gong: 0 },
@@ -113,13 +117,14 @@ function runRebu(t, input) {
   };
 }
 
-// ---------------------------------------------------------------- csp（独立参照）
-function runCsp(t) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'csp-'));
+// ---------------------------------------------------------------- 第三方 CLI（独立参照）
+function runThirdCli(t) {
+  if (!THIRD_CLI_BIN) throw new Error('未设置 QIMEN_THIRD_CLI_BIN（第三方定局 CLI 路径）');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'third-'));
   const ds = `${t.year}-${t.month}-${t.day}-${t.hour}-${t.minute}-0`;
-  execFileSync(CSP_BIN, ['-t', '2', '-d', ds, '-j', '--no-color'], { cwd: dir, stdio: 'pipe', timeout: 30000 });
+  execFileSync(THIRD_CLI_BIN, ['-t', '2', '-d', ds, '-j', '--no-color'], { cwd: dir, stdio: 'pipe', timeout: 30000 });
   const f = fs.readdirSync(dir).find((n) => n.endsWith('.json'));
-  if (!f) throw new Error('csp 未生成 JSON');
+  if (!f) throw new Error('第三方 CLI 未生成 JSON');
   const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
   fs.rmSync(dir, { recursive: true, force: true });
   const b = d['基本信息'] || {};
@@ -139,7 +144,7 @@ function runCsp(t) {
   }
   const kong = (d['旬空'] || {})['时柱'] || [];
   return {
-    source: 'csp', school: 'yin',
+    source: 'third-cli', school: 'yin',
     sizhu: { y: sz['年柱'], m: sz['月柱'], d: sz['日柱'], h: sz['时柱'] },
     ju: { yinYang: String(b['阴阳遁'] || '').replace('遁', ''), number: b['局数'] ?? '', label: `${b['阴阳遁'] || ''}${b['局数'] ?? ''}局` },
     jieqi: '', xunshou: '', kongwang: Array.isArray(kong) ? kong.join('') : '', maxing: '',
@@ -230,23 +235,23 @@ function main() {
     const row = { input: t, diffs: [], errors: [] };
     let ours;
     try { ours = runOurs(t); } catch (e) { row.errors.push(`ours: ${e.message}`); report.push(row); continue; }
-    // 热卜输入 = 本项目结果（验证同输入下盘面排布）
+    // 第三方输入 = 本项目结果（验证同输入下盘面排布）
     const input = {
       yinYang: ours.ju.yinYang, juNum: ours.ju.number,
       shiGan: (ours.sizhu.h || '').slice(0, 1), shiZhi: (ours.sizhu.h || '').slice(1, 2),
       currentYi: YI_OF_XUN[ours.xunshou] || '', maXingPos: ours.maxingGong,
     };
-    let rebu;
-    try { rebu = runRebu(t, input); } catch (e) { row.errors.push(`rebu: ${e.message}`); }
-    if (rebu) {
-      const rows = compare(ours, rebu, { palaces: true, anGan: true, zhifu: true, ganExact: true });
-      row.diffs.push({ engine: 'rebu', total: rows.length, items: rows.filter((r) => !r.same) });
+    let third;
+    try { third = runThird(t, input); } catch (e) { row.errors.push(`third: ${e.message}`); }
+    if (third) {
+      const rows = compare(ours, third, { palaces: true, anGan: true, zhifu: true, ganExact: true });
+      row.diffs.push({ engine: 'third', total: rows.length, items: rows.filter((r) => !r.same) });
     }
-    let csp;
-    try { csp = runCsp(t); } catch (e) { row.errors.push(`csp: ${e.message}`); }
-    if (csp) {
-      const rows = compare(ours, csp, { sizhu: true, ju: true, meta: true, zhifu: true, palaces: true, anGan: false, kong: true });
-      row.diffs.push({ engine: 'csp', total: rows.length, items: rows.filter((r) => !r.same) });
+    let cli;
+    try { cli = runThirdCli(t); } catch (e) { row.errors.push(`third-cli: ${e.message}`); }
+    if (cli) {
+      const rows = compare(ours, cli, { sizhu: true, ju: true, meta: true, zhifu: true, palaces: true, anGan: false, kong: true });
+      row.diffs.push({ engine: 'third-cli', total: rows.length, items: rows.filter((r) => !r.same) });
     }
     report.push(row);
   }
@@ -277,4 +282,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { runOurs, runRebu, runCsp, compare, cases, stripTags, YI_OF_XUN };
+module.exports = { runOurs, runThird, runThirdCli, compare, cases, stripTags, YI_OF_XUN };

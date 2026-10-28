@@ -2,14 +2,14 @@
 /**
  * 十二长生（长生状态）功能测试
  *
- * 1) 表级：10 干 × 8 宫 = 72 项（热卜无「甲」行，比 9 干 × 8 宫 = 72 项中的 72? 实为 9×8=72）
+ * 1) 表级：10 干 × 8 宫 = 72 项（第三方无「甲」行，比 9 干 × 8 宫 = 72 项中的 72? 实为 9×8=72）
  *    本项目表：qimen_constants.js CHANGSHENG[gan][CS_IDX[g]]
- *    热卜表：yinpanPan.js state() 内的局部表[gan][g]
+ *    第三方表：第三方排盘脚本 state() 内的局部表[gan][g]
  *    归一化：字序（养胎=胎养）、简称（临=临官/沐=沐浴/生=长生/旺=帝旺）
  *
  * 2) 盘级：真实盘面下每宫「天盘干 / 地盘干」的长生输出
  *    本项目：showState() 的取值逻辑（tian[0] / di[0] + CS_IDX）
- *    热卜：state() 实际写入 #stateTianN / #stateDiN 的文本
+ *    第三方：state() 实际写入 #stateTianN / #stateDiN 的文本
  *
  * 用法: node scripts/parity/test-changsheng.js [--verbose]
  */
@@ -18,11 +18,11 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const { runOurs, runRebu, cases } = require('./run-parity');
+const { runOurs, runThird, cases } = require('./run-parity');
 
 const ROOT = path.resolve(__dirname, '../..');
-const REBU_SRC = '/home/wrz/dsh/reverse-rebu/yinpan/site/Mobile/tools/yinpan/yinpanPan.unpacked.pretty.js';
-const GANS = ['乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']; // 热卜表无甲
+const THIRD_SRC = process.env.QIMEN_THIRD_YINPAN_JS || '';
+const GANS = ['乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']; // 第三方表无甲
 const GONGS = [1, 2, 3, 4, 6, 7, 8, 9];
 
 // ---------------------------------------------------------------- 加载本项目表
@@ -34,9 +34,10 @@ function loadOursTable() {
   return ctx.window.QM;
 }
 
-// ---------------------------------------------------------------- 提取热卜表
-function loadRebuTable() {
-  const src = fs.readFileSync(REBU_SRC, 'utf8');
+// ---------------------------------------------------------------- 提取第三方表
+function loadThirdTable() {
+  if (!THIRD_SRC) throw new Error('未设置 QIMEN_THIRD_YINPAN_JS（第三方时盘脚本路径）');
+  const src = fs.readFileSync(THIRD_SRC, 'utf8');
   const i = src.indexOf('function state()');
   const j = src.indexOf('var c = {', i) + 'var c = '.length;
   let depth = 0, end = j;
@@ -70,22 +71,22 @@ function parseStates(v) {
 const norm = (v) => parseStates(v).sort().join('+');
 
 // ---------------------------------------------------------------- 表级测试
-function tableTest(C, rebuT) {
+function tableTest(C, thirdT) {
   const rows = [];
   for (const gan of GANS) for (const g of GONGS) {
     const oursRaw = C.CHANGSHENG[gan] ? C.CHANGSHENG[gan][C.CS_IDX[g]] : undefined;
-    const rebuRaw = rebuT[gan] ? rebuT[gan][g] : undefined;
-    const ok = norm(oursRaw) === norm(rebuRaw);
-    if (!ok) rows.push({ scope: `${gan}宫${g}`, ours: oursRaw, other: rebuRaw, ok });
+    const thirdRaw = thirdT[gan] ? thirdT[gan][g] : undefined;
+    const ok = norm(oursRaw) === norm(thirdRaw);
+    if (!ok) rows.push({ scope: `${gan}宫${g}`, ours: oursRaw, other: thirdRaw, ok });
   }
   return { total: GANS.length * GONGS.length, rows };
 }
 
 // ---------------------------------------------------------------- 盘级测试
-/** 热卜 state() 的实际输出（#stateTianN / #stateDiN） */
-function rebuStateOutput(t, input) {
-  // runRebu 内部已排好盘；这里复跑一次以拿到 ctx（简化：直接复用 runRebu 的 mock 逻辑）
-  const { store, ctx } = runRebuRaw(t, input);
+/** 第三方 state() 的实际输出（#stateTianN / #stateDiN） */
+function thirdStateOutput(t, input) {
+  // runThird 内部已排好盘；这里复跑一次以拿到 ctx（简化：直接复用 runThird 的 mock 逻辑）
+  const { store, ctx } = runThirdRaw(t, input);
   try { ctx.state(); } catch (e) { /* state 依赖盘面，可能缺元素 */ }
   const out = { tian: {}, di: {} };
   for (let g = 1; g <= 9; g++) {
@@ -96,9 +97,9 @@ function rebuStateOutput(t, input) {
   return out;
 }
 
-/** 复用 run-parity 的 mock 重建 ctx（runRebu 只返回结果，这里需要 ctx 调 state()） */
-function runRebuRaw(t, input) {
-  const REBU_JS = REBU_SRC;
+/** 复用 run-parity 的 mock 重建 ctx（runThird 只返回结果，这里需要 ctx 调 state()） */
+function runThirdRaw(t, input) {
+  const THIRD_JS = THIRD_SRC;
   const store = {};
   const el = (id) => ({
     html(v) { if (v === undefined) return store[id] || ''; store[id] = String(v); return this; },
@@ -119,7 +120,7 @@ function runRebuRaw(t, input) {
   };
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
-  try { vm.runInContext(fs.readFileSync(REBU_JS, 'utf8'), ctx, { filename: 'yinpanPan.js' }); } catch (e) { }
+  try { vm.runInContext(fs.readFileSync(THIRD_JS, 'utf8'), ctx, { filename: '第三方排盘脚本' }); } catch (e) { }
   return { store, ctx };
 }
 
@@ -131,7 +132,7 @@ function palaceTest(C, t) {
     currentYi: { 甲子: '戊', 甲戌: '己', 甲申: '庚', 甲午: '辛', 甲辰: '壬', 甲寅: '癸' }[ours.xunshou] || '',
     maXingPos: ours.maxingGong,
   };
-  const rebu = rebuStateOutput(t, input);
+  const third = thirdStateOutput(t, input);
   const rows = [];
   for (let g = 1; g <= 9; g++) {
     if (g === 5) continue;
@@ -140,11 +141,11 @@ function palaceTest(C, t) {
     // 本项目：showState 的取值逻辑（天盘首干 / 地盘首干）
     const oursTian = C.CHANGSHENG[p.tian[0]] ? C.CHANGSHENG[p.tian[0]][C.CS_IDX[g]] : '';
     const oursDi = C.CHANGSHENG[p.di[0]] ? C.CHANGSHENG[p.di[0]][C.CS_IDX[g]] : '';
-    // 热卜：state() 写入的文本；寄干时形如「状态、状态」，只取首状态
-    const rebuTian = String(rebu.tian[g] || '').split('、')[0];
-    const rebuDi = String(rebu.di[g] || '').split('、')[0];
-    if (norm(oursTian) !== norm(rebuTian)) rows.push({ scope: `宫${g}.天盘(${p.tian[0]})`, ours: oursTian, other: rebuTian, ok: false });
-    if (norm(oursDi) !== norm(rebuDi)) rows.push({ scope: `宫${g}.地盘(${p.di[0]})`, ours: oursDi, other: rebuDi, ok: false });
+    // 第三方：state() 写入的文本；寄干时形如「状态、状态」，只取首状态
+    const thirdTian = String(third.tian[g] || '').split('、')[0];
+    const thirdDi = String(third.di[g] || '').split('、')[0];
+    if (norm(oursTian) !== norm(thirdTian)) rows.push({ scope: `宫${g}.天盘(${p.tian[0]})`, ours: oursTian, other: thirdTian, ok: false });
+    if (norm(oursDi) !== norm(thirdDi)) rows.push({ scope: `宫${g}.地盘(${p.di[0]})`, ours: oursDi, other: thirdDi, ok: false });
   }
   return { total: 8 * 2, rows };
 }
@@ -153,12 +154,12 @@ function palaceTest(C, t) {
 function main() {
   const verbose = process.argv.includes('--verbose');
   const C = loadOursTable();
-  const rebuT = loadRebuTable();
+  const thirdT = loadThirdTable();
   console.log('════ 十二长生 · 表级 ════');
-  const tt = tableTest(C, rebuT);
+  const tt = tableTest(C, thirdT);
   console.log(`${GANS.length} 干 × 8 宫 = ${tt.total} 项，差异 ${tt.rows.length}`);
-  for (const r of tt.rows.slice(0, verbose ? 99 : 10)) console.log(`  ${r.scope}: 本=${r.ours} 热卜=${r.other}`);
-  if (rebuT['甲']) console.log('  ⚠️ 热卜含甲行');
+  for (const r of tt.rows.slice(0, verbose ? 99 : 10)) console.log(`  ${r.scope}: 本=${r.ours} 第三方=${r.other}`);
+  if (thirdT['甲']) console.log('  ⚠️ 第三方含甲行');
 
   console.log('\n════ 十二长生 · 盘级 ════');
   let total = 0, bad = 0;
@@ -168,11 +169,11 @@ function main() {
     const head = `${t.year}-${String(t.month).padStart(2, '0')}-${String(t.day).padStart(2, '0')} ${String(t.hour).padStart(2, '0')}:${String(t.minute).padStart(2, '0')}`;
     if (pt.rows.length === 0) { if (verbose) console.log(`  ${head} ✅`); continue; }
     console.log(`  ${head}: ${pt.rows.length} 项`);
-    for (const r of pt.rows.slice(0, verbose ? 99 : 4)) console.log(`      ${r.scope}: 本=${r.ours} 热卜=${r.other}`);
+    for (const r of pt.rows.slice(0, verbose ? 99 : 4)) console.log(`      ${r.scope}: 本=${r.ours} 第三方=${r.other}`);
   }
   console.log(`\n盘级 ${total} 项，差异 ${bad}`);
   process.exitCode = tt.rows.length + bad > 0 ? 1 : 0;
 }
 
 if (require.main === module) main();
-module.exports = { tableTest, palaceTest, loadOursTable, loadRebuTable, norm };
+module.exports = { tableTest, palaceTest, loadOursTable, loadThirdTable, norm };
